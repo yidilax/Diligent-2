@@ -2310,6 +2310,24 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
 .status-hist-meta { font-size:11px; color:var(--muted); }
 .status-hist-text { font-size:13px; color:var(--text); line-height:1.4; }
 
+
+/* === CONSTRUCTION SCHEDULE === */
+.sched-summary { padding: 4px 20px 14px; }
+.sched-prog-bar { height: 10px; background: #E4DFD4; border-radius: 6px; overflow: hidden; }
+.sched-prog-fill { height: 100%; background: linear-gradient(90deg, #2D7A4F, #3DA068); border-radius: 6px; transition: width 0.3s; }
+.sched-prog-label { font-size: 12px; color: var(--muted); font-weight: 600; margin-top: 6px; }
+
+.sched-list { padding: 0 16px; }
+.sched-row { display: flex; align-items: flex-start; gap: 12px; padding: 14px 4px; border-bottom: 1px solid #ECE8E0; cursor: pointer; }
+.sched-row:active { background: #F7F5F0; }
+.sched-row-num { flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; background: var(--navy); color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: 2px; }
+.sched-row-main { flex: 1; min-width: 0; }
+.sched-row-name { font-size: 15px; font-weight: 600; color: var(--navy); }
+.sched-row-dates { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.sched-nodate { font-style: italic; opacity: 0.7; }
+.sched-row-notes { font-size: 12px; color: var(--text); margin-top: 4px; background: #F7F5F0; padding: 5px 8px; border-radius: 6px; }
+.sched-status-badge { flex-shrink: 0; color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 12px; white-space: nowrap; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -3248,12 +3266,24 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
   </div>
 
   <div class="office-tab" id="tab-scheduling" style="display:none;">
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:50vh;text-align:center;padding:32px 20px;">
-      <div style="font-size:64px;margin-bottom:20px;">📅</div>
-      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;color:var(--navy);margin:0 0 12px;">Scheduling</h2>
-      <div style="display:inline-block;background:var(--gold);color:var(--navy);font-weight:700;font-size:13px;padding:6px 16px;border-radius:20px;letter-spacing:1px;margin-bottom:16px;">COMING SOON</div>
-      <p style="color:var(--muted);font-size:15px;max-width:380px;line-height:1.6;">Plan and schedule work across your projects and team. This feature is on the way.</p>
+    <div class="tab-header">
+      <div>
+        <h2 class="tab-title">Construction Schedule</h2>
+        <div class="tab-count">Day-to-day build phases</div>
+      </div>
+      <button class="tab-add-btn" onclick="resetSchedulePhases()">&#8635; Reset Phases</button>
     </div>
+
+    <div class="task-toolbar">
+      <select id="sched-house-sel" class="tf-input" onchange="schedLoadHouse()" style="width:100%"></select>
+      <div class="task-views">
+        <button class="sched-view-btn task-view-btn active" data-view="list" onclick="setSchedView('list')">&#9776; List</button>
+        <button class="sched-view-btn task-view-btn" data-view="gantt" onclick="setSchedView('gantt')">&#128202; Gantt</button>
+        <button class="sched-view-btn task-view-btn" data-view="calendar" onclick="setSchedView('calendar')">&#128197; Calendar</button>
+      </div>
+    </div>
+
+    <div id="schedContent"></div>
   </div>
 
 
@@ -4698,6 +4728,306 @@ async function _populateTaskProjectFilter() {
   } catch (e) {}
 }
 
+
+/* ===========================================================
+   CONSTRUCTION SCHEDULE - per house (optional per unit),
+   standard editable phases, List / Gantt / Calendar views
+   =========================================================== */
+
+var STD_CONSTRUCTION_PHASES = [
+  'Site Prep','Foundation','Framing','Roofing','Rough Plumbing','Rough Electrical',
+  'Rough HVAC','Insulation','Sheetrock','Taping / Mudding','Flooring','Paint',
+  'Trim / Doors','Cabinets / Counters','Final Plumbing','Final Electrical',
+  'Punch List','Final Inspection'
+];
+var SCHED_STATUSES = [
+  { id: 'not_started', label: 'Not Started', color: '#9A948B' },
+  { id: 'in_progress', label: 'In Progress', color: '#3B6FB0' },
+  { id: 'done',        label: 'Done',        color: '#2D7A4F' },
+  { id: 'delayed',     label: 'Delayed',     color: '#B03A2E' }
+];
+var _schedView = 'list';        // list | gantt | calendar
+var _schedHouseKey = null;      // currently selected house schedule key
+var _schedCalMonth = null;
+
+function _schedStatusMeta(id) {
+  for (var i = 0; i < SCHED_STATUSES.length; i++) if (SCHED_STATUSES[i].id === id) return SCHED_STATUSES[i];
+  return SCHED_STATUSES[0];
+}
+function _schedKey(projId, address, unit) {
+  var base = projId + '|' + address + (unit ? ('|' + unit) : '');
+  return 'schedule:' + btoa(unescape(encodeURIComponent(base))).replace(/[^A-Za-z0-9]/g, '');
+}
+
+/* -- Build the house/unit picker from projects -- */
+async function renderScheduling() {
+  var sel = document.getElementById('sched-house-sel');
+  if (!sel) return;
+  var keys = await DB.list('project:');
+  var projs = (await Promise.all(keys.map(function(k) { return DB.get(k); }))).filter(Boolean).filter(canSee);
+  window._schedProjCache = projs;
+
+  var opts = '<option value="">- Select a house -</option>';
+  projs.forEach(function(p) {
+    (p.houses || []).forEach(function(h) {
+      var hKey = _schedKey(p.id, h.address);
+      opts += '<option value="' + hKey + '" data-proj="' + p.id + '" data-addr="' + _esc(h.address) + '">' +
+        _esc(p.name) + ' - ' + _esc(h.address) + '</option>';
+      // Optional separate unit schedules
+      (h.units || []).forEach(function(u) {
+        var uKey = _schedKey(p.id, h.address, u);
+        opts += '<option value="' + uKey + '" data-proj="' + p.id + '" data-addr="' + _esc(h.address) + '" data-unit="' + _esc(u) + '">' +
+          '&nbsp;&nbsp;&#8627; ' + _esc(h.address) + ' - Unit ' + _esc(u) + '</option>';
+      });
+    });
+  });
+  sel.innerHTML = opts;
+
+  if (_schedHouseKey) {
+    sel.value = _schedHouseKey;
+    schedLoadHouse();
+  } else {
+    document.getElementById('schedContent').innerHTML = _schedEmpty();
+  }
+}
+
+function _schedEmpty() {
+  return '<div class="tab-empty"><div class="tab-empty-icon">📅</div>' +
+    '<div class="tab-empty-title">Select a House</div>' +
+    '<div class="tab-empty-desc">Choose a house above to view or build its construction schedule.</div></div>';
+}
+
+async function schedLoadHouse() {
+  var sel = document.getElementById('sched-house-sel');
+  _schedHouseKey = sel.value;
+  if (!_schedHouseKey) { document.getElementById('schedContent').innerHTML = _schedEmpty(); return; }
+  renderSchedView();
+}
+
+async function _loadSchedule() {
+  if (!_schedHouseKey) return null;
+  try {
+    var sch = await DB.get(_schedHouseKey);
+    if (sch && sch.phases) return sch;
+  } catch (e) {}
+  // New schedule: seed standard phases
+  return {
+    key: _schedHouseKey,
+    phases: STD_CONSTRUCTION_PHASES.map(function(name, i) {
+      return { id: 'ph_' + i, name: name, start: '', end: '', status: 'not_started', notes: '' };
+    }),
+    _createdAt: Date.now()
+  };
+}
+async function _saveSchedule(sch) { sch._updatedAt = Date.now(); await DB.set(_schedHouseKey, sch); }
+
+/* -- Render current view -- */
+async function renderSchedView() {
+  var host = document.getElementById('schedContent');
+  if (!host || !_schedHouseKey) return;
+  var sch = await _loadSchedule();
+  window._schedCache = sch;
+
+  // progress summary
+  var done = sch.phases.filter(function(p) { return p.status === 'done'; }).length;
+  var total = sch.phases.length;
+  var pct = total ? Math.round(done / total * 100) : 0;
+  var summary = '<div class="sched-summary">' +
+    '<div class="sched-prog-bar"><div class="sched-prog-fill" style="width:' + pct + '%"></div></div>' +
+    '<div class="sched-prog-label">' + done + ' of ' + total + ' phases complete (' + pct + '%)</div></div>';
+
+  var viewHtml = '';
+  if (_schedView === 'list')      viewHtml = _renderSchedList(sch);
+  else if (_schedView === 'gantt') viewHtml = _renderSchedGantt(sch);
+  else if (_schedView === 'calendar') viewHtml = _renderSchedCalendar(sch);
+  host.innerHTML = summary + viewHtml;
+}
+
+/* -- LIST VIEW -- */
+function _renderSchedList(sch) {
+  var html = '<div class="sched-list">';
+  sch.phases.forEach(function(p, i) {
+    var sm = _schedStatusMeta(p.status);
+    var dates = '';
+    if (p.start && p.end) dates = _fmtTaskDate(p.start) + ' → ' + _fmtTaskDate(p.end);
+    else if (p.start) dates = 'Starts ' + _fmtTaskDate(p.start);
+    else if (p.end) dates = 'Due ' + _fmtTaskDate(p.end);
+    html += '<div class="sched-row" onclick="openPhaseEditor(' + i + ')">' +
+      '<div class="sched-row-num">' + (i + 1) + '</div>' +
+      '<div class="sched-row-main">' +
+        '<div class="sched-row-name">' + _esc(p.name) + '</div>' +
+        (dates ? '<div class="sched-row-dates">📅 ' + dates + '</div>' : '<div class="sched-row-dates sched-nodate">No dates set</div>') +
+        (p.notes ? '<div class="sched-row-notes">' + _esc(p.notes) + '</div>' : '') +
+      '</div>' +
+      '<span class="sched-status-badge" style="background:' + sm.color + '">' + sm.label + '</span>' +
+    '</div>';
+  });
+  html += '</div>';
+  html += '<button class="tf-btn-ghost" style="margin:14px 0" onclick="addPhase()">+ Add phase</button>';
+  return html;
+}
+
+/* -- GANTT VIEW -- */
+function _renderSchedGantt(sch) {
+  var dated = sch.phases.filter(function(p) { return p.start || p.end; });
+  if (dated.length === 0) {
+    return '<div class="tab-empty"><div class="tab-empty-icon">📊</div><div class="tab-empty-title">No dated phases</div><div class="tab-empty-desc">Tap a phase in List view to add start and end dates.</div></div>';
+  }
+  var allDates = [];
+  dated.forEach(function(p) { if (p.start) allDates.push(p.start); if (p.end) allDates.push(p.end); });
+  allDates.sort();
+  var minD = new Date(allDates[0] + 'T00:00:00');
+  var maxD = new Date(allDates[allDates.length - 1] + 'T00:00:00');
+  minD.setDate(minD.getDate() - 1); maxD.setDate(maxD.getDate() + 1);
+  var totalDays = Math.max(1, Math.round((maxD - minD) / 86400000));
+  var dayW = 30, labelW = 150;
+
+  var head = '<div class="tl-row tl-head" style="width:' + (labelW + totalDays * dayW) + 'px"><div class="tl-label" style="width:' + labelW + 'px"></div>';
+  for (var d = 0; d < totalDays; d++) {
+    var cur = new Date(minD); cur.setDate(cur.getDate() + d);
+    var isFirst = cur.getDate() === 1 || d === 0;
+    head += '<div class="tl-tick" style="width:' + dayW + 'px">' + (isFirst ? '<span class="tl-month">' + cur.toLocaleString('default', { month: 'short' }) + '</span>' : '') + '<span class="tl-day">' + cur.getDate() + '</span></div>';
+  }
+  head += '</div>';
+
+  var rows = '';
+  sch.phases.forEach(function(p, idx) {
+    if (!p.start && !p.end) return;
+    var s = p.start ? new Date(p.start + 'T00:00:00') : new Date(p.end + 'T00:00:00');
+    var e = p.end ? new Date(p.end + 'T00:00:00') : new Date(p.start + 'T00:00:00');
+    var offset = Math.round((s - minD) / 86400000);
+    var span = Math.max(1, Math.round((e - s) / 86400000) + 1);
+    var sm = _schedStatusMeta(p.status);
+    rows += '<div class="tl-row" style="width:' + (labelW + totalDays * dayW) + 'px">' +
+      '<div class="tl-label" style="width:' + labelW + 'px" onclick="openPhaseEditor(' + idx + ')">' + _esc(p.name) + '</div>' +
+      '<div class="tl-track" style="width:' + (totalDays * dayW) + 'px">' +
+        '<div class="tl-bar" style="left:' + (offset * dayW) + 'px;width:' + (span * dayW - 4) + 'px;background:' + sm.color + '" onclick="openPhaseEditor(' + idx + ')" title="' + _esc(p.name) + '"></div>' +
+      '</div></div>';
+  });
+  return '<div class="tl-scroll"><div class="tl-inner">' + head + rows + '</div></div>';
+}
+
+/* -- CALENDAR VIEW -- */
+function _renderSchedCalendar(sch) {
+  if (!_schedCalMonth) {
+    var firstDated = sch.phases.filter(function(p){return p.start;}).sort(function(a,b){return a.start.localeCompare(b.start);})[0];
+    _schedCalMonth = firstDated ? new Date(firstDated.start + 'T00:00:00') : new Date();
+  }
+  var year = _schedCalMonth.getFullYear(), month = _schedCalMonth.getMonth();
+  var monthName = _schedCalMonth.toLocaleString('default', { month: 'long', year: 'numeric' });
+  var startDay = new Date(year, month, 1).getDay();
+  var daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  // map each day to phases active that day
+  function dayHas(iso) {
+    return sch.phases.filter(function(p) {
+      if (!p.start && !p.end) return false;
+      var s = p.start || p.end, e = p.end || p.start;
+      return iso >= s && iso <= e;
+    });
+  }
+  var html = '<div class="task-cal-head"><button class="task-cal-nav" onclick="_schedCalShift(-1)">‹</button><span class="task-cal-title">' + monthName + '</span><button class="task-cal-nav" onclick="_schedCalShift(1)">›</button></div>';
+  html += '<div class="task-cal-grid">';
+  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(function(d){ html += '<div class="task-cal-dow">' + d + '</div>'; });
+  for (var i = 0; i < startDay; i++) html += '<div class="task-cal-cell task-cal-empty"></div>';
+  for (var day = 1; day <= daysInMonth; day++) {
+    var iso = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+    var active = dayHas(iso);
+    var isToday = iso === new Date().toISOString().slice(0, 10);
+    html += '<div class="task-cal-cell' + (isToday ? ' task-cal-today' : '') + '"><div class="task-cal-daynum">' + day + '</div>';
+    active.slice(0, 3).forEach(function(p) {
+      var sm = _schedStatusMeta(p.status);
+      html += '<div class="task-cal-pill" style="border-left:3px solid ' + sm.color + '">' + _esc(p.name) + '</div>';
+    });
+    if (active.length > 3) html += '<div class="task-cal-more">+' + (active.length - 3) + '</div>';
+    html += '</div>';
+  }
+  html += '</div>';
+  return html;
+}
+function _schedCalShift(dir) {
+  if (!_schedCalMonth) _schedCalMonth = new Date();
+  _schedCalMonth = new Date(_schedCalMonth.getFullYear(), _schedCalMonth.getMonth() + dir, 1);
+  renderSchedView();
+}
+
+function setSchedView(v) {
+  _schedView = v;
+  document.querySelectorAll('.sched-view-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.view === v); });
+  renderSchedView();
+}
+
+/* -- PHASE EDITOR -- */
+var _editingPhaseIdx = null;
+async function openPhaseEditor(idx) {
+  var sch = await _loadSchedule();
+  var p = sch.phases[idx];
+  if (!p) return;
+  _editingPhaseIdx = idx;
+  var statusOpts = SCHED_STATUSES.map(function(s) {
+    return '<option value="' + s.id + '"' + (p.status === s.id ? ' selected' : '') + '>' + s.label + '</option>';
+  }).join('');
+  var modal = document.getElementById('phaseModal');
+  document.getElementById('phaseModalTitle').textContent = 'Edit Phase';
+  document.getElementById('phaseModalBody').innerHTML =
+    '<label class="tf-label">Phase name</label>' +
+    '<input id="ph-name" class="tf-input" type="text" value="' + _esc(p.name) + '">' +
+    '<div class="tf-row">' +
+      '<div class="tf-col"><label class="tf-label">Start date</label><input id="ph-start" class="tf-input" type="date" value="' + (p.start || '') + '"></div>' +
+      '<div class="tf-col"><label class="tf-label">End date</label><input id="ph-end" class="tf-input" type="date" value="' + (p.end || '') + '"></div>' +
+    '</div>' +
+    '<label class="tf-label">Status</label>' +
+    '<select id="ph-status" class="tf-input">' + statusOpts + '</select>' +
+    '<label class="tf-label">Notes</label>' +
+    '<textarea id="ph-notes" class="tf-input" rows="2" placeholder="Crew, subcontractor, blockers...">' + _esc(p.notes || '') + '</textarea>' +
+    '<div class="tf-modal-actions">' +
+      '<button class="tf-btn-danger" onclick="deletePhase(' + idx + ')">Delete</button>' +
+      '<div><button class="tf-btn-ghost" onclick="closePhaseEditor()">Cancel</button>' +
+      '<button class="tf-btn-primary" onclick="savePhase()">Save</button></div>' +
+    '</div>';
+  modal.style.display = 'flex';
+}
+function closePhaseEditor() { var m = document.getElementById('phaseModal'); if (m) m.style.display = 'none'; _editingPhaseIdx = null; }
+
+async function savePhase() {
+  if (_editingPhaseIdx === null) return;
+  var sch = await _loadSchedule();
+  var p = sch.phases[_editingPhaseIdx];
+  p.name = document.getElementById('ph-name').value.trim() || 'Phase';
+  p.start = document.getElementById('ph-start').value || '';
+  p.end = document.getElementById('ph-end').value || '';
+  p.status = document.getElementById('ph-status').value;
+  p.notes = document.getElementById('ph-notes').value.trim();
+  await _saveSchedule(sch);
+  closePhaseEditor();
+  renderSchedView();
+}
+async function deletePhase(idx) {
+  if (!confirm('Delete this phase?')) return;
+  var sch = await _loadSchedule();
+  sch.phases.splice(idx, 1);
+  await _saveSchedule(sch);
+  closePhaseEditor();
+  renderSchedView();
+}
+async function addPhase() {
+  var sch = await _loadSchedule();
+  sch.phases.push({ id: 'ph_' + Date.now(), name: 'New Phase', start: '', end: '', status: 'not_started', notes: '' });
+  await _saveSchedule(sch);
+  renderSchedView();
+  openPhaseEditor(sch.phases.length - 1);
+}
+async function resetSchedulePhases() {
+  if (!confirm('Reset to the standard construction phases? This replaces the current phase list for this house.')) return;
+  var sch = await _loadSchedule();
+  sch.phases = STD_CONSTRUCTION_PHASES.map(function(name, i) {
+    return { id: 'ph_' + i, name: name, start: '', end: '', status: 'not_started', notes: '' };
+  });
+  await _saveSchedule(sch);
+  renderSchedView();
+}
+
+
 async function switchTab(tab) {
   // Hide all office tabs
   document.querySelectorAll('.office-tab').forEach(function(t) { t.style.display = 'none'; });
@@ -4719,6 +5049,7 @@ async function switchTab(tab) {
   if (tab === 'upgradeEditor') initUpgradeEditor();
   if (tab === 'punchlist') renderPunchList();
   if (tab === 'tasks') { _populateTaskProjectFilter(); renderTasks(); }
+  if (tab === 'scheduling') renderScheduling();
   if (tab === 'specs') renderSpecs();
 }
 
@@ -9995,6 +10326,14 @@ if (document.readyState === 'loading') {
   </div>
 </div>
 
+
+<!-- PHASE EDITOR MODAL -->
+<div class="task-modal-overlay" id="phaseModal" style="display:none;">
+  <div class="task-modal">
+    <div class="task-modal-head"><span id="phaseModalTitle">Edit Phase</span><button class="task-modal-x" onclick="closePhaseEditor()">&#10005;</button></div>
+    <div class="task-modal-body" id="phaseModalBody"></div>
+  </div>
+</div>
 </body>
 </html
   <!-- Tasks (Coming Soon) -->
