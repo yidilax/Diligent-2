@@ -2837,6 +2837,115 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .gantt-today-line { position:absolute; top:0; bottom:0; width:2px; background:#c9a227; z-index:5; pointer-events:none; box-shadow:0 0 0 1px rgba(201,162,39,.25); }
 .gantt-today-flag { position:absolute; top:-1px; background:#c9a227; color:#1a2b4a; font-family:'Inter',sans-serif; font-size:9px; font-weight:800; letter-spacing:1px; padding:2px 6px; border-radius:0 0 3px 3px; transform:translateX(-50%); white-space:nowrap; z-index:6; }
 
+
+/* Mobile tap-target safety for all action buttons */
+.icon-btn, .icon-btn-danger, .tf-btn-danger, .wo-line-check, button[onclick] {
+  touch-action: manipulation;
+}
+.icon-btn, .icon-btn-danger { min-height: 36px; min-width: 36px; cursor: pointer; }
+.cust-card-actions, .proj-card-actions { position: relative; z-index: 2; }
+
+
+/* ===== Smart quick-add bar ===== */
+.qa2 { margin:14px 12px 0; background:#fbf9f3; border:1.5px solid #1a2b4a; border-radius:4px; box-shadow:0 2px 0 #1a2b4a; overflow:hidden; }
+.qa2-row1 { display:flex; align-items:stretch; }
+.qa2-plus { background:#c9a227; color:#1a2b4a; font-size:22px; font-weight:800; width:46px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.qa2-input { flex:1; border:0; outline:0; background:transparent; font-family:'Inter',sans-serif; font-size:16px; color:#16233d; padding:0 12px; height:50px; }
+.qa2-input::placeholder { color:#a8a290; }
+.qa2-add { background:#1a2b4a; color:#fbf9f3; border:0; padding:0 20px; font-family:'Inter',sans-serif; font-weight:700; font-size:15px; cursor:pointer; }
+.qa2-add:active { background:#0f1d36; }
+.qa2-row2 { display:flex; gap:7px; padding:9px 10px; border-top:1px solid #e6ddc9; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+.qa2-chip { display:inline-flex; align-items:center; gap:5px; flex-shrink:0; background:#f0ebde; border:1px solid #ded6c0; border-radius:20px; padding:7px 13px; font-family:'Inter',sans-serif; font-size:13px; font-weight:600; color:#5a5648; cursor:pointer; touch-action:manipulation; }
+.qa2-chip.on { background:#1a2b4a; border-color:#1a2b4a; color:#fbf9f3; }
+.qa2-chip-i { font-size:13px; }
+.qa2-prio-dot { width:9px; height:9px; border-radius:50%; background:#B8901F; display:inline-block; }
+
+.qa2-pop { position:fixed; z-index:9000; background:#fff; border:1.5px solid #1a2b4a; border-radius:8px; box-shadow:0 8px 30px rgba(0,0,0,.22); padding:6px; min-width:170px; max-height:50vh; overflow-y:auto; }
+.qa2-pop-item { display:block; width:100%; text-align:left; background:transparent; border:0; padding:11px 12px; font-family:'Inter',sans-serif; font-size:14px; color:#16233d; cursor:pointer; border-radius:6px; }
+.qa2-pop-item:active, .qa2-pop-item:hover { background:#f2eedf; }
+
+/* ===== Tap quick-action sheet ===== */
+.tas-overlay { position:fixed; inset:0; z-index:8000; display:none; }
+.tas-backdrop { position:absolute; inset:0; background:rgba(13,31,60,.45); opacity:0; transition:opacity .2s; }
+.tas-overlay.show .tas-backdrop { opacity:1; }
+.tas-sheet { position:absolute; left:0; right:0; bottom:0; background:#fbf9f3; border-top:3px solid #c9a227; border-radius:16px 16px 0 0; padding:10px 16px calc(16px + env(safe-area-inset-bottom)); transform:translateY(100%); transition:transform .24s cubic-bezier(.2,.8,.2,1); max-width:560px; margin:0 auto; }
+.tas-overlay.show .tas-sheet { transform:translateY(0); }
+.tas-grip { width:40px; height:4px; border-radius:2px; background:#d8d0bd; margin:4px auto 12px; }
+.tas-title { font-family:'Inter',sans-serif; font-size:17px; font-weight:700; color:#16233d; line-height:1.3; }
+.tas-sub { font-family:'Inter',sans-serif; font-size:13px; color:#8a8470; margin-top:3px; }
+.tas-actions { display:flex; flex-direction:column; gap:2px; margin:14px 0 6px; }
+.tas-act { display:flex; align-items:center; gap:13px; width:100%; text-align:left; background:transparent; border:0; padding:15px 8px; font-family:'Inter',sans-serif; font-size:16px; font-weight:600; color:#16233d; cursor:pointer; border-radius:8px; border-bottom:1px solid #eee7d6; }
+.tas-act:last-child { border-bottom:0; }
+.tas-act:active { background:#f2eedf; }
+.tas-ic { width:26px; text-align:center; font-size:18px; }
+.tas-danger { color:#b3261e; }
+.tas-cancel { width:100%; margin-top:8px; padding:14px; background:#ece7da; border:0; border-radius:10px; font-family:'Inter',sans-serif; font-size:15px; font-weight:700; color:#5a5648; cursor:pointer; }
+
+/* swipe affordance */
+.wo-line { position:relative; overflow:hidden; }
+.wo-line-swipe-bg { position:absolute; inset:0; display:flex; align-items:center; justify-content:space-between; padding:0 18px; font-family:'Inter',sans-serif; font-weight:700; font-size:14px; color:#fff; pointer-events:none; }
+.wo-line-swipe-done { background:#3a7d5d; }
+.wo-line-swipe-del { background:#b3261e; }
+
+
+/* Fix horizontal overflow on tasks */
+#tab-tasks { overflow-x:hidden; }
+.qa2, .wo { max-width:100%; box-sizing:border-box; }
+.qa2-row1 { min-width:0; }
+.qa2-input { min-width:0; }
+.qa2-add { flex-shrink:0; }
+.wo-titleblock { flex-wrap:wrap; gap:10px; }
+.wo-tb-right { gap:14px; }
+.wo-tb-num { font-size:26px; }
+.wo-tb-day { font-size:30px; }
+@media (max-width:380px){
+  .wo-tb-right { gap:10px; }
+  .qa2-chip { padding:7px 11px; font-size:12px; }
+}
+
+
+.wo-line-swipe-bg .sw-r { margin-left:auto; }
+.wo-line-swipe-done .sw-r { display:none; }
+.wo-line-swipe-del .sw-l { display:none; }
+.wo-line > .wo-line-tab, .wo-line > .wo-line-check, .wo-line > .wo-line-main { position:relative; z-index:1; }
+.wo-line-main { background:#fbf9f3; }
+.wo-line { background:#fbf9f3; }
+
+
+/* ===== Rich subtasks (mini-tasks) ===== */
+.td-sub2 { display:flex; align-items:flex-start; gap:10px; padding:11px 12px; background:#fff; border:1px solid #ebe7dd; border-radius:9px; margin-bottom:7px; }
+.td-sub2.done { background:#f7f6f1; }
+.td-sub2-check { flex-shrink:0; width:22px; height:22px; border-radius:6px; border:2px solid #cfc9bb; background:#fff; color:#fff; font-size:13px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; margin-top:1px; }
+.td-sub2-check.on { background:#c9a227; border-color:#c9a227; }
+.td-sub2-main { flex:1; min-width:0; }
+.td-sub2-title { font-family:'Inter',sans-serif; font-size:14px; font-weight:600; color:#16233d; line-height:1.3; cursor:text; }
+.td-sub2.done .td-sub2-title { text-decoration:line-through; color:#a59f8f; }
+.td-sub2-meta { display:flex; flex-wrap:wrap; gap:6px; margin-top:7px; }
+.td-sub2-chip { display:inline-flex; align-items:center; gap:5px; font-family:'Inter',sans-serif; font-size:12px; font-weight:600; color:#5a5648; background:#f0ebde; border:1px solid #ded6c0; border-radius:14px; padding:4px 10px; cursor:pointer; }
+.td-sub2-chip.empty { color:#9a9484; background:transparent; border-style:dashed; }
+.td-sub2-chip.over { color:#fff; background:#b3261e; border-color:#b3261e; }
+.td-sub2-ava { display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; background:#1a2b4a; color:#fff; font-size:9px; font-weight:700; }
+.td-sub2-del { flex-shrink:0; background:transparent; border:0; color:#c4bca8; font-size:15px; cursor:pointer; padding:2px 4px; margin-top:1px; }
+.td-sub2-del:active { color:#b3261e; }
+
+
+/* ===== Rich text editor (Asana-style) ===== */
+.rte-toolbar { display:flex; align-items:center; gap:3px; flex-wrap:wrap; padding:6px; background:#f2eedf; border:1.5px solid #d8d0bd; border-bottom:0; border-radius:8px 8px 0 0; }
+.rte-btn { background:#fff; border:1px solid #ded6c0; border-radius:5px; min-width:32px; height:30px; padding:0 8px; font-family:'Inter',sans-serif; font-size:13px; color:#16233d; cursor:pointer; }
+.rte-btn:active { background:#1a2b4a; color:#fff; }
+.rte-sep { width:1px; height:20px; background:#d8d0bd; margin:0 3px; }
+.rte-area { min-height:90px; border-radius:0 0 8px 8px !important; border-top:0 !important; line-height:1.5; overflow-y:auto; max-height:240px; text-align:left; }
+.rte-area:empty:before { content:attr(data-ph); color:#a8a290; }
+.rte-area:focus { outline:none; }
+.rte-area ul { margin:6px 0; padding-left:22px; list-style:disc; }
+.rte-area ol { margin:6px 0; padding-left:22px; list-style:decimal; }
+.rte-area b, .rte-area strong { font-weight:700; }
+.rte-area a { color:#1a2b4a; text-decoration:underline; }
+/* description display in detail */
+.td-desc-rich ul { padding-left:22px; list-style:disc; margin:6px 0; }
+.td-desc-rich ol { padding-left:22px; list-style:decimal; margin:6px 0; }
+.td-desc-rich a { color:#1a2b4a; text-decoration:underline; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -3673,23 +3782,20 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     </div>
 
   <div class="office-tab" id="tab-tasks" style="display:none;">
-    <div class="tab-header">
-      <div>
-        <h2 class="tab-title">Tasks</h2>
-        <div class="tab-count" id="tasks-count">0 open tasks</div>
-      </div>
-      <button class="tab-add-btn" onclick="openTaskForm()">+ New Task</button>
-    </div>
+        <div id="tasks-count" style="display:none;">0 open tasks</div>
 
-    <div id="viewAsBanner" class="viewas-banner" style="display:none;">
-      <span>Viewing <strong id="viewAsName"></strong>'s tasks</span>
-      <button onclick="clearViewAs()">Back to mine</button>
-    </div>
-    <!-- Quick add -->
-    <div class="tsk-quickadd">
-      <span class="tsk-qa-plus">+</span>
-      <input id="taskQuickInput" class="tsk-qa-input" type="text" placeholder="Add a task and press Enter (try 'Call inspector today')" onkeydown="_quickAddTask(event)">
-      <button class="tsk-qa-btn" onclick="_quickAddTask({key:'Enter'})">Add</button>
+    <div class="qa2">
+      <div class="qa2-row1">
+        <span class="qa2-plus">+</span>
+        <input id="taskQuickInput" class="qa2-input" type="text" placeholder="Add a task..." onkeydown="_quickAddTask(event)">
+        <button class="qa2-add" onclick="_quickAddTask({key:'Enter'})">Add</button>
+      </div>
+      <div class="qa2-row2">
+        <button class="qa2-chip" id="qa2-who" onclick="_qaOpenWho(event)"><span class="qa2-chip-i">&#128100;</span><span id="qa2-who-lbl">Me</span></button>
+        <button class="qa2-chip" id="qa2-house" onclick="_qaOpenHouse(event)"><span class="qa2-chip-i">&#8962;</span><span id="qa2-house-lbl">House</span></button>
+        <button class="qa2-chip" id="qa2-when" onclick="_qaCycleWhen()"><span class="qa2-chip-i">&#128197;</span><span id="qa2-when-lbl">No date</span></button>
+        <button class="qa2-chip qa2-prio" id="qa2-prio" onclick="_qaCyclePrio()"><span class="qa2-prio-dot" id="qa2-prio-dot"></span><span id="qa2-prio-lbl">Medium</span></button>
+      </div>
     </div>
 
     <!-- Scope + view switcher -->
@@ -4878,29 +4984,216 @@ async function _quickAddTask(ev) {
   if (ev && ev.key && ev.key !== 'Enter') return;
   var inp = document.getElementById('taskQuickInput');
   if (!inp) return;
-  var raw = (inp.value || '').trim();
-  if (!raw) return;
-  // very light natural parsing: "today"/"tomorrow" sets due date
-  var due = '';
-  var low = raw.toLowerCase();
-  var today = new Date();
-  function iso(d){ return d.toISOString().slice(0,10); }
-  if (/\btoday\b/.test(low)) { due = iso(today); raw = raw.replace(/\btoday\b/i,'').trim(); }
-  else if (/\btomorrow\b/.test(low)) { var tm=new Date(today); tm.setDate(tm.getDate()+1); due = iso(tm); raw = raw.replace(/\btomorrow\b/i,'').trim(); }
-  var uid = _effectiveUserId();
+  var title = (inp.value || '').trim();
+  if (!title) { inp.focus(); return; }
+  if (typeof _qa === 'undefined' || !_qa.whoId) { if (typeof _qaResetState === 'function') _qaResetState(); }
+  var uid = (_qa && _qa.whoId) ? _qa.whoId : _effectiveUserId();
+  var uname = (_qa && _qa.whoName) ? _qa.whoName : ((currentUser && currentUser.name) || '');
   var t = {
     id: 'task_' + Date.now() + '_' + Math.floor(Math.random()*1000),
-    title: raw, description: '',
-    ownerId: uid, assigneeId: uid, assigneeName: (currentUser && _viewAsUserId ? (window._viewAsName||'') : (currentUser? currentUser.name : '')),
-    assignee2Id: '', dueDate: due, startDate: '', priority: 'medium', status: 'todo',
-    projectId: '', tags: [], subtasks: [], comments: [], followers: [],
+    title: title, description: '',
+    ownerId: _effectiveUserId(),
+    assigneeId: uid, assigneeName: uname,
+    assignee2Id: '',
+    dueDate: (typeof _qaResolveWhen === 'function' ? _qaResolveWhen() : ''),
+    startDate: '',
+    priority: (_qa && _qa.prio) ? _qa.prio : 'medium',
+    status: 'todo',
+    projectId: (_qa && _qa.houseId) ? _qa.houseId : '',
+    projectName: (_qa && _qa.houseName) ? _qa.houseName : '',
+    tags: [], subtasks: [], comments: [], followers: [],
     createdAt: new Date().toISOString()
   };
   inp.value = '';
   await DB.set('task:' + t.id, t);
   if (typeof _notifyTaskStakeholders === 'function') { try { _notifyTaskStakeholders(t, { type:'created' }); } catch(e){} }
+  if (_qa) { _qa.when=''; _qa.whenLabel='No date'; if (typeof _qaSyncChips==='function') _qaSyncChips(); }
   renderTasks();
+  inp.focus();
 }
+
+/* ============================================================
+   TASKS — Smart quick-add + tap quick-actions + swipe
+   ============================================================ */
+
+// Quick-add state
+var _qa = { whoId:'', whoName:'', houseId:'', houseName:'', when:'', whenLabel:'No date', prio:'medium' };
+
+function _qaResetState() {
+  var meId = _effectiveUserId();
+  var meName = (_viewAsUserId ? (window._viewAsName||'') : (currentUser ? currentUser.name : '')) || 'Me';
+  _qa = { whoId: meId, whoName: meName, houseId:'', houseName:'', when:'', whenLabel:'No date', prio:'medium' };
+  _qaSyncChips();
+}
+function _qaSyncChips() {
+  var w = document.getElementById('qa2-who-lbl'); if (w) w.textContent = _qa.whoName || 'Me';
+  var h = document.getElementById('qa2-house-lbl'); if (h) h.textContent = _qa.houseName || 'House';
+  var wn = document.getElementById('qa2-when-lbl'); if (wn) wn.textContent = _qa.whenLabel;
+  var pl = document.getElementById('qa2-prio-lbl'); if (pl) pl.textContent = _qa.prio.charAt(0).toUpperCase()+_qa.prio.slice(1);
+  var pd = document.getElementById('qa2-prio-dot'); if (pd) pd.style.background = _taskPriorityMeta(_qa.prio).color;
+  // active styling
+  var hc = document.getElementById('qa2-house'); if (hc) hc.classList.toggle('on', !!_qa.houseId);
+  var wc = document.getElementById('qa2-when'); if (wc) wc.classList.toggle('on', !!_qa.when);
+}
+
+// WHO picker — small popover of active employees
+async function _qaOpenWho(ev) {
+  if (ev) ev.stopPropagation();
+  var emps = await _loadEmployeesForAssign();
+  var meId = _effectiveUserId();
+  var opts = [{ id: meId, name: (_qa.whoName||'Me') + ' (me)' }];
+  emps.forEach(function(u){ if (u.id !== meId) opts.push({ id: u.id, name: u.name }); });
+  _qaPopover('qa2-who', opts.map(function(o){
+    return '<button class="qa2-pop-item" onclick="_qaPickWho(\'' + o.id + '\',\'' + _esc(o.name).replace(/'/g,"\\'") + '\')">' + _esc(o.name) + '</button>';
+  }).join(''));
+}
+function _qaPickWho(id, name) {
+  _qa.whoId = id; _qa.whoName = name.replace(/ \(me\)$/,'');
+  _qaClosePopover(); _qaSyncChips();
+}
+
+// HOUSE picker — projects/houses
+async function _qaOpenHouse(ev) {
+  if (ev) ev.stopPropagation();
+  var projs = window._schedProjCache;
+  if (!projs) {
+    var keys = await DB.list('project:');
+    projs = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+    window._schedProjCache = projs;
+  }
+  var items = '<button class="qa2-pop-item" onclick="_qaPickHouse(\'\',\'\')">No house</button>';
+  projs.forEach(function(p){
+    items += '<button class="qa2-pop-item" onclick="_qaPickHouse(\'' + p.id + '\',\'' + _esc(p.name).replace(/'/g,"\\'") + '\')">' + _esc(p.name) + '</button>';
+  });
+  _qaPopover('qa2-house', items);
+}
+function _qaPickHouse(id, name) {
+  _qa.houseId = id; _qa.houseName = name;
+  _qaClosePopover(); _qaSyncChips();
+}
+
+// WHEN — cycle No date -> Today -> Tomorrow -> This week (Fri) -> Next week
+function _qaCycleWhen() {
+  var order = ['', 'today', 'tomorrow', 'friday', 'nextweek'];
+  var labels = { '':'No date', today:'Today', tomorrow:'Tomorrow', friday:'This Fri', nextweek:'Next week' };
+  var idx = order.indexOf(_qa.when);
+  var next = order[(idx+1) % order.length];
+  _qa.when = next; _qa.whenLabel = labels[next];
+  _qaSyncChips();
+}
+function _qaResolveWhen() {
+  if (!_qa.when) return '';
+  var d = new Date(); d.setHours(0,0,0,0);
+  if (_qa.when === 'today') {}
+  else if (_qa.when === 'tomorrow') d.setDate(d.getDate()+1);
+  else if (_qa.when === 'friday') { var add=(5 - d.getDay()+7)%7; d.setDate(d.getDate()+(add||7)); }
+  else if (_qa.when === 'nextweek') d.setDate(d.getDate()+7);
+  return d.toISOString().slice(0,10);
+}
+
+// PRIORITY — cycle low/medium/high/urgent
+function _qaCyclePrio() {
+  var order = ['low','medium','high','urgent'];
+  var idx = order.indexOf(_qa.prio);
+  _qa.prio = order[(idx+1) % order.length];
+  _qaSyncChips();
+}
+
+// shared popover
+function _qaPopover(anchorId, innerHtml) {
+  _qaClosePopover();
+  var anchor = document.getElementById(anchorId);
+  if (!anchor) return;
+  var pop = document.createElement('div');
+  pop.id = 'qa2-popover';
+  pop.className = 'qa2-pop';
+  pop.innerHTML = innerHtml;
+  var r = anchor.getBoundingClientRect();
+  pop.style.left = Math.max(8, r.left) + 'px';
+  pop.style.top = (r.bottom + 6) + 'px';
+  document.body.appendChild(pop);
+  setTimeout(function(){ document.addEventListener('click', _qaClosePopover, { once:true }); }, 10);
+}
+function _qaClosePopover() {
+  var p = document.getElementById('qa2-popover'); if (p) p.remove();
+}
+
+/* ===== TAP QUICK-ACTIONS (action sheet on tapping a task) ===== */
+var _qaCurrentTask = null;
+async function openTaskQuickActions(id) {
+  var t = await DB.get('task:' + id);
+  if (!t) return;
+  _qaCurrentTask = t;
+  var done = (t.status||'todo') === 'done';
+  var sheet = document.getElementById('taskActionSheet');
+  if (!sheet) { sheet = document.createElement('div'); sheet.id = 'taskActionSheet'; document.body.appendChild(sheet); }
+  sheet.className = 'tas-overlay';
+  sheet.innerHTML =
+    '<div class="tas-backdrop" onclick="closeTaskQuickActions()"></div>' +
+    '<div class="tas-sheet">' +
+      '<div class="tas-grip"></div>' +
+      '<div class="tas-title">' + _esc(t.title||'Task') + '</div>' +
+      (t.dueDate ? '<div class="tas-sub">Due ' + _fmtTaskDate(t.dueDate) + '</div>' : '') +
+      '<div class="tas-actions">' +
+        '<button class="tas-act" onclick="_tasDone()"><span class="tas-ic">' + (done?'\u21ba':'\u2713') + '</span>' + (done?'Reopen':'Mark done') + '</button>' +
+        '<button class="tas-act" onclick="_tasDate()"><span class="tas-ic">&#128197;</span>Set date</button>' +
+        '<button class="tas-act" onclick="_tasAssign()"><span class="tas-ic">&#128100;</span>Assign</button>' +
+        '<button class="tas-act" onclick="_tasEdit()"><span class="tas-ic">&#9998;</span>Edit details</button>' +
+        '<button class="tas-act tas-danger" onclick="_tasDelete()"><span class="tas-ic">&#128465;</span>Delete</button>' +
+      '</div>' +
+      '<button class="tas-cancel" onclick="closeTaskQuickActions()">Close</button>' +
+    '</div>';
+  sheet.style.display = 'block';
+  requestAnimationFrame(function(){ sheet.classList.add('show'); });
+}
+function closeTaskQuickActions() {
+  var sheet = document.getElementById('taskActionSheet');
+  if (!sheet) return;
+  sheet.classList.remove('show');
+  setTimeout(function(){ sheet.style.display = 'none'; }, 200);
+}
+async function _tasDone() {
+  if (!_qaCurrentTask) return;
+  await toggleTaskDone(_qaCurrentTask.id);
+  closeTaskQuickActions();
+}
+function _tasEdit() {
+  var id = _qaCurrentTask && _qaCurrentTask.id;
+  closeTaskQuickActions();
+  if (id) openTaskForm(id);
+}
+function _tasDelete() {
+  var id = _qaCurrentTask && _qaCurrentTask.id;
+  closeTaskQuickActions();
+  if (id && typeof deleteTask === 'function') deleteTask(id);
+}
+async function _tasDate() {
+  if (!_qaCurrentTask) return;
+  var cur = _qaCurrentTask.dueDate || '';
+  var val = prompt('Set due date (YYYY-MM-DD), or leave blank to clear:', cur);
+  if (val === null) return;
+  var t = await DB.get('task:' + _qaCurrentTask.id);
+  t.dueDate = (val||'').trim();
+  await DB.set('task:' + t.id, t);
+  closeTaskQuickActions(); renderTasks();
+}
+async function _tasAssign() {
+  if (!_qaCurrentTask) return;
+  var emps = await _loadEmployeesForAssign();
+  var sheet = document.getElementById('taskActionSheet');
+  var list = emps.map(function(u){
+    return '<button class="tas-act" onclick="_tasDoAssign(\'' + u.id + '\',\'' + _esc(u.name).replace(/'/g,"\\'") + '\')">' + _esc(u.name) + '</button>';
+  }).join('');
+  sheet.querySelector('.tas-actions').innerHTML = list || '<div class="tas-sub">No active employees</div>';
+}
+async function _tasDoAssign(uid, uname) {
+  var t = await DB.get('task:' + _qaCurrentTask.id);
+  t.assigneeId = uid; t.assigneeName = uname;
+  await DB.set('task:' + t.id, t);
+  if (typeof _notifyTaskStakeholders === 'function') { try { _notifyTaskStakeholders(t, { type:'assigned' }); } catch(e){} }
+  closeTaskQuickActions(); renderTasks();
+}
+
 
 // Smart date buckets
 function _taskBucket(t) {
@@ -5033,7 +5326,7 @@ function _woLine(t) {
   var subDone = (t.subtasks||[]).filter(function(s){return s.done;}).length;
   var who = (t.assigneeName||'').trim();
 
-  return '<div class="wo-line' + (done?' done':'') + '" onclick="openTaskDetail(\'' + t.id + '\')">' +
+  return '<div class="wo-line' + (done?' done':'') + '" onclick="openTaskQuickActions(\'' + t.id + '\')">' +
     '<span class="wo-line-tab" style="background:' + pm.color + '" title="' + pm.label + '"></span>' +
     '<button class="wo-line-check' + (done?' on':'') + '" onclick="event.stopPropagation();toggleTaskDone(\'' + t.id + '\')" aria-label="Mark done">' + (done?'\u2713':'') + '</button>' +
     '<div class="wo-line-main">' +
@@ -5121,6 +5414,7 @@ async function _taskDropNew(ev, status){
 async function renderTasks() {
   var host = document.getElementById('tasksContent');
   if (!host) return;
+  if (typeof _qa === 'undefined' || !_qa.whoId) { if (typeof _qaResetState === 'function') _qaResetState(); }
   var tasks = (_taskScope === 'following') ? await _loadFollowedTasks() : await _loadAllTasks();
   window._taskTagsCache = await _loadTaskTags();
   window._allEmpCache = await _loadEmployeesForAssign();
@@ -5153,11 +5447,68 @@ async function renderTasks() {
   var countEl = document.getElementById('tasks-count');
   if (countEl) countEl.textContent = openCount + ' open task' + (openCount !== 1 ? 's' : '');
 
-  if (_taskView === 'list')      host.innerHTML = _renderTaskSmart(filtered);
+  if (_taskView === 'list')      { host.innerHTML = _renderTaskSmart(filtered); setTimeout(_wireTaskSwipe, 30); }
   else if (_taskView === 'board') host.innerHTML = _renderTaskBoardNew(filtered);
   else if (_taskView === 'calendar') host.innerHTML = _renderTaskCalendar(filtered);
   else if (_taskView === 'timeline') host.innerHTML = _renderTaskTimeline(filtered);
 }
+
+/* ===== Swipe to complete (right) / delete (left) on task lines ===== */
+function _wireTaskSwipe() {
+  var lines = document.querySelectorAll('#tasksContent .wo-line');
+  lines.forEach(function(line) {
+    if (line._swipeWired) return;
+    line._swipeWired = true;
+    var startX = 0, startY = 0, dx = 0, dragging = false, decided = false, horizontal = false;
+    var m = (line.getAttribute('onclick') || '').match(/openTaskQuickActions\('([^']+)'\)/);
+    var id = m ? m[1] : null;
+    var main = line;
+    function reset() {
+      main.style.transition = 'transform .2s';
+      main.style.transform = 'translateX(0)';
+      var bg = line.querySelector('.wo-line-swipe-bg'); if (bg) bg.remove();
+    }
+    line.addEventListener('touchstart', function(e) {
+      if (e.touches.length !== 1) return;
+      startX = e.touches[0].clientX; startY = e.touches[0].clientY;
+      dx = 0; dragging = true; decided = false; horizontal = false;
+      main.style.transition = 'none';
+    }, { passive: true });
+    line.addEventListener('touchmove', function(e) {
+      if (!dragging) return;
+      dx = e.touches[0].clientX - startX;
+      var dy = e.touches[0].clientY - startY;
+      if (!decided) { decided = true; horizontal = Math.abs(dx) > Math.abs(dy); }
+      if (!horizontal) return;
+      e.preventDefault();
+      var bg = line.querySelector('.wo-line-swipe-bg');
+      if (!bg) {
+        bg = document.createElement('div'); bg.className = 'wo-line-swipe-bg';
+        bg.innerHTML = '<span class="sw-l">\u2713 Done</span><span class="sw-r">Delete \u2715</span>';
+        line.insertBefore(bg, line.firstChild);
+      }
+      bg.className = 'wo-line-swipe-bg ' + (dx > 0 ? 'wo-line-swipe-done' : 'wo-line-swipe-del');
+      var clamped = Math.max(-120, Math.min(120, dx));
+      main.style.transform = 'translateX(' + clamped + 'px)';
+    }, { passive: false });
+    line.addEventListener('touchend', function() {
+      if (!dragging) return;
+      dragging = false;
+      if (horizontal && Math.abs(dx) > 80 && id) {
+        if (dx > 0) {
+          main.style.transition = 'transform .2s'; main.style.transform = 'translateX(100%)';
+          setTimeout(function() { toggleTaskDone(id); }, 150);
+        } else {
+          reset();
+          if (typeof deleteTask === 'function') deleteTask(id);
+        }
+      } else {
+        reset();
+      }
+    });
+  });
+}
+
 
 /* ── LIST VIEW (grouped by status section) ── */
 function _renderTaskList(tasks) {
@@ -5366,6 +5717,49 @@ function _tfmToggleTag(id) {
   if (i === -1) _tfmTags.push(id); else _tfmTags.splice(i, 1);
   _loadTaskTags().then(function(t) { _tfmRenderTags(t); });
 }
+
+// Rich text editor commands for description fields
+
+// Sanitize rich-text: allow only basic formatting tags
+function _rteSanitize(htmlStr) {
+  if (!htmlStr) return '';
+  var tmp = document.createElement('div');
+  tmp.innerHTML = htmlStr;
+  var allowed = { B:1, STRONG:1, I:1, EM:1, U:1, UL:1, OL:1, LI:1, BR:1, DIV:1, P:1, A:1, SPAN:1 };
+  (function clean(node){
+    var children = Array.prototype.slice.call(node.childNodes);
+    children.forEach(function(c){
+      if (c.nodeType === 1) {
+        if (!allowed[c.tagName]) {
+          // unwrap disallowed element
+          while (c.firstChild) node.insertBefore(c.firstChild, c);
+          node.removeChild(c);
+          return;
+        }
+        // strip all attributes except href on <a>
+        Array.prototype.slice.call(c.attributes).forEach(function(a){
+          if (!(c.tagName === 'A' && a.name === 'href')) c.removeAttribute(a.name);
+        });
+        if (c.tagName === 'A') { c.setAttribute('target','_blank'); c.setAttribute('rel','noopener'); }
+        clean(c);
+      } else if (c.nodeType !== 3) {
+        node.removeChild(c);
+      }
+    });
+  })(tmp);
+  return tmp.innerHTML;
+}
+
+function _rteCmd(ev, cmd) {
+  ev.preventDefault();
+  document.execCommand(cmd, false, null);
+}
+function _rteLink(ev) {
+  ev.preventDefault();
+  var url = prompt('Link URL:', 'https://');
+  if (url) document.execCommand('createLink', false, url);
+}
+
 async function openTaskForm(taskId) {
   _editingTaskId = taskId || null;
   var employees = await _loadEmployeesForAssign();
@@ -5416,7 +5810,7 @@ async function openTaskForm(taskId) {
     '<label class="tf-label">Task title *</label>' +
     '<input id="tfm-title" class="tf-input" type="text" placeholder="What needs to be done?" value="' + (t ? _esc(t.title) : '') + '">' +
     '<label class="tf-label">Description</label>' +
-    '<textarea id="tfm-desc" class="tf-input" rows="3" placeholder="Add details...">' + (t ? _esc(t.description || '') : '') + '</textarea>' +
+    '<div class="rte-toolbar">' +'<button type="button" class="rte-btn" onmousedown="_rteCmd(event,\'bold\')"><b>B</b></button>' +'<button type="button" class="rte-btn" onmousedown="_rteCmd(event,\'italic\')"><i>I</i></button>' +'<button type="button" class="rte-btn" onmousedown="_rteCmd(event,\'underline\')"><u>U</u></button>' +'<span class="rte-sep"></span>' +'<button type="button" class="rte-btn" onmousedown="_rteCmd(event,\'insertUnorderedList\')">&#8226; List</button>' +'<button type="button" class="rte-btn" onmousedown="_rteCmd(event,\'insertOrderedList\')">1. List</button>' +'<button type="button" class="rte-btn" onmousedown="_rteLink(event)">&#128279;</button>' +'</div>' +'<div id="tfm-desc" class="tf-input rte-area" contenteditable="true" data-ph="Add details...">' + (t ? (t.description || '') : '') + '</div>' +
     '<label class="tf-checkrow"><input id="tfm-milestone" type="checkbox"' + (t && t.isMilestone ? ' checked' : '') + '> <span>\u2691 Mark as milestone (key project moment)</span></label>' +
     '<div class="tf-row">' +
       '<div class="tf-col"><label class="tf-label">Start date</label><input id="tfm-start" class="tf-input" type="date" value="' + (t && t.startDate ? t.startDate : '') + '"></div>' +
@@ -5484,7 +5878,7 @@ async function saveTask() {
   }
 
   task.title = title;
-  task.description = document.getElementById('tfm-desc').value.trim();
+  task.description = (document.getElementById('tfm-desc').innerHTML || '').trim();
   task.assigneeId = assigneeId;
   task.assigneeName = assigneeName;
   var a2sel = document.getElementById('tfm-assignee2');
@@ -5604,10 +5998,20 @@ async function openTaskDetail(id) {
   var subDone = (t.subtasks || []).filter(function(s){return s.done;}).length;
   var subTotal = (t.subtasks || []).length;
   var subHtml = (t.subtasks || []).map(function(s, i) {
-    return '<div class="td-subtask' + (s.done ? ' checked' : '') + '" onclick="toggleSubtask(\'' + id + '\',' + i + ')">' +
-      '<div class="td-check">' + (s.done ? '\u2713' : '') + '</div>' +
-      '<div class="td-sub-text">' + _esc(s.title) + '</div>' +
-      '<button class="td-sub-del" onclick="event.stopPropagation();deleteSubtask(\'' + id + '\',' + i + ')">\u2715</button>' +
+    var sDue = s.dueDate ? _fmtTaskDate(s.dueDate) : '';
+    var sOver = s.dueDate && !s.done && new Date(s.dueDate+'T00:00:00') < new Date(new Date().toDateString());
+    var who = (s.assigneeName||'').trim();
+    var ini = who ? who.split(/\s+/).map(function(w){return w[0];}).slice(0,2).join('').toUpperCase() : '';
+    return '<div class="td-sub2' + (s.done ? ' done' : '') + '">' +
+      '<button class="td-sub2-check' + (s.done?' on':'') + '" onclick="toggleSubtask(\'' + id + '\',' + i + ')">' + (s.done ? '\u2713' : '') + '</button>' +
+      '<div class="td-sub2-main">' +
+        '<div class="td-sub2-title" onclick="_subEditTitle(\'' + id + '\',' + i + ')">' + _esc(s.title) + '</div>' +
+        '<div class="td-sub2-meta">' +
+          '<button class="td-sub2-chip' + (sDue?'':' empty') + (sOver?' over':'') + '" onclick="_subSetDate(\'' + id + '\',' + i + ')">\ud83d\udcc5 ' + (sDue || 'Date') + '</button>' +
+          '<button class="td-sub2-chip' + (who?'':' empty') + '" onclick="_subAssign(\'' + id + '\',' + i + ')">' + (who ? ('<span class=\'td-sub2-ava\'>' + ini + '</span>' + _esc(who)) : '\ud83d\udc64 Assign') + '</button>' +
+        '</div>' +
+      '</div>' +
+      '<button class="td-sub2-del" onclick="deleteSubtask(\'' + id + '\',' + i + ')">\u2715</button>' +
     '</div>';
   }).join('');
 
@@ -5676,7 +6080,7 @@ async function openTaskDetail(id) {
         (tagHtml ? ('<div class="td-section"><div class="td-sec-head"><span class="td-sec-title">Tags</span></div><div class="td-tag-row">' + tagHtml + '</div></div>') : '') +
 
         '<div class="td-section"><div class="td-sec-head"><span class="td-sec-title">Description</span></div>' +
-          (t.description ? '<div class="td-card">' + _esc(t.description) + '</div>' : '<div class="td-card muted" onclick="openTaskForm(\'' + id + '\')">Add a description</div>') + '</div>' +
+          (t.description ? '<div class="td-card td-desc-rich">' + _rteSanitize(t.description) + '</div>' : '<div class="td-card muted" onclick="openTaskForm(\'' + id + '\')">Add a description</div>') + '</div>' +
 
         '<div class="td-section"><div class="td-sec-head"><span class="td-sec-title">Subtasks</span>' +
           (subTotal ? '<span class="td-sec-count">' + subDone + ' of ' + subTotal + '</span>' : '') + '</div>' +
@@ -5716,6 +6120,45 @@ async function addSubtask(id) {
   await DB.set('task:' + id, t);
   openTaskDetail(id);
 }
+
+async function _subSetDate(id, i) {
+  var t = await DB.get('task:' + id); if (!t || !t.subtasks[i]) return;
+  var cur = t.subtasks[i].dueDate || '';
+  var val = prompt('Subtask due date (YYYY-MM-DD), blank to clear:', cur);
+  if (val === null) return;
+  t.subtasks[i].dueDate = (val||'').trim();
+  t._updatedAt = Date.now();
+  await DB.set('task:' + id, t);
+  openTaskDetail(id);
+}
+async function _subAssign(id, i) {
+  var t = await DB.get('task:' + id); if (!t || !t.subtasks[i]) return;
+  var emps = await _loadEmployeesForAssign();
+  if (!emps.length) { alert('No active employees to assign.'); return; }
+  var names = emps.map(function(u,n){ return (n+1) + '. ' + u.name; }).join('\n');
+  var pick = prompt('Assign subtask to:\n' + names + '\n\nEnter a number (or blank to clear):', '');
+  if (pick === null) return;
+  if (pick.trim() === '') { t.subtasks[i].assigneeId=''; t.subtasks[i].assigneeName=''; }
+  else {
+    var n = parseInt(pick,10) - 1;
+    if (n >= 0 && n < emps.length) { t.subtasks[i].assigneeId = emps[n].id; t.subtasks[i].assigneeName = emps[n].name; }
+    else { alert('Invalid choice.'); return; }
+  }
+  t._updatedAt = Date.now();
+  await DB.set('task:' + id, t);
+  openTaskDetail(id);
+}
+async function _subEditTitle(id, i) {
+  var t = await DB.get('task:' + id); if (!t || !t.subtasks[i]) return;
+  var val = prompt('Edit subtask:', t.subtasks[i].title || '');
+  if (val === null) return;
+  var v = val.trim(); if (!v) return;
+  t.subtasks[i].title = v;
+  t._updatedAt = Date.now();
+  await DB.set('task:' + id, t);
+  openTaskDetail(id);
+}
+
 async function toggleSubtask(id, idx) {
   var t = await DB.get('task:' + id); if (!t || !t.subtasks[idx]) return;
   t.subtasks[idx].done = !t.subtasks[idx].done;
@@ -12442,6 +12885,35 @@ if (document.readyState === 'loading') {
     </div>
   </div>
 </div>
+
+
+
+<script>
+(function() {
+  function hardenClickables(root) {
+    var nodes = (root || document).querySelectorAll('[onclick]');
+    nodes.forEach(function(el) {
+      if (el._ddHardened) return;
+      // does an ancestor also have its own onclick?
+      var p = el.parentElement, nested = false;
+      while (p) { if (p.hasAttribute && p.hasAttribute('onclick')) { nested = true; break; } p = p.parentElement; }
+      if (!nested) return;
+      el._ddHardened = true;
+      el.addEventListener('click', function(e) { e.stopPropagation(); });
+    });
+  }
+  // Run after each render by observing DOM changes (debounced).
+  var pending = null;
+  var mo = new MutationObserver(function() {
+    if (pending) return;
+    pending = setTimeout(function() { pending = null; try { hardenClickables(document); } catch(e){} }, 60);
+  });
+  document.addEventListener('DOMContentLoaded', function() {
+    try { hardenClickables(document); } catch(e){}
+    mo.observe(document.body, { childList: true, subtree: true });
+  });
+})();
+</script>
 
 </body>
 </html
