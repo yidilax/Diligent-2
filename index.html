@@ -2328,6 +2328,95 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
 .sched-row-notes { font-size: 12px; color: var(--text); margin-top: 4px; background: #F7F5F0; padding: 5px 8px; border-radius: 6px; }
 .sched-status-badge { flex-shrink: 0; color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 12px; white-space: nowrap; }
 
+
+/* === FULL-PAGE TASK DETAIL === */
+#taskDetailModal { position:fixed; inset:0; z-index:400; background:var(--cream); display:none; }
+.td-page { display:flex; flex-direction:column; height:100vh; height:100dvh; max-width:520px; margin:0 auto; background:#F7F5F0; }
+.td-topbar { position:sticky; top:0; z-index:10; background:var(--navy); color:#fff; padding:12px 14px; display:flex; align-items:center; gap:10px; }
+.td-icon-btn { background:transparent; border:0; color:#fff; width:36px; height:36px; border-radius:9px; display:grid; place-items:center; cursor:pointer; font-size:18px; }
+.td-icon-btn:active { background:rgba(255,255,255,.15); }
+.td-spacer { flex:1; }
+.td-complete { display:flex; align-items:center; gap:7px; background:var(--gold); color:var(--navy); border:0; border-radius:999px; padding:9px 15px; font-weight:600; font-size:13px; cursor:pointer; font-family:'Inter',sans-serif; }
+.td-complete.done { background:#2D7A4F; color:#fff; }
+.td-complete:active { transform:scale(.97); }
+
+.td-scroll { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:20px; }
+
+.td-header { padding:22px 20px 6px; }
+.td-privacy { display:inline-flex; align-items:center; gap:6px; font-size:12px; color:#7A5BA8; font-weight:700; margin-bottom:12px; }
+.td-title { font-family:'Bebas Neue',sans-serif; font-size:36px; letter-spacing:.5px; line-height:1.05; color:var(--navy); }
+.td-title.done { text-decoration:line-through; color:var(--muted); }
+.td-status-pill { display:inline-flex; align-items:center; gap:6px; margin-top:10px; font-size:12px; font-weight:700; padding:5px 12px; border-radius:999px; background:#FBEEE6; color:#B5602E; }
+.td-status-pill.done { background:#E6F2EC; color:#2D7A4F; }
+
+.td-meta { display:flex; gap:10px; padding:18px 20px; }
+.td-meta-card { flex:1; min-width:0; background:#fff; border:1px solid var(--border); border-radius:14px; padding:13px; display:flex; align-items:center; gap:10px; }
+.td-avatar { width:38px; height:38px; border-radius:50%; background:var(--navy); color:var(--gold); display:grid; place-items:center; font-weight:700; font-size:13px; flex-shrink:0; }
+.td-avatar.sm { width:32px; height:32px; font-size:11px; }
+.td-cal { width:38px; height:38px; border-radius:10px; flex-shrink:0; background:#F0E6CC; color:var(--navy); display:grid; place-items:center; font-size:17px; }
+.td-meta-label { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; }
+.td-meta-value { font-size:14px; font-weight:600; color:var(--navy); margin-top:1px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.td-meta-value.due { color:#C0392B; }
+
+.td-section { padding:6px 20px 4px; }
+.td-sec-head { display:flex; align-items:center; justify-content:space-between; padding:14px 0 10px; }
+.td-sec-title { font-size:12px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--navy); }
+.td-sec-count { font-size:12px; color:var(--muted); }
+.td-card { background:#fff; border:1px solid var(--border); border-radius:14px; padding:14px; font-size:14px; color:var(--navy); line-height:1.5; white-space:pre-wrap; }
+.td-card.muted { color:var(--muted); font-style:italic; cursor:pointer; }
+.td-proj-tag, .td-tag { display:inline-flex; align-items:center; gap:7px; background:#fff; border:1px solid var(--border); border-radius:999px; padding:8px 14px; font-size:13px; font-weight:500; color:var(--navy); }
+.td-tag-dot { width:9px; height:9px; border-radius:50%; }
+.td-tag-row { display:flex; flex-wrap:wrap; gap:8px; }
+
+.td-subtask { display:flex; align-items:center; gap:12px; background:#fff; border:1px solid var(--border); border-radius:11px; padding:13px 14px; margin-bottom:8px; cursor:pointer; }
+.td-check { width:21px; height:21px; border-radius:6px; flex-shrink:0; border:2px solid var(--border); display:grid; place-items:center; color:#fff; font-size:12px; }
+.td-subtask.checked .td-check { background:#2D7A4F; border-color:#2D7A4F; }
+.td-subtask.checked .td-sub-text { text-decoration:line-through; color:var(--muted); }
+.td-sub-text { flex:1; font-size:14px; color:var(--navy); }
+.td-sub-del { background:none; border:0; color:var(--muted); font-size:12px; cursor:pointer; }
+.td-add-row { display:flex; align-items:center; border:1px dashed var(--border); border-radius:11px; padding:0 14px; }
+.td-add-input { flex:1; border:0; outline:0; background:transparent; padding:13px 0; font-size:14px; font-family:'Inter',sans-serif; color:var(--navy); }
+
+.td-photos { display:flex; gap:10px; overflow-x:auto; padding-bottom:4px; }
+.td-photo { width:90px; height:90px; border-radius:12px; flex-shrink:0; border:1px solid var(--border); cursor:pointer; display:grid; place-items:center; }
+.td-photo-file { background:linear-gradient(135deg,#1C3157,#2A436E); color:var(--gold); font-size:24px; text-decoration:none; }
+
+.td-comment { display:flex; gap:11px; margin-bottom:14px; }
+.td-bubble { flex:1; }
+.td-who { font-size:13px; font-weight:600; color:var(--navy); }
+.td-when { font-size:11px; color:var(--muted); margin-left:6px; font-weight:400; }
+.td-txt { font-size:14px; margin-top:3px; color:var(--navy); }
+.td-act-list { margin-top:8px; padding-top:10px; border-top:1px solid var(--border); }
+.td-act { font-size:12px; color:var(--muted); line-height:1.5; margin-bottom:4px; }
+.td-act-who { font-weight:700; color:var(--navy); }
+
+.td-composer { position:sticky; bottom:0; background:#F7F5F0; border-top:1px solid var(--border); padding:12px 16px; }
+.td-composer-input { display:flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--border); border-radius:999px; padding:6px 6px 6px 16px; }
+.td-composer-input input { flex:1; border:0; outline:0; font-family:inherit; font-size:14px; background:transparent; color:var(--navy); }
+.td-send { width:38px; height:38px; border-radius:50%; border:0; flex-shrink:0; background:var(--gold); color:var(--navy); font-size:16px; cursor:pointer; display:grid; place-items:center; }
+.td-send:active { transform:scale(.95); }
+
+
+.sched-unit-bar { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+.sched-unit-bar:empty { display:none; }
+.sched-unit-label { font-size:12px; color:var(--muted); font-weight:600; margin-right:2px; }
+.sched-unit-chip { background:#fff; border:1.5px solid var(--border); border-radius:14px; padding:6px 13px; font-size:12px; font-weight:600; color:var(--navy); cursor:pointer; font-family:'Inter',sans-serif; }
+.sched-unit-chip.on { background:var(--navy); color:#fff; border-color:var(--navy); }
+
+
+.sched-legend { display:flex; flex-wrap:wrap; gap:10px; padding:10px 20px; }
+.sched-legend-item { display:inline-flex; align-items:center; gap:6px; font-size:12px; color:var(--navy); font-weight:600; }
+.sched-legend-dot { width:10px; height:10px; border-radius:50%; }
+
+
+.gcal-box { padding: 0 16px 6px; }
+.gcal-status { background:#fff; border:1px solid var(--border); border-radius:12px; padding:14px; }
+.gcal-status.gcal-on { border-color:#2D7A4F; background:#F0F7F3; }
+.gcal-status.gcal-pending { background:#FBF8F0; border-color:#E8DCC0; }
+.gcal-title { font-size:14px; font-weight:700; color:var(--navy); }
+.gcal-desc { font-size:12px; color:var(--muted); margin:5px 0 10px; line-height:1.4; }
+.gcal-connect-btn { background:#fff; color:#3B6FB0; border:1.5px solid #3B6FB0; border-radius:8px; padding:9px 16px; font-size:13px; font-weight:700; cursor:pointer; font-family:'Inter',sans-serif; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -3275,14 +3364,19 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
     </div>
 
     <div class="task-toolbar">
-      <select id="sched-house-sel" class="tf-input" onchange="schedLoadHouse()" style="width:100%"></select>
-      <div class="task-views">
+      <div class="task-views" style="margin-bottom:10px">
         <button class="sched-view-btn task-view-btn active" data-view="list" onclick="setSchedView('list')">&#9776; List</button>
         <button class="sched-view-btn task-view-btn" data-view="gantt" onclick="setSchedView('gantt')">&#128202; Gantt</button>
         <button class="sched-view-btn task-view-btn" data-view="calendar" onclick="setSchedView('calendar')">&#128197; Calendar</button>
+        <button class="sched-view-btn task-view-btn" data-view="all" onclick="setSchedView('all')">&#127968; All Schedules</button>
+      </div>
+      <div id="sched-house-row">
+        <select id="sched-house-sel" class="tf-input" onchange="schedLoadHouse()" style="width:100%"></select>
+        <div id="sched-unit-bar" class="sched-unit-bar"></div>
       </div>
     </div>
 
+    <div id="gcalSettingsBox" class="gcal-box"></div>
     <div id="schedContent"></div>
   </div>
 
@@ -4543,6 +4637,16 @@ async function saveTask() {
   task._updatedAt = Date.now();
 
   await DB.set('task:' + id, task);
+  // Auto-sync to the connected user's Google Calendar (only theirs)
+  if (!existing && (task.dueDate || task.startDate)) {
+    gcalAddEvent({
+      title: 'Task: ' + task.title,
+      description: task.description || '',
+      start: task.startDate || task.dueDate,
+      end: task.dueDate || task.startDate,
+      allDay: true
+    });
+  }
   closeTaskForm();
   renderTasks();
 }
@@ -4603,72 +4707,119 @@ async function openTaskDetail(id) {
   if (!t) return;
   _editingTaskId = id;
   var pm = _taskPriorityMeta(t.priority);
+  var tags = window._taskTagsCache || (window._taskTagsCache = await _loadTaskTags());
   var modal = document.getElementById('taskDetailModal');
-  var body = document.getElementById('taskDetailBody');
+  var done = t.status === 'done';
 
-  var subHtml = '';
-  (t.subtasks || []).forEach(function(s, i) {
-    subHtml += '<div class="task-sub-row">' +
-      '<button class="task-check sm' + (s.done ? ' checked' : '') + '" onclick="toggleSubtask(\'' + id + '\',' + i + ')">' + (s.done ? '\u2713' : '') + '</button>' +
-      '<span class="' + (s.done ? 'task-sub-done' : '') + '">' + _esc(s.title) + '</span>' +
-      '<button class="task-sub-del" onclick="deleteSubtask(\'' + id + '\',' + i + ')">\u2715</button>' +
+  function initials(name) {
+    if (!name) return '?';
+    var parts = name.trim().split(/\s+/);
+    return (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
+  }
+
+  // Subtasks
+  var subDone = (t.subtasks || []).filter(function(s){return s.done;}).length;
+  var subTotal = (t.subtasks || []).length;
+  var subHtml = (t.subtasks || []).map(function(s, i) {
+    return '<div class="td-subtask' + (s.done ? ' checked' : '') + '" onclick="toggleSubtask(\'' + id + '\',' + i + ')">' +
+      '<div class="td-check">' + (s.done ? '\u2713' : '') + '</div>' +
+      '<div class="td-sub-text">' + _esc(s.title) + '</div>' +
+      '<button class="td-sub-del" onclick="event.stopPropagation();deleteSubtask(\'' + id + '\',' + i + ')">\u2715</button>' +
     '</div>';
-  });
+  }).join('');
 
-  var cmtHtml = '';
-  (t.comments || []).forEach(function(c) {
-    cmtHtml += '<div class="task-cmt">' +
-      '<div class="task-cmt-head">' + _esc(c.author) + ' <span class="task-cmt-time">' + _fmtCmtTime(c.at) + '</span></div>' +
-      '<div class="task-cmt-body">' + _esc(c.text) + '</div>' +
+  // Tags
+  var tagHtml = (t.tags || []).map(function(tid) {
+    var m = _tagMeta(tags, tid);
+    return m ? '<span class="td-tag"><span class="td-tag-dot" style="background:' + m.color + '"></span>' + _esc(m.name) + '</span>' : '';
+  }).join('');
+
+  // Attachments
+  var attHtml = (t.attachments || []).map(function(a) {
+    if (a.type && a.type.indexOf('image') === 0)
+      return '<div class="td-photo" style="background-image:url(' + a.data + ');background-size:cover;background-position:center" onclick="window.open(\'\').document.write(\'<img src=&quot;' + a.data + '&quot; style=&quot;max-width:100%&quot;>\')"></div>';
+    return '<a class="td-photo td-photo-file" href="' + a.data + '" download="' + _esc(a.name) + '">\ud83d\udcc4</a>';
+  }).join('');
+
+  // Activity / comments combined (comments shown as bubbles)
+  var cmtHtml = (t.comments || []).map(function(c) {
+    return '<div class="td-comment"><div class="td-avatar sm">' + initials(c.author) + '</div>' +
+      '<div class="td-bubble"><div class="td-who">' + _esc(c.author) + ' <span class="td-when">' + _fmtCmtTime(c.at) + '</span></div>' +
+      '<div class="td-txt">' + _esc(c.text) + '</div></div></div>';
+  }).join('');
+  var actHtml = (t.activity || []).slice().reverse().map(function(a) {
+    return '<div class="td-act"><span class="td-act-who">' + _esc(a.who) + '</span> ' + _esc(a.what) + ' <span class="td-when">' + _fmtCmtTime(a.at) + '</span></div>';
+  }).join('');
+
+  // Dates
+  var dueStr = '';
+  if (t.startDate && t.dueDate) dueStr = _fmtTaskDate(t.startDate) + ' \u2192 ' + _fmtTaskDate(t.dueDate);
+  else if (t.dueDate) dueStr = _fmtTaskDate(t.dueDate);
+  else if (t.startDate) dueStr = 'Starts ' + _fmtTaskDate(t.startDate);
+  var overdue = t.dueDate && !done && new Date(t.dueDate) < new Date(new Date().toDateString());
+
+  modal.innerHTML =
+    '<div class="td-page">' +
+      '<div class="td-topbar">' +
+        '<button class="td-icon-btn" onclick="closeTaskDetail()">\u2190</button>' +
+        '<div class="td-spacer"></div>' +
+        '<button class="td-complete' + (done ? ' done' : '') + '" onclick="toggleTaskDone(\'' + id + '\');setTimeout(function(){openTaskDetail(\'' + id + '\')},150)">' +
+          '<span>' + (done ? '\u2713' : '\u25cb') + '</span><span>' + (done ? 'Completed' : 'Mark complete') + '</span></button>' +
+        '<button class="td-icon-btn" onclick="openTaskForm(\'' + id + '\')">\u270e</button>' +
+      '</div>' +
+
+      '<div class="td-scroll">' +
+        '<div class="td-header">' +
+          (t.isMilestone ? '<span class="td-privacy">\u2691 Milestone</span>' : '') +
+          '<h1 class="td-title' + (done ? ' done' : '') + '">' + _esc(t.title || 'Task') + '</h1>' +
+          '<span class="td-status-pill' + (done ? ' done' : '') + '" style="' + (done ? '' : 'background:' + pm.color + '22;color:' + pm.color) + '">\u25cf ' + (done ? 'Completed' : (pm.label + ' priority')) + '</span>' +
+        '</div>' +
+
+        '<div class="td-meta">' +
+          '<div class="td-meta-card">' +
+            '<div class="td-avatar">' + (t.assigneeName ? initials(t.assigneeName) : '?') + '</div>' +
+            '<div><div class="td-meta-label">Assigned to</div><div class="td-meta-value">' + (t.assigneeName ? _esc(t.assigneeName) : 'Unassigned') + '</div></div>' +
+          '</div>' +
+          '<div class="td-meta-card">' +
+            '<div class="td-cal">\ud83d\udcc5</div>' +
+            '<div><div class="td-meta-label">Due date</div><div class="td-meta-value' + (overdue ? ' due' : '') + '">' + (dueStr || 'None') + '</div></div>' +
+          '</div>' +
+        '</div>' +
+
+        (t.projectName ? ('<div class="td-section"><div class="td-sec-head"><span class="td-sec-title">Project</span></div>' +
+          '<span class="td-proj-tag"><span class="td-tag-dot" style="background:var(--gold)"></span>' + _esc(t.projectName) + '</span></div>') : '') +
+
+        (tagHtml ? ('<div class="td-section"><div class="td-sec-head"><span class="td-sec-title">Tags</span></div><div class="td-tag-row">' + tagHtml + '</div></div>') : '') +
+
+        '<div class="td-section"><div class="td-sec-head"><span class="td-sec-title">Description</span></div>' +
+          (t.description ? '<div class="td-card">' + _esc(t.description) + '</div>' : '<div class="td-card muted" onclick="openTaskForm(\'' + id + '\')">Add a description</div>') + '</div>' +
+
+        '<div class="td-section"><div class="td-sec-head"><span class="td-sec-title">Subtasks</span>' +
+          (subTotal ? '<span class="td-sec-count">' + subDone + ' of ' + subTotal + '</span>' : '') + '</div>' +
+          subHtml +
+          '<div class="td-add-row"><input id="newSubInput" class="td-add-input" placeholder="\uff0b Add a subtask" onkeydown="if(event.key===\'Enter\')addSubtask(\'' + id + '\')"></div>' +
+        '</div>' +
+
+        (attHtml ? ('<div class="td-section"><div class="td-sec-head"><span class="td-sec-title">Attachments</span><span class="td-sec-count">' + (t.attachments||[]).length + '</span></div><div class="td-photos">' + attHtml + '</div></div>') : '') +
+
+        '<div class="td-section"><div class="td-sec-head"><span class="td-sec-title">Activity</span></div>' +
+          (cmtHtml || '<div class="td-card muted">No comments yet.</div>') +
+          (actHtml ? '<div class="td-act-list">' + actHtml + '</div>' : '') +
+        '</div>' +
+      '</div>' +
+
+      '<div class="td-composer">' +
+        '<div class="td-composer-input">' +
+          '<input id="newCmtInput" placeholder="Add a comment\u2026" onkeydown="if(event.key===\'Enter\')addComment(\'' + id + '\')">' +
+          '<button class="td-send" onclick="addComment(\'' + id + '\')">\u2191</button>' +
+        '</div>' +
+      '</div>' +
     '</div>';
-  });
-
-  // Attachments gallery
-  var attHtml = '';
-  (t.attachments || []).forEach(function(a, i) {
-    if (a.type && a.type.indexOf('image') === 0) {
-      attHtml += '<div class="task-att-item"><img src="' + a.data + '" class="task-att-img" onclick="window.open(\'\').document.write(\'<img src=&quot;' + a.data + '&quot; style=&quot;max-width:100%&quot;>\')"><span class="task-att-name">' + _esc(a.name) + '</span></div>';
-    } else {
-      attHtml += '<div class="task-att-item"><a href="' + a.data + '" download="' + _esc(a.name) + '" class="task-att-file">\ud83d\udcce ' + _esc(a.name) + '</a></div>';
-    }
-  });
-
-  // Activity log
-  var actHtml = '';
-  (t.activity || []).slice().reverse().forEach(function(a) {
-    actHtml += '<div class="task-act-row"><span class="task-act-who">' + _esc(a.who) + '</span> ' + _esc(a.what) + ' <span class="task-act-time">' + _fmtCmtTime(a.at) + '</span></div>';
-  });
-
-  // Date range display
-  var dateStr = '';
-  if (t.startDate && t.dueDate) dateStr = _fmtTaskDate(t.startDate) + ' \u2192 ' + _fmtTaskDate(t.dueDate);
-  else if (t.dueDate) dateStr = _fmtTaskDate(t.dueDate);
-  else if (t.startDate) dateStr = 'Starts ' + _fmtTaskDate(t.startDate);
-
-  document.getElementById('taskDetailTitle').textContent = t.title || 'Task';
-  body.innerHTML =
-    '<div class="task-detail-meta">' +
-      (t.isMilestone ? '<span class="task-badge" style="background:#7A5BA8;color:#fff">\u2691 Milestone</span>' : '') +
-      '<span class="task-badge" style="background:' + pm.color + ';color:' + (pm.text||'#fff') + '">' + pm.label + '</span>' +
-      '<span class="task-badge ghost">' + _taskStatusLabel(t.status) + '</span>' +
-      (t.assigneeName ? '<span class="task-badge ghost">\ud83d\udc64 ' + _esc(t.assigneeName) + '</span>' : '') +
-      (dateStr ? '<span class="task-badge ghost">\ud83d\udcc5 ' + dateStr + '</span>' : '') +
-      (t.projectName ? '<span class="task-badge ghost">\ud83c\udfd7 ' + _esc(t.projectName) + '</span>' : '') +
-    '</div>' +
-    (t.description ? '<div class="task-detail-desc">' + _esc(t.description) + '</div>' : '') +
-    '<button class="tf-btn-ghost" style="margin:8px 0" onclick="openTaskForm(\'' + id + '\')">\u270f\ufe0f Edit details</button>' +
-    (attHtml ? ('<div class="task-detail-section-title">Attachments</div><div class="task-att-grid">' + attHtml + '</div>') : '') +
-    '<div class="task-detail-section-title">Subtasks</div>' +
-    '<div id="taskSubList">' + (subHtml || '<div class="task-muted">No subtasks yet.</div>') + '</div>' +
-    '<div class="task-sub-add"><input id="newSubInput" class="tf-input" type="text" placeholder="Add a subtask..." onkeydown="if(event.key===\'Enter\')addSubtask(\'' + id + '\')"><button class="tf-btn-primary sm" onclick="addSubtask(\'' + id + '\')">Add</button></div>' +
-    '<div class="task-detail-section-title">Comments</div>' +
-    '<div id="taskCmtList">' + (cmtHtml || '<div class="task-muted">No comments yet.</div>') + '</div>' +
-    '<div class="task-sub-add"><input id="newCmtInput" class="tf-input" type="text" placeholder="Write a comment..." onkeydown="if(event.key===\'Enter\')addComment(\'' + id + '\')"><button class="tf-btn-primary sm" onclick="addComment(\'' + id + '\')">Post</button></div>' +
-    (actHtml ? ('<div class="task-detail-section-title">Activity</div><div class="task-act-list">' + actHtml + '</div>') : '');
-  modal.style.display = 'flex';
+  modal.style.display = 'block';
 }
 function closeTaskDetail() {
   var m = document.getElementById('taskDetailModal'); if (m) m.style.display = 'none';
+  if (typeof renderTasks === 'function') renderTasks();
 }
 
 async function addSubtask(id) {
@@ -4747,7 +4898,8 @@ var SCHED_STATUSES = [
   { id: 'delayed',     label: 'Delayed',     color: '#B03A2E' }
 ];
 var _schedView = 'list';        // list | gantt | calendar
-var _schedHouseKey = null;      // currently selected house schedule key
+var _schedHouseKey = null;
+var _schedBaseHouseKey = null;      // currently selected house schedule key
 var _schedCalMonth = null;
 
 function _schedStatusMeta(id) {
@@ -4760,34 +4912,121 @@ function _schedKey(projId, address, unit) {
 }
 
 /* -- Build the house/unit picker from projects -- */
+
+/* ── ALL-PROJECTS MASTER CALENDAR ── */
+var _schedMasterMonth = null;
+var PROJECT_COLORS = ['#3B6FB0','#2D7A4F','#D9701F','#7A5BA8','#B03A2E','#0D7A8A','#B8901F','#A8497A'];
+
+async function renderMasterCalendar() {
+  var host = document.getElementById('schedContent');
+  if (!host) return;
+  if (!_schedMasterMonth) _schedMasterMonth = new Date();
+
+  // Load all schedules + map project -> color
+  var projKeys = await DB.list('project:');
+  var projs = (await Promise.all(projKeys.map(function(k){return DB.get(k);}))).filter(Boolean).filter(canSee);
+  var projColor = {};
+  projs.forEach(function(p, i) { projColor[p.id] = PROJECT_COLORS[i % PROJECT_COLORS.length]; });
+
+  var schedKeys = await DB.list('schedule:');
+  var schedules = (await Promise.all(schedKeys.map(function(k){return DB.get(k);}))).filter(Boolean);
+
+  // Build list of dated phase entries with project context
+  // schedule key encodes projId|address(|unit); we stored phases only, so map via _schedCache is not enough.
+  // We'll re-derive project + address by scanning projects for matching keys.
+  var entries = [];
+  schedules.forEach(function(sch) {
+    // find which project/house this schedule belongs to
+    var owner = null;
+    projs.forEach(function(p) {
+      (p.houses || []).forEach(function(h) {
+        if (_schedKey(p.id, h.address) === sch.key) owner = { proj: p, addr: h.address, unit: '' };
+        (h.units || []).forEach(function(u) {
+          if (_schedKey(p.id, h.address, u) === sch.key) owner = { proj: p, addr: h.address, unit: u };
+        });
+      });
+    });
+    if (!owner) return;
+    (sch.phases || []).forEach(function(ph) {
+      if (!ph.start && !ph.end) return;
+      entries.push({
+        name: ph.name,
+        start: ph.start || ph.end,
+        end: ph.end || ph.start,
+        status: ph.status,
+        color: projColor[owner.proj.id] || '#3B6FB0',
+        projName: owner.proj.name,
+        addr: owner.addr + (owner.unit ? (' Unit ' + owner.unit) : '')
+      });
+    });
+  });
+
+  var year = _schedMasterMonth.getFullYear(), month = _schedMasterMonth.getMonth();
+  var monthName = _schedMasterMonth.toLocaleString('default', { month: 'long', year: 'numeric' });
+  var startDay = new Date(year, month, 1).getDay();
+  var daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  function dayEntries(iso) {
+    return entries.filter(function(e) { return iso >= e.start && iso <= e.end; });
+  }
+
+  // Legend
+  var legend = '<div class="sched-legend">' + projs.map(function(p) {
+    return '<span class="sched-legend-item"><span class="sched-legend-dot" style="background:' + projColor[p.id] + '"></span>' + _esc(p.name) + '</span>';
+  }).join('') + '</div>';
+
+  var html = legend +
+    '<div class="task-cal-head"><button class="task-cal-nav" onclick="_schedMasterShift(-1)">\u2039</button><span class="task-cal-title">' + monthName + '</span><button class="task-cal-nav" onclick="_schedMasterShift(1)">\u203a</button></div>';
+  html += '<div class="task-cal-grid">';
+  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(function(d){ html += '<div class="task-cal-dow">' + d + '</div>'; });
+  for (var i = 0; i < startDay; i++) html += '<div class="task-cal-cell task-cal-empty"></div>';
+  for (var day = 1; day <= daysInMonth; day++) {
+    var iso = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+    var de = dayEntries(iso);
+    var isToday = iso === new Date().toISOString().slice(0, 10);
+    html += '<div class="task-cal-cell' + (isToday ? ' task-cal-today' : '') + '"><div class="task-cal-daynum">' + day + '</div>';
+    de.slice(0, 3).forEach(function(e) {
+      html += '<div class="task-cal-pill" style="border-left:3px solid ' + e.color + '" title="' + _esc(e.projName + ' - ' + e.addr + ': ' + e.name) + '">' + _esc(e.name) + '</div>';
+    });
+    if (de.length > 3) html += '<div class="task-cal-more">+' + (de.length - 3) + '</div>';
+    html += '</div>';
+  }
+  html += '</div>';
+  if (entries.length === 0) html += '<div class="task-muted" style="padding:16px 20px">No scheduled phases yet. Add dates to any house schedule to see them here.</div>';
+  host.innerHTML = html;
+}
+function _schedMasterShift(dir) {
+  if (!_schedMasterMonth) _schedMasterMonth = new Date();
+  _schedMasterMonth = new Date(_schedMasterMonth.getFullYear(), _schedMasterMonth.getMonth() + dir, 1);
+  renderMasterCalendar();
+}
+
 async function renderScheduling() {
   var sel = document.getElementById('sched-house-sel');
   if (!sel) return;
+  renderGcalSettings();
   var keys = await DB.list('project:');
   var projs = (await Promise.all(keys.map(function(k) { return DB.get(k); }))).filter(Boolean).filter(canSee);
   window._schedProjCache = projs;
 
+  // HOUSES ONLY in the dropdown
   var opts = '<option value="">- Select a house -</option>';
   projs.forEach(function(p) {
     (p.houses || []).forEach(function(h) {
       var hKey = _schedKey(p.id, h.address);
       opts += '<option value="' + hKey + '" data-proj="' + p.id + '" data-addr="' + _esc(h.address) + '">' +
         _esc(p.name) + ' - ' + _esc(h.address) + '</option>';
-      // Optional separate unit schedules
-      (h.units || []).forEach(function(u) {
-        var uKey = _schedKey(p.id, h.address, u);
-        opts += '<option value="' + uKey + '" data-proj="' + p.id + '" data-addr="' + _esc(h.address) + '" data-unit="' + _esc(u) + '">' +
-          '&nbsp;&nbsp;&#8627; ' + _esc(h.address) + ' - Unit ' + _esc(u) + '</option>';
-      });
     });
   });
   sel.innerHTML = opts;
 
   if (_schedHouseKey) {
-    sel.value = _schedHouseKey;
+    // If a unit key is selected, the dropdown won't have it; set to base house
+    sel.value = _schedBaseHouseKey || _schedHouseKey;
     schedLoadHouse();
   } else {
     document.getElementById('schedContent').innerHTML = _schedEmpty();
+    document.getElementById('sched-unit-bar').innerHTML = '';
   }
 }
 
@@ -4799,8 +5038,53 @@ function _schedEmpty() {
 
 async function schedLoadHouse() {
   var sel = document.getElementById('sched-house-sel');
-  _schedHouseKey = sel.value;
-  if (!_schedHouseKey) { document.getElementById('schedContent').innerHTML = _schedEmpty(); return; }
+  _schedBaseHouseKey = sel.value;        // the house-level key
+  _schedHouseKey = sel.value;            // active key (house or unit)
+  if (!_schedHouseKey) {
+    document.getElementById('schedContent').innerHTML = _schedEmpty();
+    document.getElementById('sched-unit-bar').innerHTML = '';
+    return;
+  }
+  _renderUnitBar();
+  renderSchedView();
+}
+
+function _selectedHouseMeta() {
+  var sel = document.getElementById('sched-house-sel');
+  var opt = sel.options[sel.selectedIndex];
+  if (!opt || !opt.value) return null;
+  return { projId: opt.getAttribute('data-proj'), address: opt.getAttribute('data-addr') };
+}
+
+function _renderUnitBar() {
+  var bar = document.getElementById('sched-unit-bar');
+  if (!bar) return;
+  var meta = _selectedHouseMeta();
+  if (!meta) { bar.innerHTML = ''; return; }
+  // find units for this house
+  var units = [];
+  (window._schedProjCache || []).forEach(function(p) {
+    if (p.id !== meta.projId) return;
+    (p.houses || []).forEach(function(h) {
+      if (h.address === meta.address) units = h.units || [];
+    });
+  });
+
+  var baseKey = _schedKey(meta.projId, meta.address);
+  var chips = '<button class="sched-unit-chip' + (_schedHouseKey === baseKey ? ' on' : '') + '" onclick="_schedPickUnit(\'\')">Whole house</button>';
+  units.forEach(function(u) {
+    var uKey = _schedKey(meta.projId, meta.address, u);
+    chips += '<button class="sched-unit-chip' + (_schedHouseKey === uKey ? ' on' : '') + '" onclick="_schedPickUnit(\'' + _esc(u) + '\')">Unit ' + _esc(u) + '</button>';
+  });
+  // only show the bar if there are units to choose from
+  bar.innerHTML = units.length ? ('<div class="sched-unit-label">Tracking:</div>' + chips) : '';
+}
+
+function _schedPickUnit(unit) {
+  var meta = _selectedHouseMeta();
+  if (!meta) return;
+  _schedHouseKey = unit ? _schedKey(meta.projId, meta.address, unit) : _schedKey(meta.projId, meta.address);
+  _renderUnitBar();
   renderSchedView();
 }
 
@@ -4954,7 +5238,15 @@ function _schedCalShift(dir) {
 function setSchedView(v) {
   _schedView = v;
   document.querySelectorAll('.sched-view-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.view === v); });
-  renderSchedView();
+  var housePicker = document.getElementById('sched-house-row');
+  if (v === 'all') {
+    if (housePicker) housePicker.style.display = 'none';
+    renderMasterCalendar();
+  } else {
+    if (housePicker) housePicker.style.display = '';
+    if (!_schedHouseKey) { document.getElementById('schedContent').innerHTML = _schedEmpty(); return; }
+    renderSchedView();
+  }
 }
 
 /* -- PHASE EDITOR -- */
@@ -4999,6 +5291,15 @@ async function savePhase() {
   p.status = document.getElementById('ph-status').value;
   p.notes = document.getElementById('ph-notes').value.trim();
   await _saveSchedule(sch);
+  if (p.start || p.end) {
+    gcalAddEvent({
+      title: p.name + ' (construction)',
+      description: 'Construction phase' + (p.notes ? (' - ' + p.notes) : ''),
+      start: p.start || p.end,
+      end: p.end || p.start,
+      allDay: true
+    });
+  }
   closePhaseEditor();
   renderSchedView();
 }
@@ -5025,6 +5326,134 @@ async function resetSchedulePhases() {
   });
   await _saveSchedule(sch);
   renderSchedView();
+}
+
+
+
+/* =====================================================================
+   GOOGLE CALENDAR SYNC (Option C scaffolding)
+   - Per-user connection: events go ONLY to the connected user's calendar
+   - Until Google Cloud OAuth client ID is set, shows "setup required"
+   - When configured: connect once, then tasks/phases auto-create events
+   ===================================================================== */
+
+// PASTE YOUR GOOGLE OAUTH CLIENT ID HERE WHEN READY (from Google Cloud Console)
+var GOOGLE_CLIENT_ID = '';   // e.g. '1234567890-abc.apps.googleusercontent.com'
+var GOOGLE_API_KEY = '';     // optional
+var _gcalToken = null;       // in-memory access token for this session
+var _gcalInited = false;
+
+function _gcalConfigured() { return !!GOOGLE_CLIENT_ID; }
+
+// Per-user connection record (so only the connected user's calendar receives events)
+function _gcalUserKey() {
+  return 'gcal_conn:' + (currentUser ? currentUser.id : 'anon');
+}
+async function _gcalConnection() {
+  try { return await DB.get(_gcalUserKey()); } catch (e) { return null; }
+}
+async function isGcalConnected() {
+  var c = await _gcalConnection();
+  return !!(c && c.connected);
+}
+
+// Load Google Identity Services + GAPI lazily
+function _loadScript(src) {
+  return new Promise(function(resolve, reject) {
+    if (document.querySelector('script[src="' + src + '"]')) return resolve();
+    var s = document.createElement('script');
+    s.src = src; s.async = true; s.defer = true;
+    s.onload = resolve; s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+async function connectGoogleCalendar() {
+  if (!_gcalConfigured()) {
+    alert('Google Calendar setup required.\n\nThe app owner needs to add a Google OAuth Client ID first (one-time setup in Google Cloud Console). Once that is done, you can connect your calendar here.');
+    return;
+  }
+  try {
+    await _loadScript('https://accounts.google.com/gsi/client');
+    // Request a calendar access token for THIS user only
+    var tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_CLIENT_ID,
+      scope: 'https://www.googleapis.com/auth/calendar.events',
+      callback: async function(resp) {
+        if (resp && resp.access_token) {
+          _gcalToken = resp.access_token;
+          await DB.set(_gcalUserKey(), { connected: true, connectedAt: Date.now(), userId: currentUser ? currentUser.id : null });
+          alert('Google Calendar connected! New tasks and schedule phases you create will be added to your calendar.');
+          if (typeof renderSettings === 'function') renderSettings();
+        }
+      }
+    });
+    tokenClient.requestAccessToken();
+  } catch (e) {
+    alert('Could not connect to Google Calendar. Please try again.');
+  }
+}
+
+async function disconnectGoogleCalendar() {
+  _gcalToken = null;
+  await DB.set(_gcalUserKey(), { connected: false });
+  if (typeof renderSettings === 'function') renderSettings();
+}
+
+// Create a calendar event in the connected user's calendar.
+// Only fires if THIS user is connected (so it never touches anyone else's calendar).
+async function gcalAddEvent(opts) {
+  // opts: { title, description, start (ISO date), end (ISO date), allDay }
+  if (!_gcalConfigured()) return false;
+  if (!(await isGcalConnected())) return false;
+  if (!_gcalToken) return false; // token only lives for the session; user reconnects if expired
+
+  var ev = {
+    summary: opts.title,
+    description: opts.description || '',
+  };
+  if (opts.allDay !== false && opts.start) {
+    ev.start = { date: opts.start };
+    // Google all-day end is exclusive; add a day
+    var endD = new Date((opts.end || opts.start) + 'T00:00:00');
+    endD.setDate(endD.getDate() + 1);
+    ev.end = { date: endD.toISOString().slice(0, 10) };
+  }
+  try {
+    var res = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + _gcalToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify(ev)
+    });
+    return res.ok;
+  } catch (e) { return false; }
+}
+
+// Settings panel content (Connect / Disconnect)
+async function renderGcalSettings() {
+  var host = document.getElementById('gcalSettingsBox');
+  if (!host) return;
+  var connected = await isGcalConnected();
+  if (!_gcalConfigured()) {
+    host.innerHTML = '<div class="gcal-status gcal-pending">' +
+      '<div class="gcal-title">&#128197; Google Calendar</div>' +
+      '<div class="gcal-desc">Setup required. Add a Google OAuth Client ID to enable calendar sync. (One-time setup - ask your developer.)</div>' +
+      '</div>';
+    return;
+  }
+  if (connected) {
+    host.innerHTML = '<div class="gcal-status gcal-on">' +
+      '<div class="gcal-title">&#9989; Google Calendar connected</div>' +
+      '<div class="gcal-desc">New tasks and schedule phases are added to your calendar.</div>' +
+      '<button class="tf-btn-ghost" onclick="disconnectGoogleCalendar()">Disconnect</button>' +
+      '</div>';
+  } else {
+    host.innerHTML = '<div class="gcal-status">' +
+      '<div class="gcal-title">&#128197; Google Calendar</div>' +
+      '<div class="gcal-desc">Connect your Google account to auto-add tasks and schedule phases to your calendar.</div>' +
+      '<button class="gcal-connect-btn" onclick="connectGoogleCalendar()">Connect Google Calendar</button>' +
+      '</div>';
+  }
 }
 
 
@@ -10303,12 +10732,7 @@ if (document.readyState === 'loading') {
   </div>
 </div>
 <!-- TASK DETAIL MODAL -->
-<div class="task-modal-overlay" id="taskDetailModal" style="display:none;">
-  <div class="task-modal">
-    <div class="task-modal-head"><span id="taskDetailTitle">Task</span><button class="task-modal-x" onclick="closeTaskDetail()">&#10005;</button></div>
-    <div class="task-modal-body" id="taskDetailBody"></div>
-  </div>
-</div>
+<div id="taskDetailModal" style="display:none;"></div>
 
 
 <!-- TAG MANAGER MODAL -->
