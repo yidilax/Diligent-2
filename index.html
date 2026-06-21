@@ -2417,6 +2417,49 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
 .gcal-desc { font-size:12px; color:var(--muted); margin:5px 0 10px; line-height:1.4; }
 .gcal-connect-btn { background:#fff; color:#3B6FB0; border:1.5px solid #3B6FB0; border-radius:8px; padding:9px 16px; font-size:13px; font-weight:700; cursor:pointer; font-family:'Inter',sans-serif; }
 
+
+/* === NOTIFICATIONS / INBOX / MENTIONS === */
+.notif-bell { position:relative; background:transparent; border:0; color:#fff; font-size:20px; cursor:pointer; width:40px; height:40px; border-radius:10px; display:grid; place-items:center; margin-left:auto; margin-right:4px; }
+.notif-bell:active { background:rgba(255,255,255,.15); }
+.notif-badge { position:absolute; top:4px; right:4px; min-width:18px; height:18px; padding:0 5px; background:#E5484D; color:#fff; font-size:10px; font-weight:700; border-radius:9px; display:flex; align-items:center; justify-content:center; border:2px solid var(--navy); }
+
+.inbox-overlay { position:fixed; inset:0; z-index:500; background:rgba(13,31,60,.4); display:flex; justify-content:flex-end; }
+.inbox-sheet { width:100%; max-width:420px; height:100%; background:var(--cream); display:flex; flex-direction:column; box-shadow:-4px 0 20px rgba(0,0,0,.2); animation:inboxIn .22s ease; }
+@keyframes inboxIn { from { transform:translateX(40px); opacity:.6 } to { transform:translateX(0); opacity:1 } }
+.inbox-head { display:flex; align-items:center; justify-content:space-between; padding:16px 18px; background:var(--navy); color:#fff; }
+.inbox-title { font-size:17px; font-weight:700; }
+.inbox-clear { background:transparent; border:0; color:#C9A24B; font-size:13px; font-weight:600; cursor:pointer; margin-right:8px; }
+.inbox-x { background:transparent; border:0; color:#fff; font-size:16px; cursor:pointer; }
+.inbox-body { flex:1; overflow-y:auto; padding:8px 0; }
+.inbox-item { display:flex; align-items:flex-start; gap:12px; padding:14px 18px; border-bottom:1px solid var(--border); cursor:pointer; position:relative; }
+.inbox-item.unread { background:#FBF6EA; }
+.inbox-item:active { background:#F0EDE6; }
+.inbox-icon { font-size:20px; flex-shrink:0; }
+.inbox-main { flex:1; min-width:0; }
+.inbox-text { font-size:14px; color:var(--navy); line-height:1.4; }
+.inbox-time { font-size:11px; color:var(--muted); margin-top:3px; }
+.inbox-dot { width:9px; height:9px; border-radius:50%; background:#E5484D; flex-shrink:0; margin-top:5px; }
+.inbox-empty { text-align:center; padding:60px 24px; }
+.inbox-empty-icon { font-size:44px; margin-bottom:12px; opacity:.5; }
+.inbox-empty-title { font-size:16px; font-weight:700; color:var(--navy); }
+.inbox-empty-desc { font-size:13px; color:var(--muted); margin-top:4px; }
+
+.mention-box { position:fixed; z-index:600; background:#fff; border:1px solid var(--border); border-radius:10px; box-shadow:0 6px 20px rgba(0,0,0,.18); overflow:hidden; max-height:270px; overflow-y:auto; }
+.mention-opt { display:flex; align-items:center; gap:9px; padding:10px 12px; font-size:14px; color:var(--navy); cursor:pointer; }
+.mention-opt:active, .mention-opt:hover { background:#F0EDE6; }
+.mention-av { width:26px; height:26px; border-radius:50%; background:var(--navy); color:var(--gold); display:grid; place-items:center; font-size:12px; font-weight:700; flex-shrink:0; }
+
+
+.task-scope-row { display:flex; gap:8px; padding:0 0 12px; }
+.task-scope-btn { flex:1; background:#fff; border:1.5px solid var(--border); border-radius:10px; padding:10px; font-size:14px; font-weight:700; color:var(--muted); cursor:pointer; font-family:'Inter',sans-serif; }
+.task-scope-btn.active { background:var(--navy); color:#fff; border-color:var(--navy); }
+.tfm-foll-list { display:flex; flex-direction:column; gap:6px; max-height:160px; overflow-y:auto; border:1px solid var(--border); border-radius:10px; padding:8px; margin-bottom:6px; }
+.tfm-foll-opt { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--navy); cursor:pointer; padding:4px; border-radius:6px; }
+.tfm-foll-opt.on { background:#EEF4FB; font-weight:600; }
+.tfm-foll-opt input { width:16px; height:16px; accent-color:var(--navy); }
+.viewas-banner { display:flex; align-items:center; justify-content:space-between; gap:10px; background:#FBF6EA; border:1px solid #E8DCC0; border-radius:10px; padding:10px 14px; margin-bottom:12px; font-size:13px; color:var(--navy); }
+.viewas-banner button { background:var(--navy); color:#fff; border:0; border-radius:7px; padding:6px 12px; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -3022,6 +3065,10 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
       <span></span><span></span><span></span>
     </button>
     <div class="office-logo">Diligent Developers</div>
+    <button class="notif-bell" onclick="openInbox()" aria-label="Notifications">
+      &#128276;
+      <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+    </button>
     <div class="office-user">
       <span class="office-user-name" id="topbarUserName"></span>
       <span class="office-role-badge" id="topbarRoleBadge"></span>
@@ -3314,6 +3361,14 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
       <button class="tab-add-btn" onclick="openTaskForm()">+ New Task</button>
     </div>
 
+    <div id="viewAsBanner" class="viewas-banner" style="display:none;">
+      <span>Viewing <strong id="viewAsName"></strong>'s tasks</span>
+      <button onclick="clearViewAs()">Back to mine</button>
+    </div>
+    <div class="task-scope-row">
+      <button class="task-scope-btn active" data-scope="mine" onclick="setTaskScope('mine')">My Tasks</button>
+      <button class="task-scope-btn" data-scope="following" onclick="setTaskScope('following')">Following</button>
+    </div>
     <div class="task-toolbar">
       <div class="task-views">
         <button class="task-view-btn active" data-view="list" onclick="setTaskView('list')">☰ List</button>
@@ -4041,7 +4096,8 @@ var TASK_TAG_COLORS = ['#3B6FB0','#B8901F','#D9701F','#B03A2E','#2D7A4F','#7A5BA
 var DEFAULT_TASK_TAGS = ['Plumbing','Electrical','Framing','Drywall','Paint','Inspection','Punch List','Materials'];
 var _taskSort = 'none';     // none | due | priority | title
 var _taskGroup = 'status';  // status | assignee | project | tag | priority
-var _taskView = 'list';        // list | board | calendar
+var _taskView = 'list';
+var _taskScope = 'mine';        // list | board | calendar
 var _taskFilter = { mine: false, priority: '', project: '', search: '' };
 var _taskCalMonth = null;      // Date for calendar view
 var _editingTaskId = null;
@@ -4056,17 +4112,31 @@ function _taskStatusLabel(id) {
 }
 function _taskUid() { return 'task_' + Date.now() + '_' + Math.floor(Math.random() * 9999); }
 
+
+var _viewAsUserId = null;
+function _effectiveUserId() { return _viewAsUserId || (currentUser ? currentUser.id : null); }
+function _isTaskOwner(t, uid) {
+  if (!t || !uid) return false;
+  if (t.ownerId === uid) return true;
+  if (t.assigneeId === uid) return true;
+  if (t.assignee2Id === uid) return true;
+  return false;
+}
+function _isTaskFollower(t, uid) { return !!(t && uid && t.followers && t.followers.indexOf(uid) > -1); }
+function _canSeeTask(t, uid) { return _isTaskOwner(t, uid) || _isTaskFollower(t, uid); }
+
 async function _loadAllTasks() {
   var keys = await DB.list('task:');
   var all = (await Promise.all(keys.map(function(k) { return DB.get(k); }))).filter(Boolean);
-  // Visibility: admins see all; others see public or own
-  all = all.filter(function(t) {
-    if (!currentUser) return false;
-    if (currentUser.role === 'admin') return true;
-    if (!t.visibility || t.visibility === 'public') return true;
-    return t.ownerId === currentUser.id;
-  });
+  var uid = _effectiveUserId();
+  all = all.filter(function(t) { return _isTaskOwner(t, uid); });
   return all;
+}
+async function _loadFollowedTasks() {
+  var keys = await DB.list('task:');
+  var all = (await Promise.all(keys.map(function(k) { return DB.get(k); }))).filter(Boolean);
+  var uid = _effectiveUserId();
+  return all.filter(function(t) { return _isTaskFollower(t, uid) && !_isTaskOwner(t, uid); });
 }
 
 async function _loadEmployeesForAssign() {
@@ -4271,6 +4341,14 @@ async function postStatusUpdate() {
   var history = await _loadStatusUpdates();
   history.push({ state: document.getElementById('su-state').value, text: text, author: currentUser ? (currentUser.name || 'Someone') : 'Someone', at: Date.now() });
   await DB.set('task_status_updates', history);
+  // Notify all other active employees about the status update
+  try {
+    var emps = await _loadEmployeesForAssign();
+    var stLabel = document.getElementById('su-state').value.replace('_',' ');
+    emps.forEach(function(e) {
+      createNotification(e.id, { type: 'status', text: 'posted a project status: ' + stLabel });
+    });
+  } catch (e) {}
   closeStatusUpdate();
   renderTasks();
 }
@@ -4278,8 +4356,9 @@ async function postStatusUpdate() {
 async function renderTasks() {
   var host = document.getElementById('tasksContent');
   if (!host) return;
-  var tasks = await _loadAllTasks();
+  var tasks = (_taskScope === 'following') ? await _loadFollowedTasks() : await _loadAllTasks();
   window._taskTagsCache = await _loadTaskTags();
+  window._allEmpCache = await _loadEmployeesForAssign();
 
   var filtered = tasks.filter(function(t) {
     if (_taskFilter.mine && t.assigneeId !== (currentUser && currentUser.id)) return false;
@@ -4474,6 +4553,11 @@ function _taskCalShift(dir) {
 }
 
 /* ── View + filter controls ── */
+function setTaskScope(s) {
+  _taskScope = s;
+  document.querySelectorAll('.task-scope-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.scope === s); });
+  renderTasks();
+}
 function setTaskView(v) {
   _taskView = v;
   document.querySelectorAll('.task-view-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.view === v); });
@@ -4534,6 +4618,17 @@ async function openTaskForm(taskId) {
     assigneeOpts += '<option value="' + e.id + '"' + sel + '>' + _esc(e.name || e.email) + '</option>';
   });
 
+  var assignee2Opts = '<option value="">- None -</option>';
+  employees.forEach(function(e) {
+    var sel = t && t.assignee2Id === e.id ? ' selected' : '';
+    assignee2Opts += '<option value="' + e.id + '"' + sel + '>' + _esc(e.name || e.email) + '</option>';
+  });
+  var followerIds = (t && t.followers) ? t.followers : [];
+  var followerBoxes = employees.map(function(e) {
+    var on = followerIds.indexOf(e.id) > -1;
+    return '<label class="tfm-foll-opt' + (on ? ' on' : '') + '"><input type="checkbox" value="' + e.id + '"' + (on ? ' checked' : '') + ' onchange="this.parentNode.classList.toggle(\'on\',this.checked)"> ' + _esc(e.name || e.email) + '</label>';
+  }).join('');
+
   var projOpts = '<option value="">— No project —</option>';
   projects.forEach(function(p) {
     var sel = t && t.projectId === p.id ? ' selected' : '';
@@ -4565,13 +4660,17 @@ async function openTaskForm(taskId) {
       '<div class="tf-col"><label class="tf-label">Due date</label><input id="tfm-due" class="tf-input" type="date" value="' + (t && t.dueDate ? t.dueDate : '') + '"></div>' +
     '</div>' +
     '<div class="tf-row">' +
-      '<div class="tf-col"><label class="tf-label">Assignee</label><select id="tfm-assignee" class="tf-input">' + assigneeOpts + '</select></div>' +
-      '<div class="tf-col"><label class="tf-label">Priority</label><select id="tfm-priority" class="tf-input">' + prioOpts + '</select></div>' +
+      '<div class="tf-col"><label class="tf-label">Assignee 1</label><select id="tfm-assignee" class="tf-input">' + assigneeOpts + '</select></div>' +
+      '<div class="tf-col"><label class="tf-label">Assignee 2</label><select id="tfm-assignee2" class="tf-input">' + assignee2Opts + '</select></div>' +
     '</div>' +
+    '<label class="tf-label">Priority</label>' +
+    '<select id="tfm-priority" class="tf-input">' + prioOpts + '</select>' +
     '<div class="tf-row">' +
       '<div class="tf-col"><label class="tf-label">Status</label><select id="tfm-status" class="tf-input">' + statusOpts + '</select></div>' +
       '<div class="tf-col"><label class="tf-label">Project (optional)</label><select id="tfm-project" class="tf-input">' + projOpts + '</select></div>' +
     '</div>' +
+    '<label class="tf-label">Notify (followers get updates, not assigned)</label>' +
+    '<div class="tfm-foll-list">' + (followerBoxes || '<span class="task-muted">No employees yet.</span>') + '</div>' +
     '<label class="tf-label">Tags</label>' +
     '<div id="tfm-tag-list" class="tfm-tag-list"></div>' +
     '<label class="tf-label">Photos / attachments</label>' +
@@ -4625,6 +4724,11 @@ async function saveTask() {
   task.description = document.getElementById('tfm-desc').value.trim();
   task.assigneeId = assigneeId;
   task.assigneeName = assigneeName;
+  var a2sel = document.getElementById('tfm-assignee2');
+  task.assignee2Id = a2sel ? a2sel.value : '';
+  task.assignee2Name = (a2sel && a2sel.value) ? a2sel.options[a2sel.selectedIndex].text : '';
+  var follBoxes = document.querySelectorAll('.tfm-foll-list input[type=checkbox]:checked');
+  task.followers = Array.prototype.map.call(follBoxes, function(c){ return c.value; });
   task.startDate = document.getElementById('tfm-start').value || '';
   task.dueDate = document.getElementById('tfm-due').value || '';
   task.priority = document.getElementById('tfm-priority').value;
@@ -4637,6 +4741,22 @@ async function saveTask() {
   task._updatedAt = Date.now();
 
   await DB.set('task:' + id, task);
+  if (assigneeId && (!existing || existing.assigneeId !== assigneeId)) {
+    createNotification(assigneeId, { type: 'assign', text: 'assigned you to "' + task.title + '"', taskId: id });
+  }
+  if (task.assignee2Id && (!existing || existing.assignee2Id !== task.assignee2Id)) {
+    createNotification(task.assignee2Id, { type: 'assign', text: 'assigned you to "' + task.title + '"', taskId: id });
+  }
+  var prevFoll = (existing && existing.followers) ? existing.followers : [];
+  (task.followers || []).forEach(function(fid) {
+    if (prevFoll.indexOf(fid) === -1) createNotification(fid, { type: 'info', text: 'added you as a follower on "' + task.title + '"', taskId: id });
+  });
+  if (existing) {
+    var newDue2 = document.getElementById('tfm-due').value || '';
+    if ((existing.dueDate || '') !== newDue2 && newDue2) {
+      _notifyTaskStakeholders(task, { type: 'due', text: 'changed the due date on "' + task.title + '"', taskId: id });
+    }
+  }
   // Auto-sync to the connected user's Google Calendar (only theirs)
   if (!existing && (task.dueDate || task.startDate)) {
     gcalAddEvent({
@@ -4778,7 +4898,7 @@ async function openTaskDetail(id) {
         '<div class="td-meta">' +
           '<div class="td-meta-card">' +
             '<div class="td-avatar">' + (t.assigneeName ? initials(t.assigneeName) : '?') + '</div>' +
-            '<div><div class="td-meta-label">Assigned to</div><div class="td-meta-value">' + (t.assigneeName ? _esc(t.assigneeName) : 'Unassigned') + '</div></div>' +
+            '<div><div class="td-meta-label">Assigned to</div><div class="td-meta-value">' + (t.assigneeName ? _esc(t.assigneeName) : 'Unassigned') + (t.assignee2Name ? (' + ' + _esc(t.assignee2Name)) : '') + '</div></div>' +
           '</div>' +
           '<div class="td-meta-card">' +
             '<div class="td-cal">\ud83d\udcc5</div>' +
@@ -4789,6 +4909,7 @@ async function openTaskDetail(id) {
         (t.projectName ? ('<div class="td-section"><div class="td-sec-head"><span class="td-sec-title">Project</span></div>' +
           '<span class="td-proj-tag"><span class="td-tag-dot" style="background:var(--gold)"></span>' + _esc(t.projectName) + '</span></div>') : '') +
 
+        (t.followers && t.followers.length ? ('<div class="td-section"><div class="td-sec-head"><span class="td-sec-title">Following</span></div><div class="td-tag-row">' + t.followers.map(function(fid){ var emp=(window._allEmpCache||[]).filter(function(e){return e.id===fid;})[0]; return '<span class="td-tag">\ud83d\udc41 ' + _esc(emp ? (emp.name||emp.email) : 'Someone') + '</span>'; }).join('') + '</div></div>') : '') +
         (tagHtml ? ('<div class="td-section"><div class="td-sec-head"><span class="td-sec-title">Tags</span></div><div class="td-tag-row">' + tagHtml + '</div></div>') : '') +
 
         '<div class="td-section"><div class="td-sec-head"><span class="td-sec-title">Description</span></div>' +
@@ -4810,7 +4931,7 @@ async function openTaskDetail(id) {
 
       '<div class="td-composer">' +
         '<div class="td-composer-input">' +
-          '<input id="newCmtInput" placeholder="Add a comment\u2026" onkeydown="if(event.key===\'Enter\')addComment(\'' + id + '\')">' +
+          '<input id="newCmtInput" placeholder="Add a comment\u2026 (type @ to mention)" oninput="_handleMentionInput(event,\'' + id + '\')" onkeydown="if(event.key===\'Enter\')addComment(\'' + id + '\')">' +
           '<button class="td-send" onclick="addComment(\'' + id + '\')">\u2191</button>' +
         '</div>' +
       '</div>' +
@@ -4846,6 +4967,19 @@ async function deleteSubtask(id, idx) {
   await DB.set('task:' + id, t);
   openTaskDetail(id);
 }
+
+function _notifyTaskStakeholders(t, opts) {
+  var seen = {}; var targets = [];
+  if (t.assigneeId) targets.push(t.assigneeId);
+  if (t.assignee2Id) targets.push(t.assignee2Id);
+  (t.followers || []).forEach(function(f) { targets.push(f); });
+  if (t.ownerId) targets.push(t.ownerId);
+  targets.forEach(function(uid) {
+    if (!uid || seen[uid]) return; seen[uid] = 1;
+    createNotification(uid, { type: opts.type, text: opts.text, taskId: opts.taskId });
+  });
+}
+
 async function addComment(id) {
   var inp = document.getElementById('newCmtInput');
   var v = inp.value.trim(); if (!v) return;
@@ -4856,6 +4990,17 @@ async function addComment(id) {
   t.activity.push({ who: currentUser ? (currentUser.name || 'Someone') : 'Someone', what: 'commented', at: Date.now() });
   t._updatedAt = Date.now();
   await DB.set('task:' + id, t);
+
+  _notifyTaskStakeholders(t, { type: 'comment', text: 'commented on "' + (t.title || 'a task') + '"', taskId: id });
+  // Notify anyone @-mentioned in this comment
+  var mentions = _extractMentions(inp, v);
+  var notified = {};
+  mentions.forEach(function(m) {
+    if (notified[m.id]) return; notified[m.id] = 1;
+    createNotification(m.id, { type: 'mention', text: 'mentioned you in "' + (t.title || 'a task') + '"', taskId: id });
+  });
+  inp._mentions = [];
+
   openTaskDetail(id);
 }
 function _fmtCmtTime(ts) {
@@ -5457,7 +5602,173 @@ async function renderGcalSettings() {
 }
 
 
+
+/* =====================================================================
+   NOTIFICATIONS + INBOX
+   - In-app notifications: mentions, assignments, comments, status, due-date
+   - Stored per recipient: notif:<userId>:<id>
+   - Bell with unread badge in dashboard; inbox panel
+   ===================================================================== */
+
+function _notifUid() { return 'n_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7); }
+
+// Create a notification for a recipient (skips notifying yourself)
+async function createNotification(recipientId, opts) {
+  if (!recipientId) return;
+  if (currentUser && recipientId === currentUser.id) return; // don't notify yourself
+  var n = {
+    id: _notifUid(),
+    recipientId: recipientId,
+    type: opts.type || 'info',          // mention | assign | comment | status | due
+    text: opts.text || '',
+    taskId: opts.taskId || null,
+    actor: currentUser ? (currentUser.name || 'Someone') : 'Someone',
+    at: Date.now(),
+    read: false
+  };
+  try { await DB.set('notif:' + recipientId + ':' + n.id, n); } catch (e) {}
+}
+
+async function _loadMyNotifications() {
+  if (!currentUser) return [];
+  try {
+    var keys = await DB.list('notif:' + currentUser.id + ':');
+    var list = (await Promise.all(keys.map(function(k) { return DB.get(k); }))).filter(Boolean);
+    list.sort(function(a, b) { return b.at - a.at; });
+    return list;
+  } catch (e) { return []; }
+}
+
+async function _unreadCount() {
+  var list = await _loadMyNotifications();
+  return list.filter(function(n) { return !n.read; }).length;
+}
+
+async function refreshNotifBadge() {
+  var badge = document.getElementById('notifBadge');
+  if (!badge) return;
+  var c = await _unreadCount();
+  if (c > 0) { badge.textContent = c > 99 ? '99+' : c; badge.style.display = 'flex'; }
+  else { badge.style.display = 'none'; }
+}
+
+async function openInbox() {
+  var panel = document.getElementById('inboxPanel');
+  if (!panel) return;
+  var list = await _loadMyNotifications();
+  var body = document.getElementById('inboxBody');
+
+  var iconFor = { mention: '\ud83d\udcac', assign: '\ud83d\udccb', comment: '\ud83d\udcad', status: '\ud83d\udea6', due: '\ud83d\udcc5', info: '\ud83d\udd14' };
+  if (list.length === 0) {
+    body.innerHTML = '<div class="inbox-empty"><div class="inbox-empty-icon">\ud83d\udd14</div><div class="inbox-empty-title">All caught up</div><div class="inbox-empty-desc">No notifications yet.</div></div>';
+  } else {
+    body.innerHTML = list.map(function(n) {
+      return '<div class="inbox-item' + (n.read ? '' : ' unread') + '"' + (n.taskId ? ' onclick="_inboxOpenTask(\'' + n.taskId + '\')"' : '') + '>' +
+        '<div class="inbox-icon">' + (iconFor[n.type] || '\ud83d\udd14') + '</div>' +
+        '<div class="inbox-main">' +
+          '<div class="inbox-text"><strong>' + _esc(n.actor) + '</strong> ' + _esc(n.text) + '</div>' +
+          '<div class="inbox-time">' + _fmtCmtTime(n.at) + '</div>' +
+        '</div>' +
+        (n.read ? '' : '<span class="inbox-dot"></span>') +
+      '</div>';
+    }).join('');
+  }
+  panel.style.display = 'flex';
+
+  // Mark all read after opening
+  var hadUnread = list.some(function(n) { return !n.read; });
+  if (hadUnread) {
+    for (var i = 0; i < list.length; i++) {
+      if (!list[i].read) { list[i].read = true; await DB.set('notif:' + currentUser.id + ':' + list[i].id, list[i]); }
+    }
+    refreshNotifBadge();
+  }
+}
+function closeInbox() { var p = document.getElementById('inboxPanel'); if (p) p.style.display = 'none'; }
+
+async function _inboxOpenTask(taskId) {
+  closeInbox();
+  if (typeof switchTab === 'function') switchTab('tasks');
+  setTimeout(function() { if (typeof openTaskDetail === 'function') openTaskDetail(taskId); }, 150);
+}
+
+async function clearAllNotifications() {
+  if (!currentUser) return;
+  if (!confirm('Clear all notifications?')) return;
+  try {
+    var keys = await DB.list('notif:' + currentUser.id + ':');
+    for (var i = 0; i < keys.length; i++) await DB.delete(keys[i]);
+  } catch (e) {}
+  openInbox(); refreshNotifBadge();
+}
+
+/* ── @-MENTION PICKER ── */
+var _mentionTarget = null;   // the input element being typed in
+var _mentionTaskId = null;
+
+async function _mentionInit(inputEl, taskId) {
+  _mentionTarget = inputEl;
+  _mentionTaskId = taskId;
+}
+
+async function _handleMentionInput(ev, taskId) {
+  var input = ev.target;
+  _mentionTaskId = taskId;
+  var val = input.value;
+  var pos = input.selectionStart;
+  // find an @ before the cursor with no space after it
+  var upto = val.slice(0, pos);
+  var m = upto.match(/@(\w*)$/);
+  var box = document.getElementById('mentionBox');
+  if (!box) return;
+  if (!m) { box.style.display = 'none'; return; }
+  var query = m[1].toLowerCase();
+  var employees = await _loadEmployeesForAssign();
+  var matches = employees.filter(function(e) {
+    return (e.name || e.email || '').toLowerCase().indexOf(query) > -1;
+  }).slice(0, 6);
+  if (matches.length === 0) { box.style.display = 'none'; return; }
+  box.innerHTML = matches.map(function(e) {
+    var nm = (e.name || e.email).replace(/'/g, "\\'");
+    return '<div class="mention-opt" onclick="_pickMention(\'' + e.id + '\',\'' + _esc(nm) + '\')">' +
+      '<span class="mention-av">' + _esc((e.name || e.email)[0].toUpperCase()) + '</span>' + _esc(e.name || e.email) + '</div>';
+  }).join('');
+  // position the box near the input
+  var r = input.getBoundingClientRect();
+  box.style.left = r.left + 'px';
+  box.style.top = (r.top - Math.min(matches.length, 6) * 44 - 6) + 'px';
+  box.style.width = r.width + 'px';
+  box.style.display = 'block';
+  box.dataset.input = input.id;
+}
+
+function _pickMention(userId, name) {
+  var box = document.getElementById('mentionBox');
+  var input = document.getElementById(box.dataset.input);
+  if (input) {
+    var val = input.value;
+    var pos = input.selectionStart;
+    var upto = val.slice(0, pos).replace(/@(\w*)$/, '@' + name + ' ');
+    input.value = upto + val.slice(pos);
+    input.focus();
+    // track mentioned ids on the element
+    input._mentions = input._mentions || [];
+    input._mentions.push({ id: userId, name: name });
+  }
+  box.style.display = 'none';
+}
+
+// Extract mentioned user ids from an input's tracked mentions, matching names still present
+function _extractMentions(input, text) {
+  if (!input || !input._mentions) return [];
+  return input._mentions.filter(function(m) {
+    return text.indexOf('@' + m.name) > -1;
+  });
+}
+
+
 async function switchTab(tab) {
+  if (typeof refreshNotifBadge === 'function') refreshNotifBadge();
   // Hide all office tabs
   document.querySelectorAll('.office-tab').forEach(function(t) { t.style.display = 'none'; });
   var tabEl = document.getElementById('tab-' + tab);
@@ -6135,6 +6446,23 @@ function exportUpgradesCsv() {
 // ════════════════════════════════════════════
 // EMPLOYEES (Admin only)
 // ════════════════════════════════════════════
+
+async function viewEmployeeTasks(userId, userName) {
+  _viewAsUserId = userId; window._viewAsName = userName;
+  switchTab('tasks');
+  setTimeout(function() {
+    var banner = document.getElementById('viewAsBanner');
+    if (banner) { banner.style.display = 'flex'; document.getElementById('viewAsName').textContent = userName; }
+    renderTasks();
+  }, 100);
+}
+function clearViewAs() {
+  _viewAsUserId = null;
+  var banner = document.getElementById('viewAsBanner');
+  if (banner) banner.style.display = 'none';
+  renderTasks();
+}
+
 async function renderEmployees() {
   if (currentUser.role !== 'admin') return;
   const keys = await DB.list('user:');
@@ -6154,6 +6482,9 @@ async function renderEmployees() {
     var statusLabel = u.status || 'pending';
 
     var actions = '';
+    if (u.status === 'active') {
+      actions += '<button onclick="viewEmployeeTasks(\'' + u.id + '\',\'' + _esc((u.name||u.email).replace(/'/g,'')) + '\')" style="flex:1;padding:9px;border:none;border-radius:8px;background:#EEF4FB;color:#3B6FB0;font-family:Inter,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">View tasks</button>';
+    }
     if (u.status === 'pending') {
       actions += '<button onclick="approveEmployee(\'' + u.email + '\')" style="flex:1;padding:9px;border:none;border-radius:8px;background:#D1FAE5;color:#065F46;font-family:Inter,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">✓ Approve</button>';
     }
@@ -10758,6 +11089,23 @@ if (document.readyState === 'loading') {
     <div class="task-modal-body" id="phaseModalBody"></div>
   </div>
 </div>
+
+<!-- INBOX PANEL -->
+<div class="inbox-overlay" id="inboxPanel" style="display:none;" onclick="if(event.target===this)closeInbox()">
+  <div class="inbox-sheet">
+    <div class="inbox-head">
+      <span class="inbox-title">&#128276; Inbox</span>
+      <div>
+        <button class="inbox-clear" onclick="clearAllNotifications()">Clear all</button>
+        <button class="inbox-x" onclick="closeInbox()">&#10005;</button>
+      </div>
+    </div>
+    <div class="inbox-body" id="inboxBody"></div>
+  </div>
+</div>
+<!-- @-MENTION DROPDOWN -->
+<div id="mentionBox" class="mention-box" style="display:none;"></div>
+
 </body>
 </html
   <!-- Tasks (Coming Soon) -->
