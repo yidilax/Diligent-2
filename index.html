@@ -2553,6 +2553,43 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
 .cd-input:focus { outline: none; border-color: var(--gold); }
 .cd-input.cd-error { border-color: #c0392b; background: #fff5f5; }
 
+
+/* Upgrade sheet page background + section spacing */
+#customerPortalPage { background: #f5f1e8 !important; }
+#customerPortalPage .upg-container { padding-top: 8px; }
+#customerPortalPage .upg-card { margin-bottom: 28px; box-shadow: 0 2px 10px rgba(13,31,60,0.08); }
+#customerPortalPage .upg-card:last-of-type { margin-bottom: 32px; }
+
+
+/* Nicer gallery captions */
+.upg-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(13,31,60,0.06); }
+.upg-card img, .upg-card__noimg { border-radius: 0; }
+.upg-card img { aspect-ratio: 4/3; }
+.upg-card__label {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a2b4a;
+  margin: 0;
+  padding: 10px 12px 12px;
+  line-height: 1.35;
+  text-align: left;
+}
+
+
+.btn-print { width:100%; padding:13px; background:#fff; border:1.5px solid var(--navy); color:var(--navy); border-radius:8px; font-family:'Inter',sans-serif; font-size:14px; font-weight:700; cursor:pointer; }
+.btn-print:active { background:#f0eee9; }
+.pin-overlay { position:fixed; inset:0; z-index:700; background:rgba(13,31,60,.55); display:flex; align-items:center; justify-content:center; padding:20px; }
+.pin-box { background:#fff; border-radius:14px; padding:24px; width:100%; max-width:360px; box-shadow:0 12px 40px rgba(0,0,0,.3); }
+.pin-title { font-family:'Bebas Neue',sans-serif; font-size:24px; letter-spacing:1px; color:var(--navy); margin-bottom:6px; }
+.pin-sub { font-size:13px; color:var(--muted); line-height:1.5; margin-bottom:16px; }
+.pin-input { width:100%; box-sizing:border-box; font-size:24px; text-align:center; letter-spacing:8px; padding:12px; border:1.5px solid var(--border); border-radius:10px; margin-bottom:10px; font-family:'Inter',sans-serif; }
+.pin-input:focus { outline:none; border-color:var(--gold); }
+.pin-error { font-size:13px; color:#c0392b; margin-bottom:10px; line-height:1.4; }
+.pin-actions { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:6px; }
+.pin-btn-ghost { background:transparent; border:0; color:var(--muted); font-size:13px; font-weight:600; cursor:pointer; padding:8px; }
+.pin-btn-primary { background:var(--gold); color:var(--navy); border:0; border-radius:8px; padding:10px 16px; font-size:14px; font-weight:700; cursor:pointer; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -2915,6 +2952,9 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
     <div style="max-width:760px;margin:0 auto;padding:0 20px 40px;">
       <div id="submitMsg" style="display:none;padding:14px;border-radius:8px;margin-bottom:12px;font-size:13px;text-align:center;font-weight:600;"></div>
       <button class="btn-submit" onclick="submitUpgrades()" id="submitUpgradesBtn">Submit My Selections</button>
+      <div id="printSaveRow" style="display:none;gap:10px;margin-top:12px;">
+        <button class="btn-print" onclick="printMySelections()">&#128424; Print / Save PDF</button>
+      </div>
       <p class="submit-note">You can return and update your selections at any time before the deadline.</p>
     </div>
   </div>
@@ -3965,6 +4005,87 @@ function selectCustAddress(idx) {
 // ════════════════════════════════════════════
 // CUSTOMER ACCESS
 // ════════════════════════════════════════════
+
+/* ============================================================
+   CUSTOMER PIN SYSTEM
+   - Set a 4-digit PIN at first submit
+   - Required to re-access the unit after submission
+   - 5-hour edit window, then view-only
+   - Forgot PIN -> office can see/reset (Option A)
+   ============================================================ */
+var _pendingAccess = null;
+
+function _showPinGate(existing) {
+  var modal = document.getElementById('pinGateModal');
+  if (!modal) return;
+  document.getElementById('pinGateError').style.display = 'none';
+  var inp = document.getElementById('pinGateInput');
+  inp.value = '';
+  modal.style.display = 'flex';
+  setTimeout(function(){ inp.focus(); }, 100);
+}
+function _closePinGate() { var m = document.getElementById('pinGateModal'); if (m) m.style.display = 'none'; }
+
+async function _submitPinGate() {
+  if (!_pendingAccess || !_pendingAccess.existing) { _closePinGate(); return; }
+  var entered = (document.getElementById('pinGateInput').value || '').trim();
+  var errEl = document.getElementById('pinGateError');
+  if (_pendingAccess.existing._pin && entered === _pendingAccess.existing._pin) {
+    _closePinGate();
+    var a = _pendingAccess; _pendingAccess = null;
+    openCustomerPortal(a.name, a.address, a.unit, a.saveKey, a.existing);
+  } else {
+    errEl.style.color = '#c0392b';
+    errEl.textContent = 'Incorrect PIN. Please try again or use "Forgot PIN".';
+    errEl.style.display = 'block';
+  }
+}
+
+// Forgot PIN (Option A: tell them to contact office; office can see it)
+function _forgotPin() {
+  var errEl = document.getElementById('pinGateError');
+  var email = (_pendingAccess && _pendingAccess.existing && _pendingAccess.existing.email) ? _pendingAccess.existing.email : 'the email on file';
+  errEl.style.display = 'block';
+  errEl.style.color = '#1a2b4a';
+  errEl.innerHTML = 'A PIN reset will be sent to <b>' + _esc(email) + '</b>. For now, please contact the office to recover your PIN.';
+  // mark a reset request the office can see
+  if (_pendingAccess && _pendingAccess.existing) {
+    _pendingAccess.existing._pinResetRequested = new Date().toISOString();
+    DB.set(_pendingAccess.saveKey, _pendingAccess.existing);
+  }
+}
+
+// Generate a PIN prompt at submit; returns the chosen 4-digit PIN or null
+function _promptForPin() {
+  return new Promise(function(resolve) {
+    var modal = document.getElementById('pinSetModal');
+    if (!modal) { resolve(null); return; }
+    document.getElementById('pinSetError').style.display = 'none';
+    document.getElementById('pinSetInput').value = '';
+    document.getElementById('pinSetConfirm').value = '';
+    modal.style.display = 'flex';
+    setTimeout(function(){ document.getElementById('pinSetInput').focus(); }, 100);
+    window._pinSetResolve = resolve;
+  });
+}
+function _confirmSetPin() {
+  var pin = (document.getElementById('pinSetInput').value || '').trim();
+  var conf = (document.getElementById('pinSetConfirm').value || '').trim();
+  var errEl = document.getElementById('pinSetError');
+  if (!/^\d{4}$/.test(pin)) {
+    errEl.textContent = 'PIN must be exactly 4 digits.'; errEl.style.display = 'block'; return;
+  }
+  if (pin !== conf) {
+    errEl.textContent = 'PINs do not match. Please re-enter.'; errEl.style.display = 'block'; return;
+  }
+  document.getElementById('pinSetModal').style.display = 'none';
+  if (window._pinSetResolve) { window._pinSetResolve(pin); window._pinSetResolve = null; }
+}
+function _cancelSetPin() {
+  document.getElementById('pinSetModal').style.display = 'none';
+  if (window._pinSetResolve) { window._pinSetResolve(null); window._pinSetResolve = null; }
+}
+
 async function customerAccess() {
   const name = document.getElementById('custName').value.trim();
   const address = document.getElementById('custAddress').value.trim();
@@ -4005,6 +4126,13 @@ async function customerAccess() {
   const finalUnit = unit || 'Main';
   const saveKey = 'upgrades:' + btoa(unescape(encodeURIComponent(address + '|' + finalUnit))).replace(/=/g,'');
   const existing = await DB.get(saveKey) || {};
+
+  // If this unit already submitted and set a PIN, require the PIN before access
+  if (existing && existing._submittedAt && existing._pin) {
+    _pendingAccess = { name: name, address: address, unit: finalUnit, saveKey: saveKey, existing: existing };
+    _showPinGate(existing);
+    return;
+  }
   openCustomerPortal(name, address, finalUnit, saveKey, existing);
 }
 
@@ -7646,6 +7774,50 @@ function openUpgradeSheet() {
 // ════════════════════════════════════════════
 // SUBMIT — required validation + 5-hour lock
 // ════════════════════════════════════════════
+
+// Print / Save PDF of the customer's selections
+function printMySelections() {
+  var d = window._lastSubmission;
+  if (!d) { alert('Please submit your selections first.'); return; }
+  var sections = window._upgradeSections || [];
+  var rows = '';
+  sections.forEach(function(sec) {
+    var title = sec.label || sec.title || '';
+    var items = sec.fields || sec.items || [];
+    var secRows = '';
+    items.forEach(function(it) {
+      if ((it.key || '').indexOf('_glass') > -1) return;
+      var val = d.selections ? d.selections[it.key] : '';
+      var disp = val === 'yes' ? 'YES' : val === 'no' ? 'No' : (val || '-');
+      secRows += '<tr><td style="padding:6px 10px;border-bottom:1px solid #eee;">' + (it.name || it.key) + '</td>' +
+                 '<td style="padding:6px 10px;border-bottom:1px solid #eee;font-weight:600;text-align:right;">' + disp + '</td></tr>';
+    });
+    if (secRows) {
+      rows += '<tr><td colspan="2" style="background:#1a2b4a;color:#fff;padding:8px 10px;font-weight:700;letter-spacing:1px;">' + title.toUpperCase() + '</td></tr>' + secRows;
+    }
+  });
+
+  var w = window.open('', '_blank');
+  if (!w) { alert('Please allow pop-ups to print/save.'); return; }
+  var html = '<!DOCTYPE html><html><head><title>Upgrade Selections - ' + (d.name || '') + '</title>' +
+    '<style>body{font-family:Arial,sans-serif;color:#222;max-width:720px;margin:0 auto;padding:24px;}' +
+    'h1{font-size:22px;color:#1a2b4a;margin:0 0 4px;}.sub{color:#777;font-size:13px;margin-bottom:18px;}' +
+    'table{width:100%;border-collapse:collapse;font-size:13px;}' +
+    '.info{margin-bottom:16px;font-size:13px;line-height:1.6;}' +
+    '.sig{margin-top:24px;}.sig img{max-width:240px;border:1px solid #ddd;border-radius:6px;}' +
+    '@media print{button{display:none;}}</style></head><body>' +
+    '<h1>Diligent Developers</h1><div class="sub">Upgrade Selections Summary</div>' +
+    '<div class="info"><b>Name:</b> ' + (d.name || '') + '<br><b>Email:</b> ' + (d.email || '') +
+    '<br><b>Phone:</b> ' + (d.phone || '') + '<br><b>Address:</b> ' + (d.address || '') +
+    '<br><b>Unit:</b> ' + (d.unit || '') + '<br><b>Submitted:</b> ' + (d._submittedAt ? new Date(d._submittedAt).toLocaleString() : '') + '</div>' +
+    '<table>' + rows + '</table>' +
+    (d.signature ? '<div class="sig"><b>Signature:</b><br><img src="' + d.signature + '"><br>' + (d.sigDate || '') + '</div>' : '') +
+    '<div style="margin-top:24px;"><button onclick="window.print()" style="padding:10px 20px;background:#c9a227;border:none;border-radius:6px;font-weight:700;cursor:pointer;">Print / Save as PDF</button></div>' +
+    '</body></html>';
+  w.document.write(html);
+  w.document.close();
+}
+
 async function submitUpgrades() {
   var msgEl = document.getElementById('submitMsg');
   msgEl.style.display = 'none';
@@ -7803,6 +7975,20 @@ async function submitUpgrades() {
     _updatedAt: now
   };
 
+  // First submit: have the customer set a 4-digit PIN to protect their unit
+  var prevPin = (existing && existing._pin) ? existing._pin : null;
+  if (!prevPin) {
+    var newPin = await _promptForPin();
+    if (!newPin) {
+      msgEl.textContent = 'A 4-digit PIN is required to submit and protect your selections.';
+      msgEl.style.background = '#FEE2E2'; msgEl.style.color = '#B91C1C'; msgEl.style.display = 'block';
+      return;
+    }
+    saveData._pin = newPin;
+  } else {
+    saveData._pin = prevPin; // keep existing PIN on edits
+  }
+
   var btn = document.getElementById('submitUpgradesBtn');
   btn.disabled = true; btn.textContent = 'Saving…';
   await DB.set(_custSaveKey, saveData);
@@ -7813,10 +7999,15 @@ async function submitUpgrades() {
   var ampm = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12;
   var deadlineStr = h + ':' + m + ' ' + ampm;
 
+  // Make the print/save button available now
+  window._lastSubmission = saveData;
+  var printRow = document.getElementById('printSaveRow');
+  if (printRow) printRow.style.display = 'flex';
+
   msgEl.style.background = '#D1FAE5'; msgEl.style.color = '#065F46'; msgEl.style.display = 'block';
-  msgEl.textContent = isUpdate
-    ? '✓ Selections updated! You can make changes until ' + deadlineStr + '.'
-    : '✓ Submitted successfully! You have until ' + deadlineStr + ' to make changes.';
+  msgEl.innerHTML = isUpdate
+    ? 'Selections updated! You can make changes until ' + deadlineStr + '.'
+    : 'Submitted successfully! Your PIN is <b>' + saveData._pin + '</b> - you will need it to return. You have until ' + deadlineStr + ' to make changes.';
   btn.textContent = 'Update My Selections'; btn.disabled = false; btn.style.background = '';
   msgEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
@@ -8967,7 +9158,9 @@ function getStoredSubmissions() {
         sigDate: d.sigDate || '',
         submittedAt: d._submittedAt,
         _submittedAt: d._submittedAt,
-        _updatedAt: d._updatedAt || d._submittedAt
+        _updatedAt: d._updatedAt || d._submittedAt,
+        _pin: d._pin || '',
+        _pinResetRequested: d._pinResetRequested || null
       });
     } catch(e) {}
   });
@@ -9069,6 +9262,28 @@ function filterCustomers(val) {
   renderCustomerTab(val);
 }
 
+
+// Office: reset a customer's PIN (Option A) - clears it so they set a new one next submit, or set a new one now
+async function resetCustomerPin(saveKey) {
+  if (!saveKey) { alert('Could not identify this submission.'); return; }
+  var choice = prompt('Enter a new 4-digit PIN for this customer (or leave blank to clear it so they can set a new one):', '');
+  if (choice === null) return;
+  var rec = await DB.get(saveKey);
+  if (!rec) { alert('Submission not found.'); return; }
+  if (choice === '') {
+    delete rec._pin;
+  } else if (/^\d{4}$/.test(choice.trim())) {
+    rec._pin = choice.trim();
+  } else {
+    alert('PIN must be exactly 4 digits (or blank to clear).');
+    return;
+  }
+  delete rec._pinResetRequested;
+  await DB.set(saveKey, rec);
+  alert('PIN updated.');
+  await renderUpgrades();
+}
+
 function showCustomerDetail(idx) {
   var subs = window._filteredSubs || _cachedSubmissions || [];
   var s = subs[idx];
@@ -9083,6 +9298,7 @@ function showCustomerDetail(idx) {
         '<div class="cust-detail-cell"><div class="cust-detail-label">Name</div><div class="cust-detail-value">' + (s.name||'—') + '</div></div>' +
         '<div class="cust-detail-cell"><div class="cust-detail-label">Email</div><div class="cust-detail-value">' + (s.email||'—') + '</div></div>' +
         '<div class="cust-detail-cell"><div class="cust-detail-label">Phone</div><div class="cust-detail-value">' + (s.phone||'—') + '</div></div>' +
+        '<div class="cust-detail-cell"><div class="cust-detail-label">Access PIN' + (s._pinResetRequested ? ' <span style="color:#c0392b;">(reset requested)</span>' : '') + '</div><div class="cust-detail-value">' + (s._pin ? ('<b>' + s._pin + '</b> <button onclick="resetCustomerPin(\'' + (s._key||'').replace(/'/g,"") + '\')" style="margin-left:8px;font-size:11px;padding:3px 8px;border:1px solid var(--navy);border-radius:6px;background:#fff;cursor:pointer;">Reset</button>') : '—') + '</div></div>' +
         '<div class="cust-detail-cell"><div class="cust-detail-label">Unit</div><div class="cust-detail-value">' + (s.unit||'—') + '</div></div>' +
         '<div class="cust-detail-cell" style="grid-column:1/-1"><div class="cust-detail-label">Address</div><div class="cust-detail-value">' + (s.address||'—') + '</div></div>' +
         '<div class="cust-detail-cell"><div class="cust-detail-label">Submitted</div><div class="cust-detail-value">' + (s.submittedAt?new Date(s.submittedAt).toLocaleString():'—') + '</div></div>' +
@@ -11566,6 +11782,39 @@ if (document.readyState === 'loading') {
   }, true);
 })();
 </script>
+
+
+<!-- PIN GATE (returning customer must enter PIN) -->
+<div class="pin-overlay" id="pinGateModal" style="display:none;">
+  <div class="pin-box">
+    <div class="pin-title">Enter Your PIN</div>
+    <div class="pin-sub">This unit's upgrade selections are protected. Enter the 4-digit PIN you created.</div>
+    <input type="tel" inputmode="numeric" maxlength="4" id="pinGateInput" class="pin-input" placeholder="____" onkeydown="if(event.key==='Enter')_submitPinGate()">
+    <div id="pinGateError" class="pin-error" style="display:none;"></div>
+    <div class="pin-actions">
+      <button class="pin-btn-ghost" onclick="_forgotPin()">Forgot PIN?</button>
+      <div>
+        <button class="pin-btn-ghost" onclick="_closePinGate()">Cancel</button>
+        <button class="pin-btn-primary" onclick="_submitPinGate()">Continue</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PIN SET (first submit) -->
+<div class="pin-overlay" id="pinSetModal" style="display:none;">
+  <div class="pin-box">
+    <div class="pin-title">Create a 4-Digit PIN</div>
+    <div class="pin-sub">You'll need this PIN to return and view or edit your selections. Keep it safe.</div>
+    <input type="tel" inputmode="numeric" maxlength="4" id="pinSetInput" class="pin-input" placeholder="Enter PIN">
+    <input type="tel" inputmode="numeric" maxlength="4" id="pinSetConfirm" class="pin-input" placeholder="Confirm PIN" onkeydown="if(event.key==='Enter')_confirmSetPin()">
+    <div id="pinSetError" class="pin-error" style="display:none;"></div>
+    <div class="pin-actions">
+      <button class="pin-btn-ghost" onclick="_cancelSetPin()">Cancel</button>
+      <button class="pin-btn-primary" onclick="_confirmSetPin()">Set PIN &amp; Submit</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html
