@@ -3177,6 +3177,20 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .tab-empty-btn:hover { background:#0f1d36; }
 .tab-empty-btn:active { transform:scale(.98); }
 
+
+/* Ensure modal bodies scroll instead of overflowing under the sticky footer */
+.modal-box .modal-body { max-height:60vh; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+.modal-box { max-height:92vh; }
+
+
+/* === Bulletproof mobile modal scrolling === */
+.modal-overlay.open { display:flex !important; align-items:center; justify-content:center; padding:16px; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+.modal-box { display:flex; flex-direction:column; max-height:calc(100vh - 32px); max-height:calc(100dvh - 32px); }
+.modal-box .modal-header { flex:0 0 auto; }
+.modal-box .modal-footer, .modal-box .cust-form-footer { flex:0 0 auto; }
+.modal-box .modal-body { flex:1 1 auto; min-height:0; max-height:none; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
+.modal-box .modal-body.cust-form, .modal-box .cust-form { max-height:none; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
