@@ -3429,26 +3429,29 @@ let currentUser = null;
 // INIT
 // ════════════════════════════════════════════
 async function init() {
-  // Seed Shmily's admin account (so it's auto-approved when she signs in)
-  var existing = await DB.get('user:shmily@diligentdevelopersny.com');
-  if (!existing || existing.role !== 'admin' || existing.status !== 'active') {
-    await DB.set('user:shmily@diligentdevelopersny.com', {
-      id: 'admin_shmily', name: 'Shmily', email: 'shmily@diligentdevelopersny.com',
-      role: 'admin', status: 'active',
-      createdAt: new Date().toISOString()
-    });
-  }
-  // Remove the old generic admin account if it exists
-  await DB.delete('user:admin@diligentdevelopers.com');
-
   function _hideLoader() {
     var l = document.getElementById('bootLoader');
     if (l) l.style.display = 'none';
   }
 
-  // Let Firebase Auth restore the session
+  // Let Firebase Auth restore the session (no DB writes before login!)
   var auth = _getAuth();
   if (auth) {
+    // Handle Google redirect result (mobile sign-in returns here)
+    try {
+      var redirectResult = await auth.getRedirectResult();
+      if (redirectResult && redirectResult.user) {
+        await handleAuthedUser(redirectResult.user);
+        return;
+      }
+    } catch(e) {
+      console.warn('Redirect result error:', e);
+      var errEl = document.getElementById('loginError');
+      if (errEl && e.code === 'auth/unauthorized-domain') {
+        errEl.textContent = 'This domain is not authorized in Firebase. Add it under Authentication → Settings → Authorized domains.';
+        errEl.style.display = 'block';
+      }
+    }
     auth.onAuthStateChanged(async function(fbUser) {
       if (fbUser) {
         await handleAuthedUser(fbUser);
@@ -8499,24 +8502,33 @@ function _getAuth() {
 async function handleAuthedUser(fbUser) {
   if (!fbUser) return;
   var email = (fbUser.email || '').toLowerCase();
+  var ADMIN_EMAILS = ['shmily@diligentdevelopersny.com'];
 
-  // Look up their app record
+  // Look up their app record (now allowed — they're authenticated)
   var userRec = await DB.get('user:' + email);
 
   if (!userRec) {
-    // First time — create a pending account
+    // First time signing in
+    var isAdmin = ADMIN_EMAILS.indexOf(email) !== -1;
     userRec = {
-      id: 'emp_' + Date.now(),
+      id: isAdmin ? 'admin_' + email.split('@')[0] : 'emp_' + Date.now(),
       uid: fbUser.uid,
       name: fbUser.displayName || email.split('@')[0],
       email: email,
-      role: 'employee',
-      title: 'Employee',
-      status: 'pending',
+      role: isAdmin ? 'admin' : 'employee',
+      title: isAdmin ? 'Administrator' : 'Employee',
+      status: isAdmin ? 'active' : 'pending',
       createdAt: new Date().toISOString()
     };
     await DB.set('user:' + email, userRec);
-    await DB.set('pending:' + userRec.id, { email: email, name: userRec.name, createdAt: userRec.createdAt });
+    if (!isAdmin) {
+      await DB.set('pending:' + userRec.id, { email: email, name: userRec.name, createdAt: userRec.createdAt });
+    }
+  } else if (ADMIN_EMAILS.indexOf(email) !== -1 && (userRec.role !== 'admin' || userRec.status !== 'active')) {
+    // Ensure designated admin is always admin + active
+    userRec.role = 'admin';
+    userRec.status = 'active';
+    await DB.set('user:' + email, userRec);
   }
 
   currentUser = userRec;
@@ -8526,7 +8538,6 @@ async function handleAuthedUser(fbUser) {
   } else if (userRec.status === 'pending') {
     showPage('pendingPage');
   } else {
-    // disabled
     var auth = _getAuth();
     if (auth) await auth.signOut();
     showPage('officeAuthPage');
@@ -8541,13 +8552,32 @@ async function signInWithGoogle() {
   var auth = _getAuth();
   if (!auth) { alert('Authentication unavailable. Please try again.'); return; }
   var provider = new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+
+  var errEl = document.getElementById('loginError');
+  if (errEl) errEl.style.display = 'none';
+
+  // Detect mobile — use redirect (popups blocked on mobile)
+  var isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
   try {
-    var result = await auth.signInWithPopup(provider);
-    await handleAuthedUser(result.user);
+    if (isMobile) {
+      // Redirect flow — page reloads, result handled in init via getRedirectResult
+      await auth.signInWithRedirect(provider);
+    } else {
+      var result = await auth.signInWithPopup(provider);
+      await handleAuthedUser(result.user);
+    }
   } catch(e) {
     console.warn('Google sign-in error:', e);
-    var errEl = document.getElementById('loginError');
-    if (errEl) { errEl.textContent = 'Google sign-in failed: ' + (e.message || 'try again'); errEl.style.display = 'block'; }
+    var msg = 'Google sign-in failed.';
+    if (e.code === 'auth/unauthorized-domain') msg = 'This domain is not authorized in Firebase. Add it under Authentication → Settings → Authorized domains.';
+    else if (e.code === 'auth/popup-blocked') {
+      // Popup blocked, try redirect
+      try { await auth.signInWithRedirect(provider); return; } catch(e2) {}
+    }
+    else if (e.message) msg = 'Google sign-in failed: ' + e.message;
+    if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
   }
 }
 
