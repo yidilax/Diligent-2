@@ -39,8 +39,9 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
   justify-content: flex-start;
   padding: 0;
   position: relative;
-  overflow-y: auto;
-  min-height: 100vh;
+  overflow: hidden;
+  height: 100vh;
+  height: 100dvh;
 }
 
 .landing-inner { position: relative; z-index: 1; width: 100%; max-width: 480px; text-align: center; }
@@ -2133,6 +2134,17 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
   .ue-section-card.ue-dragging { opacity: 0.4; outline: 2px dashed var(--gold); }
   .ue-drag-handle:active { cursor: grabbing; }
 
+
+  .office-nav-section {
+    font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+    color: rgba(255,255,255,0.35); padding: 16px 24px 6px;
+    text-transform: uppercase;
+  }
+  .nav-soon {
+    font-size: 9px; font-weight: 700; background: var(--gold); color: var(--navy);
+    padding: 2px 6px; border-radius: 4px; margin-left: 6px; letter-spacing: 0.5px;
+  }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -2198,22 +2210,31 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
   /* ════ LANDING PAGE ════ */
   .lp-root {
     width: 100%;
-    min-height: 100vh;
+    height: 100vh;
+    height: 100dvh;
     background: #0D1F3C;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
   }
 
   /* ── Photo ── */
   .lp-photo-wrap {
     width: 100%;
-    flex-shrink: 0;
+    flex-shrink: 1;
+    min-height: 0;
     background: #F5F0E8;
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    max-height: 42vh;
   }
   .lp-photo {
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: cover;
     display: block;
   }
   .lp-separator {
@@ -2225,12 +2246,14 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
   /* ── Content ── */
   .lp-content {
     flex: 1;
+    min-height: 0;
     background: #0D1F3C;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 32px 28px 48px;
+    padding: 24px 28px 28px;
+    overflow-y: auto;
   }
   .lp-rule {
     width: 44px; height: 2px;
@@ -2238,7 +2261,7 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
     border-radius: 2px;
     margin-bottom: 22px;
   }
-  .lp-title { text-align: center; margin-bottom: 36px; }
+  .lp-title { text-align: center; margin-bottom: 24px; }
   .lp-title-main {
     font-family: 'Bebas Neue', sans-serif;
     font-size: clamp(28px, 4vw, 42px);
@@ -2916,19 +2939,11 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
           <span class="nav-icon">📊</span> Dashboard
         </button>
       </li>
+
+      <li class="office-nav-section">WORK</li>
       <li class="office-nav-item">
         <button class="office-nav-btn" onclick="switchTab('projects');closeSidebar();" id="navbtn-projects">
           <span class="nav-icon">🏗️</span> Projects
-        </button>
-      </li>
-      <li class="office-nav-item">
-        <button class="office-nav-btn" onclick="switchTab('customers');closeSidebar();" id="navbtn-customers">
-          <span class="nav-icon">👥</span> Customers
-        </button>
-      </li>
-      <li class="office-nav-item">
-        <button class="office-nav-btn" onclick="switchTab('upgrades');closeSidebar();" id="navbtn-upgrades">
-          <span class="nav-icon">📋</span> Upgrades
         </button>
       </li>
       <li class="office-nav-item">
@@ -2941,12 +2956,35 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
           <span class="nav-icon">🏠</span> House Specs
         </button>
       </li>
-      <div class="office-nav-divider admin-only" style="display:none;"></div>
+      <li class="office-nav-item">
+        <button class="office-nav-btn" onclick="switchTab('tasks');closeSidebar();" id="navbtn-tasks">
+          <span class="nav-icon">📝</span> Tasks <span class="nav-soon">SOON</span>
+        </button>
+      </li>
+      <li class="office-nav-item">
+        <button class="office-nav-btn" onclick="switchTab('scheduling');closeSidebar();" id="navbtn-scheduling">
+          <span class="nav-icon">📅</span> Scheduling <span class="nav-soon">SOON</span>
+        </button>
+      </li>
+
+      <li class="office-nav-section">CUSTOMERS</li>
+      <li class="office-nav-item">
+        <button class="office-nav-btn" onclick="switchTab('customers');closeSidebar();" id="navbtn-customers">
+          <span class="nav-icon">👥</span> Customers
+        </button>
+      </li>
+      <li class="office-nav-item">
+        <button class="office-nav-btn" onclick="switchTab('upgrades');closeSidebar();" id="navbtn-upgrades">
+          <span class="nav-icon">📋</span> Upgrades
+        </button>
+      </li>
       <li class="office-nav-item admin-only" style="display:none;">
         <button class="office-nav-btn" onclick="switchTab('upgradeEditor');closeSidebar();" id="navbtn-upgradeEditor">
           <span class="nav-icon">✏️</span> Upgrade Editor
         </button>
       </li>
+
+      <li class="office-nav-section admin-only" style="display:none;">ADMIN</li>
       <li class="office-nav-item admin-only" style="display:none;">
         <button class="office-nav-btn" onclick="switchTab('employees');closeSidebar();" id="navbtn-employees">
           <span class="nav-icon">👤</span> Employees
@@ -4859,8 +4897,12 @@ function ue_collectFromUI() {
       const hasGlass = row.dataset.hasGlass === 'true';
       const type = typeSel ? typeSel.value : 'radio';
       var options = [];
-      if (type === 'dropdown' && optInput) {
-        options = optInput.value.split(',').map(function(o) { return o.trim(); }).filter(Boolean);
+      if (type === 'dropdown') {
+        var optInputs = row.querySelectorAll('.ue-opt-value');
+        optInputs.forEach(function(oi) {
+          var v = oi.value.trim();
+          if (v) options.push(v);
+        });
       }
       var itemObj = {
         key: row.dataset.key || (sec.id + '_' + (ii + 1)),
@@ -5026,13 +5068,6 @@ function ue_buildItemRow(item) {
   store.value = item.photo || '';
   row.appendChild(store);
 
-  // Options store (for dropdown)
-  var optStore = document.createElement('textarea');
-  optStore.className = 'ue-opt-store';
-  optStore.style.display = 'none';
-  optStore.value = (item.options || []).join('\n');
-  row.appendChild(optStore);
-
   // Photo button
   var photoBtn = document.createElement('div');
   photoBtn.className = 'ue-photo-btn';
@@ -5048,9 +5083,9 @@ function ue_buildItemRow(item) {
   photoBtn.addEventListener('click', function() { ue_openPhotoPopup(photoBtn, row); });
   row.appendChild(photoBtn);
 
-  // Right side wrapper (name + type controls)
+  // Right side wrapper
   var rightWrap = document.createElement('div');
-  rightWrap.style.cssText = 'flex:1;display:flex;flex-direction:column;gap:6px;min-width:0;';
+  rightWrap.style.cssText = 'flex:1;display:flex;flex-direction:column;gap:8px;min-width:0;';
 
   // Name input
   var nameInput = document.createElement('input');
@@ -5061,39 +5096,78 @@ function ue_buildItemRow(item) {
   nameInput.style.width = '100%';
   rightWrap.appendChild(nameInput);
 
-  // Type selector row
+  // Type selector
   var typeRow = document.createElement('div');
-  typeRow.style.cssText = 'display:flex;gap:6px;align-items:center;flex-wrap:wrap;';
+  typeRow.style.cssText = 'display:flex;gap:6px;align-items:center;';
+  var typeLabel = document.createElement('span');
+  typeLabel.textContent = 'Answer type:';
+  typeLabel.style.cssText = 'font-size:11px;color:var(--muted);font-weight:600;';
+  typeRow.appendChild(typeLabel);
 
   var typeSel = document.createElement('select');
   typeSel.className = 'ue-item-type';
-  typeSel.style.cssText = 'padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:11px;font-family:Inter,sans-serif;cursor:pointer;';
-  [['radio','Yes / No'],['checkbox','Checkbox (agree)'],['dropdown','Dropdown']].forEach(function(o) {
+  typeSel.style.cssText = 'padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;font-family:Inter,sans-serif;cursor:pointer;';
+  [['radio','Yes / No'],['checkbox','Checkbox (agree)'],['dropdown','Dropdown (choices)']].forEach(function(o) {
     var opt = document.createElement('option');
     opt.value = o[0]; opt.textContent = o[1];
     if ((item.type || 'radio') === o[0]) opt.selected = true;
     typeSel.appendChild(opt);
   });
   typeRow.appendChild(typeSel);
+  rightWrap.appendChild(typeRow);
 
-  // Options input (only shown for dropdown)
-  var optInput = document.createElement('input');
-  optInput.className = 'ue-item-options';
-  optInput.type = 'text';
-  optInput.placeholder = 'Options: White, Gray, Navy';
-  optInput.value = (item.options || []).join(', ');
-  optInput.style.cssText = 'flex:1;min-width:120px;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:11px;font-family:Inter,sans-serif;display:' + ((item.type === 'dropdown') ? 'block' : 'none') + ';';
-  typeRow.appendChild(optInput);
+  // ── Dropdown options builder (visual) ──
+  var optBox = document.createElement('div');
+  optBox.className = 'ue-dropdown-builder';
+  optBox.style.cssText = 'display:' + ((item.type === 'dropdown') ? 'block' : 'none') + ';background:#F7F5F0;border:1.5px solid var(--gold);border-radius:8px;padding:10px;';
+  optBox.innerHTML = '<div style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Choices customers can pick:</div>';
 
+  var optList = document.createElement('div');
+  optList.className = 'ue-opt-list';
+  optList.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-bottom:8px;';
+
+  function makeOptInput(val) {
+    var optRow = document.createElement('div');
+    optRow.style.cssText = 'display:flex;gap:6px;align-items:center;';
+    var inp = document.createElement('input');
+    inp.className = 'ue-opt-value';
+    inp.type = 'text';
+    inp.value = val || '';
+    inp.placeholder = 'e.g. White';
+    inp.style.cssText = 'flex:1;padding:7px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;font-family:Inter,sans-serif;';
+    var rm = document.createElement('button');
+    rm.textContent = '✕';
+    rm.title = 'Remove choice';
+    rm.style.cssText = 'background:#FEE2E2;color:#B03A2E;border:none;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:12px;flex-shrink:0;';
+    rm.onclick = function() { optRow.remove(); };
+    optRow.appendChild(inp);
+    optRow.appendChild(rm);
+    return optRow;
+  }
+
+  var existingOpts = item.options || [];
+  if (existingOpts.length === 0) existingOpts = ['', ''];  // start with 2 empty
+  existingOpts.forEach(function(o) { optList.appendChild(makeOptInput(o)); });
+
+  optBox.appendChild(optList);
+
+  var addOptBtn = document.createElement('button');
+  addOptBtn.textContent = '+ Add another choice';
+  addOptBtn.style.cssText = 'background:var(--navy);color:white;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;';
+  addOptBtn.onclick = function() { optList.appendChild(makeOptInput('')); };
+  optBox.appendChild(addOptBtn);
+
+  rightWrap.appendChild(optBox);
+
+  // Toggle dropdown builder visibility on type change
   typeSel.addEventListener('change', function() {
     row.dataset.type = typeSel.value;
-    optInput.style.display = typeSel.value === 'dropdown' ? 'block' : 'none';
+    optBox.style.display = typeSel.value === 'dropdown' ? 'block' : 'none';
   });
 
-  rightWrap.appendChild(typeRow);
   row.appendChild(rightWrap);
 
-  // Delete button
+  // Delete item button
   var delBtn = document.createElement('button');
   delBtn.className = 'ue-del-btn';
   delBtn.textContent = '✕';
@@ -9075,4 +9149,25 @@ if (document.readyState === 'loading') {
 }
 </script>
 </body>
-</html>
+</html
+  <!-- Tasks (Coming Soon) -->
+  <div class="office-tab" id="tab-tasks" style="display:none;">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px 20px;">
+      <div style="font-size:64px;margin-bottom:20px;">📝</div>
+      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;color:var(--navy);margin:0 0 12px;">Tasks</h2>
+      <div style="display:inline-block;background:var(--gold);color:var(--navy);font-weight:700;font-size:13px;padding:6px 16px;border-radius:20px;letter-spacing:1px;margin-bottom:16px;">COMING SOON</div>
+      <p style="color:var(--muted);font-size:15px;max-width:380px;line-height:1.6;">Assign and track tasks for your team. This feature is on the way.</p>
+    </div>
+  </div>
+
+  <!-- Scheduling (Coming Soon) -->
+  <div class="office-tab" id="tab-scheduling" style="display:none;">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px 20px;">
+      <div style="font-size:64px;margin-bottom:20px;">📅</div>
+      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;color:var(--navy);margin:0 0 12px;">Scheduling</h2>
+      <div style="display:inline-block;background:var(--gold);color:var(--navy);font-weight:700;font-size:13px;padding:6px 16px;border-radius:20px;letter-spacing:1px;margin-bottom:16px;">COMING SOON</div>
+      <p style="color:var(--muted);font-size:15px;max-width:380px;line-height:1.6;">Plan and schedule work across your projects and team. This feature is on the way.</p>
+    </div>
+  </div>
+
+  >
