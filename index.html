@@ -2590,6 +2590,107 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
 .pin-btn-ghost { background:transparent; border:0; color:var(--muted); font-size:13px; font-weight:600; cursor:pointer; padding:8px; }
 .pin-btn-primary { background:var(--gold); color:var(--navy); border:0; border-radius:8px; padding:10px 16px; font-size:14px; font-weight:700; cursor:pointer; }
 
+
+.coming-soon { text-align:center; padding:60px 24px; }
+.coming-soon-icon { font-size:48px; margin-bottom:14px; opacity:.6; }
+.coming-soon-title { font-family:'Bebas Neue',sans-serif; font-size:24px; letter-spacing:1px; color:var(--navy); margin-bottom:8px; }
+.coming-soon-desc { font-size:14px; color:var(--muted); line-height:1.5; max-width:320px; margin:0 auto; }
+
+
+/* ===================== TASKS REDESIGN ===================== */
+#tab-tasks { background:#f7f5f0; }
+.tsk-quickadd {
+  display:flex; align-items:center; gap:10px; margin:14px 16px 0;
+  background:#fff; border:1.5px solid #e6e1d6; border-radius:12px; padding:6px 8px 6px 14px;
+  box-shadow:0 1px 4px rgba(13,31,60,.05); transition:border-color .15s, box-shadow .15s;
+}
+.tsk-quickadd:focus-within { border-color:var(--gold); box-shadow:0 2px 10px rgba(201,162,39,.15); }
+.tsk-qa-plus { font-size:22px; color:var(--gold); font-weight:700; line-height:1; }
+.tsk-qa-input { flex:1; border:0; outline:0; font-family:'Inter',sans-serif; font-size:15px; color:var(--navy); background:transparent; padding:8px 0; }
+.tsk-qa-input::placeholder { color:#a8a59c; }
+.tsk-qa-btn { background:var(--navy); color:#fff; border:0; border-radius:8px; padding:9px 16px; font-weight:700; font-size:14px; cursor:pointer; font-family:'Inter',sans-serif; }
+.tsk-qa-btn:active { transform:scale(.97); }
+
+.tsk-controls { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:12px 16px 0; flex-wrap:wrap; }
+.tsk-scope, .tsk-views { display:inline-flex; background:#ece8df; border-radius:9px; padding:3px; }
+.tsk-scope-btn, .tsk-view-btn { border:0; background:transparent; font-family:'Inter',sans-serif; font-size:13px; font-weight:600; color:#6b6862; padding:7px 14px; border-radius:7px; cursor:pointer; transition:all .12s; }
+.tsk-scope-btn.active, .tsk-view-btn.active { background:#fff; color:var(--navy); box-shadow:0 1px 3px rgba(0,0,0,.1); }
+
+.tsk-filters-wrap { margin:10px 16px 0; }
+.tsk-filters-toggle { font-size:13px; color:#6b6862; cursor:pointer; font-weight:600; list-style:none; padding:4px 0; user-select:none; }
+.tsk-filters-toggle::-webkit-details-marker { display:none; }
+.tsk-filters-toggle::before { content:'\25b8 '; color:var(--gold); }
+details[open] .tsk-filters-toggle::before { content:'\25be '; }
+.tsk-filters { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+.tsk-filter-input { font-family:'Inter',sans-serif; font-size:13px; padding:8px 10px; border:1.5px solid #e6e1d6; border-radius:8px; background:#fff; color:var(--navy); }
+.tsk-filter-check { display:inline-flex; align-items:center; gap:6px; font-size:13px; color:#6b6862; }
+
+#tasksContent { padding:8px 16px 28px; }
+
+/* Smart groups */
+.tsk-group { margin-top:18px; }
+.tsk-group-hd { display:flex; align-items:center; gap:9px; margin-bottom:8px; }
+.tsk-group-bar { width:3px; height:15px; border-radius:2px; }
+.tsk-group-name { font-family:'Inter',sans-serif; font-size:12px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--navy); }
+.tsk-group-count { font-size:11px; font-weight:700; color:#a8a59c; background:#ece8df; border-radius:10px; padding:1px 8px; }
+.tsk-group-body { display:flex; flex-direction:column; gap:8px; }
+
+/* Task card */
+.tsk-card { display:flex; align-items:flex-start; gap:11px; background:#fff; border:1px solid #ebe7dd; border-radius:11px; padding:13px 14px; cursor:pointer; transition:box-shadow .14s, transform .14s, border-color .14s; }
+.tsk-card:active { transform:scale(.995); }
+.tsk-card:hover { box-shadow:0 3px 12px rgba(13,31,60,.08); border-color:#ddd6c8; }
+.tsk-check { flex-shrink:0; width:21px; height:21px; border-radius:50%; border:2px solid #cfc9bb; background:#fff; cursor:pointer; font-size:12px; color:#fff; display:flex; align-items:center; justify-content:center; margin-top:1px; transition:all .14s; padding:0; }
+.tsk-check.on { background:var(--gold); border-color:var(--gold); }
+.tsk-card-body { flex:1; min-width:0; }
+.tsk-card-title { font-family:'Inter',sans-serif; font-size:15px; font-weight:600; color:var(--navy); line-height:1.35; }
+.tsk-done .tsk-card-title { text-decoration:line-through; color:#a8a59c; }
+.tsk-ms { color:var(--gold); }
+.tsk-card-meta { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-top:6px; font-size:12px; color:#8a877f; }
+.tsk-prio { display:inline-flex; align-items:center; gap:5px; font-weight:600; }
+.tsk-prio::before { content:''; width:7px; height:7px; border-radius:50%; background:var(--pc,#999); display:inline-block; }
+.tsk-due.over { color:#c0392b; font-weight:700; }
+.tsk-ava { flex-shrink:0; width:28px; height:28px; border-radius:50%; background:var(--navy); color:#fff; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif; }
+.tsk-ava.sm { width:22px; height:22px; font-size:9px; }
+
+/* Board */
+.tsk-board { display:flex; gap:12px; overflow-x:auto; padding-bottom:8px; -webkit-overflow-scrolling:touch; }
+.tsk-col { flex:0 0 78%; max-width:300px; background:#f0ece3; border-radius:12px; padding:10px; }
+.tsk-col-hd { display:flex; align-items:center; gap:7px; font-family:'Inter',sans-serif; font-size:13px; font-weight:700; color:var(--navy); margin-bottom:10px; padding:2px 4px; }
+.tsk-col-dot { width:9px; height:9px; border-radius:50%; }
+.tsk-col-count { margin-left:auto; font-size:11px; color:#a8a59c; background:#fff; border-radius:10px; padding:1px 8px; }
+.tsk-col-body { display:flex; flex-direction:column; gap:8px; min-height:40px; }
+.tsk-col-empty { font-size:12px; color:#b3aea2; text-align:center; padding:16px 0; }
+.tsk-bcard { background:#fff; border:1px solid #ebe7dd; border-radius:10px; padding:11px 12px; cursor:pointer; transition:box-shadow .14s; }
+.tsk-bcard:hover { box-shadow:0 3px 10px rgba(13,31,60,.1); }
+.tsk-bcard-top { display:flex; align-items:center; gap:8px; margin-bottom:7px; }
+.tsk-prio-dot { width:8px; height:8px; border-radius:50%; }
+.tsk-bdue { font-size:11px; color:#8a877f; }
+.tsk-bdue.over { color:#c0392b; font-weight:700; }
+.tsk-bcard-title { font-size:14px; font-weight:600; color:var(--navy); line-height:1.35; }
+.tsk-bcard-foot { display:flex; justify-content:flex-end; margin-top:8px; }
+
+
+/* ===================== SCHEDULE LOOKAHEAD ===================== */
+.sched-lookahead { margin:12px 16px 0; }
+.sched-lookahead:empty { display:none; }
+.la-head { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:10px; }
+.la-title { font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:1px; color:var(--navy); }
+.la-sub { font-size:12px; color:#8a877f; }
+.la-list { display:flex; flex-direction:column; gap:7px; }
+.la-item { display:flex; align-items:center; gap:11px; background:#fff; border:1px solid #ebe7dd; border-radius:10px; padding:10px 13px; }
+.la-when { flex-shrink:0; width:64px; font-size:11px; font-weight:700; color:#8a877f; text-transform:uppercase; letter-spacing:.5px; }
+.la-when.la-now { color:#c9a227; }
+.la-bar { flex-shrink:0; width:4px; align-self:stretch; border-radius:2px; min-height:30px; }
+.la-info { flex:1; min-width:0; }
+.la-phase { font-size:14px; font-weight:600; color:var(--navy); }
+.la-house { font-size:12px; color:#8a877f; margin-top:1px; }
+.la-dates { flex-shrink:0; font-size:11px; color:#a8a59c; font-variant-numeric:tabular-nums; }
+.la-empty { font-size:13px; color:#a8a59c; background:#fff; border:1px dashed #ddd6c8; border-radius:10px; padding:16px; text-align:center; }
+
+/* Gantt today line */
+.gantt-today-line { position:absolute; top:0; bottom:0; width:2px; background:#c0392b; z-index:5; pointer-events:none; }
+.gantt-today-flag { position:absolute; top:-2px; background:#c0392b; color:#fff; font-size:9px; font-weight:700; padding:1px 5px; border-radius:3px; transform:translateX(-50%); white-space:nowrap; z-index:6; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -3438,46 +3539,42 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
       <span>Viewing <strong id="viewAsName"></strong>'s tasks</span>
       <button onclick="clearViewAs()">Back to mine</button>
     </div>
-    <div class="task-scope-row">
-      <button class="task-scope-btn active" data-scope="mine" onclick="setTaskScope('mine')">My Tasks</button>
-      <button class="task-scope-btn" data-scope="following" onclick="setTaskScope('following')">Following</button>
+    <!-- Quick add -->
+    <div class="tsk-quickadd">
+      <span class="tsk-qa-plus">+</span>
+      <input id="taskQuickInput" class="tsk-qa-input" type="text" placeholder="Add a task and press Enter (try 'Call inspector today')" onkeydown="_quickAddTask(event)">
+      <button class="tsk-qa-btn" onclick="_quickAddTask({key:'Enter'})">Add</button>
     </div>
-    <div class="task-toolbar">
-      <div class="task-views">
-        <button class="task-view-btn active" data-view="list" onclick="setTaskView('list')">☰ List</button>
-        <button class="task-view-btn" data-view="board" onclick="setTaskView('board')">▦ Board</button>
-        <button class="task-view-btn" data-view="calendar" onclick="setTaskView('calendar')">📅 Calendar</button>
-        <button class="task-view-btn" data-view="timeline" onclick="setTaskView('timeline')">📊 Timeline</button>
+
+    <!-- Scope + view switcher -->
+    <div class="tsk-controls">
+      <div class="tsk-scope">
+        <button class="tsk-scope-btn active" data-scope="mine" onclick="setTaskScope('mine')">My tasks</button>
+        <button class="tsk-scope-btn" data-scope="following" onclick="setTaskScope('following')">Following</button>
       </div>
-      <div class="task-filters">
-        <input id="tf-search" class="task-filter-input" type="text" placeholder="🔍 Search..." oninput="_taskFilterChange()">
-        <select id="tf-priority" class="task-filter-input" onchange="_taskFilterChange()">
+      <div class="tsk-views">
+        <button class="tsk-view-btn active" data-view="list" onclick="setTaskView('list')" title="List">List</button>
+        <button class="tsk-view-btn" data-view="board" onclick="setTaskView('board')" title="Board">Board</button>
+        <button class="tsk-view-btn" data-view="calendar" onclick="setTaskView('calendar')" title="Calendar">Calendar</button>
+      </div>
+    </div>
+
+    <!-- Collapsible filters -->
+    <details class="tsk-filters-wrap">
+      <summary class="tsk-filters-toggle">Filters &amp; search</summary>
+      <div class="tsk-filters">
+        <input id="tf-search" class="tsk-filter-input" type="text" placeholder="Search tasks" oninput="_taskFilterChange()">
+        <select id="tf-priority" class="tsk-filter-input" onchange="_taskFilterChange()">
           <option value="">All priorities</option>
           <option value="urgent">Urgent</option>
           <option value="high">High</option>
           <option value="medium">Medium</option>
           <option value="low">Low</option>
         </select>
-        <select id="tf-project" class="task-filter-input" onchange="_taskFilterChange()" style="display:none;"></select>
-        <label class="task-filter-check"><input id="tf-mine" type="checkbox" onchange="_taskFilterChange()"> My tasks</label>
+        <select id="tf-project" class="tsk-filter-input" onchange="_taskFilterChange()" style="display:none;"></select>
+        <label class="tsk-filter-check"><input id="tf-mine" type="checkbox" onchange="_taskFilterChange()"> Only mine</label>
       </div>
-      <div class="task-sortgroup">
-        <select class="task-filter-input" onchange="setTaskGroup(this.value)" title="Group by">
-          <option value="status">Group: Status</option>
-          <option value="priority">Group: Priority</option>
-          <option value="assignee">Group: Assignee</option>
-          <option value="project">Group: Project</option>
-          <option value="tag">Group: Tag</option>
-        </select>
-        <select class="task-filter-input" onchange="setTaskSort(this.value)" title="Sort by">
-          <option value="none">Sort: Default</option>
-          <option value="due">Sort: Due date</option>
-          <option value="priority">Sort: Priority</option>
-          <option value="title">Sort: Title (A-Z)</option>
-        </select>
-        <button class="task-status-btn" onclick="openStatusUpdate()">◉ Status</button>
-      </div>
-    </div>
+    </details>
 
     <div id="tasksContent"></div>
   </div>
@@ -3495,6 +3592,8 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
       <button class="sched-scope-btn task-scope-btn active" data-scope="mine" onclick="setSchedScope('mine')">My Schedules</button>
       <button class="sched-scope-btn task-scope-btn" data-scope="following" onclick="setSchedScope('following')">Following</button>
     </div>
+
+    <div id="schedLookahead" class="sched-lookahead"></div>
     <div class="task-toolbar">
       <div class="task-views" style="margin-bottom:10px">
         <button class="sched-view-btn task-view-btn active" data-view="list" onclick="setSchedView('list')">&#9776; List</button>
@@ -4623,6 +4722,160 @@ async function postStatusUpdate() {
   renderTasks();
 }
 
+/* ============================================================
+   TASKS — REDESIGN (quick-add + smart grouping, cleaner board)
+   Keeps all existing data/save/load/visibility functions.
+   ============================================================ */
+
+// Quick-add: type a title, Enter to create. Optional inline @assignee / due parsing kept simple.
+async function _quickAddTask(ev) {
+  if (ev && ev.key && ev.key !== 'Enter') return;
+  var inp = document.getElementById('taskQuickInput');
+  if (!inp) return;
+  var raw = (inp.value || '').trim();
+  if (!raw) return;
+  // very light natural parsing: "today"/"tomorrow" sets due date
+  var due = '';
+  var low = raw.toLowerCase();
+  var today = new Date();
+  function iso(d){ return d.toISOString().slice(0,10); }
+  if (/\btoday\b/.test(low)) { due = iso(today); raw = raw.replace(/\btoday\b/i,'').trim(); }
+  else if (/\btomorrow\b/.test(low)) { var tm=new Date(today); tm.setDate(tm.getDate()+1); due = iso(tm); raw = raw.replace(/\btomorrow\b/i,'').trim(); }
+  var uid = _effectiveUserId();
+  var t = {
+    id: 'task_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+    title: raw, description: '',
+    ownerId: uid, assigneeId: uid, assigneeName: (currentUser && _viewAsUserId ? (window._viewAsName||'') : (currentUser? currentUser.name : '')),
+    assignee2Id: '', dueDate: due, startDate: '', priority: 'medium', status: 'todo',
+    projectId: '', tags: [], subtasks: [], comments: [], followers: [],
+    createdAt: new Date().toISOString()
+  };
+  inp.value = '';
+  await DB.set('task:' + t.id, t);
+  if (typeof _notifyTaskStakeholders === 'function') { try { _notifyTaskStakeholders(t, { type:'created' }); } catch(e){} }
+  renderTasks();
+}
+
+// Smart date buckets
+function _taskBucket(t) {
+  if ((t.status||'todo') === 'done') return 'done';
+  if (!t.dueDate) return 'someday';
+  var d = new Date(t.dueDate + 'T00:00:00');
+  var now = new Date(); now.setHours(0,0,0,0);
+  var diff = Math.round((d - now) / 86400000);
+  if (diff < 0) return 'overdue';
+  if (diff === 0) return 'today';
+  if (diff <= 7) return 'week';
+  return 'upcoming';
+}
+
+var _TASK_BUCKETS = [
+  { id:'overdue',  label:'Overdue',      accent:'#c0392b' },
+  { id:'today',    label:'Today',        accent:'#c9a227' },
+  { id:'week',     label:'This week',    accent:'#1a2b4a' },
+  { id:'upcoming', label:'Upcoming',     accent:'#5b6b8c' },
+  { id:'someday',  label:'No date',      accent:'#9aa3b2' },
+  { id:'done',     label:'Completed',    accent:'#3a7d5d' }
+];
+
+// NEW smart list: groups by Overdue / Today / This week / Upcoming / No date / Completed
+function _renderTaskSmart(tasks) {
+  if (!tasks.length) return _tasksEmpty();
+  var byBucket = {};
+  tasks.forEach(function(t){ var b=_taskBucket(t); (byBucket[b]=byBucket[b]||[]).push(t); });
+  // sort within bucket by priority then due
+  var prioRank = { urgent:0, high:1, medium:2, low:3 };
+  Object.keys(byBucket).forEach(function(k){
+    byBucket[k].sort(function(a,b){
+      var pr = (prioRank[a.priority]||9)-(prioRank[b.priority]||9);
+      if (pr!==0) return pr;
+      return (a.dueDate||'9999').localeCompare(b.dueDate||'9999');
+    });
+  });
+  var html = '';
+  _TASK_BUCKETS.forEach(function(bk){
+    var items = byBucket[bk.id];
+    if (!items || !items.length) return;
+    html += '<div class="tsk-group">' +
+      '<div class="tsk-group-hd"><span class="tsk-group-bar" style="background:' + bk.accent + '"></span>' +
+        '<span class="tsk-group-name">' + bk.label + '</span>' +
+        '<span class="tsk-group-count">' + items.length + '</span></div>' +
+      '<div class="tsk-group-body">' + items.map(_taskCardHtml).join('') + '</div>' +
+    '</div>';
+  });
+  return html;
+}
+
+// Cleaner task card
+function _taskCardHtml(t) {
+  var pm = _taskPriorityMeta(t.priority);
+  var done = (t.status||'todo') === 'done';
+  var due = t.dueDate ? _fmtTaskDate(t.dueDate) : '';
+  var overdue = t.dueDate && !done && new Date(t.dueDate+'T00:00:00') < new Date(new Date().toDateString());
+  var subCount = (t.subtasks || []).length;
+  var subDone = (t.subtasks || []).filter(function(s){ return s.done; }).length;
+  var cmtCount = (t.comments || []).length;
+  var initials = (t.assigneeName||'').trim().split(/\s+/).map(function(w){return w[0];}).slice(0,2).join('').toUpperCase();
+  return '<div class="tsk-card' + (done?' tsk-done':'') + '" onclick="openTaskDetail(\'' + t.id + '\')">' +
+    '<button class="tsk-check' + (done?' on':'') + '" onclick="event.stopPropagation();toggleTaskDone(\'' + t.id + '\')" aria-label="Toggle complete">' + (done?'\u2713':'') + '</button>' +
+    '<div class="tsk-card-body">' +
+      '<div class="tsk-card-title">' + (t.isMilestone?'<span class="tsk-ms">\u2691</span> ':'') + _esc(t.title||'Untitled') + '</div>' +
+      '<div class="tsk-card-meta">' +
+        '<span class="tsk-prio" style="--pc:' + pm.color + '">' + pm.label + '</span>' +
+        (due ? '<span class="tsk-due' + (overdue?' over':'') + '">' + (overdue?'\u26a0 ':'') + due + '</span>' : '') +
+        (subCount ? '<span class="tsk-sub">\u2713 ' + subDone + '/' + subCount + '</span>' : '') +
+        (cmtCount ? '<span class="tsk-cmt">\u{1F4AC} ' + cmtCount + '</span>' : '') +
+      '</div>' +
+    '</div>' +
+    (t.assigneeName ? '<span class="tsk-ava" title="' + _esc(t.assigneeName) + '">' + (initials||'?') + '</span>' : '') +
+  '</div>';
+}
+
+// Better board (kanban) — clean columns, colored headers, counts
+function _renderTaskBoardNew(tasks) {
+  var cols = (typeof TASK_STATUSES !== 'undefined' && TASK_STATUSES.length) ? TASK_STATUSES :
+    [{id:'todo',label:'To do'},{id:'in_progress',label:'In progress'},{id:'done',label:'Done'}];
+  var colColors = { todo:'#5b6b8c', inprogress:'#c9a227', review:'#7a5bb5', done:'#3a7d5d', blocked:'#c0392b' };
+  var html = '<div class="tsk-board">';
+  cols.forEach(function(c){
+    var items = tasks.filter(function(t){ return (t.status||'todo')===c.id; });
+    var ac = colColors[c.id] || '#1a2b4a';
+    html += '<div class="tsk-col" data-status="' + c.id + '" ondragover="event.preventDefault()" ondrop="_taskDropNew(event,\'' + c.id + '\')">' +
+      '<div class="tsk-col-hd"><span class="tsk-col-dot" style="background:' + ac + '"></span>' + c.label +
+        '<span class="tsk-col-count">' + items.length + '</span></div>' +
+      '<div class="tsk-col-body">' +
+        (items.length ? items.map(_taskBoardCardHtml).join('') : '<div class="tsk-col-empty">Nothing here</div>') +
+      '</div>' +
+    '</div>';
+  });
+  html += '</div>';
+  return html;
+}
+function _taskBoardCardHtml(t){
+  var pm = _taskPriorityMeta(t.priority);
+  var due = t.dueDate ? _fmtTaskDate(t.dueDate) : '';
+  var done = (t.status||'todo')==='done';
+  var overdue = t.dueDate && !done && new Date(t.dueDate+'T00:00:00') < new Date(new Date().toDateString());
+  var initials = (t.assigneeName||'').trim().split(/\s+/).map(function(w){return w[0];}).slice(0,2).join('').toUpperCase();
+  return '<div class="tsk-bcard" draggable="true" ondragstart="_taskDragNew(event,\'' + t.id + '\')" onclick="openTaskDetail(\'' + t.id + '\')">' +
+    '<div class="tsk-bcard-top"><span class="tsk-prio-dot" style="background:' + pm.color + '"></span>' +
+      (due ? '<span class="tsk-bdue' + (overdue?' over':'') + '">' + due + '</span>' : '') + '</div>' +
+    '<div class="tsk-bcard-title">' + _esc(t.title||'Untitled') + '</div>' +
+    (t.assigneeName ? '<div class="tsk-bcard-foot"><span class="tsk-ava sm">' + (initials||'?') + '</span></div>' : '') +
+  '</div>';
+}
+var _taskDragId = null;
+function _taskDragNew(ev, id){ _taskDragId = id; ev.dataTransfer.effectAllowed='move'; }
+async function _taskDropNew(ev, status){
+  ev.preventDefault();
+  if (!_taskDragId) return;
+  var t = await DB.get('task:' + _taskDragId);
+  if (t && (t.status||'todo')!==status){ t.status = status; await DB.set('task:'+t.id, t); }
+  _taskDragId = null;
+  renderTasks();
+}
+
+
 async function renderTasks() {
   var host = document.getElementById('tasksContent');
   if (!host) return;
@@ -4658,12 +4911,10 @@ async function renderTasks() {
   var countEl = document.getElementById('tasks-count');
   if (countEl) countEl.textContent = openCount + ' open task' + (openCount !== 1 ? 's' : '');
 
-  if (_taskView === 'list')      host.innerHTML = _renderTaskList(filtered);
-  else if (_taskView === 'board') host.innerHTML = _renderTaskBoard(filtered);
+  if (_taskView === 'list')      host.innerHTML = _renderTaskSmart(filtered);
+  else if (_taskView === 'board') host.innerHTML = _renderTaskBoardNew(filtered);
   else if (_taskView === 'calendar') host.innerHTML = _renderTaskCalendar(filtered);
   else if (_taskView === 'timeline') host.innerHTML = _renderTaskTimeline(filtered);
-
-  if (_taskView === 'board') _wireBoardDrag();
 }
 
 /* ── LIST VIEW (grouped by status section) ── */
@@ -4825,12 +5076,12 @@ function _taskCalShift(dir) {
 /* ── View + filter controls ── */
 function setTaskScope(s) {
   _taskScope = s;
-  document.querySelectorAll('.task-scope-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.scope === s); });
+  document.querySelectorAll('.tsk-scope-btn, .task-scope-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.scope === s); });
   renderTasks();
 }
 function setTaskView(v) {
   _taskView = v;
-  document.querySelectorAll('.task-view-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.view === v); });
+  document.querySelectorAll('.tsk-view-btn, .task-view-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.view === v); });
   renderTasks();
 }
 function _taskFilterChange() {
@@ -5464,11 +5715,96 @@ async function saveSchedFollowers() {
   renderSchedView();
 }
 
+/* ============================================================
+   SCHEDULE — LOOKAHEAD (next 3 weeks) + cleaner overview
+   Aggregates phases across all houses the user can see.
+   ============================================================ */
+
+// Build the "Next 3 weeks" lookahead panel from every visible schedule.
+async function _renderScheduleLookahead() {
+  var host = document.getElementById('schedLookahead');
+  if (!host) return;
+  var uid = _effectiveUserId();
+
+  // gather all schedules the user can see
+  var schedKeys = await DB.list('schedule:');
+  var scheds = (await Promise.all(schedKeys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+
+  // map project id -> name + color for labelling
+  var projKeys = await DB.list('project:');
+  var projs = (await Promise.all(projKeys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+  function projName(pid){ var p = projs.filter(function(x){return x.id===pid;})[0]; return p?p.name:''; }
+
+  var now = new Date(); now.setHours(0,0,0,0);
+  var horizon = new Date(now); horizon.setDate(horizon.getDate() + 21);
+
+  var statusColor = {};
+  (typeof SCHED_STATUSES !== 'undefined' ? SCHED_STATUSES : []).forEach(function(s){ statusColor[s.id] = s.color; });
+
+  var items = [];
+  scheds.forEach(function(sch) {
+    if (!_canSeeSched || _canSeeSched(sch, uid)) {
+      (sch.phases || []).forEach(function(ph) {
+        if (!ph.start && !ph.end) return;
+        var st = ph.start ? new Date(ph.start + 'T00:00:00') : null;
+        var en = ph.end ? new Date(ph.end + 'T00:00:00') : st;
+        // include if the phase is active or starting within the horizon, and not finished before today
+        var startsSoon = st && st >= now && st <= horizon;
+        var activeNow = st && en && st <= now && en >= now && (ph.status||'') !== 'done';
+        if (startsSoon || activeNow) {
+          items.push({
+            house: sch.address || sch.label || 'House',
+            proj: projName(sch.projectId),
+            phase: ph.name, start: st, end: en, status: ph.status || 'not_started',
+            when: st || now, active: activeNow
+          });
+        }
+      });
+    }
+  });
+
+  items.sort(function(a,b){ return (a.when||0) - (b.when||0); });
+
+  if (!items.length) {
+    host.innerHTML = '<div class="la-empty">Nothing scheduled in the next 3 weeks. Add phase dates to a house to see the lookahead.</div>';
+    return;
+  }
+
+  function fmt(d){ if(!d) return ''; return (d.getMonth()+1) + '/' + d.getDate(); }
+  function dayLabel(d){
+    if (!d) return '';
+    var diff = Math.round((d - now)/86400000);
+    if (diff < 0) return 'now';
+    if (diff === 0) return 'today';
+    if (diff === 1) return 'tomorrow';
+    if (diff <= 7) return 'in ' + diff + 'd';
+    return fmt(d);
+  }
+
+  var html = '<div class="la-head"><span class="la-title">Next 3 weeks</span>' +
+    '<span class="la-sub">' + items.length + ' phase' + (items.length!==1?'s':'') + ' to watch</span></div>' +
+    '<div class="la-list">';
+  items.slice(0, 12).forEach(function(it){
+    var col = statusColor[it.status] || '#9A948B';
+    html += '<div class="la-item">' +
+      '<span class="la-when' + (it.active?' la-now':'') + '">' + (it.active ? 'in progress' : dayLabel(it.when)) + '</span>' +
+      '<span class="la-bar" style="background:' + col + '"></span>' +
+      '<div class="la-info"><div class="la-phase">' + _esc(it.phase) + '</div>' +
+        '<div class="la-house">' + _esc(it.house) + (it.proj ? ' \u00b7 ' + _esc(it.proj) : '') + '</div></div>' +
+      (it.end ? '<span class="la-dates">' + fmt(it.start) + '\u2013' + fmt(it.end) + '</span>' : '') +
+    '</div>';
+  });
+  html += '</div>';
+  host.innerHTML = html;
+}
+
+
 async function renderScheduling() {
   var sel = document.getElementById('sched-house-sel');
   if (!sel) return;
   renderGcalSettings();
   _renderSchedScope();
+  _renderScheduleLookahead();
   var uid = _effectiveUserId();
   var keys = await DB.list('project:');
   var projs = (await Promise.all(keys.map(function(k) { return DB.get(k); }))).filter(Boolean);
@@ -5686,7 +6022,16 @@ function _renderSchedGantt(sch) {
         '<div class="tl-bar" style="left:' + (offset * dayW) + 'px;width:' + (span * dayW - 4) + 'px;background:' + sm.color + '" onclick="openPhaseEditor(' + idx + ')" title="' + _esc(p.name) + '"></div>' +
       '</div></div>';
   });
-  return '<div class="tl-scroll"><div class="tl-inner">' + head + rows + '</div></div>';
+  // Today line
+  var todayLine = '';
+  var _today = new Date(); _today.setHours(0,0,0,0);
+  if (_today >= minD && _today <= maxD) {
+    var tOffset = Math.round((_today - minD) / 86400000);
+    var tLeft = labelW + tOffset * dayW + (dayW/2);
+    todayLine = '<div class="gantt-today-line" style="left:' + tLeft + 'px"></div>' +
+                '<div class="gantt-today-flag" style="left:' + tLeft + 'px">TODAY</div>';
+  }
+  return '<div class="tl-scroll"><div class="tl-inner" style="position:relative">' + todayLine + head + rows + '</div></div>';
 }
 
 /* -- CALENDAR VIEW -- */
@@ -6127,6 +6472,40 @@ function _extractMentions(input, text) {
 }
 
 
+
+// Is the effective user (respecting view-as) an admin?
+function _effectiveIsAdmin() {
+  if (_viewAsUserId) return false;           // viewing as an employee => employee view
+  return !!(currentUser && currentUser.role === 'admin');
+}
+function _showComingSoon(containerId, label) {
+  var host = document.getElementById(containerId);
+  if (!host) return;
+  host.innerHTML = '<div class="coming-soon">' +
+    '<div class="coming-soon-icon">\ud83d\udea7</div>' +
+    '<div class="coming-soon-title">' + label + ' - Coming Soon</div>' +
+    '<div class="coming-soon-desc">This feature is being prepared for your account. Check back soon.</div>' +
+    '</div>';
+}
+
+
+// Show/hide a tab's controls (toolbars, buttons) - keeps title + content container
+function _toggleTabChrome(tabId, show) {
+  var tab = document.getElementById(tabId);
+  if (!tab) return;
+  // Hide direct-child control rows (toolbars, scope rows, view toggles) but keep the header and the content host
+  var keepIds = { 'tasksContent':1, 'schedContent':1 };
+  Array.prototype.forEach.call(tab.children, function(child) {
+    // keep the tab-header (has the title)
+    if (child.classList && child.classList.contains('tab-header')) { child.style.display = show ? '' : 'none'; return; }
+    // keep content hosts
+    if (child.id && keepIds[child.id]) { child.style.display = ''; return; }
+    // hide/show everything else (toolbars, scope rows, view buttons, gcal box, banners)
+    if (child.id === 'tasksContent' || child.id === 'schedContent') return;
+    child.style.display = show ? '' : 'none';
+  });
+}
+
 async function switchTab(tab) {
   if (typeof refreshNotifBadge === 'function') refreshNotifBadge();
   if (typeof _renderViewAsBanner === 'function') _renderViewAsBanner();
@@ -6150,8 +6529,14 @@ async function switchTab(tab) {
   if (tab === 'upgrades') await renderUpgrades();
   if (tab === 'upgradeEditor') initUpgradeEditor();
   if (tab === 'punchlist') renderPunchList();
-  if (tab === 'tasks') { _populateTaskProjectFilter(); renderTasks(); }
-  if (tab === 'scheduling') renderScheduling();
+  if (tab === 'tasks') {
+    if (_effectiveIsAdmin()) { _toggleTabChrome('tab-tasks', true); _populateTaskProjectFilter(); renderTasks(); }
+    else { _toggleTabChrome('tab-tasks', false); _showComingSoon('tasksContent', 'Tasks'); }
+  }
+  if (tab === 'scheduling') {
+    if (_effectiveIsAdmin()) { _toggleTabChrome('tab-scheduling', true); renderScheduling(); }
+    else { _toggleTabChrome('tab-scheduling', false); _showComingSoon('schedContent', 'Construction Schedule'); }
+  }
   if (tab === 'specs') renderSpecs();
 }
 
@@ -11774,7 +12159,7 @@ if (document.readyState === 'loading') {
   // Delegate: any input[type=tel] formats as the user types
   document.addEventListener('input', function(e) {
     var el = e.target;
-    if (el && el.tagName === 'INPUT' && el.type === 'tel') {
+    if (el && el.tagName === 'INPUT' && el.type === 'tel' && !el.classList.contains('pin-input') && !el.hasAttribute('data-nophone')) {
       var atEnd = el.selectionStart >= el.value.length;
       el.value = fmtPhone(el.value);
       if (atEnd) { try { el.selectionStart = el.selectionEnd = el.value.length; } catch(_) {} }
