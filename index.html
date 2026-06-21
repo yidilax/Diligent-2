@@ -3216,6 +3216,11 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .pu-thumb { width:88px; height:88px; border-radius:9px; overflow:hidden; border:1px solid var(--border); cursor:pointer; }
 .pu-thumb img { width:100%; height:100%; object-fit:cover; }
 
+
+.cu-ai-btn { flex-shrink:0; font-family:'Inter',sans-serif; font-size:12px; font-weight:700; color:#16243f; background:linear-gradient(135deg,#d4af37,#c9a227); border:0; border-radius:8px; padding:7px 12px; cursor:pointer; box-shadow:0 2px 8px rgba(201,162,39,.3); }
+.cu-ai-btn:disabled { opacity:.7; cursor:default; }
+.modal-box .cu-ai-btn { color:#16243f; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -3571,9 +3576,9 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
   <div style="background:white;border-bottom:1px solid var(--border);padding:10px 20px;font-size:12px;color:var(--muted);">
     <span id="portalUnitInfo"></span>
   </div>
-  <div id="portalUpdate" class="portal-update"></div>
-  <div id="portalStatus" class="portal-status"></div>
   <div style="overflow-y:auto;flex:1;">
+    <div id="portalUpdate" class="portal-update"></div>
+    <div id="portalStatus" class="portal-status"></div>
     <div class="upg-container" id="upgradeSheetContent">
 <!-- Dynamically filled by buildUpgradeSheet() -->
 </div>
@@ -4042,8 +4047,13 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
             </div>
 
             <div class="cust-form-sec">Update</div>
-            <div class="form-group"><label class="form-label">Message <span style="font-weight:400;opacity:.6;">(optional)</span></label>
-              <textarea class="form-input" id="cu-text" rows="4" placeholder="e.g. Framing is complete, drywall starts next week."></textarea>
+            <div class="form-group">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                <label class="form-label" style="margin-bottom:0;">Message <span style="font-weight:400;opacity:.6;">(optional)</span></label>
+                <button type="button" class="cu-ai-btn" id="cuAiBtn" onclick="cuAiWrite()">✨ Help me write</button>
+              </div>
+              <textarea class="form-input" id="cu-text" rows="4" placeholder="e.g. Framing is complete, drywall starts next week." style="margin-top:8px;"></textarea>
+              <div id="cu-ai-hint" style="display:none;font-size:12px;color:var(--gold);margin-top:6px;">✨ Type a few keywords or rough notes above, then tap Help me write to polish it.</div>
             </div>
             <div class="form-group"><label class="form-label">Photos <span style="font-weight:400;opacity:.6;">(optional)</span></label>
               <div id="cu-photos" class="cu-photo-row"></div>
@@ -8315,11 +8325,12 @@ function cuLoadUnits(address) {
 
 function cuAddPhoto() {
   var input = document.createElement('input');
-  input.type = 'file'; input.accept = 'image/*'; input.setAttribute('capture','environment');
+  input.type = 'file'; input.accept = 'image/*'; input.multiple = true;
   input.onchange = function() {
-    var file = input.files && input.files[0];
-    if (!file) return;
-    _plCompressImage(file, function(dataUrl){ _cuPhotos.push(dataUrl); cuRenderPhotos(); });
+    var files = input.files ? Array.prototype.slice.call(input.files) : [];
+    if (!files.length) return;
+    var pending = files.length;
+    files.forEach(function(file){ _plCompressImage(file, function(dataUrl){ _cuPhotos.push(dataUrl); pending--; if(pending<=0) cuRenderPhotos(); }); });
   };
   input.click();
 }
@@ -8357,6 +8368,49 @@ async function saveCustUpdate() {
   await DB.set('custupdate:' + id, rec);
   closeCustUpdateModal();
   renderCustUpdates();
+}
+
+
+async function cuAiWrite() {
+  var ta = document.getElementById('cu-text');
+  var btn = document.getElementById('cuAiBtn');
+  var notes = (ta.value || '').trim();
+  if (!notes) {
+    var hint = document.getElementById('cu-ai-hint');
+    if (hint) { hint.style.display = 'block'; ta.focus(); }
+    return;
+  }
+  // context: project/unit
+  var projName = '';
+  var projSel = document.getElementById('cu-project');
+  if (projSel && projSel.selectedIndex >= 0) projName = projSel.options[projSel.selectedIndex].text || '';
+  var house = document.getElementById('cu-house').value || '';
+  var unit = document.getElementById('cu-unit').value || '';
+  var loc = unit ? ('unit ' + unit) : (house ? house : (projName ? projName : 'their home'));
+
+  var orig = btn.textContent;
+  btn.textContent = '✨ Writing…';
+  btn.disabled = true;
+  try {
+    var prompt = 'You write short, warm progress updates that a home construction company sends to its customers about their new home. ' +
+      'Rewrite the following rough notes into a friendly, clear, professional update of 1-3 sentences. ' +
+      'Do not invent specific dates, names, or facts that are not in the notes. Keep it positive and concise. ' +
+      'Context: this update is about ' + loc + '. Return ONLY the update text, with no preamble or quotation marks.\n\nRough notes: ' + notes;
+    var resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
+    });
+    var data = await resp.json();
+    var text = (data.content || []).map(function(b){ return b.type === 'text' ? b.text : ''; }).join('').trim();
+    text = text.replace(/^["\u201c]+|["\u201d]+$/g, '').trim();
+    if (text) ta.value = text;
+  } catch (e) {
+    alert('Could not generate text right now. You can write it manually.');
+  } finally {
+    btn.textContent = orig;
+    btn.disabled = false;
+  }
 }
 
 async function deleteCustUpdate(id) {
@@ -11794,7 +11848,7 @@ function _plAddPhoto(unitId, ri, ii) {
   var input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/*';
-  input.setAttribute('capture', 'environment'); // prefer rear camera on mobile
+  // no forced capture: lets the user pick Camera OR Photo Library/Gallery
   input.onchange = function() {
     var file = input.files && input.files[0];
     if (!file) return;
