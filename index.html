@@ -3128,10 +3128,10 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 
 /* ===== Punch item photos ===== */
 .pl-photo-row { display:flex; flex-wrap:wrap; gap:7px; margin-top:8px; align-items:center; }
-.pl-photo-thumb { position:relative; width:56px; height:56px; border-radius:8px; overflow:hidden; border:1px solid var(--border); cursor:pointer; flex-shrink:0; }
+.pl-photo-thumb { position:relative; width:40px; height:40px; border-radius:7px; overflow:hidden; border:1px solid var(--border); cursor:pointer; flex-shrink:0; }
 .pl-photo-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
 .pl-photo-del { position:absolute; top:2px; right:2px; width:18px; height:18px; border-radius:50%; border:0; background:rgba(13,31,60,.75); color:#fff; font-size:10px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; }
-.pl-photo-add { font-family:'Inter',sans-serif; font-size:12px; font-weight:700; color:var(--navy); background:#f0ece3; border:1px dashed #c9c1ad; border-radius:8px; padding:8px 12px; cursor:pointer; height:56px; }
+.pl-photo-add { font-size:15px; line-height:1; color:var(--navy); background:#f0ece3; border:1px dashed #c9c1ad; border-radius:8px; width:34px; height:34px; padding:0; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; }
 .pl-photo-add:active { background:#e7e1d3; }
 .pl-photo-lightbox { position:fixed; inset:0; background:rgba(0,0,0,.9); z-index:99999; display:flex; align-items:center; justify-content:center; padding:20px; cursor:zoom-out; }
 .pl-photo-lightbox img { max-width:100%; max-height:90vh; border-radius:8px; }
@@ -10996,7 +10996,8 @@ function closeSidebar() {
 // ════════════════════════════════════════════
 
 var _plPhase = 'before';
-var _plScope = 'mine'; // 'mine' | 'following' | 'find'
+var _plScope = 'mine';
+var _plUnitMode = 'view'; // 'mine' | 'following' | 'find'
 function setPunchScope(s) {
   _plScope = s;
   document.querySelectorAll('.pl-scope-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.scope === s); });
@@ -11108,6 +11109,7 @@ if (!window._plCardDelegated) {
   document.addEventListener('click', function(e) {
     var card = e.target.closest && e.target.closest('.pl-unit-card');
     if (card && card.dataset.uid && !e.target.closest('button')) {
+      _plUnitMode = 'view';
       openUnit(card.dataset.uid);
     }
   });
@@ -11198,53 +11200,105 @@ async function openUnit(unitId) {
   var unitData = await DB.get('punch:' + _plPhase + ':' + unitId);
   if (!unitData) return;
   _plCurrentUnit = unitData;
+  if (typeof _plUnitMode === 'undefined') _plUnitMode = 'view';
 
   var container = document.getElementById('punchUnitList');
   container.innerHTML = '';
+  var isEdit = (_plUnitMode === 'edit');
 
-  // Header
+  // ---- Totals ----
+  var totalAll = 0, doneAll = 0;
+  (unitData.rooms || []).forEach(function(r){ (r.items||[]).forEach(function(it){ totalAll++; if(it.done) doneAll++; }); });
+  var pctAll = totalAll ? Math.round(doneAll/totalAll*100) : 0;
+
+  // ---- Header ----
   var header = document.createElement('div');
-  header.style.cssText = 'margin-bottom:20px;';
-  header.innerHTML = '<button onclick="renderPunchList()" style="background:none;border:none;font-size:13px;font-weight:700;color:var(--navy);cursor:pointer;font-family:Inter,sans-serif;padding:0;margin-bottom:12px;">← Back to List</button>' +
-    '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">' +
+  header.style.cssText = 'margin-bottom:18px;';
+  header.innerHTML = '<button onclick="renderPunchList()" style="background:none;border:none;font-size:13px;font-weight:700;color:var(--navy);cursor:pointer;font-family:Inter,sans-serif;padding:0;margin-bottom:12px;">\u2190 Back to List</button>' +
+    '<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;">' +
       '<div>' +
-        '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:22px;letter-spacing:2px;color:var(--navy);">' + unitData.address + ' · Unit ' + unitData.unit + '</div>' +
-        '<div style="font-size:12px;color:var(--muted);">' + (unitData.customerName || '') + '</div>' +
+        '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:22px;letter-spacing:2px;color:var(--navy);">' + (unitData.address||'') + ' \u00b7 Unit ' + (unitData.unit||'') + '</div>' +
+        '<div style="font-size:12px;color:var(--muted);">' + (unitData.customerName || '') + (totalAll ? ('  \u00b7  ' + doneAll + '/' + totalAll + ' done (' + pctAll + '%)') : '') + '</div>' +
       '</div>' +
       '<div style="display:flex;gap:8px;">' +
-        '<button onclick="openAddRoom()" class="btn-primary" style="font-size:13px;">+ Add Room</button>' +
-        '<button onclick="deleteUnit(\'' + unitId + '\')" style="font-size:13px;padding:10px 14px;background:none;border:1.5px solid #FECACA;border-radius:var(--radius);color:#DC2626;cursor:pointer;font-family:Inter,sans-serif;">Delete</button>' +
+        (isEdit
+          ? '<button onclick="_plSetUnitMode(\'view\',\'' + unitId + '\')" class="btn-primary" style="font-size:13px;">\u2713 Done</button>'
+          : '<button onclick="_plSetUnitMode(\'edit\',\'' + unitId + '\')" style="font-size:13px;padding:10px 16px;background:var(--gold);color:var(--navy);border:none;border-radius:var(--radius);font-family:Inter,sans-serif;font-weight:700;cursor:pointer;">\u270e Edit</button>') +
       '</div>' +
     '</div>';
   container.appendChild(header);
 
-  // Rooms
-  if (!unitData.rooms || unitData.rooms.length === 0) {
-    var empty = document.createElement('div');
-    empty.style.cssText = 'text-align:center;padding:40px;color:var(--muted);';
-    empty.innerHTML = '<div style="font-size:32px;margin-bottom:8px;">🏠</div><div style="font-size:13px;">No rooms yet. Tap "+ Add Room" to start.</div>';
-    container.appendChild(empty);
+  if (isEdit) {
+    // toolbar with Add Room + Delete unit (edit mode only)
+    var tb = document.createElement('div');
+    tb.style.cssText = 'display:flex;gap:8px;margin-bottom:14px;';
+    tb.innerHTML = '<button onclick="openAddRoom()" class="btn-primary" style="font-size:13px;">+ Add Room</button>' +
+      '<button onclick="deleteUnit(\'' + unitId + '\')" style="font-size:13px;padding:10px 14px;background:none;border:1.5px solid #FECACA;border-radius:var(--radius);color:#DC2626;cursor:pointer;font-family:Inter,sans-serif;">Delete Unit</button>';
+    container.appendChild(tb);
+  }
+
+  var rooms = unitData.rooms || [];
+
+  // ---- VIEW MODE: clean, only rooms that have items ----
+  if (!isEdit) {
+    var roomsWithItems = rooms.filter(function(r){ return (r.items||[]).length > 0; });
+    if (roomsWithItems.length === 0) {
+      var empty = document.createElement('div');
+      empty.className = 'tab-empty';
+      empty.innerHTML = '<div class="tab-empty-icon">\ud83d\udccb</div><div class="tab-empty-desc">No punch items yet.</div><button class="tab-empty-btn" onclick="_plSetUnitMode(\'edit\',\'' + unitId + '\')">\u270e Edit to add</button>';
+      container.appendChild(empty);
+      return;
+    }
+    rooms.forEach(function(room, ri) {
+      if ((room.items||[]).length === 0) return; // hide empty rooms
+      var card = document.createElement('div');
+      card.className = 'pl-room-card';
+      var dc = (room.items||[]).filter(function(it){return it.done;}).length;
+      card.innerHTML = '<div class="pl-room-header"><span class="pl-room-name">' + room.name + '</span>' +
+        '<span style="font-size:11px;color:var(--muted);">' + dc + '/' + (room.items||[]).length + '</span></div>';
+      var list = document.createElement('div');
+      (room.items||[]).forEach(function(item, ii) {
+        var el = document.createElement('div');
+        el.className = 'pl-item' + (item.done ? ' pl-item-done' : '');
+        el.innerHTML = '<label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;flex:1;">' +
+          '<input type="checkbox"' + (item.done ? ' checked' : '') + ' onchange="toggleItem(\'' + unitId + '\',' + ri + ',' + ii + ',this.checked)" style="margin-top:2px;width:16px;height:16px;accent-color:var(--navy);flex-shrink:0;">' +
+          '<div style="flex:1;">' +
+            '<div class="pl-item-text">' + item.text + '</div>' +
+            (item.sub ? '<div class="pl-item-sub">\ud83d\udd27 ' + item.sub + '</div>' : '') +
+            (item.note ? '<div class="pl-item-note">' + item.note + '</div>' : '') +
+            _plPhotoStripView(item) +
+          '</div>' +
+        '</label>';
+        list.appendChild(el);
+      });
+      card.appendChild(list);
+      container.appendChild(card);
+    });
     return;
   }
 
-  unitData.rooms.forEach(function(room, ri) {
+  // ---- EDIT MODE: full editable layout ----
+  if (rooms.length === 0) {
+    var e2 = document.createElement('div');
+    e2.style.cssText = 'text-align:center;padding:40px;color:var(--muted);';
+    e2.innerHTML = '<div style="font-size:32px;margin-bottom:8px;">\ud83c\udfe0</div><div style="font-size:13px;">No rooms yet. Tap "+ Add Room" to start.</div>';
+    container.appendChild(e2);
+    return;
+  }
+  rooms.forEach(function(room, ri) {
     var roomCard = document.createElement('div');
     roomCard.className = 'pl-room-card';
-
     var doneCount = (room.items || []).filter(function(it) { return it.done; }).length;
     var totalCount = (room.items || []).length;
-
     roomCard.innerHTML = '<div class="pl-room-header">' +
       '<span class="pl-room-name" id="room-name-' + ri + '">' + room.name + '</span>' +
       '<div style="display:flex;align-items:center;gap:8px;">' +
         '<span style="font-size:11px;color:var(--muted);">' + doneCount + '/' + totalCount + '</span>' +
-        '<button onclick="renameRoom(\'' + unitId + '\',' + ri + ')" style="font-size:12px;padding:4px 8px;border:none;background:none;color:var(--muted);cursor:pointer;" title="Rename">✏️</button>' +
+        '<button onclick="renameRoom(\'' + unitId + '\',' + ri + ')" style="font-size:12px;padding:4px 8px;border:none;background:none;color:var(--muted);cursor:pointer;" title="Rename">\u270f\ufe0f</button>' +
         '<button onclick="openAddItem(\'' + unitId + '\',' + ri + ')" style="font-size:12px;padding:4px 10px;border:1px solid var(--border);border-radius:var(--radius);background:white;cursor:pointer;font-family:Inter,sans-serif;">+ Item</button>' +
-        '<button onclick="deleteRoom(\'' + unitId + '\',' + ri + ')" style="font-size:12px;padding:4px 8px;border:none;background:none;color:#DC2626;cursor:pointer;">🗑</button>' +
+        '<button onclick="deleteRoom(\'' + unitId + '\',' + ri + ')" style="font-size:12px;padding:4px 8px;border:none;background:none;color:#DC2626;cursor:pointer;">\ud83d\uddd1</button>' +
       '</div>' +
     '</div>';
-
-    // Items
     var itemsList = document.createElement('div');
     itemsList.style.cssText = 'padding:0;';
     (room.items || []).forEach(function(item, ii) {
@@ -11254,26 +11308,47 @@ async function openUnit(unitId) {
         '<input type="checkbox"' + (item.done ? ' checked' : '') + ' onchange="toggleItem(\'' + unitId + '\',' + ri + ',' + ii + ',this.checked)" style="margin-top:2px;width:16px;height:16px;accent-color:var(--navy);flex-shrink:0;">' +
         '<div style="flex:1;">' +
           '<div class="pl-item-text">' + item.text + '</div>' +
-          (item.sub ? '<div class="pl-item-sub">🔧 ' + item.sub + '</div>' : '') +
+          (item.sub ? '<div class="pl-item-sub">\ud83d\udd27 ' + item.sub + '</div>' : '') +
           (item.note ? '<div class="pl-item-note">' + item.note + '</div>' : '') +
           _plPhotoStrip(item, unitId, ri, ii) +
         '</div>' +
       '</label>' +
-      '<button onclick="deleteItem(\'' + unitId + '\',' + ri + ',' + ii + ')" style="font-size:12px;padding:4px 8px;border:none;background:none;color:#DC2626;cursor:pointer;flex-shrink:0;">✕</button>';
+      '<button onclick="openEditItem(\'' + unitId + '\',' + ri + ',' + ii + ')" style="font-size:13px;padding:4px 6px;border:none;background:none;cursor:pointer;flex-shrink:0;color:var(--navy);">\u270e</button>' +
+      '<button onclick="deleteItem(\'' + unitId + '\',' + ri + ',' + ii + ')" style="font-size:12px;padding:4px 8px;border:none;background:none;color:#DC2626;cursor:pointer;flex-shrink:0;">\u2715</button>';
       itemsList.appendChild(itemEl);
     });
-
     if ((room.items || []).length === 0) {
-      itemsList.innerHTML = '<div style="padding:12px 16px;font-size:12px;color:var(--muted);font-style:italic;">No items — tap "+ Item" to add.</div>';
+      itemsList.innerHTML = '<div style="padding:12px 16px;font-size:12px;color:var(--muted);font-style:italic;">No items \u2014 tap "+ Item" to add.</div>';
     }
-
     roomCard.appendChild(itemsList);
     container.appendChild(roomCard);
   });
 }
 
+function _plSetUnitMode(mode, unitId) {
+  _plUnitMode = mode;
+  openUnit(unitId);
+}
+
+// Read-only photo strip for view mode (thumbnails only, tap to enlarge, no add/delete)
+function _plPhotoStripView(item) {
+  var photos = item.photos || [];
+  if (!photos.length) return '';
+  return '<div class="pl-photo-row">' + photos.map(function(ph){
+    return '<div class="pl-photo-thumb" onclick="event.stopPropagation();_plLightbox(\'' + encodeURIComponent(ph) + '\')"><img src="' + ph + '"></div>';
+  }).join('') + '</div>';
+}
+function _plLightbox(src) {
+  var overlay = document.createElement('div');
+  overlay.className = 'pl-photo-lightbox';
+  overlay.onclick = function(){ overlay.remove(); };
+  overlay.innerHTML = '<img src="' + decodeURIComponent(src) + '"><div class="pl-photo-lightbox-close">\u2715</div>';
+  document.body.appendChild(overlay);
+}
+
 function openAddRoom() {
   var popup = document.createElement('div');
+  popup.id = 'pl_add_room_popup';
   popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
   popup.innerHTML = '<div style="background:white;border-radius:14px;padding:24px;width:100%;max-width:380px;">' +
     '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:20px;letter-spacing:2px;color:var(--navy);margin-bottom:16px;">Add Room</div>' +
@@ -11294,10 +11369,10 @@ async function saveRoom() {
   if (!name || !_plCurrentUnit) return;
   if (!_plCurrentUnit.rooms) _plCurrentUnit.rooms = [];
   _plCurrentUnit.rooms.push({ name: name, items: [] });
+  _plUnitMode = 'edit';
   await DB.set('punch:' + _plPhase + ':' + _plCurrentUnit.id, _plCurrentUnit);
-  document.querySelectorAll('div[style*="position:fixed"]').forEach(function(p) {
-    if (p.querySelector('#pl_room_name')) p.remove();
-  });
+  var rp = document.getElementById('pl_add_room_popup');
+  if (rp) rp.remove();
   openUnit(_plCurrentUnit.id);
 }
 
@@ -11377,6 +11452,62 @@ function openAddItem(unitId, roomIdx) {
   setTimeout(function() { var inp = document.getElementById('pl_item_text'); if (inp) inp.focus(); }, 100);
 }
 
+function openEditItem(unitId, roomIdx, itemIdx) {
+  var unit = _plCurrentUnit;
+  if (!unit) return;
+  var room = unit.rooms[roomIdx];
+  var item = room && room.items[itemIdx];
+  if (!item) return;
+  var roomOpts = (unit.rooms || []).map(function(r, ri) {
+    return '<option value="' + ri + '"' + (ri === roomIdx ? ' selected' : '') + '>' + (r.name || ('Room ' + (ri+1))) + '</option>';
+  }).join('');
+  var popup = document.createElement('div');
+  popup.id = 'pl_edit_item_popup';
+  popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  popup.innerHTML = '<div style="background:white;border-radius:14px;padding:24px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;">' +
+    '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:20px;letter-spacing:2px;color:var(--navy);margin-bottom:16px;">Edit Item</div>' +
+    '<div class="form-group"><label class="form-label">Description <span style="color:var(--gold);">*</span></label>' +
+      '<input class="form-input" id="pl_edit_text" value="' + (item.text || '').replace(/"/g,'&quot;') + '"></div>' +
+    '<div class="form-group"><label class="form-label">Sub Contractor</label>' +
+      '<input class="form-input" id="pl_edit_sub" value="' + (item.sub || '').replace(/"/g,'&quot;') + '" placeholder="e.g. Painter, Electrician\u2026" list="pl_sub_list2">' +
+      '<datalist id="pl_sub_list2"><option value="Painter"><option value="Electrician"><option value="Plumber"><option value="Carpenter"><option value="Tile"><option value="General"></datalist></div>' +
+    '<div class="form-group"><label class="form-label">Room</label>' +
+      '<select class="form-input" id="pl_edit_room">' + roomOpts + '</select></div>' +
+    '<div class="form-group"><label class="form-label">Notes (optional)</label>' +
+      '<input class="form-input" id="pl_edit_note" value="' + (item.note || '').replace(/"/g,'&quot;') + '"></div>' +
+    '<div style="display:flex;gap:10px;margin-top:4px;">' +
+      '<button onclick="document.getElementById(\'pl_edit_item_popup\').remove()" style="flex:1;padding:12px;border:1.5px solid var(--border);border-radius:8px;background:white;cursor:pointer;font-family:Inter,sans-serif;font-size:13px;">Cancel</button>' +
+      '<button onclick="saveEditItem(\'' + unitId + '\',' + roomIdx + ',' + itemIdx + ')" style="flex:2;padding:12px;border:none;border-radius:8px;background:var(--navy);color:white;cursor:pointer;font-family:Bebas Neue,sans-serif;font-size:16px;letter-spacing:1px;">Save Changes</button>' +
+    '</div>' +
+  '</div>';
+  popup.addEventListener('click', function(e) { if (e.target === popup) popup.remove(); });
+  document.body.appendChild(popup);
+  setTimeout(function() { var inp = document.getElementById('pl_edit_text'); if (inp) inp.focus(); }, 100);
+}
+
+async function saveEditItem(unitId, roomIdx, itemIdx) {
+  var text = (document.getElementById('pl_edit_text') || {}).value.trim();
+  var sub = (document.getElementById('pl_edit_sub') || {}).value.trim();
+  var note = (document.getElementById('pl_edit_note') || {}).value.trim();
+  var newRoom = parseInt((document.getElementById('pl_edit_room') || {}).value, 10);
+  if (!text || !_plCurrentUnit) return;
+  var room = _plCurrentUnit.rooms[roomIdx];
+  var item = room && room.items[itemIdx];
+  if (!item) return;
+  item.text = text; item.sub = sub; item.note = note;
+  // move to another room if changed
+  if (!isNaN(newRoom) && newRoom !== roomIdx && _plCurrentUnit.rooms[newRoom]) {
+    room.items.splice(itemIdx, 1);
+    if (!_plCurrentUnit.rooms[newRoom].items) _plCurrentUnit.rooms[newRoom].items = [];
+    _plCurrentUnit.rooms[newRoom].items.push(item);
+  }
+  await DB.set('punch:' + _plPhase + ':' + unitId, _plCurrentUnit);
+  var popup = document.getElementById('pl_edit_item_popup');
+  if (popup) popup.remove();
+  openUnit(unitId);
+}
+
+
 
 // ===== Punch list item photos =====
 function _plPhotoStrip(item, unitId, ri, ii) {
@@ -11388,7 +11519,7 @@ function _plPhotoStrip(item, unitId, ri, ii) {
     '</div>';
   }).join('');
   return '<div class="pl-photo-row" onclick="event.stopPropagation();">' + thumbs +
-    '<button class="pl-photo-add" onclick="event.stopPropagation();_plAddPhoto(\'' + unitId + '\',' + ri + ',' + ii + ')">\ud83d\udcf7 Photo</button>' +
+    '<button class="pl-photo-add" title="Add photo" onclick="event.stopPropagation();_plAddPhoto(\'' + unitId + '\',' + ri + ',' + ii + ')">\ud83d\udcf7</button>' +
   '</div>';
 }
 
@@ -11472,6 +11603,7 @@ async function saveItem(unitId, roomIdx) {
   if (!room) return;
   if (!room.items) room.items = [];
   room.items.push({ id: 'pi_' + Date.now(), text: text, sub: sub, note: note, done: false });
+  _plUnitMode = 'edit';
   await DB.set('punch:' + _plPhase + ':' + unitId, _plCurrentUnit);
   var popup = document.getElementById('pl_add_item_popup');
   if (popup) popup.remove();
@@ -11598,6 +11730,18 @@ function generateSubReport(units) {
     return;
   }
 
+  // Determine if the report is scoped to a single unit and/or single sub
+  var _subKeys = Object.keys(bySub);
+  var _singleSub = (_subKeys.length === 1);
+  var _unitSet = {};
+  filteredUnits.forEach(function(u){ _unitSet[u.address + ' \u00b7 Unit ' + u.unit] = (u.customerName || ''); });
+  var _unitNames = Object.keys(_unitSet);
+  var _singleUnit = (_unitNames.length === 1);
+  // Build a context subtitle showing the fixed unit/sub when single
+  var _ctxBits = [];
+  if (_singleUnit) { _ctxBits.push(_unitNames[0] + (_unitSet[_unitNames[0]] ? ' (' + _unitSet[_unitNames[0]] + ')' : '')); }
+  if (_singleSub) { _ctxBits.push('\ud83d\udd27 ' + _subKeys[0]); }
+
   // Build printable HTML
   var phase = _plPhase === 'before' ? 'Before Move-In' : 'After Move-In';
   var date = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
@@ -11628,19 +11772,19 @@ function generateSubReport(units) {
     '<div class="no-print"><button class="print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button></div>' +
     '<div class="report-header">' +
       '<div class="report-title">Diligent Developers — Punch List</div>' +
-      '<div class="report-sub">' + phase + ' &nbsp;·&nbsp; Generated ' + date + '</div>' +
+      '<div class="report-sub">' + phase + ' &nbsp;\u00b7&nbsp; Generated ' + date + (_ctxBits.length ? ' &nbsp;\u00b7&nbsp; ' + _ctxBits.join(' &nbsp;\u00b7&nbsp; ') : '') + '</div>' +
     '</div>';
 
   Object.keys(bySub).sort().forEach(function(sub) {
     var items = bySub[sub];
     reportHtml += '<div class="sub-section">' +
-      '<div class="sub-name">🔧 ' + sub + ' &nbsp;(' + items.length + ' item' + (items.length !== 1 ? 's' : '') + ')</div>' +
-      '<div class="sub-body">' +
+      (_singleSub ? '' : '<div class="sub-name">🔧 ' + sub + ' &nbsp;(' + items.length + ' item' + (items.length !== 1 ? 's' : '') + ')</div>') +
+      '<div class="sub-body"' + (_singleSub ? ' style="border-radius:6px;border-top:1px solid #E5E7EB;"' : '') + '>' +
       items.map(function(it) {
         return '<div class="item-row' + (it.done ? ' done' : '') + '">' +
           '<div class="item-checkbox' + (it.done ? ' checked' : '') + '"></div>' +
           '<div style="flex:1;">' +
-            '<div class="item-unit">' + it.unit + '</div>' +
+            (_singleUnit ? '' : '<div class="item-unit">' + it.unit + '</div>') +
             '<div class="item-room">' + it.room + '</div>' +
             '<div class="item-text">' + it.text + '</div>' +
             (it.note ? '<div class="item-note">' + it.note + '</div>' : '') +
