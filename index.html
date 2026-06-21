@@ -2960,6 +2960,37 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .tas-title { cursor:pointer; }
 .tas-title:active { color:#c9a227; }
 
+
+/* ===== Customer form (nicer) ===== */
+.cust-form { max-height:62vh; overflow-y:auto; }
+.cust-form-sec { font-family:'Inter',sans-serif; font-size:11px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; color:#c9a227; margin:16px 0 8px; padding-bottom:5px; border-bottom:1px solid #eee7d6; }
+.cust-form-sec:first-child { margin-top:0; }
+.cust-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.cust-form .req { color:#c0392b; }
+.cust-form-footer { position:sticky; bottom:0; background:#fff; border-top:1px solid #eee7d6; padding-top:12px; gap:10px; }
+.cust-save-btn { min-width:150px; font-weight:700; }
+
+/* ===== Customer cards (nicer) ===== */
+.cust-card { background:#fff; border:1px solid #ebe7dd; border-radius:13px; margin-bottom:11px; overflow:hidden; transition:box-shadow .15s, transform .12s; }
+.cust-card:hover { box-shadow:0 4px 16px rgba(13,31,60,.09); }
+.cust-card-inner { padding:15px 16px; display:flex; align-items:center; gap:13px; }
+.cust-avatar { width:46px; height:46px; border-radius:50%; background:linear-gradient(135deg,#1a2b4a,#2d4470); color:#fff; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:20px; flex-shrink:0; letter-spacing:1px; }
+.cust-card-name { font-family:'Inter',sans-serif; font-size:16px; font-weight:700; color:#16233d; }
+.cust-card-meta { font-family:'Inter',sans-serif; font-size:12.5px; color:#8a8470; margin-top:3px; line-height:1.5; }
+.cust-card-arrow { margin-left:auto; color:#c4bca8; font-size:22px; flex-shrink:0; }
+.cust-card-actions { border-top:1px solid #f3eee2; padding:9px 14px; display:flex; justify-content:flex-end; gap:8px; position:relative; z-index:2; }
+
+
+/* ===== Punch list scope ===== */
+.pl-scope-row { display:inline-flex; background:#ece8df; border-radius:9px; padding:3px; margin-bottom:14px; }
+.pl-scope-btn { border:0; background:transparent; font-family:'Inter',sans-serif; font-size:13px; font-weight:700; color:#6b6862; padding:8px 16px; border-radius:7px; cursor:pointer; }
+.pl-scope-btn.active { background:#1a2b4a; color:#fff; }
+.pl-search-input { width:100%; box-sizing:border-box; font-family:'Inter',sans-serif; font-size:14px; padding:11px 14px; border:1.5px solid var(--border); border-radius:9px; margin-bottom:14px; }
+.pl-search-input:focus { outline:none; border-color:var(--gold); }
+.pl-foll-btn { font-family:'Inter',sans-serif; font-size:12px; font-weight:700; padding:6px 12px; border-radius:7px; border:1.5px solid var(--navy); background:#fff; color:var(--navy); cursor:pointer; }
+.pl-foll-btn.on { background:var(--navy); color:#fff; }
+.pl-owner-tag { font-size:11px; color:var(--muted); font-weight:600; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -3639,33 +3670,39 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
             <span id="custModalTitle">Add Customer</span>
             <button onclick="closeCustomerModal()" class="modal-close">✕</button>
           </div>
-          <div class="modal-body">
-            <div id="cust-vis-toggle"></div>
-            <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="cust-name" placeholder="Customer name"></div>
-            <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="cust-email" placeholder="email@example.com"></div>
-            <div class="form-group"><label class="form-label">Phone (Home)</label><input class="form-input" type="tel" id="cust-phone-home" placeholder="Home phone"></div>
-            <div class="form-group"><label class="form-label">Phone (Cell 1)</label><input class="form-input" type="tel" id="cust-phone-cell1" placeholder="Cell phone 1"></div>
-            <div class="form-group"><label class="form-label">Phone (Cell 2)</label><input class="form-input" type="tel" id="cust-phone-cell2" placeholder="Cell phone 2"></div>
+          <div class="modal-body cust-form">
+            <div class="cust-form-sec">Contact</div>
+            <div class="form-group"><label class="form-label">Full name <span class="req">*</span></label><input class="form-input" id="cust-name" placeholder="e.g. Sam Cohen"></div>
+            <div class="form-group"><label class="form-label">Email <span class="req">*</span></label><input class="form-input" type="email" id="cust-email" placeholder="email@example.com"></div>
+            <div class="cust-form-grid">
+              <div class="form-group"><label class="form-label">Home phone</label><input class="form-input" type="tel" id="cust-phone-home" placeholder="845-000-0000"></div>
+              <div class="form-group"><label class="form-label">Cell 1</label><input class="form-input" type="tel" id="cust-phone-cell1" placeholder="845-000-0000"></div>
+            </div>
+            <div class="form-group"><label class="form-label">Cell 2</label><input class="form-input" type="tel" id="cust-phone-cell2" placeholder="Optional"></div>
+
+            <div class="cust-form-sec">Property</div>
             <div class="form-group"><label class="form-label">Project</label>
               <select class="form-input" id="cust-project" onchange="loadProjectUnits(this.value)">
-                <option value="">— Select Project —</option>
+                <option value="">— Select project —</option>
               </select>
             </div>
-            <div class="form-group"><label class="form-label">Address / Building</label>
+            <div class="form-group"><label class="form-label">Address / building</label>
               <select class="form-input" id="cust-house" onchange="loadHouseUnits(this.value)">
-                <option value="">— Select Address —</option>
+                <option value="">— Select address —</option>
               </select>
             </div>
             <div class="form-group"><label class="form-label">Unit</label>
               <select class="form-input" id="cust-unit">
-                <option value="">— Select Unit —</option>
+                <option value="">— Select unit —</option>
               </select>
             </div>
-            <div class="form-group"><label class="form-label">Notes</label><textarea class="form-input" id="cust-notes" rows="2" placeholder="Optional notes"></textarea></div>
+
+            <div class="cust-form-sec">Notes</div>
+            <div class="form-group"><textarea class="form-input" id="cust-notes" rows="2" placeholder="Optional notes about this customer"></textarea></div>
           </div>
-          <div class="modal-footer">
+          <div class="modal-footer cust-form-footer">
             <button class="btn-logout" onclick="closeCustomerModal()">Cancel</button>
-            <button class="btn-primary" id="custSaveBtn" onclick="saveCustomer()">Save Customer</button>
+            <button class="btn-primary cust-save-btn" id="custSaveBtn" onclick="saveCustomer()">Save Customer</button>
           </div>
         </div>
       </div>
@@ -3742,6 +3779,16 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
           <button onclick="openAddPunchUnit()" class="btn-primary" style="font-size:13px;">+ Add Unit</button>
           <button onclick="openSubReport()" style="font-size:13px;padding:10px 16px;background:var(--gold);color:var(--navy);border:none;border-radius:var(--radius);font-family:'Inter',sans-serif;font-weight:700;cursor:pointer;">📄 Sub Report</button>
         </div>
+      </div>
+
+      <!-- Scope: Mine / Following / Find -->
+      <div class="pl-scope-row">
+        <button class="pl-scope-btn active" data-scope="mine" onclick="setPunchScope('mine')">My lists</button>
+        <button class="pl-scope-btn" data-scope="following" onclick="setPunchScope('following')">Following</button>
+        <button class="pl-scope-btn" data-scope="find" onclick="setPunchScope('find')">Find</button>
+      </div>
+      <div id="pl-search-wrap" style="display:none;">
+        <input id="pl-search" class="pl-search-input" type="text" placeholder="Search all public punch lists by address, unit, or owner" oninput="renderPunchList()">
       </div>
 
       <!-- Unit list -->
@@ -7692,7 +7739,7 @@ async function saveCustomer() {
     const updated = Object.assign({}, existing, {
       name, email, phoneHome, phoneCell1, phoneCell2,
       projectId, projectName, houseAddress, unit, notes,
-      visibility: _currentVisibility || existing.visibility || 'public',
+      visibility: 'public',
       updatedAt: new Date().toISOString(),
       updatedBy: currentUser ? currentUser.name : 'Admin'
     });
@@ -7702,7 +7749,7 @@ async function saveCustomer() {
       id: 'customer_' + Date.now(),
       name, email, phoneHome, phoneCell1, phoneCell2,
       projectId, projectName, houseAddress, unit, notes,
-      visibility: _currentVisibility || 'public',
+      visibility: 'public',
       ownerId: currentUser ? currentUser.id : 'admin',
       ownerName: currentUser ? currentUser.name : 'Admin',
       createdAt: new Date().toISOString(),
@@ -7731,7 +7778,7 @@ async function renderCustomers() {
     return;
   }
   var all = (await Promise.all(keys.map(function(k) { return DB.get(k); }))).filter(Boolean);
-  var customers = all.filter(canSee).sort(function(a,b) { return (a.name||'').localeCompare(b.name||''); });
+  var customers = all.sort(function(a,b) { return (a.name||'').localeCompare(b.name||''); });
   if (countEl) countEl.textContent = customers.length + ' customer' + (customers.length!==1?'s':'');
   if (customers.length === 0) {
     listEl.innerHTML = '<div class="tab-empty"><div class="tab-empty-icon">👥</div><div class="tab-empty-title">No Customers Visible</div></div>';
@@ -9193,9 +9240,7 @@ async function showCustomerForm(customerId) {
       }
     }
   }
-  _currentVisibility = (customerId && (await DB.get('customer:' + customerId)) || {}).visibility || 'public';
-  var visSlot = document.getElementById('cust-vis-toggle');
-  if (visSlot) visSlot.innerHTML = visToggleHtml(_currentVisibility);
+  _currentVisibility = 'public';
   openModal('addCustomer');
 }
 
@@ -10604,7 +10649,26 @@ function closeSidebar() {
 // PUNCH LIST SYSTEM
 // ════════════════════════════════════════════
 
-var _plPhase = 'before'; // 'before' | 'after'
+var _plPhase = 'before';
+var _plScope = 'mine'; // 'mine' | 'following' | 'find'
+function setPunchScope(s) {
+  _plScope = s;
+  document.querySelectorAll('.pl-scope-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.scope === s); });
+  var sw = document.getElementById('pl-search-wrap');
+  if (sw) sw.style.display = (s === 'find') ? 'block' : 'none';
+  renderPunchList();
+}
+function _plIsOwner(u) { return u && currentUser && (u.ownerId === currentUser.id || (!u.ownerId && currentUser.role === 'admin')); }
+function _plIsFollower(u) { return u && currentUser && (u.followers || []).indexOf(currentUser.id) !== -1; }
+async function togglePunchFollow(phase, unitId) {
+  var u = await DB.get('punch:' + phase + ':' + unitId);
+  if (!u) return;
+  u.followers = u.followers || [];
+  var i = u.followers.indexOf(currentUser.id);
+  if (i === -1) u.followers.push(currentUser.id); else u.followers.splice(i, 1);
+  await DB.set('punch:' + phase + ':' + unitId, u);
+  renderPunchList();
+} // 'before' | 'after'
 
 function setPunchPhase(phase) {
   _plPhase = phase;
@@ -10627,7 +10691,22 @@ async function renderPunchList() {
     return;
   }
   var all = (await Promise.all(keys.map(function(k) { return DB.get(k); }))).filter(Boolean);
-  var units = all.filter(canSee).sort(function(a,b) {
+  var q = (document.getElementById('pl-search') && document.getElementById('pl-search').value || '').toLowerCase().trim();
+  var units = all.filter(function(u) {
+    if (_plScope === 'mine') return _plIsOwner(u);
+    if (_plScope === 'following') return _plIsFollower(u) && !_plIsOwner(u);
+    // find: all PUBLIC lists (and your own), optionally matching search
+    if (_plScope === 'find') {
+      var visible = _plIsOwner(u) || (u.visibility || 'public') === 'public' || (currentUser && currentUser.role === 'admin');
+      if (!visible) return false;
+      if (q) {
+        var hay = ((u.address||'') + ' ' + (u.unit||'') + ' ' + (u.customerName||'') + ' ' + (u.ownerName||'')).toLowerCase();
+        return hay.indexOf(q) !== -1;
+      }
+      return true;
+    }
+    return false;
+  }).sort(function(a,b) {
     return (a.address + a.unit).localeCompare(b.address + b.unit);
   });
   if (units.length === 0) {
@@ -10649,7 +10728,7 @@ async function renderPunchList() {
             '<div class="pl-unit-name">' + (u.address||'—') + ' · Unit ' + (u.unit||'—') + '</div>' +
             visBadge(u) +
           '</div>' +
-          '<div class="pl-unit-meta">' + (u.customerName||'') + (u.ownerName ? ' · by ' + u.ownerName : '') + '</div>' +
+          '<div class="pl-unit-meta">' + (u.customerName||'') + (u.ownerName ? ' \u00b7 by ' + u.ownerName : '') + '</div>' +(!_plIsOwner(u) ? '<button class="pl-foll-btn' + (_plIsFollower(u)?' on':'') + '" onclick="event.stopPropagation();togglePunchFollow(\'' + u.phase + '\',\'' + u.id + '\')">' + (_plIsFollower(u) ? '\u2713 Following' : '+ Follow') + '</button>' : '') +
         '</div>' +
         '<div style="text-align:right;flex-shrink:0;">' +
           '<div style="font-family:Bebas Neue,sans-serif;font-size:22px;color:' + statusColor + ';">' + pct + '%</div>' +
