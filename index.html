@@ -2991,6 +2991,192 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .pl-foll-btn.on { background:var(--navy); color:#fff; }
 .pl-owner-tag { font-size:11px; color:var(--muted); font-weight:600; }
 
+
+/* ===================== PREMIUM DARK MODALS ===================== */
+.modal-overlay { backdrop-filter:blur(3px); }
+.modal-box {
+  background:linear-gradient(170deg,#1a2b4a 0%,#16243f 55%,#101c33 100%);
+  border:1px solid rgba(201,162,39,.25);
+  border-radius:18px;
+  width:100%; max-width:440px;
+  box-shadow:0 24px 70px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.03) inset;
+  overflow:hidden;
+  display:flex; flex-direction:column;
+  max-height:90vh;
+  animation:modalpop .26s cubic-bezier(.2,.9,.25,1);
+}
+@keyframes modalpop { from { opacity:0; transform:translateY(18px) scale(.97); } to { opacity:1; transform:none; } }
+
+.modal-header {
+  background:transparent;
+  padding:20px 22px 16px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  border-radius:0;
+  position:relative;
+}
+.modal-header::after { content:''; position:absolute; left:22px; bottom:-1px; width:46px; height:3px; background:var(--gold); border-radius:2px; }
+.modal-header span, #custModalTitle, #projModalTitle { font-family:'Bebas Neue',sans-serif; font-size:26px; letter-spacing:1.5px; color:#fff; }
+.modal-close { color:rgba(255,255,255,.55); font-size:24px; transition:color .15s, transform .15s; }
+.modal-close:hover { color:#fff; transform:rotate(90deg); }
+
+.modal-body { padding:20px 22px; background:transparent; }
+.modal-body.cust-form, .cust-form { max-height:60vh; overflow-y:auto; }
+
+/* Form fields on dark surface */
+.modal-box .form-label, .modal-box .cust-form-sec { color:rgba(255,255,255,.55); }
+.modal-box .cust-form-sec { color:var(--gold); border-bottom:1px solid rgba(255,255,255,.08); }
+.modal-box .form-input {
+  background:rgba(255,255,255,.06);
+  border:1.5px solid rgba(255,255,255,.12);
+  color:#fff;
+  border-radius:10px;
+  padding:12px 14px;
+  transition:border-color .18s, background .18s, box-shadow .18s;
+}
+.modal-box .form-input::placeholder { color:rgba(255,255,255,.35); }
+.modal-box .form-input:focus {
+  border-color:var(--gold);
+  background:rgba(255,255,255,.09);
+  box-shadow:0 0 0 3px rgba(201,162,39,.15);
+}
+.modal-box select.form-input { color:#fff; }
+.modal-box select.form-input option { background:#16243f; color:#fff; }
+.modal-box .req { color:#ffb4a8; }
+
+/* Footer + buttons */
+.modal-footer, .cust-form-footer {
+  padding:16px 22px 20px;
+  border-top:1px solid rgba(255,255,255,.08);
+  background:rgba(0,0,0,.15);
+  display:flex; gap:12px; align-items:center;
+  position:sticky; bottom:0;
+}
+.modal-box .btn-primary, .cust-save-btn {
+  flex:1;
+  background:linear-gradient(135deg,#d4af37,#c9a227);
+  color:#16243f;
+  border:0;
+  border-radius:11px;
+  padding:14px;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:19px; letter-spacing:1.5px;
+  cursor:pointer;
+  box-shadow:0 6px 18px rgba(201,162,39,.35);
+  transition:transform .12s, box-shadow .15s, filter .15s;
+}
+.modal-box .btn-primary:hover, .cust-save-btn:hover { filter:brightness(1.06); box-shadow:0 8px 22px rgba(201,162,39,.45); }
+.modal-box .btn-primary:active, .cust-save-btn:active { transform:translateY(1px) scale(.99); }
+.modal-box .btn-logout {
+  flex:0 0 auto;
+  width:auto; padding:13px 20px;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.16);
+  color:rgba(255,255,255,.75);
+  border-radius:11px;
+  font-weight:600; font-size:14px;
+  font-family:'Inter',sans-serif;
+}
+.modal-box .btn-logout:hover { background:rgba(255,255,255,.12); color:#fff; }
+
+/* house rows / dynamic inputs inside modal also get dark treatment */
+.modal-box input, .modal-box select, .modal-box textarea { color:#fff; }
+.modal-box input[type=text], .modal-box input[type=email], .modal-box input[type=tel], .modal-box textarea {
+  background:rgba(255,255,255,.06); border:1.5px solid rgba(255,255,255,.12); border-radius:10px;
+}
+.modal-box input::placeholder, .modal-box textarea::placeholder { color:rgba(255,255,255,.35); }
+
+/* vis toggle inside dark modal */
+.modal-box .vis-toggle-wrap span { color:rgba(255,255,255,.7) !important; }
+
+
+/* House rows inside dark project modal */
+.modal-box [id^="houserow_"] {
+  background:rgba(255,255,255,.05) !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+  border-radius:12px !important;
+}
+.modal-box [id^="houserow_"] .form-label { color:rgba(255,255,255,.55); }
+.modal-box [id^="houserow_"] input,
+.modal-box [id^="houserow_"] textarea {
+  background:rgba(255,255,255,.06) !important;
+  border:1.5px solid rgba(255,255,255,.14) !important;
+  color:#fff !important;
+}
+.modal-box [id^="houserow_"] input::placeholder { color:rgba(255,255,255,.35) !important; }
+/* + Add Address button + remove (x) button */
+.modal-box [onclick*="addHouseRow"] {
+  background:rgba(201,162,39,.15) !important;
+  border:1px solid rgba(201,162,39,.4) !important;
+  color:#e9c75a !important;
+  border-radius:10px !important;
+  padding:11px 16px !important;
+  font-weight:700 !important;
+  cursor:pointer;
+}
+.modal-box [onclick*="removeHouseRow"] {
+  background:rgba(255,255,255,.08) !important;
+  border:1px solid rgba(255,255,255,.18) !important;
+  color:rgba(255,255,255,.7) !important;
+  border-radius:8px !important;
+}
+/* Visibility toggle buttons in dark modal */
+.modal-box .vis-toggle-wrap > div { background:rgba(255,255,255,.06) !important; }
+.modal-box .vis-toggle-wrap button { color:rgba(255,255,255,.6) !important; }
+.modal-box .vis-toggle-wrap button[style*="background: var(--navy)"],
+.modal-box .vis-toggle-wrap button.active { background:var(--gold) !important; color:#16243f !important; }
+
+
+/* ===== Punch item photos ===== */
+.pl-photo-row { display:flex; flex-wrap:wrap; gap:7px; margin-top:8px; align-items:center; }
+.pl-photo-thumb { position:relative; width:56px; height:56px; border-radius:8px; overflow:hidden; border:1px solid var(--border); cursor:pointer; flex-shrink:0; }
+.pl-photo-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+.pl-photo-del { position:absolute; top:2px; right:2px; width:18px; height:18px; border-radius:50%; border:0; background:rgba(13,31,60,.75); color:#fff; font-size:10px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; }
+.pl-photo-add { font-family:'Inter',sans-serif; font-size:12px; font-weight:700; color:var(--navy); background:#f0ece3; border:1px dashed #c9c1ad; border-radius:8px; padding:8px 12px; cursor:pointer; height:56px; }
+.pl-photo-add:active { background:#e7e1d3; }
+.pl-photo-lightbox { position:fixed; inset:0; background:rgba(0,0,0,.9); z-index:99999; display:flex; align-items:center; justify-content:center; padding:20px; cursor:zoom-out; }
+.pl-photo-lightbox img { max-width:100%; max-height:90vh; border-radius:8px; }
+.pl-photo-lightbox-close { position:absolute; top:18px; right:20px; color:#fff; font-size:26px; cursor:pointer; }
+
+
+/* ===== Dashboard Today panel ===== */
+.dash-today { margin-bottom:22px; }
+.dash-today:empty { display:none; }
+.dash-today-hd { font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:1.5px; color:var(--navy); margin-bottom:10px; }
+.dash-today-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; }
+.dash-today-card { background:#fff; border:1px solid #ebe7dd; border-radius:12px; padding:14px; text-align:left; cursor:pointer; transition:box-shadow .14s, transform .1s; }
+.dash-today-card:active { transform:scale(.98); }
+.dash-today-card:hover { box-shadow:0 4px 14px rgba(13,31,60,.08); }
+.dash-today-card.urgent { border-left:4px solid #b3261e; }
+.dash-today-card.gold { border-left:4px solid var(--gold); }
+.dash-today-num { font-family:'Bebas Neue',sans-serif; font-size:30px; line-height:1; color:var(--navy); }
+.dash-today-card.urgent .dash-today-num { color:#b3261e; }
+.dash-today-lbl { font-family:'Inter',sans-serif; font-size:12px; color:var(--muted); margin-top:3px; }
+.dash-today-clear { background:#fff; border:1px dashed #d8d0bd; border-radius:12px; padding:18px; text-align:center; font-size:13px; color:var(--muted); }
+.dash-today-phases { display:flex; flex-wrap:wrap; gap:7px; margin-top:10px; }
+.dash-phase-pill { font-family:'Inter',sans-serif; font-size:12px; font-weight:600; color:var(--navy); background:#e8edf5; border:1px solid #cfd9e8; border-radius:14px; padding:4px 11px; }
+
+
+/* ===== Customer status (where's my home) ===== */
+.portal-status:empty { display:none; }
+.ps-card { max-width:760px; margin:14px auto 0; padding:16px 18px; background:linear-gradient(135deg,#1a2b4a,#23375c); border-radius:14px; color:#fff; }
+.ps-top { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:10px; }
+.ps-title { font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:1px; }
+.ps-pct { font-family:'Bebas Neue',sans-serif; font-size:24px; color:var(--gold); }
+.ps-bar { height:9px; background:rgba(255,255,255,.15); border-radius:5px; overflow:hidden; }
+.ps-bar-fill { height:100%; background:linear-gradient(90deg,#d4af37,#c9a227); border-radius:5px; transition:width .5s ease; }
+.ps-line { font-family:'Inter',sans-serif; font-size:14px; font-weight:600; margin-top:11px; }
+.ps-next { font-family:'Inter',sans-serif; font-size:12px; color:rgba(255,255,255,.65); margin-top:3px; }
+
+
+/* ===== Empty states (consistent, directional) ===== */
+.tab-empty { text-align:center; padding:54px 24px; }
+.tab-empty-icon { font-size:44px; margin-bottom:14px; opacity:.85; }
+.tab-empty-title { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:1px; color:var(--navy); margin-bottom:7px; }
+.tab-empty-desc { font-family:'Inter',sans-serif; font-size:13.5px; color:var(--muted); max-width:320px; margin:0 auto 18px; line-height:1.5; }
+.tab-empty-btn { background:var(--navy); color:#fff; border:0; border-radius:10px; padding:12px 22px; font-family:'Inter',sans-serif; font-weight:700; font-size:14px; cursor:pointer; transition:background .15s, transform .1s; }
+.tab-empty-btn:hover { background:#0f1d36; }
+.tab-empty-btn:active { transform:scale(.98); }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -3346,6 +3532,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
   <div style="background:white;border-bottom:1px solid var(--border);padding:10px 20px;font-size:12px;color:var(--muted);">
     <span id="portalUnitInfo"></span>
   </div>
+  <div id="portalStatus" class="portal-status"></div>
   <div style="overflow-y:auto;flex:1;">
     <div class="upg-container" id="upgradeSheetContent">
 <!-- Dynamically filled by buildUpgradeSheet() -->
@@ -3553,6 +3740,9 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
         <div style="font-size:12px;color:var(--muted);margin-top:3px;" id="dashDate"></div>
       </div>
 
+      <!-- Today panel -->
+      <div id="dashToday" class="dash-today"></div>
+
       <!-- Stat cards -->
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px;">
         <div class="dash-stat" onclick="switchTab('projects')" style="cursor:pointer;">
@@ -3687,14 +3877,18 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
               </select>
             </div>
             <div class="form-group"><label class="form-label">Address / building</label>
-              <select class="form-input" id="cust-house" onchange="loadHouseUnits(this.value)">
+              <select class="form-input" id="cust-house" onchange="onCustHouseChange(this.value)">
                 <option value="">— Select address —</option>
+                <option value="__manual__">+ Type a new address</option>
               </select>
+              <input class="form-input" id="cust-house-manual" type="text" placeholder="Type the address" style="display:none;margin-top:8px;" oninput="document.getElementById('cust-unit-manual').dataset.touched='1';">
             </div>
             <div class="form-group"><label class="form-label">Unit</label>
-              <select class="form-input" id="cust-unit">
+              <select class="form-input" id="cust-unit" onchange="onCustUnitChange(this.value)">
                 <option value="">— Select unit —</option>
+                <option value="__manual__">+ Type a unit</option>
               </select>
+              <input class="form-input" id="cust-unit-manual" type="text" placeholder="Type the unit (e.g. 2B)" style="display:none;margin-top:8px;">
             </div>
 
             <div class="cust-form-sec">Notes</div>
@@ -4553,6 +4747,45 @@ async function customerAccess() {
 // ════════════════════════════════════════════
 let _custSaveKey = '';
 
+
+// Customer-facing "where's my home" status from the unit's schedule
+async function _renderCustomerStatus(projId, address, unit) {
+  var host = document.getElementById('portalStatus');
+  if (!host) return;
+  host.innerHTML = '';
+  if (!projId || !address) return;
+  var key;
+  try { key = _schedKey(projId, address, unit); } catch(e) { return; }
+  var sch = await DB.get(key);
+  // fall back: schedule may be keyed without unit
+  if (!sch) { try { sch = await DB.get(_schedKey(projId, address)); } catch(e){} }
+  if (!sch || !sch.phases || !sch.phases.length) return;
+
+  var phases = sch.phases;
+  var total = phases.length;
+  var done = phases.filter(function(p){ return (p.status||'') === 'done'; }).length;
+  var current = phases.filter(function(p){ return (p.status||'') === 'in_progress'; })[0];
+  var delayed = phases.filter(function(p){ return (p.status||'') === 'delayed'; })[0];
+  // next not-started phase
+  var next = phases.filter(function(p){ return (p.status||'not_started') === 'not_started'; })[0];
+  var pct = total ? Math.round(done/total*100) : 0;
+
+  var statusLine;
+  if (done === total) statusLine = 'Your home is complete!';
+  else if (delayed) statusLine = 'Current phase: ' + _esc(delayed.name) + ' (delayed)';
+  else if (current) statusLine = 'Currently in: ' + _esc(current.name);
+  else if (next) statusLine = 'Up next: ' + _esc(next.name);
+  else statusLine = 'Construction in progress';
+
+  host.innerHTML =
+    '<div class="ps-card">' +
+      '<div class="ps-top"><span class="ps-title">Your Home\u2019s Progress</span><span class="ps-pct">' + pct + '%</span></div>' +
+      '<div class="ps-bar"><div class="ps-bar-fill" style="width:' + pct + '%"></div></div>' +
+      '<div class="ps-line">' + statusLine + '</div>' +
+      (next && current ? '<div class="ps-next">Up next: ' + _esc(next.name) + '</div>' : '') +
+    '</div>';
+}
+
 async function openCustomerPortal(name, address, unit, saveKey, selections) {
   _custSaveKey = saveKey;
   // Store customer info for submission
@@ -4572,10 +4805,12 @@ async function openCustomerPortal(name, address, unit, saveKey, selections) {
   var pName = document.getElementById('portalCustomerName');
   var pUnit = document.getElementById('portalUnitInfo');
   if (pName) pName.textContent = name;
+  try { var _sp = (_selectedProject && _selectedProject.id) || ''; _renderCustomerStatus(_sp, address, unit); } catch(e) {}
   if (pUnit) pUnit.textContent = '📍 ' + address + '  ·  Unit ' + unit;
 
-  // Restore saved selections
-  var savedSel = selections || {};
+  // Restore saved selections (the param is the whole saved submission object)
+  var _saved = selections || {};
+  var savedSel = (_saved && _saved.selections) ? _saved.selections : _saved;
   if (Object.keys(savedSel).length > 0) {
     Object.keys(savedSel).forEach(function(radioName) {
       if (radioName === '_submittedAt') return;
@@ -7295,6 +7530,70 @@ async function switchTab(tab) {
 // ════════════════════════════════════════════
 // DASHBOARD STATS
 // ════════════════════════════════════════════
+
+async function _renderDashToday() {
+  var host = document.getElementById('dashToday');
+  if (!host) return;
+  var now = new Date(); now.setHours(0,0,0,0);
+  var todayISO = now.toISOString().slice(0,10);
+
+  // 1. Tasks due today / overdue (for the effective user)
+  var dueToday = 0, overdue = 0, nextTasks = [];
+  try {
+    var tasks = await _loadAllTasks();
+    tasks.forEach(function(t) {
+      if ((t.status||'todo') === 'done' || !t.dueDate) return;
+      if (t.dueDate === todayISO) { dueToday++; nextTasks.push(t); }
+      else if (t.dueDate < todayISO) { overdue++; nextTasks.push(t); }
+    });
+  } catch(e) {}
+
+  // 2. Schedule phases active today
+  var activePhases = [];
+  try {
+    var schedKeys = await DB.list('schedule:');
+    var scheds = (await Promise.all(schedKeys.map(function(k){return DB.get(k);}))).filter(Boolean);
+    scheds.forEach(function(sch) {
+      if (typeof _canSeeSched === 'function' && !_canSeeSched(sch, _effectiveUserId())) return;
+      (sch.phases||[]).forEach(function(ph) {
+        if (!ph.start || !ph.end) return;
+        if (ph.start <= todayISO && ph.end >= todayISO && (ph.status||'') !== 'done') {
+          activePhases.push({ name: ph.name, house: sch.address || sch.label || 'House' });
+        }
+      });
+    });
+  } catch(e) {}
+
+  // 3. New submissions (last 7 days)
+  var newSubs = 0;
+  try {
+    var subs = getStoredSubmissions ? getStoredSubmissions() : [];
+    var weekAgo = Date.now() - 7*86400000;
+    subs.forEach(function(s){ if (s._submittedAt && s._submittedAt > weekAgo) newSubs++; });
+  } catch(e) {}
+
+  if (dueToday === 0 && overdue === 0 && activePhases.length === 0 && newSubs === 0) {
+    host.innerHTML = '<div class="dash-today-hd">Today</div>' +
+      '<div class="dash-today-clear">You\'re all caught up. Nothing needs attention right now.</div>';
+    return;
+  }
+
+  var html = '<div class="dash-today-hd">Today at a glance</div><div class="dash-today-grid">';
+  if (overdue > 0) html += '<button class="dash-today-card urgent" onclick="switchTab(\'tasks\')"><div class="dash-today-num">' + overdue + '</div><div class="dash-today-lbl">Overdue task' + (overdue!==1?'s':'') + '</div></button>';
+  if (dueToday > 0) html += '<button class="dash-today-card" onclick="switchTab(\'tasks\')"><div class="dash-today-num">' + dueToday + '</div><div class="dash-today-lbl">Due today</div></button>';
+  if (activePhases.length > 0) html += '<button class="dash-today-card" onclick="switchTab(\'scheduling\')"><div class="dash-today-num">' + activePhases.length + '</div><div class="dash-today-lbl">Phase' + (activePhases.length!==1?'s':'') + ' in progress</div></button>';
+  if (newSubs > 0) html += '<button class="dash-today-card gold" onclick="switchTab(\'upgrades\')"><div class="dash-today-num">' + newSubs + '</div><div class="dash-today-lbl">New submission' + (newSubs!==1?'s':'') + '</div></button>';
+  html += '</div>';
+
+  // active phase detail line
+  if (activePhases.length > 0) {
+    html += '<div class="dash-today-phases">' + activePhases.slice(0,3).map(function(p){
+      return '<span class="dash-phase-pill">' + _esc(p.name) + ' \u00b7 ' + _esc(p.house) + '</span>';
+    }).join('') + '</div>';
+  }
+  host.innerHTML = html;
+}
+
 async function refreshDashboard() {
   // Welcome message
   var welcomeEl = document.getElementById('dashWelcome');
@@ -7395,6 +7694,7 @@ async function refreshDashboard() {
       '</div>';
     }).join('') +
   '</div>';
+  try { await _renderDashToday(); } catch(e) {}
 }
 
 // ════════════════════════════════════════════
@@ -7550,7 +7850,7 @@ async function renderProjects() {
   var listEl = document.getElementById('projectsList');
   var countEl = document.getElementById('proj-count');
   if (keys.length === 0) {
-    listEl.innerHTML = '<div class="tab-empty"><div class="tab-empty-icon">🏗️</div><div class="tab-empty-title">No Projects Yet</div><div class="tab-empty-desc">Create your first project to manage addresses and units.</div></div>';
+    listEl.innerHTML = '<div class="tab-empty"><div class="tab-empty-icon">🏗️</div><div class="tab-empty-title">No Projects Yet</div><div class="tab-empty-desc">Create your first project to manage addresses and units.</div><button class="tab-empty-btn" onclick="showProjectForm()">+ New Project</button></div>';
     if (countEl) countEl.textContent = '0 projects';
     return;
   }
@@ -7614,10 +7914,10 @@ async function openModal(id) {
     const sel = document.getElementById('cust-project');
     sel.innerHTML = '<option value="">— Select project —</option>' +
       _projectsCache.map(p => '<option value="' + p.id + '">' + p.name + '</option>').join('');
-    document.getElementById('cust-house').innerHTML = '<option value="">— Select house —</option>';
-    document.getElementById('cust-house').disabled = true;
-    document.getElementById('cust-unit').innerHTML = '<option value="">— Select unit —</option>';
-    document.getElementById('cust-unit').disabled = true;
+    document.getElementById('cust-house').innerHTML = '<option value="">— Select house —</option><option value="__manual__">+ Type a new address</option>';
+    document.getElementById('cust-house').disabled = false;
+    document.getElementById('cust-unit').innerHTML = '<option value="">— Select unit —</option><option value="__manual__">+ Type a unit</option>';
+    document.getElementById('cust-unit').disabled = false;
   }
   document.getElementById('modal-' + id).classList.add('open');
 }
@@ -7641,23 +7941,6 @@ function onCustProjectChange() {
   houseEl.disabled = false;
 }
 
-function onCustHouseChange() {
-  const projId = document.getElementById('cust-project').value;
-  const houseIdx = document.getElementById('cust-house').value;
-  const unitEl = document.getElementById('cust-unit');
-  unitEl.innerHTML = '<option value="">— Select unit —</option>';
-
-  if (!projId || houseIdx === '') { unitEl.disabled = true; return; }
-  const proj = _projectsCache.find(p => p.id === projId);
-  const house = proj && proj.houses ? proj.houses[parseInt(houseIdx)] : null;
-  if (!house || !house.units || house.units.length === 0) {
-    unitEl.disabled = true;
-    return;
-  }
-  unitEl.innerHTML = '<option value="">— Select unit —</option>' +
-    house.units.map(u => '<option value="' + u + '">' + u + '</option>').join('');
-  unitEl.disabled = false;
-}
 
 function closeModal(id) {
   document.getElementById('modal-' + id).classList.remove('open');
@@ -7722,8 +8005,13 @@ async function saveCustomer() {
   const phoneCell1 = document.getElementById('cust-phone-cell1').value.trim();
   const phoneCell2 = document.getElementById('cust-phone-cell2').value.trim();
   const projectId = document.getElementById('cust-project').value;
-  const houseIdx = document.getElementById('cust-house').value;
-  const unit = document.getElementById('cust-unit').value;
+  var houseSelVal = document.getElementById('cust-house').value;
+  var unitSelVal = document.getElementById('cust-unit').value;
+  var manualAddr = (document.getElementById('cust-house-manual') || {}).value || '';
+  var manualUnit = (document.getElementById('cust-unit-manual') || {}).value || '';
+  const houseIdx = (houseSelVal === '__manual__') ? '' : houseSelVal;
+  const unit = (unitSelVal === '__manual__') ? manualUnit.trim() : unitSelVal;
+  manualAddr = manualAddr.trim();
   const notes = document.getElementById('cust-notes').value.trim();
   if (!name || !email) { alert('Please enter customer name and email.'); return; }
   var projectName = '', houseAddress = '';
@@ -7734,6 +8022,7 @@ async function saveCustomer() {
       houseAddress = proj.houses[parseInt(houseIdx)].address;
     }
   }
+  if (manualAddr) { houseAddress = manualAddr; }
   if (_editingCustomerId) {
     const existing = await DB.get('customer:' + _editingCustomerId);
     const updated = Object.assign({}, existing, {
@@ -7773,7 +8062,7 @@ async function renderCustomers() {
   var listEl = document.getElementById('customersList');
   var countEl = document.getElementById('cust-count');
   if (keys.length === 0) {
-    listEl.innerHTML = '<div class="tab-empty"><div class="tab-empty-icon">👥</div><div class="tab-empty-title">No Customers Yet</div></div>';
+    listEl.innerHTML = '<div class="tab-empty"><div class="tab-empty-icon">👥</div><div class="tab-empty-title">No Customers Yet</div><div class="tab-empty-desc">Add your first customer to track their contact info and property.</div><button class="tab-empty-btn" onclick="showCustomerForm()">+ Add Customer</button></div>';
     if (countEl) countEl.textContent = '0 customers';
     return;
   }
@@ -8955,6 +9244,17 @@ function printMySelections() {
   w.document.close();
 }
 
+// Office: open a customer's upgrade sheet as a printable PDF (with signature + date)
+async function printSubmissionPdf(key) {
+  var d = await DB.get(key);
+  if (!d) { alert('Submission not found.'); return; }
+  if (!d.selections && d._submittedAt === undefined) { alert('This unit has no submitted selections yet.'); return; }
+  var prev = window._lastSubmission;
+  window._lastSubmission = d;
+  try { printMySelections(); } finally { window._lastSubmission = prev; }
+}
+
+
 async function submitUpgrades() {
   var msgEl = document.getElementById('submitMsg');
   msgEl.style.display = 'none';
@@ -9252,8 +9552,8 @@ function closeCustomerModal() {
 async function loadProjectUnits(projectId) {
   var houseSel = document.getElementById('cust-house');
   var unitSel = document.getElementById('cust-unit');
-  houseSel.innerHTML = '<option value="">— Select Address —</option>';
-  unitSel.innerHTML = '<option value="">— Select Unit —</option>';
+  houseSel.innerHTML = '<option value="">— Select Address —</option><option value="__manual__">+ Type a new address</option>';
+  unitSel.innerHTML = '<option value="">— Select Unit —</option><option value="__manual__">+ Type a unit</option>';
   if (!projectId) return;
   var proj = _projectsCache.find(function(p) { return p.id === projectId; });
   if (!proj) {
@@ -9269,7 +9569,7 @@ async function loadProjectUnits(projectId) {
 
 function loadHouseUnits(houseIdx) {
   var unitSel = document.getElementById('cust-unit');
-  unitSel.innerHTML = '<option value="">— Select Unit —</option>';
+  unitSel.innerHTML = '<option value="">— Select Unit —</option><option value="__manual__">+ Type a unit</option>';
   var projId = document.getElementById('cust-project').value;
   var proj = _projectsCache.find(function(p) { return p.id === projId; });
   if (!proj || !proj.houses || !proj.houses[parseInt(houseIdx)]) return;
@@ -9278,6 +9578,25 @@ function loadHouseUnits(houseIdx) {
     unitSel.innerHTML += '<option value="' + u + '">' + u + '</option>';
   });
 }
+
+function onCustHouseChange(val) {
+  var manual = document.getElementById('cust-house-manual');
+  if (val === '__manual__') {
+    manual.style.display = 'block'; manual.focus();
+    // when typing a manual address, also switch unit to manual
+    document.getElementById('cust-unit').value = '__manual__';
+    onCustUnitChange('__manual__');
+  } else {
+    manual.style.display = 'none'; manual.value = '';
+    loadHouseUnits(val);
+  }
+}
+function onCustUnitChange(val) {
+  var manual = document.getElementById('cust-unit-manual');
+  if (val === '__manual__') { manual.style.display = 'block'; }
+  else { manual.style.display = 'none'; manual.value = ''; }
+}
+
 
 // ════════════════════════════════════════════
 // EMPLOYEES
@@ -10419,6 +10738,15 @@ async function resetCustomerPin(saveKey) {
   await renderUpgrades();
 }
 
+
+function _officeViewPdf() {
+  var s = window._officeDetailSub;
+  if (!s) { alert('No submission selected.'); return; }
+  var prev = window._lastSubmission;
+  window._lastSubmission = s;
+  try { printMySelections(); } finally { window._lastSubmission = prev; }
+}
+
 function showCustomerDetail(idx) {
   var subs = window._filteredSubs || _cachedSubmissions || [];
   var s = subs[idx];
@@ -10426,7 +10754,11 @@ function showCustomerDetail(idx) {
   var sel = s.selections || {};
 
   // Info card
-  var html = '<button onclick="closeCustomerDetail()" style="background:none;border:none;font-size:13px;font-weight:700;color:var(--navy);cursor:pointer;font-family:Inter,sans-serif;padding:0;margin-bottom:16px;">← Back</button>' +
+  window._officeDetailSub = s;
+  var html = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px;">' +
+    '<button onclick="closeCustomerDetail()" style="background:none;border:none;font-size:13px;font-weight:700;color:var(--navy);cursor:pointer;font-family:Inter,sans-serif;padding:0;">← Back</button>' +
+    '<button onclick="_officeViewPdf()" style="background:var(--gold);color:var(--navy);border:none;border-radius:8px;padding:9px 16px;font-family:Inter,sans-serif;font-weight:700;font-size:13px;cursor:pointer;">📄 View / Save PDF</button>' +
+  '</div>' +
     '<div class="cust-detail-card">' +
       '<div class="cust-detail-hdr">Customer Info</div>' +
       '<div class="cust-detail-grid">' +
@@ -10684,10 +11016,10 @@ async function renderPunchList() {
   if (!container) return;
   var keys = await DB.list('punch:' + _plPhase + ':');
   if (!keys || keys.length === 0) {
-    container.innerHTML = '<div style="text-align:center;padding:48px 20px;color:var(--muted);">' +
-      '<div style="font-size:36px;margin-bottom:10px;">📋</div>' +
-      '<div style="font-size:14px;font-weight:600;color:var(--navy);margin-bottom:6px;">No units yet</div>' +
-      '<div style="font-size:13px;">Tap "+ Add Unit" to create your first punch list.</div></div>';
+    container.innerHTML = '<div class="tab-empty"><div class="tab-empty-icon">📋</div>' +
+      '<div class="tab-empty-title">No Punch Lists Yet</div>' +
+      '<div class="tab-empty-desc">Add a unit to start tracking punch-list items room by room.</div>' +
+      '<button class="tab-empty-btn" onclick="openAddPunchUnit()">+ Add Unit</button></div>';
     return;
   }
   var all = (await Promise.all(keys.map(function(k) { return DB.get(k); }))).filter(Boolean);
@@ -10710,7 +11042,16 @@ async function renderPunchList() {
     return (a.address + a.unit).localeCompare(b.address + b.unit);
   });
   if (units.length === 0) {
-    container.innerHTML = '<div style="text-align:center;padding:48px 20px;color:var(--muted);"><div style="font-size:36px;">🔒</div><div style="font-size:13px;margin-top:8px;">No visible punch lists yet.</div></div>';
+    var emptyMsg = _plScope === 'following'
+      ? 'You\'re not following any punch lists yet. Use Find to search and follow one.'
+      : (_plScope === 'find'
+          ? 'No public punch lists match your search.'
+          : 'You have no punch lists for this phase yet.');
+    var emptyBtn = (_plScope === 'mine')
+      ? '<button class="tab-empty-btn" onclick="openAddPunchUnit()">+ Add Unit</button>'
+      : (_plScope === 'following' ? '<button class="tab-empty-btn" onclick="setPunchScope(\'find\')">Find punch lists</button>' : '');
+    container.innerHTML = '<div class="tab-empty"><div class="tab-empty-icon">📋</div>' +
+      '<div class="tab-empty-desc">' + emptyMsg + '</div>' + emptyBtn + '</div>';
     return;
   }
   container.innerHTML = units.map(function(u) {
@@ -10901,6 +11242,7 @@ async function openUnit(unitId) {
           '<div class="pl-item-text">' + item.text + '</div>' +
           (item.sub ? '<div class="pl-item-sub">🔧 ' + item.sub + '</div>' : '') +
           (item.note ? '<div class="pl-item-note">' + item.note + '</div>' : '') +
+          _plPhotoStrip(item, unitId, ri, ii) +
         '</div>' +
       '</label>' +
       '<button onclick="deleteItem(\'' + unitId + '\',' + ri + ',' + ii + ')" style="font-size:12px;padding:4px 8px;border:none;background:none;color:#DC2626;cursor:pointer;flex-shrink:0;">✕</button>';
@@ -11019,6 +11361,92 @@ function openAddItem(unitId, roomIdx) {
   popup.addEventListener('click', function(e) { if (e.target === popup) popup.remove(); });
   document.body.appendChild(popup);
   setTimeout(function() { var inp = document.getElementById('pl_item_text'); if (inp) inp.focus(); }, 100);
+}
+
+
+// ===== Punch list item photos =====
+function _plPhotoStrip(item, unitId, ri, ii) {
+  var photos = item.photos || [];
+  var thumbs = photos.map(function(ph, pi) {
+    return '<div class="pl-photo-thumb" onclick="event.stopPropagation();_plViewPhoto(\'' + unitId + '\',' + ri + ',' + ii + ',' + pi + ')">' +
+      '<img src="' + ph + '" alt="photo">' +
+      '<button class="pl-photo-del" onclick="event.stopPropagation();_plDeletePhoto(\'' + unitId + '\',' + ri + ',' + ii + ',' + pi + ')">\u2715</button>' +
+    '</div>';
+  }).join('');
+  return '<div class="pl-photo-row" onclick="event.stopPropagation();">' + thumbs +
+    '<button class="pl-photo-add" onclick="event.stopPropagation();_plAddPhoto(\'' + unitId + '\',' + ri + ',' + ii + ')">\ud83d\udcf7 Photo</button>' +
+  '</div>';
+}
+
+function _plAddPhoto(unitId, ri, ii) {
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.setAttribute('capture', 'environment'); // prefer rear camera on mobile
+  input.onchange = function() {
+    var file = input.files && input.files[0];
+    if (!file) return;
+    _plCompressImage(file, function(dataUrl) {
+      _plSavePhoto(unitId, ri, ii, dataUrl);
+    });
+  };
+  input.click();
+}
+
+// Compress to max 900px wide, quality ~0.72 (matches the app's image pipeline)
+function _plCompressImage(file, cb) {
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = new Image();
+    img.onload = function() {
+      var maxW = 900;
+      var scale = Math.min(1, maxW / img.width);
+      var w = Math.round(img.width * scale);
+      var h = Math.round(img.height * scale);
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      cb(canvas.toDataURL('image/jpeg', 0.72));
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function _plSavePhoto(unitId, ri, ii, dataUrl) {
+  var unit = await DB.get('punch:' + _plPhase + ':' + unitId);
+  if (!unit) return;
+  var item = unit.rooms[ri] && unit.rooms[ri].items[ii];
+  if (!item) return;
+  item.photos = item.photos || [];
+  item.photos.push(dataUrl);
+  await DB.set('punch:' + _plPhase + ':' + unitId, unit);
+  _plCurrentUnit = unit;
+  openUnit(unitId);
+}
+
+async function _plDeletePhoto(unitId, ri, ii, pi) {
+  if (!confirm('Remove this photo?')) return;
+  var unit = await DB.get('punch:' + _plPhase + ':' + unitId);
+  if (!unit) return;
+  var item = unit.rooms[ri] && unit.rooms[ri].items[ii];
+  if (!item || !item.photos) return;
+  item.photos.splice(pi, 1);
+  await DB.set('punch:' + _plPhase + ':' + unitId, unit);
+  _plCurrentUnit = unit;
+  openUnit(unitId);
+}
+
+async function _plViewPhoto(unitId, ri, ii, pi) {
+  var unit = _plCurrentUnit || await DB.get('punch:' + _plPhase + ':' + unitId);
+  var item = unit && unit.rooms[ri] && unit.rooms[ri].items[ii];
+  if (!item || !item.photos || !item.photos[pi]) return;
+  var overlay = document.createElement('div');
+  overlay.className = 'pl-photo-lightbox';
+  overlay.onclick = function() { overlay.remove(); };
+  overlay.innerHTML = '<img src="' + item.photos[pi] + '"><div class="pl-photo-lightbox-close">\u2715</div>';
+  document.body.appendChild(overlay);
 }
 
 async function saveItem(unitId, roomIdx) {
