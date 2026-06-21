@@ -2147,8 +2147,8 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
 
 
   /* Banner clearance — prevent download/update banners covering content */
-  .office-tab { padding-bottom: 90px; }
-  #customerPortalPage { padding-bottom: 90px; }
+  .office-tab { padding-bottom: 24px; }
+  #customerPortalPage { padding-bottom: 40px; }
   .upg-card:last-of-type { margin-bottom: 40px; }
   /* Sub-option box smooth appearance */
   .suboption-box { animation: subFade 0.2s ease; }
@@ -2174,7 +2174,7 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
 /* List view */
 .task-section { margin:0 20px 18px; }
 .task-section-head { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--muted); padding:10px 2px; border-bottom:2px solid var(--border); }
-.task-section-count { background:var(--border); color:var(--navy); border-radius:10px; padding:1px 8px; font-size:11px; margin-left:6px; }
+.task-section-count { background:#D8D2C6; color:#0D1F3C; border-radius:10px; padding:1px 8px; font-size:11px; font-weight:700; margin-left:6px; }
 .task-row { display:flex; align-items:flex-start; gap:12px; padding:14px 4px; border-bottom:1px solid #ECE8E0; cursor:pointer; }
 .task-row:active { background:#F7F5F0; }
 .task-check { flex-shrink:0; width:22px; height:22px; border-radius:50%; border:2px solid var(--border); background:#fff; cursor:pointer; font-size:13px; color:#fff; display:flex; align-items:center; justify-content:center; margin-top:1px; }
@@ -2195,7 +2195,7 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
 .task-card-prio { position:absolute; top:0; left:0; width:4px; height:100%; border-radius:10px 0 0 10px; }
 .task-card-title { font-size:14px; font-weight:600; color:var(--navy); line-height:1.3; margin-left:6px; }
 .task-card-meta { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; margin-left:6px; }
-.task-chip { font-size:11px; background:#F0EDE6; color:var(--navy); padding:3px 8px; border-radius:6px; font-weight:500; }
+.task-chip { font-size:11px; background:#EAE5DB; color:#0D1F3C; padding:3px 8px; border-radius:6px; font-weight:600; }
 
 /* Calendar view */
 .task-cal-head { display:flex; align-items:center; justify-content:center; gap:18px; padding:6px 20px 14px; }
@@ -2229,8 +2229,8 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
 .tf-btn-danger { background:#FEE2E2; color:var(--red); border:none; border-radius:9px; padding:11px 18px; font-weight:600; font-size:14px; cursor:pointer; font-family:'Inter',sans-serif; }
 
 .task-detail-meta { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
-.task-badge { color:#fff; font-size:12px; font-weight:600; padding:4px 10px; border-radius:6px; }
-.task-badge.ghost { background:#F0EDE6; color:var(--navy); }
+.task-badge { color:#fff; font-size:12px; font-weight:700; padding:5px 11px; border-radius:6px; }
+.task-badge.ghost { background:#E4DFD4; color:#0D1F3C; }
 .task-detail-desc { font-size:14px; color:var(--text); line-height:1.5; background:#F7F5F0; padding:12px; border-radius:9px; margin-bottom:8px; white-space:pre-wrap; }
 .task-detail-section-title { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted); margin:18px 0 8px; }
 .task-sub-row { display:flex; align-items:center; gap:9px; padding:7px 0; font-size:14px; color:var(--navy); }
@@ -3132,6 +3132,48 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
       <div id="employeeFormArea" style="display:none;"></div>
     </div>
 
+  <div class="office-tab" id="tab-tasks" style="display:none;">
+    <div class="tab-header">
+      <div>
+        <h2 class="tab-title">Tasks</h2>
+        <div class="tab-count" id="tasks-count">0 open tasks</div>
+      </div>
+      <button class="tab-add-btn" onclick="openTaskForm()">+ New Task</button>
+    </div>
+
+    <div class="task-toolbar">
+      <div class="task-views">
+        <button class="task-view-btn active" data-view="list" onclick="setTaskView('list')">☰ List</button>
+        <button class="task-view-btn" data-view="board" onclick="setTaskView('board')">▦ Board</button>
+        <button class="task-view-btn" data-view="calendar" onclick="setTaskView('calendar')">📅 Calendar</button>
+      </div>
+      <div class="task-filters">
+        <input id="tf-search" class="task-filter-input" type="text" placeholder="🔍 Search..." oninput="_taskFilterChange()">
+        <select id="tf-priority" class="task-filter-input" onchange="_taskFilterChange()">
+          <option value="">All priorities</option>
+          <option value="urgent">Urgent</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+        <select id="tf-project" class="task-filter-input" onchange="_taskFilterChange()" style="display:none;"></select>
+        <label class="task-filter-check"><input id="tf-mine" type="checkbox" onchange="_taskFilterChange()"> My tasks</label>
+      </div>
+    </div>
+
+    <div id="tasksContent"></div>
+  </div>
+
+  <div class="office-tab" id="tab-scheduling" style="display:none;">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:50vh;text-align:center;padding:32px 20px;">
+      <div style="font-size:64px;margin-bottom:20px;">📅</div>
+      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;color:var(--navy);margin:0 0 12px;">Scheduling</h2>
+      <div style="display:inline-block;background:var(--gold);color:var(--navy);font-weight:700;font-size:13px;padding:6px 16px;border-radius:20px;letter-spacing:1px;margin-bottom:16px;">COMING SOON</div>
+      <p style="color:var(--muted);font-size:15px;max-width:380px;line-height:1.6;">Plan and schedule work across your projects and team. This feature is on the way.</p>
+    </div>
+  </div>
+
+
   </div>
 </div>
 
@@ -3777,10 +3819,10 @@ async function openOfficeDashboard() {
    ═══════════════════════════════════════════════════════════ */
 
 var TASK_PRIORITIES = [
-  { id: 'low',    label: 'Low',    color: '#6B8FC7' },
-  { id: 'medium', label: 'Medium', color: '#C9A84C' },
-  { id: 'high',   label: 'High',   color: '#E08A3C' },
-  { id: 'urgent', label: 'Urgent', color: '#B03A2E' }
+  { id: 'low',    label: 'Low',    color: '#3B6FB0', text: '#FFFFFF' },
+  { id: 'medium', label: 'Medium', color: '#B8901F', text: '#FFFFFF' },
+  { id: 'high',   label: 'High',   color: '#D9701F', text: '#FFFFFF' },
+  { id: 'urgent', label: 'Urgent', color: '#B03A2E', text: '#FFFFFF' }
 ];
 var TASK_STATUSES = [
   { id: 'todo',        label: 'To Do' },
@@ -4147,7 +4189,7 @@ async function openTaskDetail(id) {
   document.getElementById('taskDetailTitle').textContent = t.title || 'Task';
   body.innerHTML =
     '<div class="task-detail-meta">' +
-      '<span class="task-badge" style="background:' + pm.color + '">' + pm.label + '</span>' +
+      '<span class="task-badge" style="background:' + pm.color + ';color:' + (pm.text||'#fff') + '">' + pm.label + '</span>' +
       '<span class="task-badge ghost">' + _taskStatusLabel(t.status) + '</span>' +
       (t.assigneeName ? '<span class="task-badge ghost">👤 ' + _esc(t.assigneeName) + '</span>' : '') +
       (t.dueDate ? '<span class="task-badge ghost">📅 ' + _fmtTaskDate(t.dueDate) + '</span>' : '') +
@@ -9506,46 +9548,9 @@ if (document.readyState === 'loading') {
 </body>
 </html
   <!-- Tasks (Coming Soon) -->
-  <div class="office-tab" id="tab-tasks" style="display:none;">
-    <div class="tab-header">
-      <div>
-        <h2 class="tab-title">Tasks</h2>
-        <div class="tab-count" id="tasks-count">0 open tasks</div>
-      </div>
-      <button class="tab-add-btn" onclick="openTaskForm()">+ New Task</button>
-    </div>
-
-    <div class="task-toolbar">
-      <div class="task-views">
-        <button class="task-view-btn active" data-view="list" onclick="setTaskView('list')">☰ List</button>
-        <button class="task-view-btn" data-view="board" onclick="setTaskView('board')">▦ Board</button>
-        <button class="task-view-btn" data-view="calendar" onclick="setTaskView('calendar')">📅 Calendar</button>
-      </div>
-      <div class="task-filters">
-        <input id="tf-search" class="task-filter-input" type="text" placeholder="🔍 Search..." oninput="_taskFilterChange()">
-        <select id="tf-priority" class="task-filter-input" onchange="_taskFilterChange()">
-          <option value="">All priorities</option>
-          <option value="urgent">Urgent</option>
-          <option value="high">High</option>
-          <option value="medium">Medium</option>
-          <option value="low">Low</option>
-        </select>
-        <select id="tf-project" class="task-filter-input" onchange="_taskFilterChange()" style="display:none;"></select>
-        <label class="task-filter-check"><input id="tf-mine" type="checkbox" onchange="_taskFilterChange()"> My tasks</label>
-      </div>
-    </div>
-
-    <div id="tasksContent"></div>
-  </div>
+  
 
   <!-- Scheduling (Coming Soon) -->
-  <div class="office-tab" id="tab-scheduling" style="display:none;">
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px 20px;">
-      <div style="font-size:64px;margin-bottom:20px;">📅</div>
-      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;color:var(--navy);margin:0 0 12px;">Scheduling</h2>
-      <div style="display:inline-block;background:var(--gold);color:var(--navy);font-weight:700;font-size:13px;padding:6px 16px;border-radius:20px;letter-spacing:1px;margin-bottom:16px;">COMING SOON</div>
-      <p style="color:var(--muted);font-size:15px;max-width:380px;line-height:1.6;">Plan and schedule work across your projects and team. This feature is on the way.</p>
-    </div>
-  </div>
+  
 
   >
