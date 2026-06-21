@@ -2872,9 +2872,7 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
     
   </div>
 </div>
-<div style="text-align:center;padding:0 16px 32px;">
-  <button onclick="showPage('officeAuthPage')" style="background:none;border:none;color:var(--muted);font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;text-decoration:underline;font-family:Inter,sans-serif;">Office Login</button>
-</div>
+
 </div><!-- /landingPage -->
 
 <!-- LIGHTBOX -->
@@ -3128,6 +3126,11 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
           <div class="dash-stat-icon">📋</div>
           <div class="dash-stat-num" id="statUpgrades">—</div>
           <div class="dash-stat-label">Submissions</div>
+        </div>
+        <div class="dash-stat" onclick="switchTab('tasks')" style="cursor:pointer;">
+          <div class="dash-stat-icon">✓</div>
+          <div class="dash-stat-num" id="statTasks">—</div>
+          <div class="dash-stat-label">Open Tasks</div>
         </div>
         <div class="dash-stat dash-stat-gold admin-only" onclick="switchTab('employees')" id="statPendingLink" style="display:none;cursor:pointer;">
           <div class="dash-stat-icon">⏳</div>
@@ -3528,27 +3531,30 @@ function _fsKey(key) {
 
 const DB = {
   async get(key) {
-    // 1. Try Firebase first
+    // CACHE-FIRST: if we have it locally, return instantly (and refresh in background)
+    if (_store[key] !== undefined) {
+      _bgRefresh(key);
+      try { return JSON.parse(_store[key]); } catch(e) { return null; }
+    }
+    // Not cached yet - fetch from Firebase
     try {
       const fs = _getFirestore();
       if (fs) {
         const doc = await fs.collection('dd').doc(_fsKey(key)).get();
         if (doc.exists) {
           const val = doc.data().v;
-          _store[key] = val; // cache locally
+          _store[key] = val;
           _saveToLS();
           return JSON.parse(val);
         }
       }
     } catch(e) { console.warn('FB get error:', e); }
-    // 2. Fallback: window.storage (Claude)
     try {
       if (window.storage) {
         const r = await window.storage.get(key, true);
         if (r) { _store[key] = r.value; return JSON.parse(r.value); }
       }
     } catch(e) {}
-    // 3. Fallback: localStorage / in-memory
     const v = _store[key];
     return v ? JSON.parse(v) : null;
   },
@@ -3616,6 +3622,90 @@ const DB = {
     return true;
   }
 };
+
+/* ===== PERFORMANCE: cache-first reads with background sync ===== */
+var _cacheWarm = false;
+var _bgPending = {};
+var _bgListPending = {};
+
+// Refresh a single key from Firebase in the background (non-blocking)
+function _bgRefresh(key) {
+  if (_bgPending[key]) return;
+  _bgPending[key] = 1;
+  setTimeout(async function() {
+    try {
+      const fs = _getFirestore();
+      if (fs) {
+        const doc = await fs.collection('dd').doc(_fsKey(key)).get();
+        if (doc.exists) {
+          const val = doc.data().v;
+          if (_store[key] !== val) { _store[key] = val; _saveToLS(); }
+        }
+      }
+    } catch(e) {}
+    delete _bgPending[key];
+  }, 0);
+}
+
+// Refresh a prefix range from Firebase in the background (throttled)
+function _bgListRefresh(prefix) {
+  var now = Date.now();
+  if (_bgListPending[prefix] && (now - _bgListPending[prefix]) < 4000) return; // throttle 4s
+  _bgListPending[prefix] = now;
+  setTimeout(async function() {
+    try {
+      const fs = _getFirestore();
+      if (fs) {
+        const snap = await fs.collection('dd')
+          .where('k', '>=', prefix)
+          .where('k', '<', prefix + '\uf8ff')
+          .get();
+        var changed = false;
+        snap.docs.forEach(function(d) {
+          const data = d.data();
+          if (data.k && data.v && _store[data.k] !== data.v) { _store[data.k] = data.v; changed = true; }
+        });
+        if (changed) _saveToLS();
+      }
+    } catch(e) {}
+  }, 0);
+}
+
+// Warm the whole cache once (called after login). Loads all docs into _store.
+async function warmCache() {
+  try {
+    const fs = _getFirestore();
+    if (fs) {
+      const snap = await fs.collection('dd').get();
+      snap.docs.forEach(function(d) {
+        const data = d.data();
+        if (data.k && data.v) { _store[data.k] = data.v; }
+      });
+      _saveToLS();
+    } else if (window.storage) {
+      // window.storage path: pull everything
+      const r = await window.storage.list('', true);
+      if (r && r.keys) {
+        for (var i = 0; i < r.keys.length; i++) {
+          try { const g = await window.storage.get(r.keys[i], true); if (g) _store[r.keys[i]] = g.value; } catch(e) {}
+        }
+      }
+    }
+  } catch(e) { console.warn('warmCache error', e); }
+  _cacheWarm = true;
+}
+
+// Synchronous cache reads for hot render loops (no async overhead)
+function _cachedGet(key) {
+  var v = _store[key];
+  if (v === undefined) return null;
+  try { return JSON.parse(v); } catch(e) { return null; }
+}
+function _cachedList(prefix) {
+  return Object.keys(_store).filter(function(k) { return k.indexOf(prefix) === 0; });
+}
+
+
 
 
 // ════════════════════════════════════════════
@@ -4075,6 +4165,8 @@ async function doLogout() {
 // ════════════════════════════════════════════
 async function openOfficeDashboard() {
   var _bl = document.getElementById('bootLoader');
+  // Warm the data cache once so all tabs respond instantly
+  if (!_cacheWarm) { try { await warmCache(); } catch(e) {} }
   if (_bl) _bl.style.display = 'none';
   showPage('officePage');
   document.getElementById('topbarUserName').textContent = currentUser.name;
@@ -4155,6 +4247,11 @@ function _isTaskFollower(t, uid) { return !!(t && uid && t.followers && t.follow
 function _canSeeTask(t, uid) { return _isTaskOwner(t, uid) || _isTaskFollower(t, uid); }
 
 async function _loadAllTasks() {
+  if (_cacheWarm) {
+    _bgListRefresh('task:');
+    var uid0 = _effectiveUserId();
+    return _cachedList('task:').map(_cachedGet).filter(Boolean).filter(function(t) { return _isTaskOwner(t, uid0); });
+  }
   var keys = await DB.list('task:');
   var all = (await Promise.all(keys.map(function(k) { return DB.get(k); }))).filter(Boolean);
   var uid = _effectiveUserId();
@@ -4162,6 +4259,11 @@ async function _loadAllTasks() {
   return all;
 }
 async function _loadFollowedTasks() {
+  if (_cacheWarm) {
+    _bgListRefresh('task:');
+    var uid0 = _effectiveUserId();
+    return _cachedList('task:').map(_cachedGet).filter(Boolean).filter(function(t) { return _isTaskFollower(t, uid0) && !_isTaskOwner(t, uid0); });
+  }
   var keys = await DB.list('task:');
   var all = (await Promise.all(keys.map(function(k) { return DB.get(k); }))).filter(Boolean);
   var uid = _effectiveUserId();
@@ -5902,6 +6004,7 @@ async function switchTab(tab) {
 
 
   // Load tab data
+  if (tab === 'dashboard') await refreshDashboard();
   if (tab === 'projects') await renderProjects();
   if (tab === 'customers') await renderCustomers();
   if (tab === 'employees') await renderEmployees();
@@ -5920,10 +6023,11 @@ async function refreshDashboard() {
   // Welcome message
   var welcomeEl = document.getElementById('dashWelcome');
   var dateEl = document.getElementById('dashDate');
-  if (welcomeEl && currentUser) {
+  var _dashName = _viewAsUserId ? (window._viewAsName || 'employee') : (currentUser ? (currentUser.name || 'there') : 'there');
+  if (welcomeEl) {
     var hour = new Date().getHours();
     var greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-    welcomeEl.textContent = greeting + ', ' + (currentUser.name || 'there');
+    welcomeEl.textContent = _viewAsUserId ? (_dashName + "'s dashboard") : (greeting + ', ' + _dashName);
   }
   if (dateEl) {
     dateEl.textContent = new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
@@ -5935,11 +6039,18 @@ async function refreshDashboard() {
   var subs = getStoredSubmissions ? getStoredSubmissions() : [];
 
   // Count only records this user can see
-  var allProj = (await Promise.all(projKeys.map(function(k){return DB.get(k);}))).filter(canSee);
-  var allCust = (await Promise.all(custKeys.map(function(k){return DB.get(k);}))).filter(canSee);
+  var _vis = _viewAsUserId ? function(r){ return r && (r.ownerId === _viewAsUserId || (r.visibility === 'public')); } : canSee;
+  var allProj = (await Promise.all(projKeys.map(function(k){return DB.get(k);}))).filter(_vis);
+  var allCust = (await Promise.all(custKeys.map(function(k){return DB.get(k);}))).filter(_vis);
   document.getElementById('statProjects').textContent = allProj.length;
   document.getElementById('statCustomers').textContent = allCust.length;
   document.getElementById('statUpgrades').textContent = subs.length;
+  // Task count for the effective user
+  try {
+    var myTasks = await _loadAllTasks();
+    var stTasksEl = document.getElementById('statTasks');
+    if (stTasksEl) stTasksEl.textContent = myTasks.filter(function(t){return t.status!=='done';}).length;
+  } catch(e) {}
 
   if (currentUser && currentUser.role === 'admin') {
     var pendEl = document.getElementById('statPendingLink');
@@ -6570,9 +6681,23 @@ function exportUpgradesCsv() {
 async function viewEmployeeTasks(userId, userName) { return viewEmployee(userId, userName); }
 async function viewEmployee(userId, userName) {
   _viewAsUserId = userId; window._viewAsName = userName;
-  // Show a global banner across the whole app
+  // Swap the displayed identity to the viewed employee
+  _applyViewedIdentity();
   _renderViewAsBanner();
   switchTab('dashboard');
+}
+async function _applyViewedIdentity() {
+  var u = _viewAsUserId ? await DB.get('user:' + _viewAsUserId) : null;
+  var nm = _viewAsUserId ? (window._viewAsName || (u && u.name) || 'Employee') : (currentUser ? currentUser.name : '');
+  var role = _viewAsUserId ? (u && u.role ? u.role : 'employee') : (currentUser ? currentUser.role : '');
+  var tbName = document.getElementById('topbarUserName');
+  var tbRole = document.getElementById('topbarRoleBadge');
+  var sbName = document.getElementById('sidebarUserName');
+  var sbRole = document.getElementById('sidebarUserRole');
+  if (tbName) tbName.textContent = nm;
+  if (tbRole) tbRole.textContent = role;
+  if (sbName) sbName.textContent = nm;
+  if (sbRole) sbRole.textContent = role;
 }
 function _renderViewAsBanner() {
   var banner = document.getElementById('globalViewAsBanner');
@@ -6584,9 +6709,10 @@ function _renderViewAsBanner() {
     banner.style.display = 'none';
   }
 }
-function clearViewAs() {
+async function clearViewAs() {
   _viewAsUserId = null;
   window._viewAsName = null;
+  await _applyViewedIdentity();
   _renderViewAsBanner();
   var legacy = document.getElementById('viewAsBanner');
   if (legacy) legacy.style.display = 'none';
@@ -8667,12 +8793,49 @@ var _cachedSubmissions = null;
 
 function getStoredSubmissions() {
   var results = [];
+  // 1. Legacy/native submissions stored under 'submission:'
   Object.keys(_store).forEach(function(k) {
     if (k.startsWith('submission:')) {
       try { results.push(JSON.parse(_store[k])); } catch(e) {}
     }
   });
-  return results.sort(function(a,b) { return new Date(b.submittedAt) - new Date(a.submittedAt); });
+  // 2. Customer-portal submissions stored under 'upgrades:' (normalize to the same shape)
+  Object.keys(_store).forEach(function(k) {
+    if (!k.startsWith('upgrades:')) return;
+    try {
+      var d = JSON.parse(_store[k]);
+      if (!d || !d._submittedAt) return; // only show actually-submitted sheets
+      // decode address|unit from the key as a fallback
+      var addr = d.address || '', unit = d.unit || '';
+      if (!addr) {
+        try {
+          var b64 = k.replace('upgrades:', '');
+          while (b64.length % 4) b64 += '=';
+          var parts = decodeURIComponent(escape(atob(b64))).split('|');
+          addr = parts[0] || ''; unit = unit || parts[1] || '';
+        } catch(e) {}
+      }
+      var sel = d.selections || {};
+      results.push({
+        _key: k,
+        name: d.name || '',
+        address: addr,
+        unit: unit,
+        email: d.email || '',
+        phone: d.phone || '',
+        selections: sel,
+        paintColor: d.paintColor || sel.paintColor || sel.paint || '',
+        signature: d.signature || '',
+        sigDate: d.sigDate || '',
+        submittedAt: d._submittedAt,
+        _submittedAt: d._submittedAt,
+        _updatedAt: d._updatedAt || d._submittedAt
+      });
+    } catch(e) {}
+  });
+  return results.sort(function(a,b) {
+    return new Date(b.submittedAt || b._submittedAt) - new Date(a.submittedAt || a._submittedAt);
+  });
 }
 
 function switchUpgradeView(view) {
