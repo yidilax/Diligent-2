@@ -3,6 +3,6 @@
   "target": {
     "namespace": "android_app",
     "package_name": "app.diligentdevelopers.twa",
-    "sha256_cert_fingerprints": ["6D:24:B8:08:53:CF:63:18:6C:1C:07:76:EE:46:18:54:3A:9E:63:B9:8E:E1:2B:DE:05:B2:6A:C5:8C:91:DC:07"]
+    "sha256_cert_fingerprints": ["B9:07:C6:68:CA:46:74:DF:CF:38:85:CB:5F:AE:5F:63:E5:D4:E2:48:99:25:86:11:A0:85:13:11:F6:3C:E7:B8"]
   }
 }]
