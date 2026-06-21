@@ -3191,6 +3191,31 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .modal-box .modal-body { flex:1 1 auto; min-height:0; max-height:none; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
 .modal-box .modal-body.cust-form, .modal-box .cust-form { max-height:none; }
 
+
+/* ===== Customer Updates (office) ===== */
+.cu-card { background:#fff; border:1px solid #ebe7dd; border-radius:13px; padding:15px 16px; margin-bottom:12px; }
+.cu-card-top { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:8px; }
+.cu-card-target { font-family:'Inter',sans-serif; font-weight:700; font-size:15px; color:#16233d; }
+.cu-card-meta { font-family:'Inter',sans-serif; font-size:12px; color:#8a8470; margin-top:2px; }
+.cu-card-actions { display:flex; gap:6px; flex-shrink:0; }
+.cu-mini-btn { font-family:'Inter',sans-serif; font-size:12px; font-weight:600; padding:6px 11px; border-radius:7px; border:1px solid var(--border); background:#fff; color:var(--navy); cursor:pointer; }
+.cu-mini-btn.danger { color:#c0392b; border-color:#f3c6c0; }
+.cu-card-text { font-family:'Inter',sans-serif; font-size:14px; color:#3a3730; line-height:1.5; white-space:pre-wrap; margin-bottom:8px; }
+.cu-photo-row { display:flex; flex-wrap:wrap; gap:8px; }
+.cu-thumb { position:relative; width:72px; height:72px; border-radius:9px; overflow:hidden; border:1px solid var(--border); cursor:pointer; }
+.cu-thumb img { width:100%; height:100%; object-fit:cover; }
+.cu-thumb-del { position:absolute; top:2px; right:2px; width:18px; height:18px; border-radius:50%; border:0; background:rgba(13,31,60,.75); color:#fff; font-size:10px; cursor:pointer; line-height:1; }
+.modal-box .cu-add-photo { margin-top:8px; font-family:'Inter',sans-serif; font-size:13px; font-weight:700; color:var(--gold); background:rgba(201,162,39,.15); border:1px dashed rgba(201,162,39,.45); border-radius:9px; padding:10px 16px; cursor:pointer; }
+
+/* ===== Portal update (customer) ===== */
+.portal-update:empty { display:none; }
+.pu-card { max-width:760px; margin:14px auto 0; padding:16px 18px; background:#fff; border:1px solid #ece6d8; border-left:4px solid var(--gold); border-radius:12px; box-shadow:0 2px 10px rgba(13,31,60,.05); }
+.pu-label { font-family:'Bebas Neue',sans-serif; font-size:16px; letter-spacing:1px; color:var(--navy); margin-bottom:8px; }
+.pu-text { font-family:'Inter',sans-serif; font-size:14px; color:#3a3730; line-height:1.55; white-space:pre-wrap; margin-bottom:10px; }
+.pu-photos { display:flex; flex-wrap:wrap; gap:8px; }
+.pu-thumb { width:88px; height:88px; border-radius:9px; overflow:hidden; border:1px solid var(--border); cursor:pointer; }
+.pu-thumb img { width:100%; height:100%; object-fit:cover; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -3546,6 +3571,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
   <div style="background:white;border-bottom:1px solid var(--border);padding:10px 20px;font-size:12px;color:var(--muted);">
     <span id="portalUnitInfo"></span>
   </div>
+  <div id="portalUpdate" class="portal-update"></div>
   <div id="portalStatus" class="portal-status"></div>
   <div style="overflow-y:auto;flex:1;">
     <div class="upg-container" id="upgradeSheetContent">
@@ -3701,6 +3727,11 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <li class="office-nav-item">
         <button class="office-nav-btn" onclick="switchTab('upgrades');closeSidebar();" id="navbtn-upgrades">
           <span class="nav-icon">📋</span> Upgrades
+        </button>
+      </li>
+      <li class="office-nav-item">
+        <button class="office-nav-btn" onclick="switchTab('custUpdates');closeSidebar();" id="navbtn-custUpdates">
+          <span class="nav-icon">📣</span> Customer Updates
         </button>
       </li>
       <li class="office-nav-item admin-only" style="display:none;">
@@ -3971,6 +4002,59 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div class="ue-save-bar">
         <button class="ue-save-btn" onclick="ue_save()">💾 Save Changes</button>
         <span id="ue_saveMsg" style="font-size:13px;color:#059669;font-weight:700;display:none;">✓ Saved!</span>
+      </div>
+    </div>
+
+    <!-- CUSTOMER UPDATES TAB -->
+    <div id="tab-custUpdates" class="office-tab" style="display:none;">
+      <div class="tab-header">
+        <div class="tab-header-left">
+          <div class="tab-title">Customer Updates</div>
+          <div class="tab-count" id="cu-count"></div>
+        </div>
+        <button class="btn-primary" onclick="openCustUpdateForm()">+ New Update</button>
+      </div>
+      <div id="custUpdatesList"></div>
+
+      <!-- New/Edit update modal -->
+      <div id="modal-custUpdate" class="modal-overlay" style="display:none;">
+        <div class="modal-box">
+          <div class="modal-header">
+            <span id="cuModalTitle">New Update</span>
+            <button onclick="closeCustUpdateModal()" class="modal-close">✕</button>
+          </div>
+          <div class="modal-body">
+            <div class="cust-form-sec">Who sees this</div>
+            <div class="form-group"><label class="form-label">Project</label>
+              <select class="form-input" id="cu-project" onchange="cuLoadHouses(this.value)">
+                <option value="">— Select project —</option>
+              </select>
+            </div>
+            <div class="form-group"><label class="form-label">House / Address <span style="font-weight:400;opacity:.6;">(optional — leave for whole project)</span></label>
+              <select class="form-input" id="cu-house" onchange="cuLoadUnits(this.value)">
+                <option value="">All addresses in project</option>
+              </select>
+            </div>
+            <div class="form-group"><label class="form-label">Unit <span style="font-weight:400;opacity:.6;">(optional)</span></label>
+              <select class="form-input" id="cu-unit">
+                <option value="">All units</option>
+              </select>
+            </div>
+
+            <div class="cust-form-sec">Update</div>
+            <div class="form-group"><label class="form-label">Message <span style="font-weight:400;opacity:.6;">(optional)</span></label>
+              <textarea class="form-input" id="cu-text" rows="4" placeholder="e.g. Framing is complete, drywall starts next week."></textarea>
+            </div>
+            <div class="form-group"><label class="form-label">Photos <span style="font-weight:400;opacity:.6;">(optional)</span></label>
+              <div id="cu-photos" class="cu-photo-row"></div>
+              <button type="button" class="cu-add-photo" onclick="cuAddPhoto()">������ Add photo</button>
+            </div>
+          </div>
+          <div class="modal-footer cust-form-footer">
+            <button class="btn-logout" onclick="closeCustUpdateModal()">Cancel</button>
+            <button class="btn-primary cust-save-btn" id="cuSaveBtn" onclick="saveCustUpdate()">Post Update</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -4763,6 +4847,22 @@ let _custSaveKey = '';
 
 
 // Customer-facing "where's my home" status from the unit's schedule
+
+async function _renderCustomerUpdate(projId, address, unit) {
+  var host = document.getElementById('portalUpdate');
+  if (!host) { return; }
+  host.innerHTML = '';
+  var u = await _getLatestCustUpdate(projId, address, unit);
+  if (!u) return;
+  var when = u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '';
+  var thumbs = (u.photos||[]).map(function(ph){ return '<div class="pu-thumb" onclick="_plLightbox(\'' + encodeURIComponent(ph) + '\')"><img src="' + ph + '"></div>'; }).join('');
+  host.innerHTML = '<div class="pu-card">' +
+    '<div class="pu-label">\ud83d\udce3 Update on your home' + (when ? '  \u00b7  ' + when : '') + '</div>' +
+    (u.text ? '<div class="pu-text">' + _esc(u.text) + '</div>' : '') +
+    (thumbs ? '<div class="pu-photos">' + thumbs + '</div>' : '') +
+  '</div>';
+}
+
 async function _renderCustomerStatus(projId, address, unit) {
   var host = document.getElementById('portalStatus');
   if (!host) return;
@@ -4819,7 +4919,7 @@ async function openCustomerPortal(name, address, unit, saveKey, selections) {
   var pName = document.getElementById('portalCustomerName');
   var pUnit = document.getElementById('portalUnitInfo');
   if (pName) pName.textContent = name;
-  try { var _sp = (_selectedProject && _selectedProject.id) || ''; _renderCustomerStatus(_sp, address, unit); } catch(e) {}
+  try { var _sp = (_selectedProject && _selectedProject.id) || ''; _renderCustomerUpdate(_sp, address, unit); _renderCustomerStatus(_sp, address, unit); } catch(e) {}
   if (pUnit) pUnit.textContent = '📍 ' + address + '  ·  Unit ' + unit;
 
   // Restore saved selections (the param is the whole saved submission object)
@@ -7528,6 +7628,7 @@ async function switchTab(tab) {
   if (tab === 'customers') await renderCustomers();
   if (tab === 'employees') await renderEmployees();
   if (tab === 'upgrades') await renderUpgrades();
+  if (tab === 'custUpdates') await renderCustUpdates();
   if (tab === 'upgradeEditor') initUpgradeEditor();
   if (tab === 'punchlist') renderPunchList();
   if (tab === 'tasks') {
@@ -8114,6 +8215,172 @@ async function renderCustomers() {
     '</div>';
   }).join('');
 }
+
+// ===================== CUSTOMER UPDATES =====================
+var _cuEditId = null;
+var _cuPhotos = [];
+
+async function renderCustUpdates() {
+  var host = document.getElementById('custUpdatesList');
+  if (!host) return;
+  var keys = await DB.list('custupdate:');
+  var updates = (await Promise.all(keys.map(function(k){return DB.get(k);}))).filter(Boolean);
+  // only updates for projects this user can see
+  var projKeys = await DB.list('project:');
+  var projs = (await Promise.all(projKeys.map(function(k){return DB.get(k);}))).filter(Boolean);
+  var visibleProjIds = {};
+  projs.forEach(function(p){ if (canSee(p)) visibleProjIds[p.id] = true; });
+  updates = updates.filter(function(u){ return !u.projectId || visibleProjIds[u.projectId] || (currentUser && currentUser.role === 'admin'); });
+  updates.sort(function(a,b){ return (b.createdAt||0) - (a.createdAt||0); });
+
+  var countEl = document.getElementById('cu-count');
+  if (countEl) countEl.textContent = updates.length + ' update' + (updates.length!==1?'s':'');
+
+  if (updates.length === 0) {
+    host.innerHTML = '<div class="tab-empty"><div class="tab-empty-icon">\ud83d\udce3</div><div class="tab-empty-title">No Updates Yet</div><div class="tab-empty-desc">Post progress updates with photos that customers see when they log in.</div><button class="tab-empty-btn" onclick="openCustUpdateForm()">+ New Update</button></div>';
+    return;
+  }
+
+  host.innerHTML = updates.map(function(u) {
+    var target = u.unit ? (u.houseAddress + ' \u00b7 Unit ' + u.unit) : (u.houseAddress ? u.houseAddress : (u.projectName || 'Project') + ' (all units)');
+    var when = u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+    var thumbs = (u.photos||[]).map(function(ph){ return '<div class="cu-thumb" onclick="_plLightbox(\'' + encodeURIComponent(ph) + '\')"><img src="' + ph + '"></div>'; }).join('');
+    return '<div class="cu-card">' +
+      '<div class="cu-card-top">' +
+        '<div><div class="cu-card-target">' + target + '</div><div class="cu-card-meta">' + (u.projectName||'') + (when ? '  \u00b7  ' + when : '') + (u.authorName ? '  \u00b7  ' + u.authorName : '') + '</div></div>' +
+        '<div class="cu-card-actions">' +
+          '<button onclick="openCustUpdateForm(\'' + u.id + '\')" class="cu-mini-btn">Edit</button>' +
+          '<button onclick="deleteCustUpdate(\'' + u.id + '\')" class="cu-mini-btn danger">Delete</button>' +
+        '</div>' +
+      '</div>' +
+      (u.text ? '<div class="cu-card-text">' + _esc(u.text) + '</div>' : '') +
+      (thumbs ? '<div class="cu-photo-row">' + thumbs + '</div>' : '') +
+    '</div>';
+  }).join('');
+}
+
+async function openCustUpdateForm(id) {
+  _cuEditId = id || null;
+  _cuPhotos = [];
+  document.getElementById('cuModalTitle').textContent = id ? 'Edit Update' : 'New Update';
+  document.getElementById('cuSaveBtn').textContent = id ? 'Save Update' : 'Post Update';
+  document.getElementById('cu-text').value = '';
+  // load projects
+  var projKeys = await DB.list('project:');
+  var projs = (await Promise.all(projKeys.map(function(k){return DB.get(k);}))).filter(Boolean).filter(canSee);
+  var sel = document.getElementById('cu-project');
+  sel.innerHTML = '<option value="">\u2014 Select project \u2014</option>' + projs.map(function(p){ return '<option value="' + p.id + '">' + p.name + '</option>'; }).join('');
+  document.getElementById('cu-house').innerHTML = '<option value="">All addresses in project</option>';
+  document.getElementById('cu-unit').innerHTML = '<option value="">All units</option>';
+  window._cuProjects = projs;
+
+  if (id) {
+    var u = await DB.get('custupdate:' + id);
+    if (u) {
+      document.getElementById('cu-text').value = u.text || '';
+      _cuPhotos = (u.photos || []).slice();
+      if (u.projectId) {
+        sel.value = u.projectId;
+        cuLoadHouses(u.projectId);
+        if (u.houseAddress) { setTimeout(function(){ document.getElementById('cu-house').value = u.houseAddress; cuLoadUnits(u.houseAddress); setTimeout(function(){ if (u.unit) document.getElementById('cu-unit').value = u.unit; }, 30); }, 30); }
+      }
+    }
+  }
+  cuRenderPhotos();
+  document.getElementById('modal-custUpdate').classList.add('open');
+}
+
+function closeCustUpdateModal() { document.getElementById('modal-custUpdate').classList.remove('open'); _cuEditId = null; _cuPhotos = []; }
+function closeCustUpdateForm() { closeCustUpdateModal(); }
+
+function cuLoadHouses(projId) {
+  var houseSel = document.getElementById('cu-house');
+  var unitSel = document.getElementById('cu-unit');
+  houseSel.innerHTML = '<option value="">All addresses in project</option>';
+  unitSel.innerHTML = '<option value="">All units</option>';
+  var proj = (window._cuProjects||[]).find(function(p){ return p.id === projId; });
+  if (proj && proj.houses) {
+    proj.houses.forEach(function(h){ houseSel.innerHTML += '<option value="' + h.address + '">' + h.address + '</option>'; });
+  }
+}
+function cuLoadUnits(address) {
+  var unitSel = document.getElementById('cu-unit');
+  unitSel.innerHTML = '<option value="">All units</option>';
+  var projId = document.getElementById('cu-project').value;
+  var proj = (window._cuProjects||[]).find(function(p){ return p.id === projId; });
+  if (!proj || !proj.houses) return;
+  var house = proj.houses.find(function(h){ return h.address === address; });
+  if (house && house.units) house.units.forEach(function(un){ unitSel.innerHTML += '<option value="' + un + '">' + un + '</option>'; });
+}
+
+function cuAddPhoto() {
+  var input = document.createElement('input');
+  input.type = 'file'; input.accept = 'image/*'; input.setAttribute('capture','environment');
+  input.onchange = function() {
+    var file = input.files && input.files[0];
+    if (!file) return;
+    _plCompressImage(file, function(dataUrl){ _cuPhotos.push(dataUrl); cuRenderPhotos(); });
+  };
+  input.click();
+}
+function cuRenderPhotos() {
+  var host = document.getElementById('cu-photos');
+  if (!host) return;
+  host.innerHTML = _cuPhotos.map(function(ph, i){
+    return '<div class="cu-thumb"><img src="' + ph + '"><button class="cu-thumb-del" onclick="_cuPhotos.splice(' + i + ',1);cuRenderPhotos()">\u2715</button></div>';
+  }).join('');
+}
+
+async function saveCustUpdate() {
+  var projId = document.getElementById('cu-project').value;
+  var text = document.getElementById('cu-text').value.trim();
+  var house = document.getElementById('cu-house').value;
+  var unit = document.getElementById('cu-unit').value;
+  if (!projId) { alert('Please select a project for this update.'); return; }
+  if (!text && _cuPhotos.length === 0) { alert('Add a message or at least one photo.'); return; }
+  var proj = (window._cuProjects||[]).find(function(p){ return p.id === projId; });
+  var id = _cuEditId || ('cu_' + Date.now() + '_' + Math.floor(Math.random()*1000));
+  var existing = _cuEditId ? (await DB.get('custupdate:' + id)) : null;
+  var rec = {
+    id: id,
+    projectId: projId,
+    projectName: proj ? proj.name : '',
+    houseAddress: house || '',
+    unit: unit || '',
+    text: text,
+    photos: _cuPhotos.slice(),
+    authorName: currentUser ? currentUser.name : '',
+    authorId: currentUser ? currentUser.id : '',
+    createdAt: existing && existing.createdAt ? existing.createdAt : Date.now(),
+    _updatedAt: Date.now()
+  };
+  await DB.set('custupdate:' + id, rec);
+  closeCustUpdateModal();
+  renderCustUpdates();
+}
+
+async function deleteCustUpdate(id) {
+  if (!confirm('Delete this update? Customers will no longer see it.')) return;
+  await DB.delete('custupdate:' + id);
+  renderCustUpdates();
+}
+
+// Find the latest update matching a customer's project/address/unit
+async function _getLatestCustUpdate(projId, address, unit) {
+  var keys = await DB.list('custupdate:');
+  var updates = (await Promise.all(keys.map(function(k){return DB.get(k);}))).filter(Boolean);
+  var matches = updates.filter(function(u){
+    if (u.projectId && projId && u.projectId !== projId) return false;
+    // if update is scoped to a house, it must match
+    if (u.houseAddress && address && u.houseAddress.toLowerCase() !== (address||'').toLowerCase()) return false;
+    // if scoped to a unit, it must match
+    if (u.unit && unit && u.unit !== unit) return false;
+    return true;
+  });
+  matches.sort(function(a,b){ return (b.createdAt||0) - (a.createdAt||0); });
+  return matches[0] || null;
+}
+
 
 async function deleteCustomer(id) {
   ddConfirm('Delete this customer? This cannot be undone.', async function() {
