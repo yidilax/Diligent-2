@@ -3536,6 +3536,8 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
   <button onclick="startForm()" style="background:var(--gold);color:var(--navy);border:none;border-radius:8px;padding:9px 20px;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;cursor:pointer;font-weight:700;">Make My Selections →</button>
 </div>
 
+<div id="galleryUpdate" class="portal-update" style="max-width:760px;margin:0 auto;padding:0 16px;"></div>
+
 <div class="upg-gallery">
   <h2 class="upg-gallery__title">AVAILABLE UPGRADES GALLERY</h2>
   <p class="upg-gallery__sub">Click any image to see a larger view</p>
@@ -3577,8 +3579,6 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     <span id="portalUnitInfo"></span>
   </div>
   <div style="overflow-y:auto;flex:1;">
-    <div id="portalUpdate" class="portal-update"></div>
-    <div id="portalStatus" class="portal-status"></div>
     <div class="upg-container" id="upgradeSheetContent">
 <!-- Dynamically filled by buildUpgradeSheet() -->
 </div>
@@ -4384,6 +4384,8 @@ const DB = {
 
 /* ===== PERFORMANCE: cache-first reads with background sync ===== */
 var _cacheWarm = false;
+// === AI writing backend === Paste your deployed endpoint URL here (e.g. a Cloudflare Worker or Vercel function). Leave '' to disable.
+var AI_ENDPOINT = '';
 var _bgPending = {};
 var _bgListPending = {};
 
@@ -4859,7 +4861,7 @@ let _custSaveKey = '';
 // Customer-facing "where's my home" status from the unit's schedule
 
 async function _renderCustomerUpdate(projId, address, unit) {
-  var host = document.getElementById('portalUpdate');
+  var host = document.getElementById('galleryUpdate') || document.getElementById('portalUpdate');
   if (!host) { return; }
   host.innerHTML = '';
   var u = await _getLatestCustUpdate(projId, address, unit);
@@ -4929,7 +4931,7 @@ async function openCustomerPortal(name, address, unit, saveKey, selections) {
   var pName = document.getElementById('portalCustomerName');
   var pUnit = document.getElementById('portalUnitInfo');
   if (pName) pName.textContent = name;
-  try { var _sp = (_selectedProject && _selectedProject.id) || ''; _renderCustomerUpdate(_sp, address, unit); _renderCustomerStatus(_sp, address, unit); } catch(e) {}
+  try { var _sp = (_selectedProject && _selectedProject.id) || ''; _renderCustomerUpdate(_sp, address, unit); } catch(e) {}
   if (pUnit) pUnit.textContent = '📍 ' + address + '  ·  Unit ' + unit;
 
   // Restore saved selections (the param is the whole saved submission object)
@@ -8380,7 +8382,10 @@ async function cuAiWrite() {
     if (hint) { hint.style.display = 'block'; ta.focus(); }
     return;
   }
-  // context: project/unit
+  if (!AI_ENDPOINT) {
+    alert('AI writing isn\'t set up yet. Add your backend URL to AI_ENDPOINT at the top of the file. Until then, you can type the update manually.');
+    return;
+  }
   var projName = '';
   var projSel = document.getElementById('cu-project');
   if (projSel && projSel.selectedIndex >= 0) projName = projSel.options[projSel.selectedIndex].text || '';
@@ -8389,24 +8394,24 @@ async function cuAiWrite() {
   var loc = unit ? ('unit ' + unit) : (house ? house : (projName ? projName : 'their home'));
 
   var orig = btn.textContent;
-  btn.textContent = '✨ Writing…';
+  btn.textContent = '\u2728 Writing\u2026';
   btn.disabled = true;
   try {
-    var prompt = 'You write short, warm progress updates that a home construction company sends to its customers about their new home. ' +
-      'Rewrite the following rough notes into a friendly, clear, professional update of 1-3 sentences. ' +
-      'Do not invent specific dates, names, or facts that are not in the notes. Keep it positive and concise. ' +
-      'Context: this update is about ' + loc + '. Return ONLY the update text, with no preamble or quotation marks.\n\nRough notes: ' + notes;
-    var resp = await fetch('https://api.anthropic.com/v1/messages', {
+    var resp = await fetch(AI_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
+      body: JSON.stringify({ notes: notes, location: loc })
     });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
     var data = await resp.json();
-    var text = (data.content || []).map(function(b){ return b.type === 'text' ? b.text : ''; }).join('').trim();
-    text = text.replace(/^["\u201c]+|["\u201d]+$/g, '').trim();
+    // accept several shapes: {text}, {result}, or raw Anthropic {content:[...]}
+    var text = data.text || data.result ||
+      ((data.content || []).map(function(b){ return b.type === 'text' ? b.text : (typeof b === 'string' ? b : ''); }).join('')) || '';
+    text = (text || '').trim().replace(/^["\u201c]+|["\u201d]+$/g, '').trim();
     if (text) ta.value = text;
+    else alert('The AI service returned no text. Check your backend response format.');
   } catch (e) {
-    alert('Could not generate text right now. You can write it manually.');
+    alert('Could not reach the AI service (' + e.message + '). You can write the update manually.');
   } finally {
     btn.textContent = orig;
     btn.disabled = false;
