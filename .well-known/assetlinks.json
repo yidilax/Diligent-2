@@ -1,8 +1,0 @@
-[{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "app.diligentdevelopers.twa",
-    "sha256_cert_fingerprints": ["6D:24:B8:08:53:CF:63:18:6C:1C:07:76:EE:46:18:54:3A:9E:63:B9:8E:E1:2B:DE:05:B2:6A:C5:8C:91:DC:07"]
-  }
-}]
