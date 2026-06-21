@@ -2154,6 +2154,96 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
   .suboption-box { animation: subFade 0.2s ease; }
   @keyframes subFade { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 
+
+/* ═══ TASKS SYSTEM STYLES ═══ */
+.tab-header { display:flex; justify-content:space-between; align-items:flex-start; padding:20px 20px 0; }
+.tab-title { font-family:'Bebas Neue',sans-serif; font-size:30px; letter-spacing:1.5px; color:var(--navy); margin:0; }
+.tab-count { font-size:13px; color:var(--muted); margin-top:2px; }
+.tab-add-btn { background:var(--navy); color:#fff; border:none; border-radius:10px; padding:11px 18px; font-weight:600; font-size:14px; cursor:pointer; font-family:'Inter',sans-serif; white-space:nowrap; }
+.tab-add-btn:active { transform:scale(0.97); }
+
+.task-toolbar { display:flex; flex-direction:column; gap:10px; padding:16px 20px; position:sticky; top:0; background:var(--cream); z-index:5; }
+.task-views { display:flex; gap:6px; background:#E6E1D8; padding:4px; border-radius:10px; }
+.task-view-btn { flex:1; background:none; border:none; padding:9px 8px; border-radius:7px; font-size:13px; font-weight:600; color:var(--muted); cursor:pointer; font-family:'Inter',sans-serif; }
+.task-view-btn.active { background:#fff; color:var(--navy); box-shadow:0 1px 3px rgba(0,0,0,0.12); }
+.task-filters { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.task-filter-input { padding:8px 10px; border:1.5px solid var(--border); border-radius:8px; font-size:13px; font-family:'Inter',sans-serif; background:#fff; }
+#tf-search { flex:1; min-width:120px; }
+.task-filter-check { display:flex; align-items:center; gap:5px; font-size:13px; color:var(--navy); font-weight:600; white-space:nowrap; }
+
+/* List view */
+.task-section { margin:0 20px 18px; }
+.task-section-head { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--muted); padding:10px 2px; border-bottom:2px solid var(--border); }
+.task-section-count { background:var(--border); color:var(--navy); border-radius:10px; padding:1px 8px; font-size:11px; margin-left:6px; }
+.task-row { display:flex; align-items:flex-start; gap:12px; padding:14px 4px; border-bottom:1px solid #ECE8E0; cursor:pointer; }
+.task-row:active { background:#F7F5F0; }
+.task-check { flex-shrink:0; width:22px; height:22px; border-radius:50%; border:2px solid var(--border); background:#fff; cursor:pointer; font-size:13px; color:#fff; display:flex; align-items:center; justify-content:center; margin-top:1px; }
+.task-check.checked { background:var(--green); border-color:var(--green); }
+.task-check.sm { width:18px; height:18px; font-size:11px; }
+.task-row-main { flex:1; min-width:0; }
+.task-row-title { font-size:15px; font-weight:600; color:var(--navy); line-height:1.3; }
+.task-done .task-row-title { text-decoration:line-through; color:var(--muted); }
+.task-row-meta { font-size:12px; color:var(--muted); margin-top:4px; display:flex; align-items:center; flex-wrap:wrap; gap:2px; }
+.task-prio-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; }
+.task-overdue { color:var(--red); font-weight:600; }
+
+/* Board view */
+.task-board { display:flex; gap:12px; overflow-x:auto; padding:0 20px 20px; -webkit-overflow-scrolling:touch; }
+.task-col { flex:0 0 250px; background:#EDEAE3; border-radius:12px; padding:12px; min-height:120px; }
+.task-col-head { font-size:13px; font-weight:700; color:var(--navy); margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px; }
+.task-card { background:#fff; border-radius:10px; padding:12px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.08); cursor:pointer; position:relative; }
+.task-card-prio { position:absolute; top:0; left:0; width:4px; height:100%; border-radius:10px 0 0 10px; }
+.task-card-title { font-size:14px; font-weight:600; color:var(--navy); line-height:1.3; margin-left:6px; }
+.task-card-meta { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; margin-left:6px; }
+.task-chip { font-size:11px; background:#F0EDE6; color:var(--navy); padding:3px 8px; border-radius:6px; font-weight:500; }
+
+/* Calendar view */
+.task-cal-head { display:flex; align-items:center; justify-content:center; gap:18px; padding:6px 20px 14px; }
+.task-cal-title { font-size:17px; font-weight:700; color:var(--navy); }
+.task-cal-nav { background:#fff; border:1.5px solid var(--border); border-radius:8px; width:34px; height:34px; font-size:18px; cursor:pointer; color:var(--navy); }
+.task-cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; padding:0 12px 20px; }
+.task-cal-dow { font-size:10px; font-weight:700; text-transform:uppercase; color:var(--muted); text-align:center; padding:4px 0; }
+.task-cal-cell { min-height:64px; background:#fff; border-radius:6px; padding:3px; border:1px solid #ECE8E0; overflow:hidden; }
+.task-cal-empty { background:transparent; border:none; }
+.task-cal-today { border:2px solid var(--gold); }
+.task-cal-daynum { font-size:11px; font-weight:600; color:var(--muted); padding:1px 3px; }
+.task-cal-pill { font-size:9px; background:#F7F5F0; border-radius:3px; padding:2px 4px; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; color:var(--navy); }
+.task-cal-more { font-size:9px; color:var(--muted); padding:1px 3px; }
+
+/* Modals */
+.task-modal-overlay { position:fixed; inset:0; background:rgba(13,31,60,0.55); z-index:400; display:flex; align-items:flex-end; justify-content:center; }
+.task-modal { background:#fff; width:100%; max-width:520px; max-height:92vh; border-radius:18px 18px 0 0; display:flex; flex-direction:column; overflow:hidden; }
+@media(min-width:560px){ .task-modal-overlay{ align-items:center; } .task-modal{ border-radius:18px; } }
+.task-modal-head { display:flex; justify-content:space-between; align-items:center; padding:18px 20px; border-bottom:1px solid var(--border); font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:1px; color:var(--navy); }
+.task-modal-x { background:none; border:none; font-size:18px; color:var(--muted); cursor:pointer; }
+.task-modal-body { padding:20px; overflow-y:auto; }
+
+.tf-label { display:block; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted); margin:12px 0 5px; }
+.tf-input { width:100%; padding:11px 13px; border:1.5px solid var(--border); border-radius:9px; font-size:14px; font-family:'Inter',sans-serif; color:var(--navy); background:#fff; box-sizing:border-box; }
+.tf-row { display:flex; gap:10px; }
+.tf-col { flex:1; min-width:0; }
+.tf-modal-actions { display:flex; justify-content:space-between; align-items:center; margin-top:20px; gap:10px; }
+.tf-btn-primary { background:var(--navy); color:#fff; border:none; border-radius:9px; padding:11px 20px; font-weight:600; font-size:14px; cursor:pointer; font-family:'Inter',sans-serif; }
+.tf-btn-primary.sm { padding:9px 14px; font-size:13px; }
+.tf-btn-ghost { background:none; border:1.5px solid var(--border); color:var(--navy); border-radius:9px; padding:11px 18px; font-weight:600; font-size:14px; cursor:pointer; margin-right:8px; font-family:'Inter',sans-serif; }
+.tf-btn-danger { background:#FEE2E2; color:var(--red); border:none; border-radius:9px; padding:11px 18px; font-weight:600; font-size:14px; cursor:pointer; font-family:'Inter',sans-serif; }
+
+.task-detail-meta { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
+.task-badge { color:#fff; font-size:12px; font-weight:600; padding:4px 10px; border-radius:6px; }
+.task-badge.ghost { background:#F0EDE6; color:var(--navy); }
+.task-detail-desc { font-size:14px; color:var(--text); line-height:1.5; background:#F7F5F0; padding:12px; border-radius:9px; margin-bottom:8px; white-space:pre-wrap; }
+.task-detail-section-title { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted); margin:18px 0 8px; }
+.task-sub-row { display:flex; align-items:center; gap:9px; padding:7px 0; font-size:14px; color:var(--navy); }
+.task-sub-done { text-decoration:line-through; color:var(--muted); }
+.task-sub-del { margin-left:auto; background:none; border:none; color:var(--muted); cursor:pointer; font-size:12px; }
+.task-sub-add { display:flex; gap:8px; margin-top:8px; }
+.task-sub-add .tf-input { flex:1; }
+.task-cmt { background:#F7F5F0; border-radius:9px; padding:10px 12px; margin-bottom:8px; }
+.task-cmt-head { font-size:12px; font-weight:700; color:var(--navy); }
+.task-cmt-time { font-weight:400; color:var(--muted); margin-left:6px; }
+.task-cmt-body { font-size:14px; color:var(--text); margin-top:3px; }
+.task-muted { font-size:13px; color:var(--muted); font-style:italic; padding:4px 0; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -2547,7 +2637,7 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
   </div>
 </div>
 <div style="text-align:center;padding:0 16px 32px;">
-  <button onclick="showOfficeLogin()" style="background:none;border:none;color:var(--muted);font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;text-decoration:underline;font-family:Inter,sans-serif;">Office Login</button>
+  <button onclick="showPage('officeAuthPage')" style="background:none;border:none;color:var(--muted);font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;text-decoration:underline;font-family:Inter,sans-serif;">Office Login</button>
 </div>
 </div><!-- /landingPage -->
 
@@ -2594,19 +2684,7 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
   </div>
 </div>
 
-<!-- Lightbox -->
-<div class="lightbox-overlay" id="lightboxOverlay" onclick="closeLightbox(event)" style="display:none;">
-  <div class="lightbox-box">
-    <div class="lightbox-img-wrap">
-      <img id="lightboxImg" src="" alt="" style="width:100%;max-height:340px;object-fit:cover;display:block;">
-      <button class="lightbox-close" onclick="closeLightboxDirect()">✕</button>
-    </div>
-    <div class="lightbox-footer">
-      <span class="lightbox-name" id="lightboxName"></span>
-      <span class="lightbox-tag" id="lightboxTag"></span>
-    </div>
-  </div>
-</div>
+<!-- duplicate lightbox removed -->
 
 <!-- ══════════════════════════════════════════ -->
 <!-- OFFICE AUTH PAGE                           -->
@@ -2727,7 +2805,7 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
       </li>
       <li class="office-nav-item">
         <button class="office-nav-btn" onclick="switchTab('tasks');closeSidebar();" id="navbtn-tasks">
-          <span class="nav-icon">📝</span> Tasks <span class="nav-soon">SOON</span>
+          <span class="nav-icon">📝</span> Tasks
         </button>
       </li>
       <li class="office-nav-item">
@@ -3692,6 +3770,458 @@ async function openOfficeDashboard() {
 // ════════════════════════════════════════════
 // TAB SWITCHING
 // ════════════════════════════════════════════
+
+/* ═══════════════════════════════════════════════════════════
+   TASKS SYSTEM (Asana-style) — List / Board / Calendar views,
+   subtasks, comments, sections, priorities, filters, project link
+   ═══════════════════════════════════════════════════════════ */
+
+var TASK_PRIORITIES = [
+  { id: 'low',    label: 'Low',    color: '#6B8FC7' },
+  { id: 'medium', label: 'Medium', color: '#C9A84C' },
+  { id: 'high',   label: 'High',   color: '#E08A3C' },
+  { id: 'urgent', label: 'Urgent', color: '#B03A2E' }
+];
+var TASK_STATUSES = [
+  { id: 'todo',        label: 'To Do' },
+  { id: 'inprogress', label: 'In Progress' },
+  { id: 'review',     label: 'Review' },
+  { id: 'done',       label: 'Done' }
+];
+var _taskView = 'list';        // list | board | calendar
+var _taskFilter = { mine: false, priority: '', project: '', search: '' };
+var _taskCalMonth = null;      // Date for calendar view
+var _editingTaskId = null;
+
+function _taskPriorityMeta(id) {
+  for (var i = 0; i < TASK_PRIORITIES.length; i++) if (TASK_PRIORITIES[i].id === id) return TASK_PRIORITIES[i];
+  return TASK_PRIORITIES[1];
+}
+function _taskStatusLabel(id) {
+  for (var i = 0; i < TASK_STATUSES.length; i++) if (TASK_STATUSES[i].id === id) return TASK_STATUSES[i].label;
+  return 'To Do';
+}
+function _taskUid() { return 'task_' + Date.now() + '_' + Math.floor(Math.random() * 9999); }
+
+async function _loadAllTasks() {
+  var keys = await DB.list('task:');
+  var all = (await Promise.all(keys.map(function(k) { return DB.get(k); }))).filter(Boolean);
+  // Visibility: admins see all; others see public or own
+  all = all.filter(function(t) {
+    if (!currentUser) return false;
+    if (currentUser.role === 'admin') return true;
+    if (!t.visibility || t.visibility === 'public') return true;
+    return t.ownerId === currentUser.id;
+  });
+  return all;
+}
+
+async function _loadEmployeesForAssign() {
+  try {
+    var keys = await DB.list('user:');
+    var users = (await Promise.all(keys.map(function(k) { return DB.get(k); }))).filter(Boolean);
+    return users.filter(function(u) { return u.status === 'active'; });
+  } catch (e) { return []; }
+}
+async function _loadProjectsForLink() {
+  try {
+    var keys = await DB.list('project:');
+    var projs = (await Promise.all(keys.map(function(k) { return DB.get(k); }))).filter(Boolean);
+    return projs.filter(canSee);
+  } catch (e) { return []; }
+}
+
+/* ── Main render ── */
+async function renderTasks() {
+  var host = document.getElementById('tasksContent');
+  if (!host) return;
+  var tasks = await _loadAllTasks();
+
+  // Apply filters
+  var filtered = tasks.filter(function(t) {
+    if (_taskFilter.mine && t.assigneeId !== (currentUser && currentUser.id)) return false;
+    if (_taskFilter.priority && t.priority !== _taskFilter.priority) return false;
+    if (_taskFilter.project && t.projectId !== _taskFilter.project) return false;
+    if (_taskFilter.search) {
+      var q = _taskFilter.search.toLowerCase();
+      if ((t.title || '').toLowerCase().indexOf(q) === -1 &&
+          (t.description || '').toLowerCase().indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+
+  var openCount = filtered.filter(function(t) { return t.status !== 'done'; }).length;
+  var countEl = document.getElementById('tasks-count');
+  if (countEl) countEl.textContent = openCount + ' open task' + (openCount !== 1 ? 's' : '');
+
+  if (_taskView === 'list')      host.innerHTML = _renderTaskList(filtered);
+  else if (_taskView === 'board') host.innerHTML = _renderTaskBoard(filtered);
+  else if (_taskView === 'calendar') host.innerHTML = _renderTaskCalendar(filtered);
+
+  if (_taskView === 'board') _wireBoardDrag();
+}
+
+/* ── LIST VIEW (grouped by status section) ── */
+function _renderTaskList(tasks) {
+  if (tasks.length === 0) return _tasksEmpty();
+  var html = '';
+  TASK_STATUSES.forEach(function(st) {
+    var group = tasks.filter(function(t) { return (t.status || 'todo') === st.id; });
+    if (group.length === 0) return;
+    html += '<div class="task-section">' +
+      '<div class="task-section-head">' + st.label + ' <span class="task-section-count">' + group.length + '</span></div>';
+    group.forEach(function(t) { html += _taskRowHtml(t); });
+    html += '</div>';
+  });
+  return html;
+}
+
+function _taskRowHtml(t) {
+  var pm = _taskPriorityMeta(t.priority);
+  var done = t.status === 'done';
+  var due = t.dueDate ? _fmtTaskDate(t.dueDate) : '';
+  var overdue = t.dueDate && !done && new Date(t.dueDate) < new Date(new Date().toDateString());
+  var subCount = (t.subtasks || []).length;
+  var subDone = (t.subtasks || []).filter(function(s) { return s.done; }).length;
+  var cmtCount = (t.comments || []).length;
+  return '<div class="task-row' + (done ? ' task-done' : '') + '" onclick="openTaskDetail(\'' + t.id + '\')">' +
+    '<button class="task-check' + (done ? ' checked' : '') + '" onclick="event.stopPropagation();toggleTaskDone(\'' + t.id + '\')">' + (done ? '✓' : '') + '</button>' +
+    '<div class="task-row-main">' +
+      '<div class="task-row-title">' + _esc(t.title || 'Untitled') + '</div>' +
+      '<div class="task-row-meta">' +
+        '<span class="task-prio-dot" style="background:' + pm.color + '"></span>' + pm.label +
+        (t.assigneeName ? ' · <span class="task-assignee">' + _esc(t.assigneeName) + '</span>' : '') +
+        (due ? ' · <span class="task-due' + (overdue ? ' task-overdue' : '') + '">📅 ' + due + '</span>' : '') +
+        (subCount ? ' · ☑ ' + subDone + '/' + subCount : '') +
+        (cmtCount ? ' · 💬 ' + cmtCount : '') +
+        (t.projectName ? ' · <span class="task-proj">🏗 ' + _esc(t.projectName) + '</span>' : '') +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+/* ── BOARD VIEW (Kanban) ── */
+function _renderTaskBoard(tasks) {
+  var html = '<div class="task-board">';
+  TASK_STATUSES.forEach(function(st) {
+    var group = tasks.filter(function(t) { return (t.status || 'todo') === st.id; });
+    html += '<div class="task-col" data-status="' + st.id + '" ondragover="event.preventDefault()" ondrop="_dropTask(event,\'' + st.id + '\')">' +
+      '<div class="task-col-head">' + st.label + ' <span class="task-section-count">' + group.length + '</span></div>';
+    group.forEach(function(t) {
+      var pm = _taskPriorityMeta(t.priority);
+      var due = t.dueDate ? _fmtTaskDate(t.dueDate) : '';
+      var overdue = t.dueDate && t.status !== 'done' && new Date(t.dueDate) < new Date(new Date().toDateString());
+      html += '<div class="task-card" draggable="true" data-id="' + t.id + '" ondragstart="_dragTask(event,\'' + t.id + '\')" onclick="openTaskDetail(\'' + t.id + '\')">' +
+        '<div class="task-card-prio" style="background:' + pm.color + '"></div>' +
+        '<div class="task-card-title">' + _esc(t.title || 'Untitled') + '</div>' +
+        '<div class="task-card-meta">' +
+          (t.assigneeName ? '<span class="task-chip">' + _esc(t.assigneeName) + '</span>' : '') +
+          (due ? '<span class="task-chip' + (overdue ? ' task-overdue' : '') + '">📅 ' + due + '</span>' : '') +
+        '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+  });
+  html += '</div>';
+  return html;
+}
+
+var _draggedTaskId = null;
+function _dragTask(e, id) { _draggedTaskId = id; e.dataTransfer.effectAllowed = 'move'; }
+async function _dropTask(e, newStatus) {
+  e.preventDefault();
+  if (!_draggedTaskId) return;
+  var t = await DB.get('task:' + _draggedTaskId);
+  if (t) { t.status = newStatus; t._updatedAt = Date.now(); await DB.set('task:' + _draggedTaskId, t); }
+  _draggedTaskId = null;
+  renderTasks();
+}
+function _wireBoardDrag() { /* drag handlers are inline */ }
+
+/* ── CALENDAR VIEW ── */
+function _renderTaskCalendar(tasks) {
+  if (!_taskCalMonth) _taskCalMonth = new Date();
+  var year = _taskCalMonth.getFullYear(), month = _taskCalMonth.getMonth();
+  var monthName = _taskCalMonth.toLocaleString('default', { month: 'long', year: 'numeric' });
+  var first = new Date(year, month, 1);
+  var startDay = first.getDay();
+  var daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  var byDate = {};
+  tasks.forEach(function(t) {
+    if (!t.dueDate) return;
+    var d = t.dueDate;
+    (byDate[d] = byDate[d] || []).push(t);
+  });
+
+  var html = '<div class="task-cal-head">' +
+    '<button class="task-cal-nav" onclick="_taskCalShift(-1)">‹</button>' +
+    '<span class="task-cal-title">' + monthName + '</span>' +
+    '<button class="task-cal-nav" onclick="_taskCalShift(1)">›</button>' +
+  '</div>';
+  html += '<div class="task-cal-grid">';
+  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(function(d) { html += '<div class="task-cal-dow">' + d + '</div>'; });
+  for (var i = 0; i < startDay; i++) html += '<div class="task-cal-cell task-cal-empty"></div>';
+  for (var day = 1; day <= daysInMonth; day++) {
+    var iso = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+    var dayTasks = byDate[iso] || [];
+    var isToday = iso === new Date().toISOString().slice(0, 10);
+    html += '<div class="task-cal-cell' + (isToday ? ' task-cal-today' : '') + '">' +
+      '<div class="task-cal-daynum">' + day + '</div>';
+    dayTasks.slice(0, 3).forEach(function(t) {
+      var pm = _taskPriorityMeta(t.priority);
+      html += '<div class="task-cal-pill" style="border-left:3px solid ' + pm.color + '" onclick="openTaskDetail(\'' + t.id + '\')">' + _esc(t.title || '') + '</div>';
+    });
+    if (dayTasks.length > 3) html += '<div class="task-cal-more">+' + (dayTasks.length - 3) + ' more</div>';
+    html += '</div>';
+  }
+  html += '</div>';
+  return html;
+}
+function _taskCalShift(dir) {
+  if (!_taskCalMonth) _taskCalMonth = new Date();
+  _taskCalMonth = new Date(_taskCalMonth.getFullYear(), _taskCalMonth.getMonth() + dir, 1);
+  renderTasks();
+}
+
+/* ── View + filter controls ── */
+function setTaskView(v) {
+  _taskView = v;
+  document.querySelectorAll('.task-view-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.view === v); });
+  renderTasks();
+}
+function _taskFilterChange() {
+  _taskFilter.mine = document.getElementById('tf-mine') ? document.getElementById('tf-mine').checked : false;
+  _taskFilter.priority = document.getElementById('tf-priority') ? document.getElementById('tf-priority').value : '';
+  _taskFilter.project = document.getElementById('tf-project') ? document.getElementById('tf-project').value : '';
+  _taskFilter.search = document.getElementById('tf-search') ? document.getElementById('tf-search').value : '';
+  renderTasks();
+}
+
+function _tasksEmpty() {
+  return '<div class="tab-empty"><div class="tab-empty-icon">📝</div>' +
+    '<div class="tab-empty-title">No Tasks Yet</div>' +
+    '<div class="tab-empty-desc">Create your first task to start tracking work for your team.</div></div>';
+}
+
+/* ── Helpers ── */
+function _esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function _fmtTaskDate(iso) {
+  if (!iso) return '';
+  var d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('default', { month: 'short', day: 'numeric' });
+}
+
+/* ── CREATE / EDIT MODAL ── */
+async function openTaskForm(taskId) {
+  _editingTaskId = taskId || null;
+  var employees = await _loadEmployeesForAssign();
+  var projects = await _loadProjectsForLink();
+  var t = taskId ? await DB.get('task:' + taskId) : null;
+
+  var assigneeOpts = '<option value="">— Unassigned —</option>';
+  employees.forEach(function(e) {
+    var sel = t && t.assigneeId === e.id ? ' selected' : '';
+    assigneeOpts += '<option value="' + e.id + '"' + sel + '>' + _esc(e.name || e.email) + '</option>';
+  });
+
+  var projOpts = '<option value="">— No project —</option>';
+  projects.forEach(function(p) {
+    var sel = t && t.projectId === p.id ? ' selected' : '';
+    projOpts += '<option value="' + p.id + '"' + sel + '>' + _esc(p.name) + '</option>';
+  });
+
+  var prioOpts = '';
+  TASK_PRIORITIES.forEach(function(p) {
+    var sel = (t ? t.priority : 'medium') === p.id ? ' selected' : '';
+    prioOpts += '<option value="' + p.id + '"' + sel + '>' + p.label + '</option>';
+  });
+  var statusOpts = '';
+  TASK_STATUSES.forEach(function(s) {
+    var sel = (t ? t.status : 'todo') === s.id ? ' selected' : '';
+    statusOpts += '<option value="' + s.id + '"' + sel + '>' + s.label + '</option>';
+  });
+
+  var modal = document.getElementById('taskFormModal');
+  var body = document.getElementById('taskFormBody');
+  document.getElementById('taskFormTitle').textContent = taskId ? 'Edit Task' : 'New Task';
+  body.innerHTML =
+    '<label class="tf-label">Task title *</label>' +
+    '<input id="tfm-title" class="tf-input" type="text" placeholder="What needs to be done?" value="' + (t ? _esc(t.title) : '') + '">' +
+    '<label class="tf-label">Description</label>' +
+    '<textarea id="tfm-desc" class="tf-input" rows="3" placeholder="Add details...">' + (t ? _esc(t.description || '') : '') + '</textarea>' +
+    '<div class="tf-row">' +
+      '<div class="tf-col"><label class="tf-label">Assignee</label><select id="tfm-assignee" class="tf-input">' + assigneeOpts + '</select></div>' +
+      '<div class="tf-col"><label class="tf-label">Due date</label><input id="tfm-due" class="tf-input" type="date" value="' + (t && t.dueDate ? t.dueDate : '') + '"></div>' +
+    '</div>' +
+    '<div class="tf-row">' +
+      '<div class="tf-col"><label class="tf-label">Priority</label><select id="tfm-priority" class="tf-input">' + prioOpts + '</select></div>' +
+      '<div class="tf-col"><label class="tf-label">Status</label><select id="tfm-status" class="tf-input">' + statusOpts + '</select></div>' +
+    '</div>' +
+    '<label class="tf-label">Link to project (optional)</label>' +
+    '<select id="tfm-project" class="tf-input">' + projOpts + '</select>' +
+    '<div class="tf-modal-actions">' +
+      (taskId ? '<button class="tf-btn-danger" onclick="deleteTask(\'' + taskId + '\')">Delete</button>' : '<span></span>') +
+      '<div><button class="tf-btn-ghost" onclick="closeTaskForm()">Cancel</button>' +
+      '<button class="tf-btn-primary" onclick="saveTask()">' + (taskId ? 'Save' : 'Create Task') + '</button></div>' +
+    '</div>';
+  modal.style.display = 'flex';
+}
+function closeTaskForm() {
+  var m = document.getElementById('taskFormModal'); if (m) m.style.display = 'none';
+  _editingTaskId = null;
+}
+
+async function saveTask() {
+  var title = document.getElementById('tfm-title').value.trim();
+  if (!title) { alert('Please enter a task title.'); return; }
+  var assigneeSel = document.getElementById('tfm-assignee');
+  var projSel = document.getElementById('tfm-project');
+  var assigneeId = assigneeSel.value;
+  var assigneeName = assigneeId ? assigneeSel.options[assigneeSel.selectedIndex].text : '';
+  var projectId = projSel.value;
+  var projectName = projectId ? projSel.options[projSel.selectedIndex].text : '';
+
+  var id = _editingTaskId || _taskUid();
+  var existing = _editingTaskId ? (await DB.get('task:' + id)) : null;
+  var task = existing || { id: id, subtasks: [], comments: [], _createdAt: Date.now(), ownerId: currentUser ? currentUser.id : null, visibility: 'public' };
+  task.title = title;
+  task.description = document.getElementById('tfm-desc').value.trim();
+  task.assigneeId = assigneeId;
+  task.assigneeName = assigneeName;
+  task.dueDate = document.getElementById('tfm-due').value || '';
+  task.priority = document.getElementById('tfm-priority').value;
+  task.status = document.getElementById('tfm-status').value;
+  task.projectId = projectId;
+  task.projectName = projectName;
+  task._updatedAt = Date.now();
+
+  await DB.set('task:' + id, task);
+  closeTaskForm();
+  renderTasks();
+}
+
+async function toggleTaskDone(id) {
+  var t = await DB.get('task:' + id);
+  if (!t) return;
+  t.status = (t.status === 'done') ? 'todo' : 'done';
+  t._updatedAt = Date.now();
+  await DB.set('task:' + id, t);
+  renderTasks();
+}
+
+async function deleteTask(id) {
+  if (!confirm('Delete this task? This cannot be undone.')) return;
+  await DB.delete('task:' + id);
+  closeTaskForm();
+  closeTaskDetail();
+  renderTasks();
+}
+
+/* ── DETAIL VIEW (subtasks + comments) ── */
+async function openTaskDetail(id) {
+  var t = await DB.get('task:' + id);
+  if (!t) return;
+  _editingTaskId = id;
+  var pm = _taskPriorityMeta(t.priority);
+  var modal = document.getElementById('taskDetailModal');
+  var body = document.getElementById('taskDetailBody');
+
+  var subHtml = '';
+  (t.subtasks || []).forEach(function(s, i) {
+    subHtml += '<div class="task-sub-row">' +
+      '<button class="task-check sm' + (s.done ? ' checked' : '') + '" onclick="toggleSubtask(\'' + id + '\',' + i + ')">' + (s.done ? '✓' : '') + '</button>' +
+      '<span class="' + (s.done ? 'task-sub-done' : '') + '">' + _esc(s.title) + '</span>' +
+      '<button class="task-sub-del" onclick="deleteSubtask(\'' + id + '\',' + i + ')">✕</button>' +
+    '</div>';
+  });
+
+  var cmtHtml = '';
+  (t.comments || []).forEach(function(c) {
+    cmtHtml += '<div class="task-cmt">' +
+      '<div class="task-cmt-head">' + _esc(c.author) + ' <span class="task-cmt-time">' + _fmtCmtTime(c.at) + '</span></div>' +
+      '<div class="task-cmt-body">' + _esc(c.text) + '</div>' +
+    '</div>';
+  });
+
+  document.getElementById('taskDetailTitle').textContent = t.title || 'Task';
+  body.innerHTML =
+    '<div class="task-detail-meta">' +
+      '<span class="task-badge" style="background:' + pm.color + '">' + pm.label + '</span>' +
+      '<span class="task-badge ghost">' + _taskStatusLabel(t.status) + '</span>' +
+      (t.assigneeName ? '<span class="task-badge ghost">👤 ' + _esc(t.assigneeName) + '</span>' : '') +
+      (t.dueDate ? '<span class="task-badge ghost">📅 ' + _fmtTaskDate(t.dueDate) + '</span>' : '') +
+      (t.projectName ? '<span class="task-badge ghost">🏗 ' + _esc(t.projectName) + '</span>' : '') +
+    '</div>' +
+    (t.description ? '<div class="task-detail-desc">' + _esc(t.description) + '</div>' : '') +
+    '<button class="tf-btn-ghost" style="margin:8px 0" onclick="openTaskForm(\'' + id + '\')">✏️ Edit details</button>' +
+    '<div class="task-detail-section-title">Subtasks</div>' +
+    '<div id="taskSubList">' + (subHtml || '<div class="task-muted">No subtasks yet.</div>') + '</div>' +
+    '<div class="task-sub-add"><input id="newSubInput" class="tf-input" type="text" placeholder="Add a subtask..." onkeydown="if(event.key===\'Enter\')addSubtask(\'' + id + '\')"><button class="tf-btn-primary sm" onclick="addSubtask(\'' + id + '\')">Add</button></div>' +
+    '<div class="task-detail-section-title">Comments</div>' +
+    '<div id="taskCmtList">' + (cmtHtml || '<div class="task-muted">No comments yet.</div>') + '</div>' +
+    '<div class="task-sub-add"><input id="newCmtInput" class="tf-input" type="text" placeholder="Write a comment..." onkeydown="if(event.key===\'Enter\')addComment(\'' + id + '\')"><button class="tf-btn-primary sm" onclick="addComment(\'' + id + '\')">Post</button></div>';
+  modal.style.display = 'flex';
+}
+function closeTaskDetail() {
+  var m = document.getElementById('taskDetailModal'); if (m) m.style.display = 'none';
+}
+
+async function addSubtask(id) {
+  var inp = document.getElementById('newSubInput');
+  var v = inp.value.trim(); if (!v) return;
+  var t = await DB.get('task:' + id); if (!t) return;
+  t.subtasks = t.subtasks || [];
+  t.subtasks.push({ title: v, done: false });
+  t._updatedAt = Date.now();
+  await DB.set('task:' + id, t);
+  openTaskDetail(id);
+}
+async function toggleSubtask(id, idx) {
+  var t = await DB.get('task:' + id); if (!t || !t.subtasks[idx]) return;
+  t.subtasks[idx].done = !t.subtasks[idx].done;
+  t._updatedAt = Date.now();
+  await DB.set('task:' + id, t);
+  openTaskDetail(id);
+}
+async function deleteSubtask(id, idx) {
+  var t = await DB.get('task:' + id); if (!t) return;
+  t.subtasks.splice(idx, 1);
+  t._updatedAt = Date.now();
+  await DB.set('task:' + id, t);
+  openTaskDetail(id);
+}
+async function addComment(id) {
+  var inp = document.getElementById('newCmtInput');
+  var v = inp.value.trim(); if (!v) return;
+  var t = await DB.get('task:' + id); if (!t) return;
+  t.comments = t.comments || [];
+  t.comments.push({ author: currentUser ? (currentUser.name || 'User') : 'User', text: v, at: Date.now() });
+  t._updatedAt = Date.now();
+  await DB.set('task:' + id, t);
+  openTaskDetail(id);
+}
+function _fmtCmtTime(ts) {
+  if (!ts) return '';
+  var d = new Date(ts);
+  return d.toLocaleDateString('default', { month: 'short', day: 'numeric' }) + ' ' + d.toLocaleTimeString('default', { hour: 'numeric', minute: '2-digit' });
+}
+
+
+
+async function _populateTaskProjectFilter() {
+  try {
+    var sel = document.getElementById('tf-project');
+    if (!sel) return;
+    var projects = await _loadProjectsForLink();
+    if (projects.length === 0) { sel.style.display = 'none'; return; }
+    sel.style.display = '';
+    var html = '<option value="">All projects</option>';
+    projects.forEach(function(p) { html += '<option value="' + p.id + '">' + _esc(p.name) + '</option>'; });
+    sel.innerHTML = html;
+  } catch (e) {}
+}
+
 async function switchTab(tab) {
   // Hide all office tabs
   document.querySelectorAll('.office-tab').forEach(function(t) { t.style.display = 'none'; });
@@ -3712,6 +4242,7 @@ async function switchTab(tab) {
   if (tab === 'upgrades') await renderUpgrades();
   if (tab === 'upgradeEditor') initUpgradeEditor();
   if (tab === 'punchlist') renderPunchList();
+  if (tab === 'tasks') { _populateTaskProjectFilter(); renderTasks(); }
   if (tab === 'specs') renderSpecs();
 }
 
@@ -4527,51 +5058,15 @@ function closeLightbox(e) {
 // Init upgrade sections on load
 (async function() { window._upgradeSections = await ue_load(); })();
 
-function toggleGlass(name, value) {
-  var wrap = document.getElementById('glass-' + name);
-  if (!wrap) return;
-  if (value === 'yes') {
-    wrap.style.display = 'flex';
-    wrap.style.flexWrap = 'wrap';
-    wrap.style.alignItems = 'center';
-    wrap.style.gap = '8px';
-  } else {
-    wrap.style.display = 'none';
-    document.querySelectorAll('input[name="' + name + '_glass"]').forEach(function(r) { r.checked = false; });
-  }
-}
+/* duplicate toggleGlass removed */
 
-function openLightbox(name, imgUrl, tag) {
-  document.getElementById('lightboxImg').src = imgUrl || '';
-  document.getElementById('lightboxName').textContent = name || '';
-  document.getElementById('lightboxTag').textContent = tag || '';
-  document.getElementById('lightboxOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
+/* duplicate openLightbox removed */
 
-function closeLightboxDirect() {
-  document.getElementById('lightboxOverlay').classList.remove('open');
-  document.body.style.overflow = '';
-}
+/* duplicate closeLightboxDirect removed */
 
-function closeLightbox(e) {
-  if (e.target === document.getElementById('lightboxOverlay')) closeLightboxDirect();
-}
+/* duplicate closeLightbox removed */
 
-function updateProgress() {
-  var fill = document.getElementById('progressFill');
-  var pctEl = document.getElementById('progressPct');
-  if (!fill || !pctEl) return;
-  var names = window._upgradeRadioNames || [];
-  var total = names.length || 1;
-  var answered = 0;
-  names.forEach(function(name) {
-    if (document.querySelector('#upgradeSheetContent input[name="' + name + '"]:checked')) answered++;
-  });
-  var pct = Math.round((answered / total) * 100);
-  fill.style.width = pct + '%';
-  pctEl.textContent = pct + '%';
-}
+/* duplicate updateProgress removed */
 
 
 // ════════════════════════════════════════════
@@ -5223,41 +5718,9 @@ function ue_applyPhoto(src, btn, row) {
   }
 }
 
-function ue_collectFromUI() {
-  var sections = [];
-  document.querySelectorAll('#ue_sections .ue-section-card').forEach(function(card, si) {
-    var numInput = card.querySelector('.ue-section-num-input');
-    var titleInput = card.querySelector('.ue-section-title-input');
-    var sec = {
-      id: card.dataset.sectionId || ('sec_' + Date.now() + '_' + si),
-      num: numInput ? (numInput.value.trim() || String(si + 2).padStart(2, '0')) : String(si + 2).padStart(2, '0'),
-      title: titleInput ? titleInput.value.trim() : 'Section',
-      items: []
-    };
-    card.querySelectorAll('.ue-item-row').forEach(function(row, ii) {
-      var nameInput = row.querySelector('.ue-item-name');
-      var store = row.querySelector('.ue-photo-store');
-      sec.items.push({
-        key: row.dataset.key || (sec.id + '_' + (ii + 1)),
-        name: nameInput ? nameInput.value.trim() : '',
-        hasGlass: row.dataset.hasGlass === 'true',
-        photo: (store && store.value) ? store.value : null
-      });
-    });
-    sections.push(sec);
-  });
-  return sections;
-}
+/* duplicate ue_collectFromUI removed */
 
-async function ue_save() {
-  var sections = ue_collectFromUI();
-  await DB.set('upgrade_sections', JSON.stringify(sections));
-  window._upgradeSections = sections;
-  buildUpgradeSheet(sections);
-  var msg = document.getElementById('ue_saveMsg');
-  msg.style.display = 'inline';
-  setTimeout(function() { msg.style.display = 'none'; }, 2500);
-}
+/* duplicate ue_save removed */
 
 async function initUpgradeEditor() {
   // Always load fresh from DB so editor matches what's saved
@@ -5448,14 +5911,8 @@ async function submitUpgrades() {
 // ════════════════════════════════════════════
 // MODAL HELPERS
 // ════════════════════════════════════════════
-function openModal(id) {
-  var el = document.getElementById('modal-' + id);
-  if (el) { el.style.display = 'flex'; el.classList.add('open'); }
-}
-function closeModal(id) {
-  var el = document.getElementById('modal-' + id);
-  if (el) { el.style.display = 'none'; el.classList.remove('open'); }
-}
+/* duplicate openModal removed */
+/* duplicate closeModal removed */
 
 // ════════════════════════════════════════════
 // PROJECTS
@@ -6031,13 +6488,7 @@ function clearSig() {
 }
 
 
-function getPos(e) {
-  var rect = canvas.getBoundingClientRect();
-  if (e.touches && e.touches.length > 0) {
-    return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
-  }
-  return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-}
+/* duplicate getPos removed */
 
 // clearSig moved to initSignatureCanvas section
 
@@ -6156,12 +6607,9 @@ function prefillFormFromData(r) {
   if (typeof updateProgress === 'function') updateProgress();
 }
 
-function setVal(id, val) { var el = document.getElementById(id); if (el) el.value = val || ''; }
+/* duplicate setVal removed */
 
-function setRadio(name, val) {
-    var input = document.querySelector('input[name="' + name + '"][value="' + (val||'').toLowerCase().trim() + '"]');
-    if (input) { input.checked = true; input.dispatchEvent(new Event('change')); }
-  }
+/* duplicate setRadio removed */
 
 function generateSubmissionId() {
   return 'sub_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -9039,16 +9487,55 @@ if (document.readyState === 'loading') {
   initAppDownloadBanner();
 }
 </script>
+
+<!-- TASK FORM MODAL -->
+<div class="task-modal-overlay" id="taskFormModal" style="display:none;">
+  <div class="task-modal">
+    <div class="task-modal-head"><span id="taskFormTitle">New Task</span><button class="task-modal-x" onclick="closeTaskForm()">&#10005;</button></div>
+    <div class="task-modal-body" id="taskFormBody"></div>
+  </div>
+</div>
+<!-- TASK DETAIL MODAL -->
+<div class="task-modal-overlay" id="taskDetailModal" style="display:none;">
+  <div class="task-modal">
+    <div class="task-modal-head"><span id="taskDetailTitle">Task</span><button class="task-modal-x" onclick="closeTaskDetail()">&#10005;</button></div>
+    <div class="task-modal-body" id="taskDetailBody"></div>
+  </div>
+</div>
+
 </body>
 </html
   <!-- Tasks (Coming Soon) -->
   <div class="office-tab" id="tab-tasks" style="display:none;">
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px 20px;">
-      <div style="font-size:64px;margin-bottom:20px;">📝</div>
-      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;color:var(--navy);margin:0 0 12px;">Tasks</h2>
-      <div style="display:inline-block;background:var(--gold);color:var(--navy);font-weight:700;font-size:13px;padding:6px 16px;border-radius:20px;letter-spacing:1px;margin-bottom:16px;">COMING SOON</div>
-      <p style="color:var(--muted);font-size:15px;max-width:380px;line-height:1.6;">Assign and track tasks for your team. This feature is on the way.</p>
+    <div class="tab-header">
+      <div>
+        <h2 class="tab-title">Tasks</h2>
+        <div class="tab-count" id="tasks-count">0 open tasks</div>
+      </div>
+      <button class="tab-add-btn" onclick="openTaskForm()">+ New Task</button>
     </div>
+
+    <div class="task-toolbar">
+      <div class="task-views">
+        <button class="task-view-btn active" data-view="list" onclick="setTaskView('list')">☰ List</button>
+        <button class="task-view-btn" data-view="board" onclick="setTaskView('board')">▦ Board</button>
+        <button class="task-view-btn" data-view="calendar" onclick="setTaskView('calendar')">📅 Calendar</button>
+      </div>
+      <div class="task-filters">
+        <input id="tf-search" class="task-filter-input" type="text" placeholder="🔍 Search..." oninput="_taskFilterChange()">
+        <select id="tf-priority" class="task-filter-input" onchange="_taskFilterChange()">
+          <option value="">All priorities</option>
+          <option value="urgent">Urgent</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+        <select id="tf-project" class="task-filter-input" onchange="_taskFilterChange()" style="display:none;"></select>
+        <label class="task-filter-check"><input id="tf-mine" type="checkbox" onchange="_taskFilterChange()"> My tasks</label>
+      </div>
+    </div>
+
+    <div id="tasksContent"></div>
   </div>
 
   <!-- Scheduling (Coming Soon) -->
