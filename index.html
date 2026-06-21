@@ -1468,7 +1468,7 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
     justify-content: center;
     padding: 20px;
   }
-  .modal-overlay.open { display: flex; }
+  .modal-overlay.open { display: flex !important; }
   .modal {
     background: white;
     border-radius: 10px;
@@ -1876,7 +1876,7 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
 
   @media print {
     header, .progress-wrap { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .btn-submit, .modal-overlay { display: none !important; }
+    .btn-submit, .modal-overlay.open { display: flex !important; }
   }
 
   /* ── LANDING PAGE ─────────────────────────────────────────────── */
@@ -2945,6 +2945,20 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .td-desc-rich ul { padding-left:22px; list-style:disc; margin:6px 0; }
 .td-desc-rich ol { padding-left:22px; list-style:decimal; margin:6px 0; }
 .td-desc-rich a { color:#1a2b4a; text-decoration:underline; }
+
+
+/* Subtask add row */
+.td-add-row { display:flex; gap:8px; margin-top:8px; }
+.td-add-input { flex:1; font-family:'Inter',sans-serif; font-size:14px; padding:11px 12px; border:1.5px solid #d8d0bd; border-radius:8px; background:#fff; color:#16233d; }
+.td-add-input:focus { outline:none; border-color:#c9a227; }
+.td-add-btn { flex-shrink:0; background:#1a2b4a; color:#fff; border:0; border-radius:8px; padding:0 16px; font-family:'Inter',sans-serif; font-weight:700; font-size:14px; cursor:pointer; touch-action:manipulation; }
+.td-add-btn:active { background:#0f1d36; }
+
+
+.tas-act.tas-open { background:#f6eed6; font-weight:700; color:#1a2b4a; border-bottom:1px solid #e8dcb8; }
+.tas-act.tas-open:active { background:#efe2c0; }
+.tas-title { cursor:pointer; }
+.tas-title:active { color:#c9a227; }
 
 </style>
   <!-- Firebase -->
@@ -5132,9 +5146,10 @@ async function openTaskQuickActions(id) {
     '<div class="tas-backdrop" onclick="closeTaskQuickActions()"></div>' +
     '<div class="tas-sheet">' +
       '<div class="tas-grip"></div>' +
-      '<div class="tas-title">' + _esc(t.title||'Task') + '</div>' +
+      '<div class="tas-title" onclick="_tasOpen()">' + _esc(t.title||'Task') + '</div>' +
       (t.dueDate ? '<div class="tas-sub">Due ' + _fmtTaskDate(t.dueDate) + '</div>' : '') +
       '<div class="tas-actions">' +
+        '<button class="tas-act tas-open" onclick="_tasOpen()"><span class="tas-ic">&#9776;</span>Open task &middot; subtasks &amp; notes</button>' +
         '<button class="tas-act" onclick="_tasDone()"><span class="tas-ic">' + (done?'\u21ba':'\u2713') + '</span>' + (done?'Reopen':'Mark done') + '</button>' +
         '<button class="tas-act" onclick="_tasDate()"><span class="tas-ic">&#128197;</span>Set date</button>' +
         '<button class="tas-act" onclick="_tasAssign()"><span class="tas-ic">&#128100;</span>Assign</button>' +
@@ -5156,6 +5171,11 @@ async function _tasDone() {
   if (!_qaCurrentTask) return;
   await toggleTaskDone(_qaCurrentTask.id);
   closeTaskQuickActions();
+}
+function _tasOpen() {
+  var id = _qaCurrentTask && _qaCurrentTask.id;
+  closeTaskQuickActions();
+  if (id) openTaskDetail(id);
 }
 function _tasEdit() {
   var id = _qaCurrentTask && _qaCurrentTask.id;
@@ -6085,7 +6105,7 @@ async function openTaskDetail(id) {
         '<div class="td-section"><div class="td-sec-head"><span class="td-sec-title">Subtasks</span>' +
           (subTotal ? '<span class="td-sec-count">' + subDone + ' of ' + subTotal + '</span>' : '') + '</div>' +
           subHtml +
-          '<div class="td-add-row"><input id="newSubInput" class="td-add-input" placeholder="\uff0b Add a subtask" onkeydown="if(event.key===\'Enter\')addSubtask(\'' + id + '\')"></div>' +
+          '<div class="td-add-row"><input id="newSubInput" class="td-add-input" placeholder="Add a subtask..." onkeydown="if(event.key===\'Enter\')addSubtask(\'' + id + '\')"><button class="td-add-btn" onclick="addSubtask(\'' + id + '\')">+ Add</button></div>' +
         '</div>' +
 
         (attHtml ? ('<div class="td-section"><div class="td-sec-head"><span class="td-sec-title">Attachments</span><span class="td-sec-count">' + (t.attachments||[]).length + '</span></div><div class="td-photos">' + attHtml + '</div></div>') : '') +
