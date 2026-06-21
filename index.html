@@ -6,6 +6,18 @@
 <title>Diligent Developers</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
+/* ===== Disable Android text-selection on tap; keep inputs selectable ===== */
+* { -webkit-tap-highlight-color: transparent; }
+html, body {
+  -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
+  -webkit-touch-callout: none;
+}
+input, textarea, select, [contenteditable="true"] {
+  -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text;
+}
+button, a, [role="button"], .btn, [onclick] {
+  touch-action: manipulation; cursor: pointer;
+}
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
@@ -2460,6 +2472,14 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
 .viewas-banner { display:flex; align-items:center; justify-content:space-between; gap:10px; background:#FBF6EA; border:1px solid #E8DCC0; border-radius:10px; padding:10px 14px; margin-bottom:12px; font-size:13px; color:var(--navy); }
 .viewas-banner button { background:var(--navy); color:#fff; border:0; border-radius:7px; padding:6px 12px; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap; }
 
+
+.global-viewas-banner { display:flex; align-items:center; justify-content:space-between; gap:10px; background:#13233F; color:#fff; border-radius:10px; padding:11px 15px; margin-bottom:16px; font-size:13px; }
+.global-viewas-banner strong { color:var(--gold); }
+.global-viewas-banner button { background:var(--gold); color:var(--navy); border:0; border-radius:7px; padding:6px 14px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; }
+
+
+.sched-foll-btn { margin-top:8px; background:#EEF4FB; color:#3B6FB0; border:1.5px solid #6B8FC7; border-radius:8px; padding:7px 13px; font-size:12px; font-weight:700; cursor:pointer; font-family:'Inter',sans-serif; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -3078,6 +3098,11 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
 
   <div class="office-content">
 
+    <div id="globalViewAsBanner" class="global-viewas-banner" style="display:none;">
+      <span>&#128065; Viewing <strong id="globalViewAsName"></strong>'s account</span>
+      <button onclick="clearViewAs()">Exit</button>
+    </div>
+
     <!-- DASHBOARD TAB -->
     <div id="tab-dashboard" class="office-tab">
 
@@ -3418,6 +3443,10 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
       <button class="tab-add-btn" onclick="resetSchedulePhases()">&#8635; Reset Phases</button>
     </div>
 
+    <div class="task-scope-row">
+      <button class="sched-scope-btn task-scope-btn active" data-scope="mine" onclick="setSchedScope('mine')">My Schedules</button>
+      <button class="sched-scope-btn task-scope-btn" data-scope="following" onclick="setSchedScope('following')">Following</button>
+    </div>
     <div class="task-toolbar">
       <div class="task-views" style="margin-bottom:10px">
         <button class="sched-view-btn task-view-btn active" data-view="list" onclick="setSchedView('list')">&#9776; List</button>
@@ -5146,33 +5175,109 @@ function _schedMasterShift(dir) {
   renderMasterCalendar();
 }
 
+
+function _isSchedOwner(sch, uid) { return !!(sch && uid && sch.ownerId === uid); }
+function _isSchedFollower(sch, uid) { return !!(sch && uid && sch.followers && sch.followers.indexOf(uid) > -1); }
+function _canSeeSched(sch, uid) {
+  // Brand-new schedules with no owner yet are visible to the creator-to-be
+  if (!sch || !sch.ownerId) return true;
+  return _isSchedOwner(sch, uid) || _isSchedFollower(sch, uid);
+}
+var _schedScope = 'mine';   // mine | following
+
+
+/* ── SCHEDULE FOLLOWERS ── */
+async function openSchedFollowers() {
+  var sch = await _loadSchedule();
+  var emps = await _loadEmployeesForAssign();
+  var current = sch.followers || [];
+  var modal = document.getElementById('schedFollModal');
+  var body = document.getElementById('schedFollBody');
+  body.innerHTML =
+    '<div class="task-muted" style="margin-bottom:10px">Followers see this schedule under their "Following" tab and get notified of changes.</div>' +
+    '<div class="tfm-foll-list">' +
+      emps.map(function(e) {
+        var on = current.indexOf(e.id) > -1;
+        return '<label class="tfm-foll-opt' + (on ? ' on' : '') + '"><input type="checkbox" value="' + e.id + '"' + (on ? ' checked' : '') + ' onchange="this.parentNode.classList.toggle(\'on\',this.checked)"> ' + _esc(e.name || e.email) + '</label>';
+      }).join('') +
+    '</div>' +
+    '<div class="tf-modal-actions"><span></span><div>' +
+      '<button class="tf-btn-ghost" onclick="closeSchedFollowers()">Cancel</button>' +
+      '<button class="tf-btn-primary" onclick="saveSchedFollowers()">Save</button></div></div>';
+  modal.style.display = 'flex';
+}
+function closeSchedFollowers() { var m = document.getElementById('schedFollModal'); if (m) m.style.display = 'none'; }
+async function saveSchedFollowers() {
+  var sch = await _loadSchedule();
+  var prev = sch.followers || [];
+  var boxes = document.querySelectorAll('#schedFollBody input[type=checkbox]:checked');
+  sch.followers = Array.prototype.map.call(boxes, function(c){ return c.value; });
+  if (!sch.ownerId) sch.ownerId = _effectiveUserId();
+  await _saveSchedule(sch);
+  // notify newly added followers
+  var label = (document.getElementById('sched-house-sel').options[document.getElementById('sched-house-sel').selectedIndex] || {}).text || 'a schedule';
+  sch.followers.forEach(function(fid) {
+    if (prev.indexOf(fid) === -1) createNotification(fid, { type: 'info', text: 'added you as a follower on the schedule for ' + label });
+  });
+  closeSchedFollowers();
+  renderSchedView();
+}
+
 async function renderScheduling() {
   var sel = document.getElementById('sched-house-sel');
   if (!sel) return;
   renderGcalSettings();
+  _renderSchedScope();
+  var uid = _effectiveUserId();
   var keys = await DB.list('project:');
-  var projs = (await Promise.all(keys.map(function(k) { return DB.get(k); }))).filter(Boolean).filter(canSee);
+  var projs = (await Promise.all(keys.map(function(k) { return DB.get(k); }))).filter(Boolean);
   window._schedProjCache = projs;
 
-  // HOUSES ONLY in the dropdown
+  // Preload all saved schedules so we can check ownership/following
+  var schedKeys = await DB.list('schedule:');
+  var schedMap = {};
+  (await Promise.all(schedKeys.map(function(k){ return DB.get(k); }))).forEach(function(s){ if (s && s.key) schedMap[s.key] = s; });
+
   var opts = '<option value="">- Select a house -</option>';
+  var shown = 0;
   projs.forEach(function(p) {
     (p.houses || []).forEach(function(h) {
       var hKey = _schedKey(p.id, h.address);
-      opts += '<option value="' + hKey + '" data-proj="' + p.id + '" data-addr="' + _esc(h.address) + '">' +
-        _esc(p.name) + ' - ' + _esc(h.address) + '</option>';
+      var sch = schedMap[hKey];
+      var include;
+      if (_schedScope === 'following') {
+        include = sch && _isSchedFollower(sch, uid) && !_isSchedOwner(sch, uid);
+      } else {
+        // mine: schedules I own, OR houses with no schedule yet (so I can create one)
+        include = !sch || _isSchedOwner(sch, uid);
+      }
+      if (include) {
+        shown++;
+        opts += '<option value="' + hKey + '" data-proj="' + p.id + '" data-addr="' + _esc(h.address) + '">' +
+          _esc(p.name) + ' - ' + _esc(h.address) + '</option>';
+      }
     });
   });
   sel.innerHTML = opts;
 
   if (_schedHouseKey) {
-    // If a unit key is selected, the dropdown won't have it; set to base house
     sel.value = _schedBaseHouseKey || _schedHouseKey;
-    schedLoadHouse();
+    if (sel.value) schedLoadHouse(); else { document.getElementById('schedContent').innerHTML = _schedEmpty(); }
   } else {
-    document.getElementById('schedContent').innerHTML = _schedEmpty();
+    document.getElementById('schedContent').innerHTML = (shown === 0 && _schedScope === 'following')
+      ? '<div class="tab-empty"><div class="tab-empty-icon">\ud83d\udc41</div><div class="tab-empty-title">Not following any schedules</div><div class="tab-empty-desc">Schedules you follow will appear here.</div></div>'
+      : _schedEmpty();
     document.getElementById('sched-unit-bar').innerHTML = '';
   }
+}
+function setSchedScope(s) {
+  _schedScope = s;
+  _schedHouseKey = null; _schedBaseHouseKey = null;
+  document.querySelectorAll('.sched-scope-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.scope === s); });
+  renderScheduling();
+}
+function _renderSchedScope() {
+  document.querySelectorAll('.sched-scope-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.scope === _schedScope); });
 }
 
 function _schedEmpty() {
@@ -5248,7 +5353,12 @@ async function _loadSchedule() {
     _createdAt: Date.now()
   };
 }
-async function _saveSchedule(sch) { sch._updatedAt = Date.now(); await DB.set(_schedHouseKey, sch); }
+async function _saveSchedule(sch) {
+  sch._updatedAt = Date.now();
+  if (!sch.ownerId) sch.ownerId = _effectiveUserId();
+  if (!sch.followers) sch.followers = [];
+  await DB.set(_schedHouseKey, sch);
+}
 
 /* -- Render current view -- */
 async function renderSchedView() {
@@ -5263,7 +5373,9 @@ async function renderSchedView() {
   var pct = total ? Math.round(done / total * 100) : 0;
   var summary = '<div class="sched-summary">' +
     '<div class="sched-prog-bar"><div class="sched-prog-fill" style="width:' + pct + '%"></div></div>' +
-    '<div class="sched-prog-label">' + done + ' of ' + total + ' phases complete (' + pct + '%)</div></div>';
+    '<div class="sched-prog-label">' + done + ' of ' + total + ' phases complete (' + pct + '%)</div>' +
+    '<button class="sched-foll-btn" onclick="openSchedFollowers()">\ud83d\udc41 Followers' + ((sch.followers && sch.followers.length) ? ' (' + sch.followers.length + ')' : '') + '</button>' +
+    '</div>';
 
   var viewHtml = '';
   if (_schedView === 'list')      viewHtml = _renderSchedList(sch);
@@ -5436,6 +5548,13 @@ async function savePhase() {
   p.status = document.getElementById('ph-status').value;
   p.notes = document.getElementById('ph-notes').value.trim();
   await _saveSchedule(sch);
+  // notify schedule followers of the change
+  if (sch.followers && sch.followers.length) {
+    var lbl = (document.getElementById('sched-house-sel').options[document.getElementById('sched-house-sel').selectedIndex] || {}).text || 'a schedule';
+    sch.followers.forEach(function(fid) {
+      createNotification(fid, { type: 'status', text: 'updated the "' + p.name + '" phase on ' + lbl });
+    });
+  }
   if (p.start || p.end) {
     gcalAddEvent({
       title: p.name + ' (construction)',
@@ -5769,6 +5888,7 @@ function _extractMentions(input, text) {
 
 async function switchTab(tab) {
   if (typeof refreshNotifBadge === 'function') refreshNotifBadge();
+  if (typeof _renderViewAsBanner === 'function') _renderViewAsBanner();
   // Hide all office tabs
   document.querySelectorAll('.office-tab').forEach(function(t) { t.style.display = 'none'; });
   var tabEl = document.getElementById('tab-' + tab);
@@ -6447,20 +6567,30 @@ function exportUpgradesCsv() {
 // EMPLOYEES (Admin only)
 // ════════════════════════════════════════════
 
-async function viewEmployeeTasks(userId, userName) {
+async function viewEmployeeTasks(userId, userName) { return viewEmployee(userId, userName); }
+async function viewEmployee(userId, userName) {
   _viewAsUserId = userId; window._viewAsName = userName;
-  switchTab('tasks');
-  setTimeout(function() {
-    var banner = document.getElementById('viewAsBanner');
-    if (banner) { banner.style.display = 'flex'; document.getElementById('viewAsName').textContent = userName; }
-    renderTasks();
-  }, 100);
+  // Show a global banner across the whole app
+  _renderViewAsBanner();
+  switchTab('dashboard');
+}
+function _renderViewAsBanner() {
+  var banner = document.getElementById('globalViewAsBanner');
+  if (!banner) return;
+  if (_viewAsUserId) {
+    banner.style.display = 'flex';
+    document.getElementById('globalViewAsName').textContent = window._viewAsName || 'employee';
+  } else {
+    banner.style.display = 'none';
+  }
 }
 function clearViewAs() {
   _viewAsUserId = null;
-  var banner = document.getElementById('viewAsBanner');
-  if (banner) banner.style.display = 'none';
-  renderTasks();
+  window._viewAsName = null;
+  _renderViewAsBanner();
+  var legacy = document.getElementById('viewAsBanner');
+  if (legacy) legacy.style.display = 'none';
+  switchTab('dashboard');
 }
 
 async function renderEmployees() {
@@ -11105,6 +11235,15 @@ if (document.readyState === 'loading') {
 </div>
 <!-- @-MENTION DROPDOWN -->
 <div id="mentionBox" class="mention-box" style="display:none;"></div>
+
+
+<!-- SCHEDULE FOLLOWERS MODAL -->
+<div class="task-modal-overlay" id="schedFollModal" style="display:none;">
+  <div class="task-modal">
+    <div class="task-modal-head"><span>Schedule Followers</span><button class="task-modal-x" onclick="closeSchedFollowers()">&#10005;</button></div>
+    <div class="task-modal-body" id="schedFollBody"></div>
+  </div>
+</div>
 
 </body>
 </html
