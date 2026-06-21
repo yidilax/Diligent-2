@@ -2691,6 +2691,152 @@ details[open] .tsk-filters-toggle::before { content:'\25be '; }
 .gantt-today-line { position:absolute; top:0; bottom:0; width:2px; background:#c0392b; z-index:5; pointer-events:none; }
 .gantt-today-flag { position:absolute; top:-2px; background:#c0392b; color:#fff; font-size:9px; font-weight:700; padding:1px 5px; border-radius:3px; transform:translateX(-50%); white-space:nowrap; z-index:6; }
 
+
+/* ============ TASKS: TODAY'S WORK ORDER (jobsite sheet) ============ */
+#tab-tasks { background:#ece7da; }
+#tasksContent { padding:0 0 30px; }
+
+.wo {
+  background:#fbf9f3;
+  margin:14px 12px 0;
+  border:1.5px solid #1a2b4a;
+  border-radius:3px;
+  box-shadow:0 2px 0 #1a2b4a, 0 6px 16px rgba(13,31,60,.12);
+  overflow:hidden;
+}
+
+/* Title block — like a stamped work-order header */
+.wo-titleblock {
+  display:flex; justify-content:space-between; align-items:stretch;
+  background:#1a2b4a; color:#fbf9f3; padding:14px 16px;
+  border-bottom:3px solid #c9a227;
+}
+.wo-tb-kicker { font-family:'Inter',sans-serif; font-size:10px; letter-spacing:3px; color:#c9a227; font-weight:700; }
+.wo-tb-day { font-family:'Bebas Neue',sans-serif; font-size:34px; line-height:.95; letter-spacing:1px; margin-top:4px; }
+.wo-tb-date { font-family:'Inter',sans-serif; font-size:12px; letter-spacing:1px; color:#b9c2d6; margin-top:2px; }
+.wo-tb-right { display:flex; gap:18px; align-items:flex-end; }
+.wo-tb-stat { text-align:right; }
+.wo-tb-num { font-family:'Bebas Neue',sans-serif; font-size:30px; line-height:1; display:block; }
+.wo-tb-num.red { color:#ff8a7a; }
+.wo-tb-lbl { font-family:'Inter',sans-serif; font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:#9aa6c0; }
+
+/* Bands — ruled sections */
+.wo-band { border-top:1px dashed #c9c1ad; }
+.wo-band:first-of-type { border-top:0; }
+.wo-band-rule {
+  display:flex; align-items:center; gap:0;
+  background:#f2eedf; padding:0;
+  border-bottom:1px solid #ded6c0;
+}
+.wo-band-tab {
+  font-family:'Inter',sans-serif; font-size:11px; font-weight:800; letter-spacing:2px;
+  color:#fbf9f3; background:var(--ac,#1a2b4a); padding:6px 14px;
+  clip-path:polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+.wo-band-count { font-family:'Bebas Neue',sans-serif; font-size:16px; color:var(--ac,#1a2b4a); margin-left:10px; }
+
+/* Ruled line-item */
+.wo-line {
+  display:flex; align-items:flex-start; gap:0;
+  background:#fbf9f3; border-bottom:1px solid #eae3d2;
+  cursor:pointer; position:relative; transition:background .1s;
+}
+.wo-line:active { background:#f4efe2; }
+.wo-line:hover { background:#f7f2e6; }
+.wo-line-tab { flex-shrink:0; width:5px; align-self:stretch; }
+.wo-line-check {
+  flex-shrink:0; width:20px; height:20px; margin:13px 10px 0 11px;
+  border:1.8px solid #1a2b4a; border-radius:2px; background:#fff;
+  color:#fff; font-size:13px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;
+}
+.wo-line-check.on { background:#c9a227; border-color:#c9a227; }
+.wo-line-main { flex:1; min-width:0; padding:11px 14px 11px 0; }
+.wo-line-title { font-family:'Inter',sans-serif; font-size:15px; font-weight:600; color:#16233d; line-height:1.3; }
+.wo-line.done .wo-line-title { text-decoration:line-through; color:#a59f8f; }
+.wo-ms { color:#c9a227; }
+.wo-line-sub { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+.wo-chip {
+  font-family:'Inter',sans-serif; font-size:11px; color:#6b6757;
+  background:#efe9da; border:1px solid #e0d8c4; border-radius:3px; padding:2px 7px;
+}
+.wo-chip-house { color:#1a2b4a; font-weight:600; background:#e8edf5; border-color:#cfd9e8; }
+.wo-chip-who { color:#7a5b1f; background:#f6eed6; border-color:#e8dcb8; }
+.wo-chip.over { color:#fff; background:#b3261e; border-color:#b3261e; font-weight:700; }
+
+.wo-band-empty { font-family:'Inter',sans-serif; font-size:13px; color:#a59f8f; padding:16px 14px; font-style:italic; }
+
+.wo-clear { text-align:center; padding:46px 20px; }
+.wo-clear-stamp {
+  display:inline-block; font-family:'Bebas Neue',sans-serif; font-size:26px; letter-spacing:3px;
+  color:#3a7d5d; border:3px solid #3a7d5d; border-radius:6px; padding:6px 20px; transform:rotate(-4deg);
+}
+.wo-clear-sub { font-family:'Inter',sans-serif; font-size:13px; color:#a59f8f; margin-top:16px; }
+
+/* Quick-add restyled as writing a new line on the order */
+.tsk-quickadd {
+  margin:14px 12px 0; background:#fbf9f3; border:1.5px solid #1a2b4a; border-radius:3px;
+  box-shadow:0 2px 0 #1a2b4a; display:flex; align-items:center; gap:0; padding:0; overflow:hidden;
+}
+.tsk-qa-plus { background:#c9a227; color:#1a2b4a; font-size:20px; font-weight:800; width:42px; height:46px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.tsk-qa-input { flex:1; border:0; outline:0; background:transparent; font-family:'Inter',sans-serif; font-size:15px; color:#16233d; padding:0 12px; height:46px; }
+.tsk-qa-input::placeholder { color:#a8a290; }
+.tsk-qa-btn { background:#1a2b4a; color:#fbf9f3; border:0; height:46px; padding:0 18px; font-family:'Inter',sans-serif; font-weight:700; font-size:14px; cursor:pointer; }
+
+/* Scope + view controls in jobsite tone */
+.tsk-controls { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:12px 12px 0; flex-wrap:wrap; }
+.tsk-scope, .tsk-views { display:inline-flex; background:#ddd5c2; border:1px solid #c9c1ad; border-radius:3px; padding:2px; }
+.tsk-scope-btn, .tsk-view-btn { border:0; background:transparent; font-family:'Inter',sans-serif; font-size:12px; font-weight:700; letter-spacing:.5px; color:#6b6757; padding:7px 13px; border-radius:2px; cursor:pointer; }
+.tsk-scope-btn.active, .tsk-view-btn.active { background:#1a2b4a; color:#fbf9f3; }
+.tsk-filters-wrap { margin:10px 12px 0; }
+.tsk-filters-toggle { font-family:'Inter',sans-serif; font-size:12px; font-weight:700; letter-spacing:.5px; color:#6b6757; cursor:pointer; list-style:none; }
+.tsk-filters-toggle::-webkit-details-marker { display:none; }
+.tsk-filters-toggle::before { content:'+ '; color:#c9a227; font-weight:800; }
+details[open] .tsk-filters-toggle::before { content:'\2212 '; }
+.tsk-filters { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+.tsk-filter-input { font-family:'Inter',sans-serif; font-size:13px; padding:8px 10px; border:1px solid #c9c1ad; border-radius:3px; background:#fbf9f3; color:#16233d; }
+.tsk-filter-check { display:inline-flex; align-items:center; gap:6px; font-size:13px; color:#6b6757; }
+
+/* Board view kept but reskinned to match (worksheet columns) */
+.tsk-board { padding:14px 12px 0; }
+.tsk-col { background:#f2eedf; border:1px solid #ded6c0; border-radius:3px; }
+.tsk-col-hd { font-family:'Inter',sans-serif; letter-spacing:1px; }
+.tsk-bcard { border-radius:3px; }
+
+
+/* ============ SCHEDULE: BUILD SHEET (matches work order) ============ */
+#tab-scheduling { background:#ece7da; }
+
+.sched-lookahead { margin:14px 12px 0; }
+.sched-lookahead:empty { display:none; }
+.sched-lookahead > .la-head, .sched-lookahead > .la-list { /* wrapped below */ }
+
+/* wrap the lookahead in a sheet look */
+#schedLookahead {
+  background:#fbf9f3; border:1.5px solid #1a2b4a; border-radius:3px;
+  box-shadow:0 2px 0 #1a2b4a, 0 6px 16px rgba(13,31,60,.12); overflow:hidden;
+}
+.la-head {
+  background:#1a2b4a; color:#fbf9f3; padding:11px 14px; border-bottom:3px solid #c9a227;
+  display:flex; align-items:baseline; justify-content:space-between;
+}
+.la-title { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:1px; color:#fbf9f3; }
+.la-sub { font-family:'Inter',sans-serif; font-size:11px; letter-spacing:1px; color:#b9c2d6; text-transform:uppercase; }
+.la-list { display:flex; flex-direction:column; }
+.la-item { display:flex; align-items:center; gap:11px; padding:11px 14px; border-bottom:1px solid #eae3d2; background:#fbf9f3; }
+.la-item:last-child { border-bottom:0; }
+.la-when { flex-shrink:0; width:62px; font-family:'Inter',sans-serif; font-size:10px; font-weight:800; letter-spacing:.5px; color:#8a8470; text-transform:uppercase; }
+.la-when.la-now { color:#b8901f; }
+.la-bar { flex-shrink:0; width:5px; align-self:stretch; min-height:32px; border-radius:1px; }
+.la-info { flex:1; min-width:0; }
+.la-phase { font-family:'Inter',sans-serif; font-size:14px; font-weight:700; color:#16233d; }
+.la-house { font-family:'Inter',sans-serif; font-size:12px; color:#8a8470; margin-top:1px; }
+.la-dates { flex-shrink:0; font-family:'Bebas Neue',sans-serif; font-size:15px; color:#a59f8f; letter-spacing:.5px; }
+.la-empty { font-family:'Inter',sans-serif; font-size:13px; color:#a59f8f; padding:18px 14px; font-style:italic; background:#fbf9f3; }
+
+/* Today survey line on the Gantt — gold like a surveyor flag */
+.gantt-today-line { position:absolute; top:0; bottom:0; width:2px; background:#c9a227; z-index:5; pointer-events:none; box-shadow:0 0 0 1px rgba(201,162,39,.25); }
+.gantt-today-flag { position:absolute; top:-1px; background:#c9a227; color:#1a2b4a; font-family:'Inter',sans-serif; font-size:9px; font-weight:800; letter-spacing:1px; padding:2px 6px; border-radius:0 0 3px 3px; transform:translateX(-50%); white-space:nowrap; z-index:6; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -4779,31 +4925,127 @@ var _TASK_BUCKETS = [
 ];
 
 // NEW smart list: groups by Overdue / Today / This week / Upcoming / No date / Completed
+/* ============================================================
+   TASKS — "TODAY'S WORK ORDER" (jobsite worksheet design)
+   Original construction-document styling. Reuses data logic.
+   ============================================================ */
+
+// Friendly big date for the work-order header
+function _workOrderDateLabel() {
+  var d = new Date();
+  var days = ['SUNDAY','MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
+  var mons = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  return { dow: days[d.getDay()], dm: mons[d.getMonth()] + ' ' + d.getDate(), yr: d.getFullYear() };
+}
+
+// Resolve a task's house/project label
+function _taskHouseLabel(t) {
+  if (t.projectName) return t.projectName;
+  if (t.projectId && window._schedProjCache) {
+    var p = (window._schedProjCache || []).filter(function(x){ return x.id === t.projectId; })[0];
+    if (p) return p.name;
+  }
+  return '';
+}
+
+// THE worksheet renderer (replaces smart list)
 function _renderTaskSmart(tasks) {
-  if (!tasks.length) return _tasksEmpty();
-  var byBucket = {};
-  tasks.forEach(function(t){ var b=_taskBucket(t); (byBucket[b]=byBucket[b]||[]).push(t); });
-  // sort within bucket by priority then due
+  var wd = _workOrderDateLabel();
+
+  // buckets: overdue / today / week / later / done
+  var groups = { overdue:[], today:[], week:[], later:[], done:[] };
+  tasks.forEach(function(t){
+    var b = _taskBucket(t);
+    if (b === 'overdue') groups.overdue.push(t);
+    else if (b === 'today') groups.today.push(t);
+    else if (b === 'week') groups.week.push(t);
+    else if (b === 'done') groups.done.push(t);
+    else groups.later.push(t); // upcoming + someday
+  });
+  // sort each by priority then due
   var prioRank = { urgent:0, high:1, medium:2, low:3 };
-  Object.keys(byBucket).forEach(function(k){
-    byBucket[k].sort(function(a,b){
-      var pr = (prioRank[a.priority]||9)-(prioRank[b.priority]||9);
+  Object.keys(groups).forEach(function(k){
+    groups[k].sort(function(a,b){
+      var pr=(prioRank[a.priority]||9)-(prioRank[b.priority]||9);
       if (pr!==0) return pr;
       return (a.dueDate||'9999').localeCompare(b.dueDate||'9999');
     });
   });
-  var html = '';
-  _TASK_BUCKETS.forEach(function(bk){
-    var items = byBucket[bk.id];
-    if (!items || !items.length) return;
-    html += '<div class="tsk-group">' +
-      '<div class="tsk-group-hd"><span class="tsk-group-bar" style="background:' + bk.accent + '"></span>' +
-        '<span class="tsk-group-name">' + bk.label + '</span>' +
-        '<span class="tsk-group-count">' + items.length + '</span></div>' +
-      '<div class="tsk-group-body">' + items.map(_taskCardHtml).join('') + '</div>' +
-    '</div>';
-  });
+
+  var openTotal = groups.overdue.length + groups.today.length + groups.week.length + groups.later.length;
+
+  var html = '<div class="wo">';
+
+  // Title block — like a work-order header
+  html += '<div class="wo-titleblock">' +
+    '<div class="wo-tb-left">' +
+      '<div class="wo-tb-kicker">WORK ORDER</div>' +
+      '<div class="wo-tb-day">' + wd.dow + '</div>' +
+      '<div class="wo-tb-date">' + wd.dm + ', ' + wd.yr + '</div>' +
+    '</div>' +
+    '<div class="wo-tb-right">' +
+      '<div class="wo-tb-stat"><span class="wo-tb-num">' + groups.today.length + '</span><span class="wo-tb-lbl">due today</span></div>' +
+      '<div class="wo-tb-stat"><span class="wo-tb-num' + (groups.overdue.length?' red':'') + '">' + groups.overdue.length + '</span><span class="wo-tb-lbl">overdue</span></div>' +
+      '<div class="wo-tb-stat"><span class="wo-tb-num">' + openTotal + '</span><span class="wo-tb-lbl">open</span></div>' +
+    '</div>' +
+  '</div>';
+
+  if (openTotal === 0 && groups.done.length === 0) {
+    html += '<div class="wo-clear"><div class="wo-clear-stamp">ALL CLEAR</div><div class="wo-clear-sub">No tasks on the board. Add one above to get started.</div></div></div>';
+    return html;
+  }
+
+  // Bands
+  if (groups.overdue.length) html += _woBand('overdue', 'OVERDUE', groups.overdue, '#b3261e');
+  html += _woBand('today', 'TODAY', groups.today, '#1a2b4a', true); // always show today band
+  if (groups.week.length) html += _woBand('week', 'THIS WEEK', groups.week, '#7a6a3a');
+  if (groups.later.length) html += _woBand('later', 'LATER', groups.later, '#7d8597');
+  if (groups.done.length) html += _woBand('done', 'COMPLETED', groups.done, '#3a7d5d');
+
+  html += '</div>';
   return html;
+}
+
+function _woBand(id, label, items, accent, alwaysShow) {
+  var body;
+  if (!items.length && alwaysShow) {
+    body = '<div class="wo-band-empty">Nothing scheduled for today.</div>';
+  } else {
+    body = items.map(_woLine).join('');
+  }
+  return '<div class="wo-band wo-band-' + id + '">' +
+    '<div class="wo-band-rule" style="--ac:' + accent + '">' +
+      '<span class="wo-band-tab">' + label + '</span>' +
+      '<span class="wo-band-count">' + items.length + '</span>' +
+    '</div>' +
+    '<div class="wo-band-body">' + body + '</div>' +
+  '</div>';
+}
+
+// One ruled work-order line
+function _woLine(t) {
+  var pm = _taskPriorityMeta(t.priority);
+  var done = (t.status||'todo') === 'done';
+  var due = t.dueDate ? _fmtTaskDate(t.dueDate) : '';
+  var overdue = t.dueDate && !done && new Date(t.dueDate+'T00:00:00') < new Date(new Date().toDateString());
+  var house = _taskHouseLabel(t);
+  var subCount = (t.subtasks||[]).length;
+  var subDone = (t.subtasks||[]).filter(function(s){return s.done;}).length;
+  var who = (t.assigneeName||'').trim();
+
+  return '<div class="wo-line' + (done?' done':'') + '" onclick="openTaskDetail(\'' + t.id + '\')">' +
+    '<span class="wo-line-tab" style="background:' + pm.color + '" title="' + pm.label + '"></span>' +
+    '<button class="wo-line-check' + (done?' on':'') + '" onclick="event.stopPropagation();toggleTaskDone(\'' + t.id + '\')" aria-label="Mark done">' + (done?'\u2713':'') + '</button>' +
+    '<div class="wo-line-main">' +
+      '<div class="wo-line-title">' + (t.isMilestone?'<span class="wo-ms">\u2691</span> ':'') + _esc(t.title||'Untitled') + '</div>' +
+      '<div class="wo-line-sub">' +
+        (house ? '<span class="wo-chip wo-chip-house">\u2302 ' + _esc(house) + '</span>' : '') +
+        (due ? '<span class="wo-chip' + (overdue?' over':'') + '">' + (overdue?'\u25b8 ':'') + due + '</span>' : '') +
+        (subCount ? '<span class="wo-chip">' + subDone + '/' + subCount + ' done</span>' : '') +
+        (who ? '<span class="wo-chip wo-chip-who">' + _esc(who) + '</span>' : '') +
+      '</div>' +
+    '</div>' +
+  '</div>';
 }
 
 // Cleaner task card
