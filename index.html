@@ -4300,8 +4300,8 @@ async function _firebaseSelfTest() {
   try {
     var fs = _getFirestore();
     if (!fs) { result.reason = 'Firebase did not initialize'; return result; }
-    var testRef = fs.collection('dd').doc('__connectivity_test__');
-    await testRef.set({ v: 'ping', k: '__connectivity_test__', t: Date.now() });
+    var testRef = fs.collection('dd').doc('zz_connectivity_test');
+    await testRef.set({ v: 'ping', k: 'zz_connectivity_test', t: Date.now() });
     var doc = await testRef.get();
     if (doc.exists && doc.data().v === 'ping') { result.ok = true; }
     else { result.reason = 'Wrote but could not read back'; }
@@ -4331,7 +4331,16 @@ async function checkSyncStatus() {
 
 // Key sanitization: Firestore doesn't allow '/' or certain chars in doc IDs
 function _fsKey(key) {
-  return key.replace(/\//g, '__').replace(/:/g, '_');
+  // Produce an ALWAYS-valid Firestore document ID from any key.
+  // Firestore rejects ids that contain '/', are '.' or '..', exceed 1500 bytes,
+  // or match the reserved pattern __.*__ . We sanitize then guard against those.
+  var id = String(key).replace(/\//g, '-').replace(/:/g, '_');
+  // strip anything that could form a reserved or invalid id
+  if (/^__.*__$/.test(id) || id === '.' || id === '..') id = 'k_' + id;
+  // leading double-underscore alone is also risky; prefix to be safe
+  if (id.indexOf('__') === 0) id = 'k' + id;
+  if (id.length > 1400) id = id.slice(0, 1400);
+  return id;
 }
 
 const DB = {
