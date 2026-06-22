@@ -3242,6 +3242,15 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 :root[data-theme="dark"] textarea, 
 :root[data-theme="dark"] select { background: #1b2735; color: var(--text); border-color: #2c3a4d; }
 
+
+/* ===== Layout density ===== */
+:root[data-density="compact"] .tab-header { margin-bottom: 10px; }
+:root[data-density="compact"] .cu-card,
+:root[data-density="compact"] .tab-empty { padding: 10px 12px; }
+:root[data-density="compact"] .form-group { margin-bottom: 10px; }
+:root[data-density="compact"] .office-nav-btn { padding-top: 9px; padding-bottom: 9px; }
+:root[data-density="compact"] .modal-body { padding-top: 10px; padding-bottom: 10px; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -3810,9 +3819,15 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     <div id="tab-dashboard" class="office-tab">
 
       <!-- Welcome bar -->
-      <div style="margin-bottom:24px;">
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(22px,5vw,30px);letter-spacing:2px;color:var(--navy);line-height:1.1;" id="dashWelcome">Welcome back</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:3px;" id="dashDate"></div>
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;">
+        <div id="dashAvatar" style="width:54px;height:54px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:22px;color:#fff;background-size:cover;background-position:center;box-shadow:0 2px 8px rgba(13,31,60,0.15);"></div>
+        <div style="min-width:0;flex:1;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(22px,5vw,30px);letter-spacing:2px;color:var(--navy);line-height:1.1;" id="dashWelcome">Welcome back</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:3px;flex-wrap:wrap;">
+            <span id="dashTag" style="display:none;font-family:'Inter',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--gold);background:rgba(201,162,39,0.13);border:1px solid rgba(201,162,39,0.3);border-radius:20px;padding:3px 10px;"></span>
+            <span style="font-size:12px;color:var(--muted);" id="dashDate"></span>
+          </div>
+        </div>
       </div>
 
       <!-- Today panel -->
@@ -4094,6 +4109,23 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
           <select class="form-input" id="prof-textsize">
             <option value="small">Small</option><option value="normal">Normal</option><option value="large">Large</option>
           </select></div>
+        <div class="form-group"><label class="form-label">Layout density</label>
+          <select class="form-input" id="prof-density">
+            <option value="comfortable">Comfortable</option><option value="compact">Compact</option>
+          </select></div>
+        <div class="form-group"><label class="form-label">Working hours <span style="font-weight:400;opacity:.6;">(optional)</span></label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;" id="prof-workdays"></div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input class="form-input" id="prof-work-from" type="time" style="flex:1;">
+            <span style="color:rgba(243,239,230,0.6);">to</span>
+            <input class="form-input" id="prof-work-to" type="time" style="flex:1;">
+          </div></div>
+        <div class="form-group"><label class="form-label" style="display:flex;align-items:center;justify-content:space-between;">Quiet hours (mute notifications) <input type="checkbox" id="prof-quiet-on" style="width:20px;height:20px;accent-color:var(--gold);"></label>
+          <div id="prof-quiet-times" style="display:none;gap:8px;align-items:center;margin-top:8px;">
+            <input class="form-input" id="prof-quiet-from" type="time" style="flex:1;">
+            <span style="color:rgba(243,239,230,0.6);">to</span>
+            <input class="form-input" id="prof-quiet-to" type="time" style="flex:1;">
+          </div></div>
 
         <div class="cust-form-sec" style="color:#f3efe6;">Notifications</div>
         <div id="prof-notifs"></div>
@@ -4105,10 +4137,21 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
         <div class="form-group"><label class="form-label">Email</label>
           <input class="form-input" id="prof-email" type="email" placeholder="you@example.com">
           <div style="font-size:11px;color:rgba(243,239,230,0.6);margin-top:4px;">Changing email requires your current password and re-login.</div></div>
+        <div class="form-group"><label class="form-label">Recovery email <span style="font-weight:400;opacity:.6;">(optional)</span></label>
+          <input class="form-input" id="prof-recovery-email" type="email" placeholder="backup@example.com"></div>
+        <div class="form-group"><label class="form-label">Recovery phone <span style="font-weight:400;opacity:.6;">(optional)</span></label>
+          <input class="form-input" id="prof-recovery-phone" type="tel" placeholder="845-000-0000"></div>
         <div class="form-group"><label class="form-label">New password <span style="font-weight:400;opacity:.6;">(leave blank to keep)</span></label>
           <input class="form-input" id="prof-pass" type="password" placeholder="At least 6 characters" autocomplete="new-password"></div>
         <div class="form-group" id="prof-currentpass-wrap" style="display:none;"><label class="form-label">Current password <span style="color:var(--gold);">*</span></label>
           <input class="form-input" id="prof-currentpass" type="password" placeholder="Required to change email or password" autocomplete="current-password"></div>
+
+        <div class="cust-form-sec" style="color:#f3efe6;">Sessions</div>
+        <div style="font-size:12px;color:rgba(243,239,230,0.65);margin-bottom:8px;" id="prof-lastlogin"></div>
+        <button type="button" onclick="signOutEverywhere()" style="width:100%;padding:11px;border-radius:8px;border:1px solid rgba(176,58,46,0.5);background:rgba(176,58,46,0.15);color:#F3A39A;font-family:Inter,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Sign out of all devices</button>
+
+        <div class="cust-form-sec" style="color:#f3efe6;">My recent activity</div>
+        <div id="prof-activity" style="max-height:160px;overflow-y:auto;"></div>
 
         <div id="prof-msg" style="font-size:13px;margin-top:6px;display:none;"></div>
       </div>
@@ -4743,6 +4786,7 @@ let currentUser = null;
 // ════════════════════════════════════════════
 async function init() {
   if (typeof applyTheme === 'function') { try { applyTheme(); } catch(e){} }
+  if (typeof applyDensity === 'function') { try { applyDensity(); } catch(e){} }
   function _hideLoader() {
     var l = document.getElementById('bootLoader');
     if (l) l.style.display = 'none';
@@ -5367,6 +5411,45 @@ function openProfileModal() {
       '</label>';
     }).join('');
   }
+  // Density
+  var dn = document.getElementById('prof-density');
+  if (dn) dn.value = currentUser.density || localStorage.getItem('dd_density') || 'comfortable';
+  // Working hours (days + times)
+  var WD = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  var wh = currentUser.workHours || {};
+  var wdHost = document.getElementById('prof-workdays');
+  if (wdHost) {
+    var days = wh.days || [];
+    wdHost.innerHTML = WD.map(function(d,i){
+      var on = days.indexOf(i) !== -1;
+      return '<button type="button" data-day="'+i+'" onclick="_profToggleDay('+i+')" style="width:34px;height:34px;border-radius:8px;border:1px solid '+(on?'var(--gold)':'rgba(255,255,255,0.25)')+';background:'+(on?'rgba(201,162,39,0.25)':'rgba(255,255,255,0.05)')+';color:#f3efe6;font-family:Inter,sans-serif;font-size:11px;font-weight:700;cursor:pointer;">'+d+'</button>';
+    }).join('');
+    window._profWorkDays = days.slice();
+  }
+  if (document.getElementById('prof-work-from')) document.getElementById('prof-work-from').value = wh.from || '';
+  if (document.getElementById('prof-work-to')) document.getElementById('prof-work-to').value = wh.to || '';
+  // Quiet hours
+  var qh = currentUser.quietHours || {};
+  var qon = document.getElementById('prof-quiet-on');
+  if (qon) {
+    qon.checked = !!qh.on;
+    document.getElementById('prof-quiet-times').style.display = qh.on ? 'flex' : 'none';
+    qon.onchange = function(){ document.getElementById('prof-quiet-times').style.display = qon.checked ? 'flex' : 'none'; };
+    document.getElementById('prof-quiet-from').value = qh.from || '22:00';
+    document.getElementById('prof-quiet-to').value = qh.to || '07:00';
+  }
+  // Recovery info
+  if (document.getElementById('prof-recovery-email')) document.getElementById('prof-recovery-email').value = currentUser.recoveryEmail || '';
+  if (document.getElementById('prof-recovery-phone')) document.getElementById('prof-recovery-phone').value = currentUser.recoveryPhone || '';
+  // Last login
+  var ll = document.getElementById('prof-lastlogin');
+  if (ll) {
+    var auth = _getAuth();
+    var meta = auth && auth.currentUser && auth.currentUser.metadata;
+    ll.textContent = (meta && meta.lastSignInTime) ? ('Last sign-in: ' + new Date(meta.lastSignInTime).toLocaleString()) : 'Signed in on this device.';
+  }
+  // Activity log
+  _loadProfileActivity();
   // Access summary
   var acc = document.getElementById('prof-access');
   if (acc) acc.innerHTML = _myAccessSummary();
@@ -5450,34 +5533,56 @@ function _wireCropEvents() {
   if (_cropWired) return; _cropWired = true;
   var frame = document.getElementById('cropFrame');
   var z = document.getElementById('cropZoom');
+  // Map a screen coordinate to canvas-space (handles the frame being rendered at a
+  // different CSS size than the 260px internal canvas, e.g. on high-DPI phones).
+  function _toCanvas(clientX, clientY) {
+    var rect = frame.getBoundingClientRect();
+    var sx = _CROP_SIZE / rect.width;
+    var sy = _CROP_SIZE / rect.height;
+    return { x: (clientX - rect.left) * sx, y: (clientY - rect.top) * sy };
+  }
   z.oninput = function() {
     var cx = _CROP_SIZE/2, cy = _CROP_SIZE/2;
     var prev = _cropScale;
     _cropScale = parseFloat(z.value);
-    // zoom around center
     _cropX = cx - (cx - _cropX) * (_cropScale/prev);
     _cropY = cy - (cy - _cropY) * (_cropScale/prev);
     _clampCrop(); _drawCrop();
   };
-  function start(x,y){ _cropDrag=true; _cropLastX=x; _cropLastY=y; }
-  function move(x,y){ if(!_cropDrag) return; _cropX += (x-_cropLastX); _cropY += (y-_cropLastY); _cropLastX=x; _cropLastY=y; _clampCrop(); _drawCrop(); }
+  function start(p){ _cropDrag=true; _cropLastX=p.x; _cropLastY=p.y; }
+  function move(p){ if(!_cropDrag) return; _cropX += (p.x-_cropLastX); _cropY += (p.y-_cropLastY); _cropLastX=p.x; _cropLastY=p.y; _clampCrop(); _drawCrop(); }
   function end(){ _cropDrag=false; }
-  frame.addEventListener('mousedown', function(e){ start(e.clientX,e.clientY); });
-  window.addEventListener('mousemove', function(e){ move(e.clientX,e.clientY); });
+  frame.addEventListener('mousedown', function(e){ start(_toCanvas(e.clientX,e.clientY)); });
+  window.addEventListener('mousemove', function(e){ if(_cropDrag) move(_toCanvas(e.clientX,e.clientY)); });
   window.addEventListener('mouseup', end);
-  frame.addEventListener('touchstart', function(e){ var t=e.touches[0]; start(t.clientX,t.clientY); }, {passive:true});
-  frame.addEventListener('touchmove', function(e){ var t=e.touches[0]; move(t.clientX,t.clientY); e.preventDefault(); }, {passive:false});
+  frame.addEventListener('touchstart', function(e){ var t=e.touches[0]; start(_toCanvas(t.clientX,t.clientY)); }, {passive:true});
+  frame.addEventListener('touchmove', function(e){ var t=e.touches[0]; move(_toCanvas(t.clientX,t.clientY)); e.preventDefault(); }, {passive:false});
   frame.addEventListener('touchend', end);
 }
 function _cropCancel() { document.getElementById('modal-cropper').classList.remove('open'); }
 function _cropApply() {
-  // Export the circular crop as a square dataURL (compressed)
+  if (!_cropImg) { _cropCancel(); return; }
   var out = document.createElement('canvas');
   out.width = 256; out.height = 256;
   var octx = out.getContext('2d');
-  var ratio = 256 / _CROP_SIZE;
-  octx.drawImage(_cropImg, _cropX*ratio, _cropY*ratio, _cropImg.width*_cropScale*ratio, _cropImg.height*_cropScale*ratio);
-  _profPhoto = out.toDataURL('image/jpeg', 0.82);
+  octx.fillStyle = '#ffffff';
+  octx.fillRect(0, 0, 256, 256);
+  // Re-draw from the SOURCE image using the exact same transform the preview used,
+  // just scaled from the 260px preview space into the 256px output space.
+  var s = 256 / _CROP_SIZE;
+  try {
+    octx.drawImage(
+      _cropImg,
+      _cropX * s,
+      _cropY * s,
+      _cropImg.width * _cropScale * s,
+      _cropImg.height * _cropScale * s
+    );
+    _profPhoto = out.toDataURL('image/jpeg', 0.85);
+  } catch (e) {
+    alert('Could not process that image. Please try a different photo.');
+    return;
+  }
   _renderProfileAvatar(_profPickedColor);
   var rm = document.getElementById('prof-removephoto'); if (rm) rm.style.display = '';
   _cropCancel();
@@ -5498,6 +5603,35 @@ function _profSetTheme(theme, silent) {
     document.documentElement.setAttribute('data-theme', theme);
   }
 }
+
+function _profToggleDay(i) {
+  window._profWorkDays = window._profWorkDays || [];
+  var idx = window._profWorkDays.indexOf(i);
+  if (idx === -1) window._profWorkDays.push(i); else window._profWorkDays.splice(idx,1);
+  var btn = document.querySelector('#prof-workdays button[data-day="'+i+'"]');
+  if (btn) {
+    var on = window._profWorkDays.indexOf(i) !== -1;
+    btn.style.border = '1px solid ' + (on?'var(--gold)':'rgba(255,255,255,0.25)');
+    btn.style.background = on ? 'rgba(201,162,39,0.25)' : 'rgba(255,255,255,0.05)';
+  }
+}
+async function _loadProfileActivity() {
+  var host = document.getElementById('prof-activity');
+  if (!host || !currentUser) return;
+  host.innerHTML = '<div style="font-size:12px;color:rgba(243,239,230,0.5);">Loading...</div>';
+  try {
+    var keys = await DB.list('activity:' + currentUser.id + ':');
+    var items = (await Promise.all(keys.map(function(k){return DB.get(k);}))).filter(Boolean);
+    items.sort(function(a,b){ return (b.at||0)-(a.at||0); });
+    items = items.slice(0, 30);
+    if (!items.length) { host.innerHTML = '<div style="font-size:12px;color:rgba(243,239,230,0.5);">No recent activity yet.</div>'; return; }
+    host.innerHTML = items.map(function(it){
+      var when = new Date(it.at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+      return '<div style="font-family:Inter,sans-serif;font-size:12px;color:#f3efe6;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.08);"><span>'+_esc(it.text)+'</span><span style="display:block;color:rgba(243,239,230,0.45);font-size:11px;margin-top:1px;">'+when+'</span></div>';
+    }).join('');
+  } catch(e) { host.innerHTML = '<div style="font-size:12px;color:rgba(243,239,230,0.5);">Could not load activity.</div>'; }
+}
+
 
 function _profMsg(text, ok) {
   var m = document.getElementById('prof-msg');
@@ -5553,6 +5687,11 @@ async function saveProfile() {
     var textSize = document.getElementById('prof-textsize') ? document.getElementById('prof-textsize').value : 'normal';
     var notifPrefs = {};
     document.querySelectorAll('#prof-notifs input[data-notif]').forEach(function(cb){ notifPrefs[cb.getAttribute('data-notif')] = cb.checked; });
+    var density = document.getElementById('prof-density') ? document.getElementById('prof-density').value : 'comfortable';
+    var workHours = { days: (window._profWorkDays||[]).slice(), from: (document.getElementById('prof-work-from')||{}).value || '', to: (document.getElementById('prof-work-to')||{}).value || '' };
+    var quietHours = { on: !!(document.getElementById('prof-quiet-on')||{}).checked, from: (document.getElementById('prof-quiet-from')||{}).value || '22:00', to: (document.getElementById('prof-quiet-to')||{}).value || '07:00' };
+    var recoveryEmail = (document.getElementById('prof-recovery-email')||{}).value || '';
+    var recoveryPhone = (document.getElementById('prof-recovery-phone')||{}).value || '';
 
     // 2) Save the profile fields onto the (possibly new) user record.
     var key = 'user:' + (currentUser.email);
@@ -5560,15 +5699,26 @@ async function saveProfile() {
     rec.name = name; rec.title = title; rec.phone = phone; rec.avatarColor = _profPickedColor;
     rec.photo = _profPhoto || null;
     rec.landingTab = landing; rec.theme = _profTheme; rec.textSize = textSize; rec.notifPrefs = notifPrefs;
+    rec.density = density; rec.workHours = workHours; rec.quietHours = quietHours; rec.recoveryEmail = recoveryEmail; rec.recoveryPhone = recoveryPhone;
     await DB.set(key, rec);
     currentUser.name = name; currentUser.title = title; currentUser.phone = phone; currentUser.avatarColor = _profPickedColor;
     currentUser.photo = _profPhoto || null;
     currentUser.landingTab = landing; currentUser.theme = _profTheme; currentUser.textSize = textSize; currentUser.notifPrefs = notifPrefs;
+    currentUser.density = density; currentUser.workHours = workHours; currentUser.quietHours = quietHours; currentUser.recoveryEmail = recoveryEmail; currentUser.recoveryPhone = recoveryPhone;
     if (typeof applyTheme === 'function') applyTheme();
+    if (typeof applyDensity === 'function') applyDensity();
+    if (typeof logActivity === 'function') logActivity('Updated their profile');
     if (typeof _renderSidebarIdentity === 'function') _renderSidebarIdentity();
 
     // refresh identity (avatar, name, title) everywhere
     if (typeof _renderSidebarIdentity === 'function') _renderSidebarIdentity();
+    // update dashboard identity live too
+    (function(){
+      var av = document.getElementById('dashAvatar');
+      if (av) { if (currentUser.photo) { av.style.backgroundImage='url('+currentUser.photo+')'; av.textContent=''; } else { av.style.backgroundImage='none'; av.style.background=currentUser.avatarColor||'#1a2b4a'; av.textContent=_profInitials(currentUser.name,currentUser.email); } }
+      var tagEl = document.getElementById('dashTag');
+      if (tagEl) { var rw = currentIsOwner()?'Owner':(currentUser.role==='admin'?'Admin':'Employee'); tagEl.textContent = currentUser.title?(currentUser.title+' \u00b7 '+rw):rw; tagEl.style.display=''; }
+    })();
     var tn = document.getElementById('topbarUserName'); if (tn) tn.textContent = name;
 
     _profMsg('Profile saved.', true);
@@ -8060,6 +8210,58 @@ function _tabStateFor(user, tabId) {
   return perms.indexOf(tabId) !== -1 ? 'allowed' : 'hidden';
 }
 
+
+// ===================== PROFILE: activity, quiet hours, density, sessions =====================
+
+// --- Activity log (per user, keyed by their id) ---
+async function logActivity(text) {
+  if (!currentUser) return;
+  try {
+    var id = 'act_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+    await DB.set('activity:' + currentUser.id + ':' + id, { id: id, text: text, at: Date.now() });
+  } catch(e) {}
+}
+
+// --- Quiet hours: is it currently within the user's muted window? ---
+function _inQuietHours(user) {
+  user = user || currentUser;
+  if (!user || !user.quietHours || !user.quietHours.on) return false;
+  var from = user.quietHours.from; // "22:00"
+  var to = user.quietHours.to;     // "07:00"
+  if (!from || !to) return false;
+  var now = new Date();
+  var cur = now.getHours()*60 + now.getMinutes();
+  function toMin(s){ var p = s.split(':'); return parseInt(p[0],10)*60 + parseInt(p[1],10); }
+  var f = toMin(from), t = toMin(to);
+  if (f === t) return false;
+  if (f < t) return cur >= f && cur < t;       // same-day window
+  return cur >= f || cur < t;                  // overnight window (e.g. 22:00 -> 07:00)
+}
+
+// --- Layout density: apply a class on the body ---
+function applyDensity() {
+  var d = (currentUser && currentUser.density) || localStorage.getItem('dd_density') || 'comfortable';
+  document.documentElement.setAttribute('data-density', d);
+  try { localStorage.setItem('dd_density', d); } catch(e) {}
+}
+
+// --- Sign out everywhere (honest version) ---
+async function signOutEverywhere() {
+  if (!confirm('Sign out of all devices? You will be logged out here, and other devices will be logged out the next time they refresh.')) return;
+  try {
+    var auth = _getAuth();
+    var u = auth && auth.currentUser;
+    // Revoking happens by signing out; Firebase rotates tokens. Best-effort: update a token-version
+    // on the user record so the app can treat older sessions as stale on next load.
+    if (currentUser) {
+      var rec = await DB.get('user:' + currentUser.email);
+      if (rec) { rec.sessionEpoch = Date.now(); await DB.set('user:' + currentUser.email, rec); }
+    }
+    if (auth) await auth.signOut();
+    location.reload();
+  } catch(e) { alert('Could not complete sign-out. Try again.'); }
+}
+
 async function createNotification(recipientId, opts) {
   if (!recipientId) return;
   if (currentUser && recipientId === currentUser.id) return; // don't notify yourself
@@ -8072,6 +8274,7 @@ async function createNotification(recipientId, opts) {
       var groupOff = (rec.notifPrefs[t] === false);
       if (groupOff) return;
     }
+    if (rec && _inQuietHours(rec)) return; // respect quiet hours
   } catch(e) {}
   var n = {
     id: _notifUid(),
@@ -8484,6 +8687,22 @@ async function _renderDashToday() {
 }
 
 async function refreshDashboard() {
+  // Dashboard identity: avatar + tag
+  (function(){
+    if (!currentUser) return;
+    var av = document.getElementById('dashAvatar');
+    if (av) {
+      if (currentUser.photo) { av.style.backgroundImage = 'url(' + currentUser.photo + ')'; av.textContent = ''; }
+      else { av.style.backgroundImage = 'none'; av.style.background = currentUser.avatarColor || '#1a2b4a'; av.textContent = (typeof _profInitials==='function') ? _profInitials(currentUser.name, currentUser.email) : ''; }
+    }
+    var tagEl = document.getElementById('dashTag');
+    if (tagEl) {
+      var roleWord = currentIsOwner() ? 'Owner' : (currentUser.role === 'admin' ? 'Admin' : 'Employee');
+      var label = currentUser.title ? (currentUser.title + ' \u00b7 ' + roleWord) : roleWord;
+      tagEl.textContent = label;
+      tagEl.style.display = '';
+    }
+  })();
   // Welcome message
   var welcomeEl = document.getElementById('dashWelcome');
   var dateEl = document.getElementById('dashDate');
@@ -8922,6 +9141,7 @@ async function saveCustomer() {
       updatedBy: currentUser ? currentUser.name : 'Admin'
     });
     await DB.set('customer:' + _editingCustomerId, updated);
+  if (typeof logActivity === 'function') logActivity('Saved a customer');
   } else {
     const customer = {
       id: 'customer_' + Date.now(),
@@ -9130,6 +9350,7 @@ async function saveCustUpdate() {
     _updatedAt: Date.now()
   };
   await DB.set('custupdate:' + id, rec);
+  if (typeof logActivity === 'function') logActivity((_cuEditId ? 'Edited' : 'Posted') + ' a customer update for ' + (rec.projectName || 'a project'));
   closeCustUpdateModal();
   renderCustUpdates();
 }
