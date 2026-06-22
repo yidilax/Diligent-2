@@ -3839,10 +3839,11 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       &#128276;
       <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
     </button>
-    <div class="office-user">
+    <button class="office-user" onclick="openProfileModal()" aria-label="My profile" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:0;">
       <span class="office-user-name" id="topbarUserName"></span>
       <span class="office-role-badge" id="topbarRoleBadge"></span>
-    </div>
+      <span id="topbarAvatar" style="width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:15px;color:#fff;background-size:cover;background-position:center;"></span>
+    </button>
   </div>
 
 
@@ -4304,10 +4305,10 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
               <input class="form-input" id="sub-phone" type="tel" placeholder="845-000-0000"></div>
             <div class="form-group"><label class="form-label">4-digit access code</label>
               <div style="display:flex;gap:8px;align-items:center;">
-                <input class="form-input" id="sub-code" type="text" maxlength="4" inputmode="numeric" style="flex:1;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:4px;text-align:center;" readonly>
+                <input class="form-input" id="sub-code" type="text" maxlength="4" inputmode="numeric" pattern="[0-9]*" style="flex:1;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:4px;text-align:center;" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4)" placeholder="0000">
                 <button type="button" onclick="document.getElementById('sub-code').value=_genSubCode()" style="flex-shrink:0;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.06);color:#f3efe6;font-family:Inter,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">↻ New</button>
               </div>
-              <div style="font-size:12px;color:rgba(243,239,230,0.6);margin-top:4px;">Give this code to the sub. They log in with it on the Subcontractor login.</div></div>
+              <div style="font-size:12px;color:rgba(243,239,230,0.6);margin-top:4px;">Type your own 4-digit code or tap ↻ New. Give this code to the sub to log in.</div></div>
             <div class="form-group"><label class="form-label">Office note for this sub <span style="font-weight:400;opacity:.6;">(optional)</span></label>
               <textarea class="form-input" id="sub-note" rows="2" placeholder="e.g. Start with Unit 2B, gate code 1234"></textarea></div>
           </div>
@@ -5917,6 +5918,12 @@ function _renderSidebarIdentity() {
     // Show the custom title if set; otherwise the role label.
     var roleWord = currentIsOwner() ? 'Owner' : (currentUser.role === 'admin' ? 'Admin' : 'Employee');
     sr.textContent = currentUser.title ? (currentUser.title + ' \u00b7 ' + roleWord) : roleWord;
+  }
+  // Topbar avatar (clickable -> profile)
+  var ta = document.getElementById('topbarAvatar');
+  if (ta) {
+    if (currentUser.photo) { ta.style.backgroundImage = 'url(' + currentUser.photo + ')'; ta.textContent = ''; }
+    else { ta.style.backgroundImage = 'none'; ta.style.background = currentUser.avatarColor || '#c9a227'; ta.textContent = _profInitials(currentUser.name, currentUser.email); }
   }
 }
 
