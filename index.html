@@ -4012,6 +4012,29 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       </div>
     </div>
 
+
+  <!-- Access editor modal -->
+  <div id="modal-access" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span>Tab Access — <span id="accessEmpName"></span></span>
+        <button onclick="closeAccessEditor()" class="modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:flex;gap:8px;margin-bottom:12px;">
+          <button onclick="accessSelectAll(true)" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:8px;background:#fff;font-family:Inter,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">Select all</button>
+          <button onclick="accessSelectAll(false)" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:8px;background:#fff;font-family:Inter,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">Clear all</button>
+        </div>
+        <div id="accessTabList"></div>
+        <p style="font-size:12px;color:var(--muted);margin-top:8px;">Dashboard is always visible. Employees only see the tabs you check here.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-logout" onclick="closeAccessEditor()">Cancel</button>
+        <button class="btn-primary" onclick="saveAccessEditor()">Save Access</button>
+      </div>
+    </div>
+  </div>
+
     <!-- CUSTOMER UPDATES TAB -->
     <div id="tab-custUpdates" class="office-tab" style="display:none;">
       <div class="tab-header">
@@ -5165,6 +5188,7 @@ async function openOfficeDashboard() {
     }
   });
 
+  if (typeof applyTabPermissions === 'function') applyTabPermissions();
   switchTab('dashboard');
   await refreshDashboard();
 }
@@ -7687,7 +7711,51 @@ function _toggleTabChrome(tabId, show) {
   });
 }
 
+
+// ===================== PER-EMPLOYEE TAB PERMISSIONS =====================
+// All grantable tabs (employees tab stays admin-only).
+var ALL_OFFICE_TABS = [
+  { id: 'dashboard',     label: 'Dashboard' },
+  { id: 'projects',      label: 'Projects' },
+  { id: 'customers',     label: 'Customers' },
+  { id: 'upgrades',      label: 'Upgrades' },
+  { id: 'custUpdates',   label: 'Customer Updates' },
+  { id: 'upgradeEditor', label: 'Upgrade Editor' },
+  { id: 'punchlist',     label: 'Punch Lists' },
+  { id: 'specs',         label: 'Specs' },
+  { id: 'tasks',         label: 'Tasks' },
+  { id: 'scheduling',    label: 'Construction Schedule' }
+];
+
+// Does the current user have access to a given tab?
+function _canAccessTab(tabId) {
+  if (!currentUser) return false;
+  if (currentUser.role === 'admin') return true;        // admin sees all
+  if (tabId === 'employees') return false;              // admin-only
+  if (tabId === 'dashboard') return true;               // everyone gets the dashboard
+  var perms = currentUser.permissions || [];
+  return perms.indexOf(tabId) !== -1;
+}
+
+// Hide nav buttons the user can't access; called after login / dashboard open.
+function applyTabPermissions() {
+  if (!currentUser) return;
+  ALL_OFFICE_TABS.forEach(function(t) {
+    var btn = document.getElementById('navbtn-' + t.id);
+    if (!btn) return;
+    var li = btn.closest('.office-nav-item') || btn;
+    li.style.display = _canAccessTab(t.id) ? '' : 'none';
+  });
+  // employees nav stays admin-only (it already has admin-only class handling)
+  var empBtn = document.getElementById('navbtn-employees');
+  if (empBtn) {
+    var empLi = empBtn.closest('.office-nav-item') || empBtn;
+    empLi.style.display = (currentUser.role === 'admin') ? '' : 'none';
+  }
+}
+
 async function switchTab(tab) {
+  if (!_canAccessTab(tab)) { if (tab !== 'dashboard') { switchTab('dashboard'); } return; }
   if (typeof refreshNotifBadge === 'function') refreshNotifBadge();
   if (typeof _renderViewAsBanner === 'function') _renderViewAsBanner();
   // Hide all office tabs
@@ -7711,14 +7779,8 @@ async function switchTab(tab) {
   if (tab === 'custUpdates') await renderCustUpdates();
   if (tab === 'upgradeEditor') initUpgradeEditor();
   if (tab === 'punchlist') renderPunchList();
-  if (tab === 'tasks') {
-    if (_effectiveIsAdmin()) { _toggleTabChrome('tab-tasks', true); _populateTaskProjectFilter(); renderTasks(); }
-    else { _toggleTabChrome('tab-tasks', false); _showComingSoon('tasksContent', 'Tasks'); }
-  }
-  if (tab === 'scheduling') {
-    if (_effectiveIsAdmin()) { _toggleTabChrome('tab-scheduling', true); renderScheduling(); }
-    else { _toggleTabChrome('tab-scheduling', false); _showComingSoon('schedContent', 'Construction Schedule'); }
-  }
+  if (tab === 'tasks') { _toggleTabChrome('tab-tasks', true); _populateTaskProjectFilter(); renderTasks(); }
+  if (tab === 'scheduling') { _toggleTabChrome('tab-scheduling', true); renderScheduling(); }
   if (tab === 'specs') renderSpecs();
 }
 
@@ -8765,6 +8827,9 @@ async function renderEmployees() {
     if (u.status === 'pending') {
       actions += '<button onclick="approveEmployee(\'' + u.email + '\')" style="flex:1;padding:9px;border:none;border-radius:8px;background:#D1FAE5;color:#065F46;font-family:Inter,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">✓ Approve</button>';
     }
+    if (u.status === 'active' && u.role !== 'admin') {
+      actions += '<button onclick="openAccessEditor(\'' + u.email + '\')" style="flex:1;padding:9px;border:none;border-radius:8px;background:#FEF3C7;color:#92400E;font-family:Inter,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">\ud83d\udd11 Access</button>';
+    }
     if (u.status === 'active') {
       actions += '<button onclick="disableEmployee(\'' + u.email + '\')" style="flex:1;padding:9px;border:none;border-radius:8px;background:#F3F4F6;color:#6B7280;font-family:Inter,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">Disable</button>';
     }
@@ -8796,6 +8861,50 @@ async function renderEmployees() {
     '</div>';
   }).join('');
 }
+
+// ===== Per-employee access editor =====
+var _accessEditEmail = null;
+async function openAccessEditor(email) {
+  if (!currentUser || currentUser.role !== 'admin') return;
+  _accessEditEmail = email;
+  var u = await DB.get('user:' + email);
+  if (!u) { alert('Employee not found.'); return; }
+  var perms = u.permissions || [];
+  var rows = ALL_OFFICE_TABS.filter(function(t){ return t.id !== 'dashboard'; }).map(function(t) {
+    var on = perms.indexOf(t.id) !== -1;
+    return '<label style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;">' +
+      '<span style="font-family:Inter,sans-serif;font-size:14px;font-weight:600;color:#16233d;">' + t.label + '</span>' +
+      '<input type="checkbox" data-tab="' + t.id + '"' + (on ? ' checked' : '') + ' style="width:20px;height:20px;accent-color:var(--gold);">' +
+    '</label>';
+  }).join('');
+  var modal = document.getElementById('modal-access');
+  document.getElementById('accessEmpName').textContent = u.name || u.email;
+  document.getElementById('accessTabList').innerHTML = rows;
+  modal.classList.add('open');
+}
+function closeAccessEditor() {
+  var m = document.getElementById('modal-access');
+  if (m) m.classList.remove('open');
+  _accessEditEmail = null;
+}
+async function saveAccessEditor() {
+  if (!_accessEditEmail) return;
+  var u = await DB.get('user:' + _accessEditEmail);
+  if (!u) { alert('Employee not found.'); return; }
+  var perms = [];
+  document.querySelectorAll('#accessTabList input[type="checkbox"]').forEach(function(cb){
+    if (cb.checked) perms.push(cb.getAttribute('data-tab'));
+  });
+  u.permissions = perms;
+  await DB.set('user:' + _accessEditEmail, u);
+  closeAccessEditor();
+  renderEmployees();
+  alert('Access updated. The employee will see the change next time they open the app.');
+}
+function accessSelectAll(on) {
+  document.querySelectorAll('#accessTabList input[type="checkbox"]').forEach(function(cb){ cb.checked = on; });
+}
+
 
 async function approveEmployee(email) {
   const user = await DB.get('user:' + email);
