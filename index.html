@@ -3706,9 +3706,12 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <span class="office-sidebar-title">Menu</span>
       <button class="office-sidebar-close" onclick="closeSidebar()">✕</button>
     </div>
-    <div class="office-sidebar-user">
-      <div class="office-sidebar-user-name" id="sidebarUserName"></div>
-      <div class="office-sidebar-user-role" id="sidebarUserRole"></div>
+    <div class="office-sidebar-user" style="display:flex;align-items:center;gap:12px;">
+      <div id="sidebarAvatar" style="width:44px;height:44px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:18px;color:#fff;background-size:cover;background-position:center;"></div>
+      <div style="min-width:0;">
+        <div class="office-sidebar-user-name" id="sidebarUserName"></div>
+        <div class="office-sidebar-user-role" id="sidebarUserRole"></div>
+      </div>
     </div>
     <ul class="office-nav-list">
       <li class="office-nav-item">
@@ -3774,7 +3777,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       </li>
     </ul>
     <div class="office-sidebar-footer">
-      <button class="btn-logout" onclick="openProfileModal()" style="margin-bottom:8px;background:rgba(201,162,39,0.15);color:var(--gold);border-color:rgba(201,162,39,0.4);">⚙️ Manage Profile</button>
+      <button class="btn-logout" onclick="closeSidebar();openProfileModal()" style="margin-bottom:8px;background:rgba(201,162,39,0.15);color:var(--gold);border-color:rgba(201,162,39,0.4);">⚙️ Manage Profile</button>
       <button class="btn-logout" onclick="doLogout()">Logout</button>
     </div>
   </div>
@@ -4033,6 +4036,25 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     </div>
 
 
+
+
+  <!-- Photo cropper modal -->
+  <div id="modal-cropper" class="modal-overlay" style="display:none;z-index:300;">
+    <div class="modal-box" style="max-width:360px;">
+      <div class="modal-header"><span>Adjust Photo</span><button onclick="_cropCancel()" class="modal-close">✕</button></div>
+      <div class="modal-body" style="text-align:center;">
+        <div style="font-size:12px;color:rgba(243,239,230,0.7);margin-bottom:10px;">Drag to move · use the slider to zoom</div>
+        <div id="cropFrame" style="width:260px;height:260px;border-radius:50%;overflow:hidden;margin:0 auto 14px;position:relative;background:#0a1422;border:2px solid var(--gold);touch-action:none;">
+          <canvas id="cropCanvas" width="260" height="260" style="position:absolute;top:0;left:0;"></canvas>
+        </div>
+        <input type="range" id="cropZoom" min="1" max="3" step="0.01" value="1" style="width:100%;accent-color:var(--gold);">
+      </div>
+      <div class="modal-footer">
+        <button class="btn-logout" onclick="_cropCancel()">Cancel</button>
+        <button class="btn-primary" onclick="_cropApply()">Use Photo</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Manage Profile modal -->
   <div id="modal-profile" class="modal-overlay" style="display:none;">
@@ -5381,13 +5403,84 @@ function _profPickPhoto() {
   input.onchange = function() {
     var file = input.files && input.files[0];
     if (!file) return;
-    _plCompressImage(file, function(dataUrl){
-      _profPhoto = dataUrl;
-      _renderProfileAvatar(_profPickedColor);
-      var rm = document.getElementById('prof-removephoto'); if (rm) rm.style.display = '';
-    });
+    var reader = new FileReader();
+    reader.onload = function(e){ _openCropper(e.target.result); };
+    reader.readAsDataURL(file);
   };
   input.click();
+}
+
+// ---- Circular photo cropper (drag + zoom) ----
+var _cropImg = null, _cropScale = 1, _cropMinScale = 1, _cropX = 0, _cropY = 0, _cropDrag = false, _cropLastX = 0, _cropLastY = 0;
+var _CROP_SIZE = 260;
+function _openCropper(dataUrl) {
+  var img = new Image();
+  img.onload = function() {
+    _cropImg = img;
+    // base scale so the image covers the circle
+    _cropMinScale = Math.max(_CROP_SIZE / img.width, _CROP_SIZE / img.height);
+    _cropScale = _cropMinScale;
+    var z = document.getElementById('cropZoom');
+    z.min = _cropMinScale; z.max = _cropMinScale * 3; z.step = (_cropMinScale*2)/100; z.value = _cropMinScale;
+    // center
+    _cropX = (_CROP_SIZE - img.width * _cropScale) / 2;
+    _cropY = (_CROP_SIZE - img.height * _cropScale) / 2;
+    _drawCrop();
+    document.getElementById('modal-cropper').classList.add('open');
+    _wireCropEvents();
+  };
+  img.src = dataUrl;
+}
+function _drawCrop() {
+  var c = document.getElementById('cropCanvas');
+  if (!c || !_cropImg) return;
+  var ctx = c.getContext('2d');
+  ctx.clearRect(0,0,_CROP_SIZE,_CROP_SIZE);
+  ctx.drawImage(_cropImg, _cropX, _cropY, _cropImg.width*_cropScale, _cropImg.height*_cropScale);
+}
+function _clampCrop() {
+  var w = _cropImg.width*_cropScale, h = _cropImg.height*_cropScale;
+  if (_cropX > 0) _cropX = 0;
+  if (_cropY > 0) _cropY = 0;
+  if (_cropX < _CROP_SIZE - w) _cropX = _CROP_SIZE - w;
+  if (_cropY < _CROP_SIZE - h) _cropY = _CROP_SIZE - h;
+}
+var _cropWired = false;
+function _wireCropEvents() {
+  if (_cropWired) return; _cropWired = true;
+  var frame = document.getElementById('cropFrame');
+  var z = document.getElementById('cropZoom');
+  z.oninput = function() {
+    var cx = _CROP_SIZE/2, cy = _CROP_SIZE/2;
+    var prev = _cropScale;
+    _cropScale = parseFloat(z.value);
+    // zoom around center
+    _cropX = cx - (cx - _cropX) * (_cropScale/prev);
+    _cropY = cy - (cy - _cropY) * (_cropScale/prev);
+    _clampCrop(); _drawCrop();
+  };
+  function start(x,y){ _cropDrag=true; _cropLastX=x; _cropLastY=y; }
+  function move(x,y){ if(!_cropDrag) return; _cropX += (x-_cropLastX); _cropY += (y-_cropLastY); _cropLastX=x; _cropLastY=y; _clampCrop(); _drawCrop(); }
+  function end(){ _cropDrag=false; }
+  frame.addEventListener('mousedown', function(e){ start(e.clientX,e.clientY); });
+  window.addEventListener('mousemove', function(e){ move(e.clientX,e.clientY); });
+  window.addEventListener('mouseup', end);
+  frame.addEventListener('touchstart', function(e){ var t=e.touches[0]; start(t.clientX,t.clientY); }, {passive:true});
+  frame.addEventListener('touchmove', function(e){ var t=e.touches[0]; move(t.clientX,t.clientY); e.preventDefault(); }, {passive:false});
+  frame.addEventListener('touchend', end);
+}
+function _cropCancel() { document.getElementById('modal-cropper').classList.remove('open'); }
+function _cropApply() {
+  // Export the circular crop as a square dataURL (compressed)
+  var out = document.createElement('canvas');
+  out.width = 256; out.height = 256;
+  var octx = out.getContext('2d');
+  var ratio = 256 / _CROP_SIZE;
+  octx.drawImage(_cropImg, _cropX*ratio, _cropY*ratio, _cropImg.width*_cropScale*ratio, _cropImg.height*_cropScale*ratio);
+  _profPhoto = out.toDataURL('image/jpeg', 0.82);
+  _renderProfileAvatar(_profPickedColor);
+  var rm = document.getElementById('prof-removephoto'); if (rm) rm.style.display = '';
+  _cropCancel();
 }
 function _profRemovePhoto() {
   _profPhoto = null;
@@ -5472,10 +5565,10 @@ async function saveProfile() {
     currentUser.photo = _profPhoto || null;
     currentUser.landingTab = landing; currentUser.theme = _profTheme; currentUser.textSize = textSize; currentUser.notifPrefs = notifPrefs;
     if (typeof applyTheme === 'function') applyTheme();
+    if (typeof _renderSidebarIdentity === 'function') _renderSidebarIdentity();
 
-    // refresh sidebar/topbar labels
-    var sn = document.getElementById('sidebarUserName'); if (sn) sn.textContent = name;
-    var sr = document.getElementById('sidebarUserRole'); if (sr) sr.textContent = currentIsOwner() ? 'Owner' : (currentUser.role === 'admin' ? 'Administrator' : (title || 'Employee'));
+    // refresh identity (avatar, name, title) everywhere
+    if (typeof _renderSidebarIdentity === 'function') _renderSidebarIdentity();
     var tn = document.getElementById('topbarUserName'); if (tn) tn.textContent = name;
 
     _profMsg('Profile saved.', true);
@@ -5528,6 +5621,31 @@ async function _migrateEmail(fbUser, oldEmail, newEmail) {
 // ════════════════════════════════════════════
 // OPEN OFFICE DASHBOARD
 // ════════════════════════════════════════════
+
+// Render the sidebar avatar (photo or initials), name, and title/role line.
+function _renderSidebarIdentity() {
+  if (!currentUser) return;
+  var av = document.getElementById('sidebarAvatar');
+  if (av) {
+    if (currentUser.photo) {
+      av.style.backgroundImage = 'url(' + currentUser.photo + ')';
+      av.textContent = '';
+    } else {
+      av.style.backgroundImage = 'none';
+      av.style.background = currentUser.avatarColor || '#1a2b4a';
+      av.textContent = _profInitials(currentUser.name, currentUser.email);
+    }
+  }
+  var sn = document.getElementById('sidebarUserName');
+  if (sn) sn.textContent = currentUser.name || '';
+  var sr = document.getElementById('sidebarUserRole');
+  if (sr) {
+    // Show the custom title if set; otherwise the role label.
+    var roleWord = currentIsOwner() ? 'Owner' : (currentUser.role === 'admin' ? 'Admin' : 'Employee');
+    sr.textContent = currentUser.title ? (currentUser.title + ' \u00b7 ' + roleWord) : roleWord;
+  }
+}
+
 async function openOfficeDashboard() {
   var _bl = document.getElementById('bootLoader');
   // Warm the data cache once so all tabs respond instantly
@@ -5535,10 +5653,7 @@ async function openOfficeDashboard() {
   if (_bl) _bl.style.display = 'none';
   showPage('officePage');
   document.getElementById('topbarUserName').textContent = currentUser.name;
-  var sidebarName = document.getElementById('sidebarUserName');
-  var sidebarRole = document.getElementById('sidebarUserRole');
-  if (sidebarName) sidebarName.textContent = currentUser.name;
-  if (sidebarRole) sidebarRole.textContent = currentUser.role === 'admin' ? 'Administrator' : (currentUser.title || 'Employee');
+  _renderSidebarIdentity();
   const badge = document.getElementById('topbarRoleBadge');
   badge.textContent = currentUser.role === 'admin' ? 'Admin' : (currentUser.title || 'Employee');
   badge.className = 'office-role-badge ' + (currentUser.role === 'admin' ? 'role-admin' : 'role-employee');
