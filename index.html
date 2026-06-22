@@ -3515,6 +3515,16 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
           <div style="font-size:24px;color:rgba(201,168,76,0.35);line-height:1;">›</div>
         </button>
 
+        <!-- Subcontractor Login -->
+        <button class="lp-btn-ghost" onclick="showPage('subAuthPage')">
+          <div class="lp-icon-box" style="background:rgba(201,168,76,0.1);">🔧</div>
+          <div style="flex:1;">
+            <div class="lp-btn-label" style="color:#C9A84C;">Subcontractor</div>
+            <div class="lp-btn-sub" style="color:rgba(255,255,255,0.4);">Enter your 4-digit code</div>
+          </div>
+          <div style="font-size:24px;color:rgba(201,168,76,0.35);line-height:1;">›</div>
+        </button>
+
       </div>
 
       <div class="lp-footer">Diligent Developers &copy; 2026</div>
@@ -3523,6 +3533,29 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 
   </div>
 
+</div>
+
+<div class="page" id="subAuthPage">
+  <div class="auth-box" style="max-width:420px;">
+    <div class="auth-header">
+      <button class="auth-back" onclick="showPage('landingPage')">← Back</button>
+      <div class="auth-title" style="font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:2px;color:#fff;">Subcontractor</div>
+      <div style="color:rgba(255,255,255,0.5);font-size:14px;">Enter your 4-digit access code</div>
+    </div>
+    <div style="padding:24px 0;">
+      <input id="subCodeInput" type="text" maxlength="4" inputmode="numeric" placeholder="0000" style="width:100%;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:14px;padding:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;" onkeydown="if(event.key==='Enter')subLogin()">
+      <div id="subAuthError" style="display:none;color:#F3A39A;font-size:13px;margin-top:10px;text-align:center;"></div>
+      <button class="btn-primary" style="width:100%;margin-top:16px;padding:14px;" onclick="subLogin()">Log In</button>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="subPortalPage">
+  <div style="background:var(--navy);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:2px solid var(--gold);">
+    <div><div id="subPortalName" style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;color:#fff;"></div><div id="subPortalTrade" style="font-size:12px;color:rgba(255,255,255,0.6);"></div></div>
+    <button onclick="subLogout()" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:8px 16px;font-family:Inter,sans-serif;font-size:13px;cursor:pointer;">Exit</button>
+  </div>
+  <div id="subPortalContent" style="padding:18px;max-width:760px;margin:0 auto;"></div>
 </div>
 
 <div class="page" id="customerAuthPage">
@@ -3770,6 +3803,11 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <li class="office-nav-item">
         <button class="office-nav-btn" onclick="switchTab('custUpdates');closeSidebar();" id="navbtn-custUpdates">
           <span class="nav-icon">📣</span> Customer Updates
+        </button>
+      </li>
+      <li class="office-nav-item">
+        <button class="office-nav-btn" onclick="switchTab('subs');closeSidebar();" id="navbtn-subs">
+          <span class="nav-icon">🔧</span> Subcontractors
         </button>
       </li>
       <li class="office-nav-item admin-only" style="display:none;">
@@ -4242,6 +4280,56 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       </div>
     </div>
 
+    <!-- SUBCONTRACTORS TAB -->
+    <div id="tab-subs" class="office-tab" style="display:none;">
+      <div class="tab-header">
+        <div class="tab-header-left">
+          <div class="tab-title">Subcontractors</div>
+          <div class="tab-count" id="subs-count"></div>
+        </div>
+        <button class="btn-primary" onclick="openSubForm()">+ Add Sub</button>
+      </div>
+      <div id="subsList"></div>
+
+      <!-- Add/edit sub modal -->
+      <div id="modal-sub" class="modal-overlay" style="display:none;">
+        <div class="modal-box">
+          <div class="modal-header"><span id="subModalTitle">Add Subcontractor</span><button onclick="closeSubModal()" class="modal-close">✕</button></div>
+          <div class="modal-body">
+            <div class="form-group"><label class="form-label">Name / Company</label>
+              <input class="form-input" id="sub-name" type="text" placeholder="e.g. Mike's Electric"></div>
+            <div class="form-group"><label class="form-label">Trade</label>
+              <select class="form-input" id="sub-trade"></select></div>
+            <div class="form-group"><label class="form-label">Phone <span style="font-weight:400;opacity:.6;">(optional)</span></label>
+              <input class="form-input" id="sub-phone" type="tel" placeholder="845-000-0000"></div>
+            <div class="form-group"><label class="form-label">4-digit access code</label>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <input class="form-input" id="sub-code" type="text" maxlength="4" inputmode="numeric" style="flex:1;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:4px;text-align:center;" readonly>
+                <button type="button" onclick="document.getElementById('sub-code').value=_genSubCode()" style="flex-shrink:0;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.06);color:#f3efe6;font-family:Inter,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">↻ New</button>
+              </div>
+              <div style="font-size:12px;color:rgba(243,239,230,0.6);margin-top:4px;">Give this code to the sub. They log in with it on the Subcontractor login.</div></div>
+            <div class="form-group"><label class="form-label">Office note for this sub <span style="font-weight:400;opacity:.6;">(optional)</span></label>
+              <textarea class="form-input" id="sub-note" rows="2" placeholder="e.g. Start with Unit 2B, gate code 1234"></textarea></div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn-logout" onclick="closeSubModal()">Cancel</button>
+            <button class="btn-primary" onclick="saveSub()">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub detail / tasks modal -->
+      <div id="modal-sub-detail" class="modal-overlay" style="display:none;">
+        <div class="modal-box">
+          <div class="modal-header"><span id="subDetailTitle">Subcontractor</span><button onclick="closeSubDetail()" class="modal-close">✕</button></div>
+          <div class="modal-body" id="subDetailBody"></div>
+          <div class="modal-footer">
+            <button class="btn-logout" onclick="closeSubDetail()">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- PUNCH LIST TAB -->
     <div id="tab-punchlist" class="office-tab" style="display:none;">
 
@@ -4494,7 +4582,7 @@ async function checkSyncStatus() {
 
 // Key sanitization: Firestore doesn't allow '/' or certain chars in doc IDs
 // Customer-facing prefixes go in the OPEN 'pub' collection; everything else is office-only in 'dd'.
-var _PUBLIC_PREFIXES = ['upgrades:', 'submission:', 'upgrade_sections', 'custupdate:'];
+var _PUBLIC_PREFIXES = ['upgrades:', 'submission:', 'upgrade_sections', 'custupdate:', 'subcontractor:', 'subpunch:'];
 function _fsCol(key) {
   for (var i = 0; i < _PUBLIC_PREFIXES.length; i++) {
     if (String(key).indexOf(_PUBLIC_PREFIXES[i]) === 0) return 'pub';
@@ -5327,6 +5415,42 @@ async function doLogout() {
   if (auth) { try { await auth.signOut(); } catch(e) {} }
   currentUser = null;
   showPage('landingPage');
+}
+
+
+// ===================== SUBCONTRACTORS =====================
+// Stored as subcontractor:<id> = { id, name, trade, code (4-digit), active, tasks:[], officeNote, assignedItems:[] }
+// Codes are routed to the OPEN 'pub' collection so subs can log in without an office account.
+var TRADE_OPTIONS = ['Electrical','Plumbing','HVAC','Framing','Trim / Finish Carpentry','Drywall','Painting','Flooring','Tile','Roofing','Masonry','Concrete','Insulation','Landscaping','General'];
+var _currentSub = null; // the logged-in subcontractor (sub portal)
+
+function _genSubCode() { return String(Math.floor(1000 + Math.random()*9000)); }
+
+// All subs
+async function _getAllSubs() {
+  var keys = await DB.list('subcontractor:');
+  return (await Promise.all(keys.map(function(k){return DB.get(k);}))).filter(Boolean);
+}
+
+// Find a sub by their 4-digit code (for login)
+async function _findSubByCode(code) {
+  var subs = await _getAllSubs();
+  return subs.filter(function(s){ return s.active !== false && String(s.code) === String(code); })[0] || null;
+}
+
+// Does a punch item belong to this sub? (auto by trade OR manual assignment)
+function _itemMatchesSub(item, unitId, roomIdx, itemIdx, sub) {
+  if (!item || !sub) return false;
+  // manual override: assignedItems holds "unitId|roomIdx|itemIdx" strings
+  var tag = unitId + '|' + roomIdx + '|' + itemIdx;
+  if ((sub.assignedItems || []).indexOf(tag) !== -1) return true;
+  // auto by trade: item.trade or item.sub text matches the sub's trade
+  var itemTrade = (item.trade || item.sub || '').toLowerCase();
+  if (!itemTrade) return false;
+  var subTrade = (sub.trade || '').toLowerCase();
+  // match on the first word too (e.g. "Trim / Finish Carpentry" -> "trim")
+  var subFirst = subTrade.split(/[\s/]+/)[0];
+  return itemTrade.indexOf(subFirst) !== -1 || subTrade.indexOf(itemTrade) !== -1 || itemTrade === subTrade;
 }
 
 // ===================== MANAGE PROFILE =====================
@@ -8612,6 +8736,7 @@ async function switchTab(tab) {
   if (tab === 'employees') await renderEmployees();
   if (tab === 'upgrades') await renderUpgrades();
   if (tab === 'custUpdates') await renderCustUpdates();
+  if (tab === 'subs') await renderSubs();
   if (tab === 'upgradeEditor') initUpgradeEditor();
   if (tab === 'punchlist') renderPunchList();
   if (tab === 'tasks') { _toggleTabChrome('tab-tasks', true); _populateTaskProjectFilter(); renderTasks(); }
@@ -9213,6 +9338,301 @@ async function renderCustomers() {
 // ===================== CUSTOMER UPDATES =====================
 var _cuEditId = null;
 var _cuPhotos = [];
+
+
+// ===== Subcontractors: office side =====
+var _subEditId = null;
+async function renderSubs() {
+  var host = document.getElementById('subsList');
+  if (!host) return;
+  var subs = await _getAllSubs();
+  subs.sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); });
+  var cnt = document.getElementById('subs-count');
+  if (cnt) cnt.textContent = subs.length + ' sub' + (subs.length!==1?'s':'');
+  if (!subs.length) {
+    host.innerHTML = '<div class="tab-empty"><div class="tab-empty-icon">\ud83d\udd27</div><div class="tab-empty-title">No Subcontractors Yet</div><div class="tab-empty-desc">Add electricians, plumbers, trim, etc. Each gets a 4-digit code to log in and see their punch items.</div><button class="tab-empty-btn" onclick="openSubForm()">+ Add Sub</button></div>';
+    return;
+  }
+  host.innerHTML = subs.map(function(s){
+    var inactive = s.active === false;
+    return '<div class="cu-card" style="'+(inactive?'opacity:.55;':'')+'">' +
+      '<div class="cu-card-top">' +
+        '<div><div class="cu-card-target">' + _esc(s.name||'Unnamed') + '</div>' +
+        '<div class="cu-card-meta">' + _esc(s.trade||'') + (s.phone?('  \u00b7  '+_esc(s.phone)):'') + (inactive?'  \u00b7  Inactive':'') + '</div></div>' +
+        '<div style="text-align:right;"><div style="font-family:\'Bebas Neue\',sans-serif;font-size:24px;letter-spacing:3px;color:var(--gold);">' + _esc(String(s.code||'----')) + '</div><div style="font-size:10px;color:var(--muted);">access code</div></div>' +
+      '</div>' +
+      '<div class="cu-card-actions" style="margin-top:8px;">' +
+        '<button onclick="openSubDetail(\'' + s.id + '\')" class="cu-mini-btn">View / Tasks</button>' +
+        '<button onclick="openSubForm(\'' + s.id + '\')" class="cu-mini-btn">Edit</button>' +
+        '<button onclick="toggleSubActive(\'' + s.id + '\')" class="cu-mini-btn">' + (inactive?'Activate':'Deactivate') + '</button>' +
+        '<button onclick="deleteSub(\'' + s.id + '\')" class="cu-mini-btn danger">Delete</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function openSubForm(id) {
+  _subEditId = id || null;
+  document.getElementById('subModalTitle').textContent = id ? 'Edit Subcontractor' : 'Add Subcontractor';
+  var tsel = document.getElementById('sub-trade');
+  tsel.innerHTML = TRADE_OPTIONS.map(function(t){ return '<option value="'+t+'">'+t+'</option>'; }).join('');
+  document.getElementById('sub-name').value = '';
+  document.getElementById('sub-phone').value = '';
+  document.getElementById('sub-note').value = '';
+  document.getElementById('sub-code').value = _genSubCode();
+  if (id) {
+    DB.get('subcontractor:' + id).then(function(s){
+      if (!s) return;
+      document.getElementById('sub-name').value = s.name || '';
+      document.getElementById('sub-trade').value = s.trade || TRADE_OPTIONS[0];
+      document.getElementById('sub-phone').value = s.phone || '';
+      document.getElementById('sub-note').value = s.officeNote || '';
+      document.getElementById('sub-code').value = s.code || _genSubCode();
+    });
+  }
+  document.getElementById('modal-sub').classList.add('open');
+}
+function closeSubModal(){ document.getElementById('modal-sub').classList.remove('open'); _subEditId=null; }
+
+async function saveSub() {
+  var name = document.getElementById('sub-name').value.trim();
+  var trade = document.getElementById('sub-trade').value;
+  var phone = document.getElementById('sub-phone').value.trim();
+  var note = document.getElementById('sub-note').value.trim();
+  var code = document.getElementById('sub-code').value.trim();
+  if (!name) { alert('Enter a name or company.'); return; }
+  if (!/^\d{4}$/.test(code)) { alert('Code must be 4 digits.'); return; }
+  // ensure code is unique
+  var subs = await _getAllSubs();
+  var clash = subs.filter(function(s){ return String(s.code)===code && s.id!==_subEditId; })[0];
+  if (clash) { alert('That code is already used by ' + (clash.name||'another sub') + '. Generate a new one.'); return; }
+  var id = _subEditId || ('sub_' + Date.now() + '_' + Math.random().toString(36).slice(2,6));
+  var existing = _subEditId ? (await DB.get('subcontractor:' + id)) : null;
+  var rec = existing || { id: id, tasks: [], assignedItems: [], active: true };
+  rec.name = name; rec.trade = trade; rec.phone = phone; rec.officeNote = note; rec.code = code;
+  if (rec.active === undefined) rec.active = true;
+  await DB.set('subcontractor:' + id, rec);
+  if (typeof logActivity === 'function') logActivity((existing?'Edited':'Added') + ' subcontractor ' + name);
+  closeSubModal();
+  renderSubs();
+}
+
+async function toggleSubActive(id) {
+  var s = await DB.get('subcontractor:' + id);
+  if (!s) return;
+  s.active = (s.active === false);
+  await DB.set('subcontractor:' + id, s);
+  renderSubs();
+}
+async function deleteSub(id) {
+  if (!confirm('Delete this subcontractor? Their code will stop working.')) return;
+  await DB.delete('subcontractor:' + id);
+  renderSubs();
+}
+
+// ===== Sub detail: office adds tasks & notes, sees their punch items =====
+var _subDetailId = null;
+async function openSubDetail(id) {
+  _subDetailId = id;
+  var s = await DB.get('subcontractor:' + id);
+  if (!s) return;
+  document.getElementById('subDetailTitle').textContent = (s.name||'Sub') + ' \u00b7 ' + (s.trade||'');
+  await _renderSubDetailBody(s);
+  document.getElementById('modal-sub-detail').classList.add('open');
+}
+function closeSubDetail(){ document.getElementById('modal-sub-detail').classList.remove('open'); _subDetailId=null; }
+
+async function _renderSubDetailBody(s) {
+  var body = document.getElementById('subDetailBody');
+  // count their punch items
+  var items = await _collectSubPunchItems(s);
+  var tasks = s.tasks || [];
+  body.innerHTML =
+    '<div class="cust-form-sec" style="color:#f3efe6;">Access</div>' +
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">' +
+      '<span style="font-family:Inter,sans-serif;font-size:13px;color:#f3efe6;">Login code</span>' +
+      '<span style="font-family:\'Bebas Neue\',sans-serif;font-size:24px;letter-spacing:3px;color:var(--gold);">' + _esc(String(s.code||'----')) + '</span>' +
+    '</div>' +
+    '<div class="cust-form-sec" style="color:#f3efe6;">Punch items for this sub <span style="opacity:.6;font-weight:400;">(' + items.length + ')</span></div>' +
+    (items.length ? items.map(function(it){ return '<div style="font-size:13px;color:#f3efe6;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.08);">' + (it.done?'\u2705 ':'\u2022 ') + _esc(it.text) + ' <span style="color:rgba(243,239,230,0.5);">\u2014 ' + _esc(it._where) + '</span></div>'; }).join('') : '<div style="font-size:13px;color:rgba(243,239,230,0.5);margin-bottom:8px;">No matching punch items yet. Tag punch items with the trade \"' + _esc(s.trade||'') + '\" or assign them manually.</div>') +
+    '<div class="cust-form-sec" style="color:#f3efe6;margin-top:14px;">Tasks you assigned</div>' +
+    '<div id="subTaskList">' + _renderSubTasks(tasks) + '</div>' +
+    '<div style="display:flex;gap:8px;margin-top:8px;">' +
+      '<input id="subNewTask" class="form-input" type="text" placeholder="Add a task..." style="flex:1;" onkeydown="if(event.key===\'Enter\')addSubTask()">' +
+      '<button onclick="addSubTask()" class="btn-primary" style="flex-shrink:0;">Add</button>' +
+    '</div>' +
+    '<div class="cust-form-sec" style="color:#f3efe6;margin-top:14px;">Office note</div>' +
+    '<textarea id="subDetailNote" class="form-input" rows="2" placeholder="Note the sub will see">' + _esc(s.officeNote||'') + '</textarea>' +
+    '<button onclick="saveSubNote()" class="cu-mini-btn" style="margin-top:6px;">Save note</button>';
+}
+function _renderSubTasks(tasks) {
+  if (!tasks || !tasks.length) return '<div style="font-size:13px;color:rgba(243,239,230,0.5);">No tasks yet.</div>';
+  return tasks.map(function(t,i){
+    return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.08);">' +
+      '<span style="flex:1;font-size:13px;color:#f3efe6;' + (t.done?'text-decoration:line-through;opacity:.6;':'') + '">' + (t.done?'\u2705 ':'') + _esc(t.text) + '</span>' +
+      '<button onclick="removeSubTask(' + i + ')" class="cu-mini-btn danger" style="padding:3px 8px;">\u2715</button>' +
+    '</div>';
+  }).join('');
+}
+async function addSubTask() {
+  var inp = document.getElementById('subNewTask');
+  var text = inp.value.trim();
+  if (!text || !_subDetailId) return;
+  var s = await DB.get('subcontractor:' + _subDetailId);
+  s.tasks = s.tasks || [];
+  s.tasks.push({ id: 't_'+Date.now(), text: text, done: false, at: Date.now() });
+  await DB.set('subcontractor:' + _subDetailId, s);
+  inp.value = '';
+  document.getElementById('subTaskList').innerHTML = _renderSubTasks(s.tasks);
+}
+async function removeSubTask(i) {
+  var s = await DB.get('subcontractor:' + _subDetailId);
+  s.tasks.splice(i,1);
+  await DB.set('subcontractor:' + _subDetailId, s);
+  document.getElementById('subTaskList').innerHTML = _renderSubTasks(s.tasks);
+}
+async function saveSubNote() {
+  var s = await DB.get('subcontractor:' + _subDetailId);
+  s.officeNote = document.getElementById('subDetailNote').value.trim();
+  await DB.set('subcontractor:' + _subDetailId, s);
+  alert('Note saved.');
+}
+
+// Collect all punch items matching a sub across all units (auto by trade + manual)
+async function _collectSubPunchItems(sub) {
+  var out = [];
+  try {
+    var keys = await DB.list('punch:');
+    var units = (await Promise.all(keys.map(function(k){return DB.get(k);}))).filter(Boolean);
+    units.forEach(function(u){
+      var unitId = u.unitId || u.id || '';
+      var where = (u.address || u.unitName || u.unit || unitId || '');
+      (u.rooms||[]).forEach(function(r, ri){
+        (r.items||[]).forEach(function(it, ii){
+          if (_itemMatchesSub(it, unitId, ri, ii, sub)) {
+            out.push(Object.assign({}, it, { _where: (r.name? r.name+', ':'') + where, _unitId: unitId, _roomIdx: ri, _itemIdx: ii, _unitKey: 'punch:' + (u.phase||'') + ':' + unitId }));
+          }
+        });
+      });
+    });
+  } catch(e) {}
+  return out;
+}
+
+// ===== Subcontractor portal (their login + screen) =====
+async function subLogin() {
+  var code = (document.getElementById('subCodeInput').value || '').trim();
+  var err = document.getElementById('subAuthError');
+  err.style.display = 'none';
+  if (!/^\d{4}$/.test(code)) { err.textContent = 'Enter your 4-digit code.'; err.style.display='block'; return; }
+  var sub = await _findSubByCode(code);
+  if (!sub) { err.textContent = 'Code not recognized. Check with the office.'; err.style.display='block'; return; }
+  _currentSub = sub;
+  document.getElementById('subPortalName').textContent = sub.name || 'Subcontractor';
+  document.getElementById('subPortalTrade').textContent = sub.trade || '';
+  showPage('subPortalPage');
+  await renderSubPortal();
+}
+function subLogout() { _currentSub = null; document.getElementById('subCodeInput').value=''; showPage('landingPage'); }
+
+async function renderSubPortal() {
+  var host = document.getElementById('subPortalContent');
+  if (!host || !_currentSub) return;
+  host.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;">Loading your work...</div>';
+  // refresh sub record (tasks/notes may have changed)
+  var fresh = await DB.get('subcontractor:' + _currentSub.id);
+  if (fresh) _currentSub = fresh;
+  var items = await _collectSubPunchItems(_currentSub);
+  // apply any saved sub-side progress overlay (done/notes/photos)
+  var overlay = await DB.get('subpunch:' + _currentSub.id) || {};
+  items.forEach(function(it){
+    var k = it._unitId + '|' + it._roomIdx + '|' + it._itemIdx;
+    if (overlay[k]) { it._subDone = overlay[k].done; it._subNote = overlay[k].note; it._subPhotos = overlay[k].photos || []; }
+  });
+
+  var html = '';
+  // office note
+  if (_currentSub.officeNote) {
+    html += '<div class="pu-card" style="border-left-color:var(--gold);margin-bottom:16px;"><div class="pu-label">\ud83d\udcdd Note from the office</div><div class="pu-text">' + _esc(_currentSub.officeNote) + '</div></div>';
+  }
+  // tasks
+  var tasks = _currentSub.tasks || [];
+  if (tasks.length) {
+    html += '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:18px;letter-spacing:1px;color:var(--navy);margin:6px 0 10px;">Your Tasks</div>';
+    html += tasks.map(function(t,i){
+      return '<div style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;">' +
+        '<input type="checkbox" ' + (t.done?'checked':'') + ' onchange="subToggleTask(' + i + ',this.checked)" style="width:22px;height:22px;accent-color:var(--gold);flex-shrink:0;">' +
+        '<span style="flex:1;font-size:14px;color:#16233d;' + (t.done?'text-decoration:line-through;opacity:.55;':'') + '">' + _esc(t.text) + '</span>' +
+      '</div>';
+    }).join('');
+  }
+  // punch items
+  html += '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:18px;letter-spacing:1px;color:var(--navy);margin:16px 0 10px;">Punch List \u00b7 ' + (_currentSub.trade||'') + '</div>';
+  if (!items.length) {
+    html += '<div class="tab-empty"><div class="tab-empty-icon">\u2705</div><div class="tab-empty-title">Nothing assigned yet</div><div class="tab-empty-desc">When the office tags punch items for your trade, they\'ll show here.</div></div>';
+  } else {
+    html += items.map(function(it, idx){
+      var done = it._subDone || it.done;
+      var thumbs = (it._subPhotos||[]).map(function(ph){ return '<div class="cu-thumb" onclick="_plLightbox(\'' + encodeURIComponent(ph) + '\')"><img src="' + ph + '"></div>'; }).join('');
+      var k = it._unitId + '|' + it._roomIdx + '|' + it._itemIdx;
+      return '<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;' + (done?'opacity:.7;':'') + '">' +
+        '<div style="display:flex;align-items:flex-start;gap:12px;">' +
+          '<input type="checkbox" ' + (done?'checked':'') + ' onchange="subToggleItem(\'' + k + '\',this.checked)" style="width:22px;height:22px;accent-color:var(--gold);flex-shrink:0;margin-top:2px;">' +
+          '<div style="flex:1;min-width:0;">' +
+            '<div style="font-size:14px;font-weight:600;color:#16233d;' + (done?'text-decoration:line-through;':'') + '">' + _esc(it.text) + '</div>' +
+            '<div style="font-size:12px;color:var(--muted);margin-top:2px;">' + _esc(it._where) + '</div>' +
+            (it.note ? '<div style="font-size:12px;color:var(--muted);margin-top:4px;font-style:italic;">Office: ' + _esc(it.note) + '</div>' : '') +
+            (it._subNote ? '<div style="font-size:13px;color:#16233d;margin-top:6px;background:#f7f4ec;border-radius:7px;padding:6px 10px;">' + _esc(it._subNote) + '</div>' : '') +
+            (thumbs ? '<div class="cu-photo-row" style="margin-top:8px;">' + thumbs + '</div>' : '') +
+            '<div style="display:flex;gap:8px;margin-top:8px;">' +
+              '<button onclick="subAddNote(\'' + k + '\')" class="cu-mini-btn">\u270e Note</button>' +
+              '<button onclick="subAddPhoto(\'' + k + '\')" class="cu-mini-btn">\ud83d\udcf7 Photo</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+  host.innerHTML = html;
+}
+
+async function _subSaveOverlay(k, patch) {
+  var overlay = await DB.get('subpunch:' + _currentSub.id) || {};
+  overlay[k] = Object.assign({ done:false, note:'', photos:[] }, overlay[k] || {}, patch);
+  await DB.set('subpunch:' + _currentSub.id, overlay);
+}
+async function subToggleItem(k, checked) {
+  await _subSaveOverlay(k, { done: checked });
+  renderSubPortal();
+}
+async function subToggleTask(i, checked) {
+  var s = await DB.get('subcontractor:' + _currentSub.id);
+  if (s && s.tasks && s.tasks[i]) { s.tasks[i].done = checked; await DB.set('subcontractor:' + s.id, s); _currentSub = s; }
+}
+async function subAddNote(k) {
+  var note = prompt('Add a note for this item:');
+  if (note === null) return;
+  await _subSaveOverlay(k, { note: note.trim() });
+  renderSubPortal();
+}
+function subAddPhoto(k) {
+  var input = document.createElement('input');
+  input.type='file'; input.accept='image/*';
+  input.onchange = function(){
+    var file = input.files && input.files[0];
+    if (!file) return;
+    _plCompressImage(file, async function(dataUrl){
+      var overlay = await DB.get('subpunch:' + _currentSub.id) || {};
+      var cur = overlay[k] || { done:false, note:'', photos:[] };
+      cur.photos = (cur.photos||[]).concat([dataUrl]);
+      await _subSaveOverlay(k, { photos: cur.photos });
+      renderSubPortal();
+    });
+  };
+  input.click();
+}
+
+
 
 async function renderCustUpdates() {
   var host = document.getElementById('custUpdatesList');
