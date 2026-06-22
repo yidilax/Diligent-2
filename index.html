@@ -3223,6 +3223,25 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 
 
 
+
+/* ===== Dark theme ===== */
+:root[data-theme="dark"] {
+  --offwhite: #15202e;
+  --cream: #1b2735;
+  --border: #2c3a4d;
+  --text: #e8eaed;
+  --muted: #9aa4b2;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  --shadow-lg: 0 12px 48px rgba(0,0,0,0.55);
+}
+:root[data-theme="dark"] body { background: #0a1422; }
+:root[data-theme="dark"] .tab-empty, 
+:root[data-theme="dark"] .cu-card,
+:root[data-theme="dark"] .sync-status-card { background: #1b2735; color: var(--text); }
+:root[data-theme="dark"] input, 
+:root[data-theme="dark"] textarea, 
+:root[data-theme="dark"] select { background: #1b2735; color: var(--text); border-color: #2c3a4d; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -3755,6 +3774,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       </li>
     </ul>
     <div class="office-sidebar-footer">
+      <button class="btn-logout" onclick="openProfileModal()" style="margin-bottom:8px;background:rgba(201,162,39,0.15);color:var(--gold);border-color:rgba(201,162,39,0.4);">⚙️ Manage Profile</button>
       <button class="btn-logout" onclick="doLogout()">Logout</button>
     </div>
   </div>
@@ -4012,6 +4032,70 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       </div>
     </div>
 
+
+
+  <!-- Manage Profile modal -->
+  <div id="modal-profile" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span>Manage Profile</span>
+        <button onclick="closeProfileModal()" class="modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="text-align:center;margin-bottom:18px;">
+          <div id="profileAvatar" onclick="_profPickPhoto()" title="Tap to upload a photo" style="width:72px;height:72px;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:32px;color:#fff;cursor:pointer;background-size:cover;background-position:center;overflow:hidden;"></div>
+          <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;align-items:center;" id="avatarColors"></div>
+          <div style="margin-top:8px;display:flex;gap:8px;justify-content:center;">
+            <button type="button" onclick="_profPickPhoto()" style="font-size:12px;font-weight:700;color:var(--gold);background:rgba(201,162,39,0.15);border:1px solid rgba(201,162,39,0.4);border-radius:7px;padding:6px 12px;cursor:pointer;">������ Upload photo</button>
+            <button type="button" id="prof-removephoto" onclick="_profRemovePhoto()" style="display:none;font-size:12px;font-weight:700;color:#f3efe6;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.25);border-radius:7px;padding:6px 12px;cursor:pointer;">Remove</button>
+          </div>
+        </div>
+
+        <div class="cust-form-sec" style="color:#f3efe6;">Details</div>
+        <div class="form-group"><label class="form-label">Display name</label>
+          <input class="form-input" id="prof-name" type="text" placeholder="Your name"></div>
+        <div class="form-group"><label class="form-label">Title / tag</label>
+          <input class="form-input" id="prof-title" type="text" placeholder="e.g. Carpenter, Project Manager" list="prof-title-list">
+          <datalist id="prof-title-list"><option value="Project Manager"><option value="Site Manager"><option value="Carpenter"><option value="Electrician"><option value="Plumber"><option value="Foreman"><option value="Office"></datalist></div>
+        <div class="form-group"><label class="form-label">Phone</label>
+          <input class="form-input" id="prof-phone" type="tel" placeholder="845-000-0000"></div>
+
+        <div class="cust-form-sec" style="color:#f3efe6;">Preferences</div>
+        <div class="form-group"><label class="form-label">Default tab on open</label>
+          <select class="form-input" id="prof-landing"></select></div>
+        <div class="form-group"><label class="form-label">Appearance</label>
+          <div style="display:flex;gap:8px;">
+            <button type="button" id="prof-theme-light" onclick="_profSetTheme('light')" style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.06);color:#f3efe6;font-family:Inter,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">☀️ Light</button>
+            <button type="button" id="prof-theme-dark" onclick="_profSetTheme('dark')" style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.06);color:#f3efe6;font-family:Inter,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">������ Dark</button>
+          </div></div>
+        <div class="form-group"><label class="form-label">Text size</label>
+          <select class="form-input" id="prof-textsize">
+            <option value="small">Small</option><option value="normal">Normal</option><option value="large">Large</option>
+          </select></div>
+
+        <div class="cust-form-sec" style="color:#f3efe6;">Notifications</div>
+        <div id="prof-notifs"></div>
+
+        <div class="cust-form-sec" style="color:#f3efe6;">My access</div>
+        <div id="prof-access" style="padding:12px 14px;border:1px solid rgba(255,255,255,0.15);border-radius:10px;background:rgba(255,255,255,0.04);margin-bottom:8px;"></div>
+
+        <div class="cust-form-sec" style="color:#f3efe6;">Account &amp; security</div>
+        <div class="form-group"><label class="form-label">Email</label>
+          <input class="form-input" id="prof-email" type="email" placeholder="you@example.com">
+          <div style="font-size:11px;color:rgba(243,239,230,0.6);margin-top:4px;">Changing email requires your current password and re-login.</div></div>
+        <div class="form-group"><label class="form-label">New password <span style="font-weight:400;opacity:.6;">(leave blank to keep)</span></label>
+          <input class="form-input" id="prof-pass" type="password" placeholder="At least 6 characters" autocomplete="new-password"></div>
+        <div class="form-group" id="prof-currentpass-wrap" style="display:none;"><label class="form-label">Current password <span style="color:var(--gold);">*</span></label>
+          <input class="form-input" id="prof-currentpass" type="password" placeholder="Required to change email or password" autocomplete="current-password"></div>
+
+        <div id="prof-msg" style="font-size:13px;margin-top:6px;display:none;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-logout" onclick="closeProfileModal()">Cancel</button>
+        <button class="btn-primary" id="profSaveBtn" onclick="saveProfile()">Save Profile</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Access editor modal -->
   <div id="modal-access" class="modal-overlay" style="display:none;">
@@ -4636,13 +4720,30 @@ let currentUser = null;
 // INIT
 // ════════════════════════════════════════════
 async function init() {
+  if (typeof applyTheme === 'function') { try { applyTheme(); } catch(e){} }
   function _hideLoader() {
     var l = document.getElementById('bootLoader');
     if (l) l.style.display = 'none';
   }
 
+  // SAFETY NET: never let the app hang on a blank/boot screen. If startup
+  // hasn't shown a real page within 7s (e.g. a Firebase read stalls), force
+  // the login page so the user can always get in.
+  var _bootSettled = false;
+  function _settleBoot() { _bootSettled = true; }
+  setTimeout(function() {
+    if (_bootSettled) return;
+    var office = document.getElementById('officePage');
+    var officeVisible = office && getComputedStyle(office).display !== 'none';
+    if (!officeVisible) {
+      _hideLoader();
+      if (typeof showPage === 'function') showPage('officeAuthPage');
+    }
+  }, 7000);
+
   var auth = _getAuth();
   if (!auth) {
+    _settleBoot();
     showPage('landingPage');
     _hideLoader();
     return;
@@ -4656,9 +4757,11 @@ async function init() {
     if (_handled && !fbUser) return;
     if (fbUser) {
       _handled = true;
-      await handleAuthedUser(fbUser);
+      _settleBoot();
+      try { await handleAuthedUser(fbUser); } catch(e) { console.warn('auth handler error', e); _hideLoader(); showPage('officeAuthPage'); }
     } else {
       // Only show landing if we're not mid-redirect
+      _settleBoot();
       showPage('landingPage');
       _hideLoader();
     }
@@ -5160,6 +5263,268 @@ async function doLogout() {
   showPage('landingPage');
 }
 
+// ===================== MANAGE PROFILE =====================
+var NOTIF_PREF_DEFS = [
+  { id: 'assign', label: 'Task assignments' },
+  { id: 'mention', label: '@-mentions' },
+  { id: 'comment', label: 'Comments & replies' },
+  { id: 'status', label: 'Status & schedule updates' },
+  { id: 'submission', label: 'New customer submissions' },
+  { id: 'info', label: 'General updates' }
+];
+var _profPhoto = null;
+var _profTheme = 'light';
+
+var AVATAR_COLORS = ['#1a2b4a','#c9a227','#2D7A4F','#B03A2E','#3B6FB0','#7B4FA3','#C2691B','#0D7377'];
+function _profInitials(name, email) {
+  var s = (name || email || '?').trim();
+  var parts = s.split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return s.slice(0,2).toUpperCase();
+}
+function _renderProfileAvatar(color) {
+  var av = document.getElementById('profileAvatar');
+  if (!av) return;
+  if (_profPhoto) {
+    av.style.backgroundImage = 'url(' + _profPhoto + ')';
+    av.style.background = av.style.background; // keep
+    av.style.backgroundImage = 'url(' + _profPhoto + ')';
+    av.textContent = '';
+  } else {
+    av.style.backgroundImage = 'none';
+    av.style.background = color || (currentUser && currentUser.avatarColor) || AVATAR_COLORS[0];
+    av.textContent = _profInitials(document.getElementById('prof-name').value, currentUser && currentUser.email);
+  }
+}
+var _profPickedColor = null;
+function openProfileModal() {
+  if (!currentUser) return;
+  _profPickedColor = currentUser.avatarColor || AVATAR_COLORS[0];
+  document.getElementById('prof-name').value = currentUser.name || '';
+  document.getElementById('prof-title').value = currentUser.title || '';
+  document.getElementById('prof-phone').value = currentUser.phone || '';
+  document.getElementById('prof-email').value = currentUser.email || '';
+  document.getElementById('prof-pass').value = '';
+  document.getElementById('prof-currentpass').value = '';
+  document.getElementById('prof-currentpass-wrap').style.display = 'none';
+  var msg = document.getElementById('prof-msg'); msg.style.display = 'none'; msg.textContent = '';
+  // color swatches
+  var cw = document.getElementById('avatarColors');
+  cw.innerHTML = AVATAR_COLORS.map(function(c){
+    var sel = (c === _profPickedColor);
+    return '<button type="button" onclick="_profPickColor(\'' + c + '\')" style="width:26px;height:26px;border-radius:50%;background:' + c + ';border:' + (sel?'3px solid #fff':'2px solid rgba(255,255,255,0.3)') + ';cursor:pointer;" data-c="' + c + '"></button>';
+  }).join('');
+  _profPhoto = currentUser.photo || null;
+  _profTheme = currentUser.theme || localStorage.getItem('dd_theme') || 'light';
+  _renderProfileAvatar(_profPickedColor);
+
+  // Default landing tab options (only tabs the user can access)
+  var landSel = document.getElementById('prof-landing');
+  if (landSel) {
+    var opts = '<option value="dashboard">Dashboard</option>';
+    _getAllOfficeTabs().forEach(function(t){
+      if (t.id === 'dashboard') return;
+      if (_canAccessTab(t.id)) opts += '<option value="' + t.id + '">' + t.label + '</option>';
+    });
+    landSel.innerHTML = opts;
+    landSel.value = currentUser.landingTab || 'dashboard';
+  }
+  // Theme + text size
+  _profSetTheme(_profTheme, true);
+  var ts = document.getElementById('prof-textsize');
+  if (ts) ts.value = currentUser.textSize || localStorage.getItem('dd_textsize') || 'normal';
+  // Notification toggles
+  var np = document.getElementById('prof-notifs');
+  if (np) {
+    var prefs = currentUser.notifPrefs || {};
+    np.innerHTML = NOTIF_PREF_DEFS.map(function(d){
+      var on = prefs[d.id] !== false; // default on
+      return '<label style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border:1px solid rgba(255,255,255,0.15);border-radius:10px;margin-bottom:6px;background:rgba(255,255,255,0.04);cursor:pointer;">' +
+        '<span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#f3efe6;">' + d.label + '</span>' +
+        '<input type="checkbox" data-notif="' + d.id + '"' + (on?' checked':'') + ' style="width:20px;height:20px;accent-color:var(--gold);">' +
+      '</label>';
+    }).join('');
+  }
+  // Access summary
+  var acc = document.getElementById('prof-access');
+  if (acc) acc.innerHTML = _myAccessSummary();
+  // photo-remove button visibility
+  var rm = document.getElementById('prof-removephoto');
+  if (rm) rm.style.display = _profPhoto ? '' : 'none';
+
+  // live initials update + reveal current-password when email/pass change
+  document.getElementById('prof-name').oninput = function(){ _renderProfileAvatar(_profPickedColor); };
+  function _maybeReveal() {
+    var emailChanged = document.getElementById('prof-email').value.trim().toLowerCase() !== (currentUser.email||'').toLowerCase();
+    var passSet = document.getElementById('prof-pass').value.length > 0;
+    document.getElementById('prof-currentpass-wrap').style.display = (emailChanged || passSet) ? '' : 'none';
+  }
+  document.getElementById('prof-email').oninput = _maybeReveal;
+  document.getElementById('prof-pass').oninput = _maybeReveal;
+  document.getElementById('modal-profile').classList.add('open');
+}
+function closeProfileModal() {
+  var m = document.getElementById('modal-profile');
+  if (m) m.classList.remove('open');
+}
+function _profPickColor(c) {
+  _profPickedColor = c;
+  document.querySelectorAll('#avatarColors button').forEach(function(btn){
+    btn.style.border = (btn.getAttribute('data-c') === c) ? '3px solid #fff' : '2px solid rgba(255,255,255,0.3)';
+  });
+  _renderProfileAvatar(c);
+}
+
+function _profPickPhoto() {
+  var input = document.createElement('input');
+  input.type = 'file'; input.accept = 'image/*';
+  input.onchange = function() {
+    var file = input.files && input.files[0];
+    if (!file) return;
+    _plCompressImage(file, function(dataUrl){
+      _profPhoto = dataUrl;
+      _renderProfileAvatar(_profPickedColor);
+      var rm = document.getElementById('prof-removephoto'); if (rm) rm.style.display = '';
+    });
+  };
+  input.click();
+}
+function _profRemovePhoto() {
+  _profPhoto = null;
+  _renderProfileAvatar(_profPickedColor);
+  var rm = document.getElementById('prof-removephoto'); if (rm) rm.style.display = 'none';
+}
+function _profSetTheme(theme, silent) {
+  _profTheme = theme;
+  var lb = document.getElementById('prof-theme-light');
+  var db = document.getElementById('prof-theme-dark');
+  if (lb) lb.style.outline = (theme === 'light') ? '2px solid var(--gold)' : 'none';
+  if (db) db.style.outline = (theme === 'dark') ? '2px solid var(--gold)' : 'none';
+  if (!silent) {
+    // live preview
+    document.documentElement.setAttribute('data-theme', theme);
+  }
+}
+
+function _profMsg(text, ok) {
+  var m = document.getElementById('prof-msg');
+  m.style.display = 'block';
+  m.style.color = ok ? '#7CD9A0' : '#F3A39A';
+  m.textContent = text;
+}
+
+async function saveProfile() {
+  if (!currentUser) return;
+  var btn = document.getElementById('profSaveBtn');
+  var name = document.getElementById('prof-name').value.trim();
+  var title = document.getElementById('prof-title').value.trim();
+  var phone = document.getElementById('prof-phone').value.trim();
+  var newEmail = document.getElementById('prof-email').value.trim();
+  var newPass = document.getElementById('prof-pass').value;
+  var curPass = document.getElementById('prof-currentpass').value;
+  if (!name) { _profMsg('Please enter a display name.', false); return; }
+
+  var emailChanged = newEmail.toLowerCase() !== (currentUser.email||'').toLowerCase();
+  var wantsAuthChange = emailChanged || newPass.length > 0;
+
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    // 1) Handle Firebase Auth changes first (password / email), since they can fail.
+    if (wantsAuthChange) {
+      var auth = _getAuth();
+      var fbUser = auth && auth.currentUser;
+      if (!fbUser) { _profMsg('You must be logged in to change email or password.', false); btn.disabled=false; btn.textContent='Save Profile'; return; }
+      if (!curPass) { _profMsg('Enter your current password to change email or password.', false); document.getElementById('prof-currentpass-wrap').style.display=''; btn.disabled=false; btn.textContent='Save Profile'; return; }
+      if (newPass && newPass.length < 6) { _profMsg('New password must be at least 6 characters.', false); btn.disabled=false; btn.textContent='Save Profile'; return; }
+      // Re-authenticate
+      try {
+        var cred = firebase.auth.EmailAuthProvider.credential(currentUser.email, curPass);
+        await fbUser.reauthenticateWithCredential(cred);
+      } catch(e) {
+        _profMsg('Current password is incorrect.', false); btn.disabled=false; btn.textContent='Save Profile'; return;
+      }
+      // Change password
+      if (newPass) {
+        try { await fbUser.updatePassword(newPass); }
+        catch(e) { _profMsg('Could not update password: ' + (e.code||e.message), false); btn.disabled=false; btn.textContent='Save Profile'; return; }
+      }
+      // Change email (with safe record migration)
+      if (emailChanged) {
+        var ok = await _migrateEmail(fbUser, currentUser.email, newEmail);
+        if (!ok) { btn.disabled=false; btn.textContent='Save Profile'; return; } // _migrateEmail shows its own message
+      }
+    }
+
+    // collect preferences
+    var landing = document.getElementById('prof-landing') ? document.getElementById('prof-landing').value : 'dashboard';
+    var textSize = document.getElementById('prof-textsize') ? document.getElementById('prof-textsize').value : 'normal';
+    var notifPrefs = {};
+    document.querySelectorAll('#prof-notifs input[data-notif]').forEach(function(cb){ notifPrefs[cb.getAttribute('data-notif')] = cb.checked; });
+
+    // 2) Save the profile fields onto the (possibly new) user record.
+    var key = 'user:' + (currentUser.email);
+    var rec = await DB.get(key) || {};
+    rec.name = name; rec.title = title; rec.phone = phone; rec.avatarColor = _profPickedColor;
+    rec.photo = _profPhoto || null;
+    rec.landingTab = landing; rec.theme = _profTheme; rec.textSize = textSize; rec.notifPrefs = notifPrefs;
+    await DB.set(key, rec);
+    currentUser.name = name; currentUser.title = title; currentUser.phone = phone; currentUser.avatarColor = _profPickedColor;
+    currentUser.photo = _profPhoto || null;
+    currentUser.landingTab = landing; currentUser.theme = _profTheme; currentUser.textSize = textSize; currentUser.notifPrefs = notifPrefs;
+    if (typeof applyTheme === 'function') applyTheme();
+
+    // refresh sidebar/topbar labels
+    var sn = document.getElementById('sidebarUserName'); if (sn) sn.textContent = name;
+    var sr = document.getElementById('sidebarUserRole'); if (sr) sr.textContent = currentIsOwner() ? 'Owner' : (currentUser.role === 'admin' ? 'Administrator' : (title || 'Employee'));
+    var tn = document.getElementById('topbarUserName'); if (tn) tn.textContent = name;
+
+    _profMsg('Profile saved.', true);
+    btn.disabled = false; btn.textContent = 'Save Profile';
+    setTimeout(closeProfileModal, 800);
+  } catch(e) {
+    _profMsg('Something went wrong: ' + (e.message||e), false);
+    btn.disabled = false; btn.textContent = 'Save Profile';
+  }
+}
+
+// Safely migrate a user from old email to new email:
+// updates Firebase Auth email, copies the user record to the new key,
+// re-points the owner config if needed, and signs them in under the new identity.
+async function _migrateEmail(fbUser, oldEmail, newEmail) {
+  // basic validation
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(newEmail)) { _profMsg('That email address looks invalid.', false); return false; }
+  // make sure new email isn't already taken in our records
+  var existing = await DB.get('user:' + newEmail);
+  if (existing) { _profMsg('That email is already in use by another account.', false); return false; }
+  // 1) Update Firebase Auth email
+  try {
+    await fbUser.updateEmail(newEmail);
+  } catch(e) {
+    var code = e.code || '';
+    if (code === 'auth/requires-recent-login') { _profMsg('Please log out and back in, then try changing your email again.', false); }
+    else if (code === 'auth/email-already-in-use') { _profMsg('That email is already registered.', false); }
+    else { _profMsg('Could not change email: ' + (code||e.message), false); }
+    return false;
+  }
+  // 2) Migrate the user record to the new key
+  var rec = await DB.get('user:' + oldEmail) || {};
+  rec.email = newEmail;
+  await DB.set('user:' + newEmail, rec);
+  // 3) If this user is the owner, re-point owner config
+  try {
+    if (isOwnerEmail(oldEmail)) {
+      await DB.set('config:owner', { email: newEmail, _updatedAt: Date.now() });
+      _ownerEmailCache = newEmail;
+    }
+  } catch(e) {}
+  // 4) Remove the old record (best-effort)
+  try { await DB.delete('user:' + oldEmail); } catch(e) {}
+  // 5) Update in-memory identity
+  currentUser.email = newEmail;
+  return true;
+}
+
+
 // ════════════════════════════════════════════
 // OPEN OFFICE DASHBOARD
 // ════════════════════════════════════════════
@@ -5189,8 +5554,11 @@ async function openOfficeDashboard() {
   });
 
   if (typeof applyTabPermissions === 'function') applyTabPermissions();
-  switchTab('dashboard');
-  await refreshDashboard();
+  if (typeof applyTheme === 'function') applyTheme();
+  var _land = (currentUser && currentUser.landingTab) || 'dashboard';
+  if (!_canAccessTab(_land)) _land = 'dashboard';
+  switchTab(_land);
+  if (_land === 'dashboard') await refreshDashboard();
 }
 
 // ════════════════════════════════════════════
@@ -7523,9 +7891,73 @@ async function renderGcalSettings() {
 function _notifUid() { return 'n_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7); }
 
 // Create a notification for a recipient (skips notifying yourself)
+
+// Find a user record by their internal id (records are keyed by email).
+async function _findUserById(id) {
+  try {
+    var keys = await DB.list('user:');
+    for (var i = 0; i < keys.length; i++) {
+      var u = await DB.get(keys[i]);
+      if (u && u.id === id) return u;
+    }
+  } catch(e) {}
+  return null;
+}
+
+// Apply the saved theme + text size (called at startup and after profile save).
+function applyTheme() {
+  var theme = (currentUser && currentUser.theme) || localStorage.getItem('dd_theme') || 'light';
+  var textSize = (currentUser && currentUser.textSize) || localStorage.getItem('dd_textsize') || 'normal';
+  document.documentElement.setAttribute('data-theme', theme);
+  var sizeMap = { small: '14px', normal: '16px', large: '18px' };
+  document.documentElement.style.fontSize = sizeMap[textSize] || '16px';
+  try { localStorage.setItem('dd_theme', theme); localStorage.setItem('dd_textsize', textSize); } catch(e) {}
+}
+
+// Build a friendly summary of the current user's role + tab access (read-only).
+function _myAccessSummary() {
+  if (!currentUser) return '';
+  var roleLabel = currentIsOwner() ? '\u2605 Owner' : (currentUser.role === 'admin' ? '\u2022 Admin' : 'Employee');
+  var lines = '<div style="font-family:Inter,sans-serif;font-size:13px;color:#f3efe6;line-height:1.7;">';
+  lines += '<div><b>Role:</b> ' + roleLabel + '</div>';
+  if (currentUser.title) lines += '<div><b>Title:</b> ' + _esc(currentUser.title) + '</div>';
+  if (currentIsOwner() || currentUser.role === 'admin') {
+    lines += '<div style="margin-top:6px;color:rgba(243,239,230,0.75);">You can access all tabs.</div>';
+    if (currentUser.role === 'admin' && !currentIsOwner()) {
+      var powers = (currentUser.adminPowers || []).map(function(pid){
+        var p = ADMIN_POWERS.filter(function(x){return x.id===pid;})[0]; return p ? p.label : pid;
+      });
+      lines += '<div style="margin-top:6px;"><b>Admin powers:</b> ' + (powers.length ? _esc(powers.join(', ')) : 'none granted') + '</div>';
+    }
+  } else {
+    var tabs = _getAllOfficeTabs().filter(function(t){ return t.id !== 'dashboard' && _tabStateFor(currentUser, t.id) === 'allowed'; });
+    var names = tabs.map(function(t){ return t.label; });
+    lines += '<div style="margin-top:6px;"><b>Tabs you can use:</b> Dashboard' + (names.length ? ', ' + _esc(names.join(', ')) : '') + '</div>';
+  }
+  lines += '</div>';
+  return lines;
+}
+// state of a tab for a specific user record (read-only helper)
+function _tabStateFor(user, tabId) {
+  if (!user) return 'hidden';
+  if (user.tabAccess && user.tabAccess[tabId]) return user.tabAccess[tabId];
+  var perms = user.permissions || [];
+  return perms.indexOf(tabId) !== -1 ? 'allowed' : 'hidden';
+}
+
 async function createNotification(recipientId, opts) {
   if (!recipientId) return;
   if (currentUser && recipientId === currentUser.id) return; // don't notify yourself
+  // Respect the recipient's notification preferences (default: on)
+  try {
+    var rec = await DB.get('user:_byid:' + recipientId);
+    if (!rec) { rec = await _findUserById(recipientId); }
+    if (rec && rec.notifPrefs && opts && opts.type) {
+      var t = opts.type;
+      var groupOff = (rec.notifPrefs[t] === false);
+      if (groupOff) return;
+    }
+  } catch(e) {}
   var n = {
     id: _notifUid(),
     recipientId: recipientId,
