@@ -4026,7 +4026,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
           <button onclick="accessSelectAll(false)" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:8px;background:#fff;font-family:Inter,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">Clear all</button>
         </div>
         <div id="accessTabList"></div>
-        <p style="font-size:12px;color:var(--muted);margin-top:8px;">Dashboard is always visible. Employees only see the tabs you check here.</p>
+        <p style="font-size:12px;color:rgba(243,239,230,0.7);margin-top:8px;">Dashboard is always visible. Employees only see the tabs you check here.</p>
       </div>
       <div class="modal-footer">
         <button class="btn-logout" onclick="closeAccessEditor()">Cancel</button>
@@ -7713,28 +7713,91 @@ function _toggleTabChrome(tabId, show) {
 
 
 // ===================== PER-EMPLOYEE TAB PERMISSIONS =====================
-// All grantable tabs (employees tab stays admin-only).
-var ALL_OFFICE_TABS = [
-  { id: 'dashboard',     label: 'Dashboard' },
-  { id: 'projects',      label: 'Projects' },
-  { id: 'customers',     label: 'Customers' },
-  { id: 'upgrades',      label: 'Upgrades' },
-  { id: 'custUpdates',   label: 'Customer Updates' },
-  { id: 'upgradeEditor', label: 'Upgrade Editor' },
-  { id: 'punchlist',     label: 'Punch Lists' },
-  { id: 'specs',         label: 'Specs' },
-  { id: 'tasks',         label: 'Tasks' },
-  { id: 'scheduling',    label: 'Construction Schedule' }
-];
+// Tabs that are NOT grantable (admin-only or always-on). Everything else in the
+// nav is auto-discovered, so any tab we add in the future shows up automatically.
+var _NON_GRANTABLE_TABS = ['employees'];
+function _getAllOfficeTabs() {
+  var tabs = [];
+  document.querySelectorAll('.office-nav-btn').forEach(function(btn) {
+    var id = btn.id && btn.id.indexOf('navbtn-') === 0 ? btn.id.slice('navbtn-'.length) : '';
+    if (!id) return;
+    if (_NON_GRANTABLE_TABS.indexOf(id) !== -1) return;
+    // label = the button's text (minus the icon)
+    var label = (btn.textContent || id).replace(/\s+/g, ' ').replace(/\bSOON\b/gi, '').trim();
+    tabs.push({ id: id, label: label });
+  });
+  return tabs;
+}
+// Back-compat: some code references ALL_OFFICE_TABS as an array.
+Object.defineProperty(window, 'ALL_OFFICE_TABS', { get: function(){ return _getAllOfficeTabs(); } });
 
 // Does the current user have access to a given tab?
-function _canAccessTab(tabId) {
+
+// ============ ROLE & POWER HIERARCHY ============
+// Owner (top) > Admin (configurable) > Employee. Owner email is fixed unless transferred.
+var OWNER_EMAIL_DEFAULT = 'shmily@diligentdevelopersny.com';
+// The current owner email is stored in config:owner; falls back to the default.
+var _ownerEmailCache = null;
+async function getOwnerEmail() {
+  if (_ownerEmailCache) return _ownerEmailCache;
+  try {
+    var c = await DB.get('config:owner');
+    _ownerEmailCache = (c && c.email) ? c.email : OWNER_EMAIL_DEFAULT;
+  } catch(e) { _ownerEmailCache = OWNER_EMAIL_DEFAULT; }
+  return _ownerEmailCache;
+}
+function _emailEq(a, b) { return (a||'').toLowerCase() === (b||'').toLowerCase(); }
+// Synchronous best-effort owner check using cache (cache is warmed at login)
+function isOwnerEmail(email) { return _emailEq(email, _ownerEmailCache || OWNER_EMAIL_DEFAULT); }
+function currentIsOwner() { return currentUser && isOwnerEmail(currentUser.email); }
+function currentIsAdmin() { return currentUser && (currentUser.role === 'admin' || currentIsOwner()); }
+
+// ---- Admin powers registry (DYNAMIC) ----
+// Add new admin-only capabilities here; they auto-appear in the owner's admin editor.
+var ADMIN_POWERS = [
+  { id: 'manage_employees', label: 'Manage employees (approve, disable, set access)' },
+  { id: 'manage_admins',    label: 'Manage other admins (approve, promote, disable)' },
+  { id: 'delete_data',      label: 'Delete customers, projects & other records' },
+  { id: 'edit_upgrades',    label: 'Edit upgrade form & send customer broadcasts' }
+];
+
+// Does the current user hold a given admin power?
+// Owner: always yes. Admin: yes if granted. Employee: no.
+function hasPower(powerId) {
   if (!currentUser) return false;
-  if (currentUser.role === 'admin') return true;        // admin sees all
-  if (tabId === 'employees') return false;              // admin-only
-  if (tabId === 'dashboard') return true;               // everyone gets the dashboard
+  if (currentIsOwner()) return true;
+  if (currentUser.role !== 'admin') return false;
+  var p = currentUser.adminPowers || [];
+  return p.indexOf(powerId) !== -1;
+}
+
+// Returns 'allowed' | 'soon' | 'hidden' for a tab for the current user.
+function _tabState(tabId) {
+  if (!currentUser) return 'hidden';
+  if (currentIsOwner()) return 'allowed';               // owner: everything
+  if (tabId === 'dashboard') return 'allowed';          // everyone gets dashboard
+  if (currentUser.role === 'admin') {
+    // employees tab is only for those with manage_employees / manage_admins power
+    if (tabId === 'employees') return (hasPower('manage_employees') || hasPower('manage_admins')) ? 'allowed' : 'hidden';
+    // owner may restrict an admin's tabs via tabAccess; default allowed if unset
+    if (currentUser.tabAccess && typeof currentUser.tabAccess === 'object' && currentUser.tabAccess[tabId]) {
+      return currentUser.tabAccess[tabId];
+    }
+    return 'allowed';
+  }
+  // Employees:
+  if (tabId === 'employees') return 'hidden';
+  if (currentUser.tabAccess && typeof currentUser.tabAccess === 'object') {
+    return currentUser.tabAccess[tabId] || 'hidden';
+  }
   var perms = currentUser.permissions || [];
-  return perms.indexOf(tabId) !== -1;
+  return perms.indexOf(tabId) !== -1 ? 'allowed' : 'hidden';
+}
+
+// Does the current user have access to a given tab? (allowed OR soon = visible in nav)
+function _canAccessTab(tabId) {
+  var s = _tabState(tabId);
+  return s === 'allowed' || s === 'soon';
 }
 
 // Hide nav buttons the user can't access; called after login / dashboard open.
@@ -7744,7 +7807,7 @@ function applyTabPermissions() {
     var btn = document.getElementById('navbtn-' + t.id);
     if (!btn) return;
     var li = btn.closest('.office-nav-item') || btn;
-    li.style.display = _canAccessTab(t.id) ? '' : 'none';
+    li.style.display = (_tabState(t.id) !== 'hidden') ? '' : 'none';
   });
   // employees nav stays admin-only (it already has admin-only class handling)
   var empBtn = document.getElementById('navbtn-employees');
@@ -7754,8 +7817,24 @@ function applyTabPermissions() {
   }
 }
 
+
+// Show a generic Coming Soon overlay for a whole tab (used by per-employee access).
+function _showTabComingSoon(tab) {
+  var tabEl = document.getElementById('tab-' + tab);
+  if (!tabEl) return;
+  var label = tab;
+  var btn = document.getElementById('navbtn-' + tab);
+  if (btn) label = (btn.textContent || tab).replace(/\s+/g, ' ').replace(/\bSOON\b/gi, '').trim();
+  tabEl.innerHTML = '<div class="coming-soon" style="padding:60px 24px;text-align:center;">' +
+    '<div class="coming-soon-icon" style="font-size:46px;margin-bottom:14px;">\ud83d\udea7</div>' +
+    '<div class="coming-soon-title" style="font-family:\'Bebas Neue\',sans-serif;font-size:24px;letter-spacing:1px;color:var(--navy);margin-bottom:8px;">' + label + ' \u2014 Coming Soon</div>' +
+    '<div class="coming-soon-desc" style="font-family:Inter,sans-serif;font-size:14px;color:var(--muted);max-width:320px;margin:0 auto;">This section is being prepared for your account. Check back soon.</div>' +
+    '</div>';
+}
+
 async function switchTab(tab) {
-  if (!_canAccessTab(tab)) { if (tab !== 'dashboard') { switchTab('dashboard'); } return; }
+  var _ts = _tabState(tab);
+  if (_ts === 'hidden') { if (tab !== 'dashboard') { switchTab('dashboard'); } return; }
   if (typeof refreshNotifBadge === 'function') refreshNotifBadge();
   if (typeof _renderViewAsBanner === 'function') _renderViewAsBanner();
   // Hide all office tabs
@@ -7769,6 +7848,8 @@ async function switchTab(tab) {
   if (activeBtn) activeBtn.classList.add('active');
 
 
+
+  if (_ts === 'soon') { _showTabComingSoon(tab); return; }
 
   // Load tab data
   if (tab === 'dashboard') await refreshDashboard();
@@ -8819,18 +8900,23 @@ async function renderEmployees() {
     var statusColor = { active: '#059669', pending: '#D97706', disabled: '#6B7280' }[u.status] || '#6B7280';
     var statusBg = { active: '#D1FAE5', pending: '#FEF3C7', disabled: '#F3F4F6' }[u.status] || '#F3F4F6';
     var statusLabel = u.status || 'pending';
+    var roleTag = isOwnerEmail(u.email) ? ' \u2605 OWNER' : (u.role === 'admin' ? ' \u2022 ADMIN' : '');
 
     var actions = '';
+    var rowIsOwner = isOwnerEmail(u.email);
+    var rowIsAdmin = (u.role === 'admin') || rowIsOwner;
+    var canManageEmployees = currentIsOwner() || hasPower('manage_employees');
+    var canManageThis = rowIsOwner ? false : (rowIsAdmin ? currentIsOwner() : (canManageEmployees || currentIsOwner()));
     if (u.status === 'active') {
       actions += '<button onclick="viewEmployeeTasks(\'' + u.id + '\',\'' + _esc((u.name||u.email).replace(/'/g,'')) + '\')" style="flex:1;padding:9px;border:none;border-radius:8px;background:#EEF4FB;color:#3B6FB0;font-family:Inter,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">View tasks</button>';
     }
-    if (u.status === 'pending') {
+    if (u.status === 'pending' && canManageThis) {
       actions += '<button onclick="approveEmployee(\'' + u.email + '\')" style="flex:1;padding:9px;border:none;border-radius:8px;background:#D1FAE5;color:#065F46;font-family:Inter,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">✓ Approve</button>';
     }
-    if (u.status === 'active' && u.role !== 'admin') {
+    if (u.status === 'active' && canManageThis) {
       actions += '<button onclick="openAccessEditor(\'' + u.email + '\')" style="flex:1;padding:9px;border:none;border-radius:8px;background:#FEF3C7;color:#92400E;font-family:Inter,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">\ud83d\udd11 Access</button>';
     }
-    if (u.status === 'active') {
+    if (u.status === 'active' && canManageThis) {
       actions += '<button onclick="disableEmployee(\'' + u.email + '\')" style="flex:1;padding:9px;border:none;border-radius:8px;background:#F3F4F6;color:#6B7280;font-family:Inter,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">Disable</button>';
     }
     if (u.status === 'disabled') {
@@ -8865,22 +8951,77 @@ async function renderEmployees() {
 // ===== Per-employee access editor =====
 var _accessEditEmail = null;
 async function openAccessEditor(email) {
-  if (!currentUser || currentUser.role !== 'admin') return;
+  if (!currentUser) return;
+  // Permission to open: need manage_employees (for employees) or manage_admins (for admins)
   _accessEditEmail = email;
   var u = await DB.get('user:' + email);
-  if (!u) { alert('Employee not found.'); return; }
-  var perms = u.permissions || [];
-  var rows = ALL_OFFICE_TABS.filter(function(t){ return t.id !== 'dashboard'; }).map(function(t) {
-    var on = perms.indexOf(t.id) !== -1;
-    return '<label style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;">' +
-      '<span style="font-family:Inter,sans-serif;font-size:14px;font-weight:600;color:#16233d;">' + t.label + '</span>' +
-      '<input type="checkbox" data-tab="' + t.id + '"' + (on ? ' checked' : '') + ' style="width:20px;height:20px;accent-color:var(--gold);">' +
-    '</label>';
+  if (!u) { alert('User not found.'); return; }
+  await getOwnerEmail();
+
+  var targetIsOwner = isOwnerEmail(email);
+  var targetIsAdmin = (u.role === 'admin') || targetIsOwner;
+
+  // Guards
+  if (targetIsOwner) { alert('The owner account cannot be edited by anyone.'); return; }
+  if (targetIsAdmin && !currentIsOwner()) { alert('Only the owner can manage admins.'); return; }
+  if (!targetIsAdmin && !(hasPower('manage_employees') || currentIsOwner())) { alert('You do not have permission to manage employees.'); return; }
+
+  // --- Build tab access rows (3-state) ---
+  var tabAccess = u.tabAccess || {};
+  // migrate legacy permissions -> tabAccess (allowed for listed, else hidden)
+  if (!u.tabAccess && u.permissions) {
+    u.permissions.forEach(function(t){ tabAccess[t] = 'allowed'; });
+  }
+  var tabs = _getAllOfficeTabs().filter(function(t){ return t.id !== 'dashboard'; });
+  var tabRows = tabs.map(function(t) {
+    var cur = tabAccess[t.id] || (targetIsAdmin ? 'allowed' : 'hidden');
+    function opt(val, lbl){ return '<option value="' + val + '"' + (cur===val?' selected':'') + '>' + lbl + '</option>'; }
+    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;border:1px solid rgba(255,255,255,0.18);border-radius:10px;margin-bottom:8px;background:rgba(255,255,255,0.04);">' +
+      '<span style="font-family:Inter,sans-serif;font-size:14px;font-weight:600;color:#f3efe6;flex:1;">' + t.label + '</span>' +
+      '<select data-tab="' + t.id + '" class="access-select" style="font-family:Inter,sans-serif;font-size:12px;font-weight:700;padding:6px 8px;border-radius:7px;border:1px solid rgba(255,255,255,0.25);background:#1f3559;color:#fff;">' +
+        opt('allowed','Allowed') + opt('soon','Coming Soon') + opt('hidden','Hidden') +
+      '</select>' +
+    '</div>';
   }).join('');
-  var modal = document.getElementById('modal-access');
-  document.getElementById('accessEmpName').textContent = u.name || u.email;
-  document.getElementById('accessTabList').innerHTML = rows;
-  modal.classList.add('open');
+
+  // --- Admin powers section (owner editing an admin only) ---
+  var powersHtml = '';
+  var roleControlHtml = '';
+  if (currentIsOwner()) {
+    // Role control: promote employee to admin / demote admin to employee, transfer ownership
+    if (targetIsAdmin) {
+      roleControlHtml =
+        '<div class="cust-form-sec" style="color:#f3efe6;">Role</div>' +
+        '<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">' +
+          '<button onclick="demoteToEmployee(\'' + email + '\')" style="flex:1;min-width:130px;padding:10px;border:1px solid rgba(255,255,255,0.25);border-radius:8px;background:rgba(255,255,255,0.06);color:#f3efe6;font-family:Inter,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">\u2193 Make Employee</button>' +
+          '<button onclick="transferOwnership(\'' + email + '\')" style="flex:1;min-width:130px;padding:10px;border:1px solid var(--gold);border-radius:8px;background:rgba(201,162,39,0.15);color:var(--gold);font-family:Inter,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">\u2605 Transfer Ownership</button>' +
+        '</div>';
+      var powers = u.adminPowers || [];
+      var powerRows = ADMIN_POWERS.map(function(p) {
+        var on = powers.indexOf(p.id) !== -1;
+        return '<label style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;border:1px solid rgba(255,255,255,0.18);border-radius:10px;margin-bottom:8px;background:rgba(255,255,255,0.04);cursor:pointer;">' +
+          '<span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#f3efe6;flex:1;">' + p.label + '</span>' +
+          '<input type="checkbox" data-power="' + p.id + '"' + (on?' checked':'') + ' style="width:20px;height:20px;accent-color:var(--gold);">' +
+        '</label>';
+      }).join('');
+      powersHtml = '<div class="cust-form-sec" style="color:#f3efe6;">Admin powers</div>' + powerRows;
+    } else {
+      // target is an employee; owner can promote to admin
+      roleControlHtml =
+        '<div class="cust-form-sec" style="color:#f3efe6;">Role</div>' +
+        '<div style="margin-bottom:12px;">' +
+          '<button onclick="promoteToAdmin(\'' + email + '\')" style="width:100%;padding:11px;border:1px solid var(--gold);border-radius:8px;background:rgba(201,162,39,0.15);color:var(--gold);font-family:Inter,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">\u2191 Make Admin</button>' +
+        '</div>';
+    }
+  }
+
+  document.getElementById('accessEmpName').textContent = (u.name || u.email) + (targetIsAdmin ? '  \u00b7 Admin' : '');
+  document.getElementById('accessTabList').innerHTML =
+    roleControlHtml +
+    powersHtml +
+    '<div class="cust-form-sec" style="color:#f3efe6;">Tab access</div>' +
+    tabRows;
+  document.getElementById('modal-access').classList.add('open');
 }
 function closeAccessEditor() {
   var m = document.getElementById('modal-access');
@@ -8889,17 +9030,77 @@ function closeAccessEditor() {
 }
 async function saveAccessEditor() {
   if (!_accessEditEmail) return;
+  if (isOwnerEmail(_accessEditEmail)) { alert('The owner account cannot be edited.'); return; }
   var u = await DB.get('user:' + _accessEditEmail);
-  if (!u) { alert('Employee not found.'); return; }
-  var perms = [];
-  document.querySelectorAll('#accessTabList input[type="checkbox"]').forEach(function(cb){
-    if (cb.checked) perms.push(cb.getAttribute('data-tab'));
+  if (!u) { alert('User not found.'); return; }
+
+  // 3-state tab access
+  var tabAccess = {};
+  document.querySelectorAll('#accessTabList select.access-select').forEach(function(sel){
+    tabAccess[sel.getAttribute('data-tab')] = sel.value;
   });
-  u.permissions = perms;
+  u.tabAccess = tabAccess;
+  // keep a legacy permissions array in sync (allowed tabs) for any old code paths
+  u.permissions = Object.keys(tabAccess).filter(function(k){ return tabAccess[k] === 'allowed'; });
+
+  // Admin powers (only present when owner edits an admin)
+  var powerBoxes = document.querySelectorAll('#accessTabList input[data-power]');
+  if (powerBoxes.length && currentIsOwner() && (u.role === 'admin')) {
+    var powers = [];
+    powerBoxes.forEach(function(cb){ if (cb.checked) powers.push(cb.getAttribute('data-power')); });
+    u.adminPowers = powers;
+  }
+
   await DB.set('user:' + _accessEditEmail, u);
   closeAccessEditor();
   renderEmployees();
-  alert('Access updated. The employee will see the change next time they open the app.');
+  alert('Saved. The change takes effect next time they open the app.');
+}
+
+// ---- Role transitions (owner-only, with guards) ----
+async function promoteToAdmin(email) {
+  if (!currentIsOwner()) { alert('Only the owner can create admins.'); return; }
+  if (isOwnerEmail(email)) return;
+  if (!confirm('Make this person an admin? They start with NO admin powers until you grant them.')) return;
+  var u = await DB.get('user:' + email);
+  if (!u) return;
+  u.role = 'admin';
+  u.adminPowers = u.adminPowers || [];   // start empty
+  await DB.set('user:' + email, u);
+  closeAccessEditor();
+  renderEmployees();
+}
+async function demoteToEmployee(email) {
+  if (!currentIsOwner()) { alert('Only the owner can change admins.'); return; }
+  if (isOwnerEmail(email)) { alert('The owner cannot be demoted.'); return; }
+  if (!confirm('Remove admin role from this person? They become a regular employee.')) return;
+  var u = await DB.get('user:' + email);
+  if (!u) return;
+  u.role = 'employee';
+  u.adminPowers = [];
+  await DB.set('user:' + email, u);
+  closeAccessEditor();
+  renderEmployees();
+}
+async function transferOwnership(email) {
+  if (!currentIsOwner()) { alert('Only the owner can transfer ownership.'); return; }
+  if (isOwnerEmail(email)) { alert('That person is already the owner.'); return; }
+  var u = await DB.get('user:' + email);
+  if (!u) { alert('User not found.'); return; }
+  if (!confirm('Transfer OWNERSHIP to ' + (u.name || email) + '?\n\nThey will gain full control and you will become a regular admin. This cannot be undone except by the new owner.')) return;
+  if (!confirm('Are you absolutely sure? Type-check: this gives ' + (u.name || email) + ' total control of the account.')) return;
+  // make target the owner
+  u.role = 'admin'; u.status = 'active'; u.isOwner = true;
+  await DB.set('user:' + email, u);
+  // demote current owner to admin (keep all powers)
+  var me = await DB.get('user:' + currentUser.email);
+  if (me) { me.role = 'admin'; me.isOwner = false; me.adminPowers = ADMIN_POWERS.map(function(p){return p.id;}); await DB.set('user:' + currentUser.email, me); }
+  // update owner config
+  await DB.set('config:owner', { email: email, _updatedAt: Date.now() });
+  _ownerEmailCache = email;
+  closeAccessEditor();
+  alert('Ownership transferred to ' + (u.name || email) + '. You are now an admin.');
+  renderEmployees();
 }
 function accessSelectAll(on) {
   document.querySelectorAll('#accessTabList input[type="checkbox"]').forEach(function(cb){ cb.checked = on; });
@@ -13620,6 +13821,17 @@ async function handleAuthedUser(fbUser) {
     }
 
     currentUser = userRec;
+
+    // Warm owner cache and make sure the owner is treated as admin-level.
+    try { await getOwnerEmail(); } catch(e) {}
+    if (isOwnerEmail(currentUser.email)) {
+      currentUser.role = 'admin';
+      currentUser.isOwner = true;
+      if (userRec.role !== 'admin' || userRec.status !== 'active') {
+        userRec.role = 'admin'; userRec.status = 'active';
+        try { await DB.set('user:' + email, userRec); } catch(e) {}
+      }
+    }
 
     if (userRec.status === 'active') {
       openOfficeDashboard();
