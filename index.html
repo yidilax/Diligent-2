@@ -3222,7 +3222,6 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .modal-box .cu-ai-btn { color:#16243f; }
 
 
-.sync-status-card { background:#fff; border:1px solid #ebe7dd; border-radius:12px; padding:13px 15px; margin-bottom:18px; }
 
 </style>
   <!-- Firebase -->
@@ -3791,14 +3790,6 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="margin-bottom:24px;">
         <div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(22px,5vw,30px);letter-spacing:2px;color:var(--navy);line-height:1.1;" id="dashWelcome">Welcome back</div>
         <div style="font-size:12px;color:var(--muted);margin-top:3px;" id="dashDate"></div>
-      </div>
-
-      <!-- Sync status -->
-      <div class="sync-status-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-          <div id="syncStatusMsg" style="font-family:'Inter',sans-serif;font-size:13px;color:var(--muted);flex:1;">Tap "Check" to test cloud sync.</div>
-          <button onclick="checkSyncStatus()" style="flex-shrink:0;background:var(--navy);color:#fff;border:0;border-radius:8px;padding:8px 14px;font-family:'Inter',sans-serif;font-weight:700;font-size:13px;cursor:pointer;">Check</button>
-        </div>
       </div>
 
       <!-- Today panel -->
@@ -4410,7 +4401,10 @@ const DB = {
   },
 
   async list(prefix) {
-    // 1. Try Firebase
+    // Collect keys from ALL sources and MERGE them, so a record can never
+    // silently disappear because one source returned a partial set.
+    var found = {};
+    // 1. Firebase
     try {
       const fs = _getFirestore();
       if (fs) {
@@ -4418,27 +4412,26 @@ const DB = {
           .where('k', '>=', prefix)
           .where('k', '<', prefix + '')
           .get();
-        if (!snap.empty) {
-          const keys = snap.docs.map(function(d) { return d.data().k; }).filter(Boolean);
-          // Cache all returned docs locally
-          snap.docs.forEach(function(d) {
-            const data = d.data();
-            if (data.k && data.v) { _store[data.k] = data.v; }
-          });
-          _saveToLS();
-          return keys;
-        }
+        snap.docs.forEach(function(d) {
+          const data = d.data();
+          if (data.k) {
+            found[data.k] = true;
+            if (data.v) { _store[data.k] = data.v; }
+          }
+        });
+        _saveToLS();
       }
     } catch(e) { console.warn('FB list error:', e); }
-    // 2. Fallback: window.storage
+    // 2. window.storage
     try {
       if (window.storage) {
         const r = await window.storage.list(prefix, true);
-        if (r && r.keys && r.keys.length) return r.keys;
+        if (r && r.keys) r.keys.forEach(function(k){ found[k] = true; });
       }
     } catch(e) {}
-    // 3. Fallback: in-memory
-    return Object.keys(_store).filter(function(k) { return k.startsWith(prefix); });
+    // 3. in-memory cache
+    Object.keys(_store).forEach(function(k) { if (k.indexOf(prefix) === 0) found[k] = true; });
+    return Object.keys(found);
   },
 
   async delete(key) {
@@ -7897,7 +7890,6 @@ async function refreshDashboard() {
     }).join('') +
   '</div>';
   try { await _renderDashToday(); } catch(e) {}
-  try { checkSyncStatus(); } catch(e) {}
 }
 
 // ════════════════════════════════════════════
@@ -8428,7 +8420,7 @@ async function saveCustUpdate() {
   if (!projId) { alert('Please select a project for this update.'); return; }
   if (!text && _cuPhotos.length === 0) { alert('Add a message or at least one photo.'); return; }
   var proj = (window._cuProjects||[]).find(function(p){ return p.id === projId; });
-  var id = _cuEditId || ('cu_' + Date.now() + '_' + Math.floor(Math.random()*1000));
+  var id = _cuEditId || ('cu_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10));
   var existing = _cuEditId ? (await DB.get('custupdate:' + id)) : null;
   var rec = {
     id: id,
