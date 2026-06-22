@@ -7740,10 +7740,14 @@ var OWNER_EMAIL_DEFAULT = 'shmily@diligentdevelopersny.com';
 var _ownerEmailCache = null;
 async function getOwnerEmail() {
   if (_ownerEmailCache) return _ownerEmailCache;
-  try {
-    var c = await DB.get('config:owner');
-    _ownerEmailCache = (c && c.email) ? c.email : OWNER_EMAIL_DEFAULT;
-  } catch(e) { _ownerEmailCache = OWNER_EMAIL_DEFAULT; }
+  // Resolve immediately to the default so nothing ever blocks on this.
+  _ownerEmailCache = OWNER_EMAIL_DEFAULT;
+  // Refresh from storage in the background (non-blocking).
+  setTimeout(function() {
+    Promise.resolve().then(function(){ return DB.get('config:owner'); })
+      .then(function(c){ if (c && c.email) _ownerEmailCache = c.email; })
+      .catch(function(){});
+  }, 0);
   return _ownerEmailCache;
 }
 function _emailEq(a, b) { return (a||'').toLowerCase() === (b||'').toLowerCase(); }
@@ -13822,8 +13826,8 @@ async function handleAuthedUser(fbUser) {
 
     currentUser = userRec;
 
-    // Warm owner cache and make sure the owner is treated as admin-level.
-    try { await getOwnerEmail(); } catch(e) {}
+    // Warm owner cache (non-blocking) and make sure the owner is treated as admin-level.
+    try { getOwnerEmail(); } catch(e) {}
     if (isOwnerEmail(currentUser.email)) {
       currentUser.role = 'admin';
       currentUser.isOwner = true;
