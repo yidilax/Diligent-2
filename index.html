@@ -3221,6 +3221,9 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .cu-ai-btn:disabled { opacity:.7; cursor:default; }
 .modal-box .cu-ai-btn { color:#16243f; }
 
+
+.sync-status-card { background:#fff; border:1px solid #ebe7dd; border-radius:12px; padding:13px 15px; margin-bottom:18px; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -3790,6 +3793,14 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
         <div style="font-size:12px;color:var(--muted);margin-top:3px;" id="dashDate"></div>
       </div>
 
+      <!-- Sync status -->
+      <div class="sync-status-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <div id="syncStatusMsg" style="font-family:'Inter',sans-serif;font-size:13px;color:var(--muted);flex:1;">Tap "Check" to test cloud sync.</div>
+          <button onclick="checkSyncStatus()" style="flex-shrink:0;background:var(--navy);color:#fff;border:0;border-radius:8px;padding:8px 14px;font-family:'Inter',sans-serif;font-weight:700;font-size:13px;cursor:pointer;">Check</button>
+        </div>
+      </div>
+
       <!-- Today panel -->
       <div id="dashToday" class="dash-today"></div>
 
@@ -4282,6 +4293,41 @@ function _getFirestore() {
     return null;
   }
 }
+
+// Firebase connectivity self-test: writes a doc and reads it back, surfacing the REAL status
+async function _firebaseSelfTest() {
+  var result = { ok: false, reason: '' };
+  try {
+    var fs = _getFirestore();
+    if (!fs) { result.reason = 'Firebase did not initialize'; return result; }
+    var testRef = fs.collection('dd').doc('__connectivity_test__');
+    await testRef.set({ v: 'ping', k: '__connectivity_test__', t: Date.now() });
+    var doc = await testRef.get();
+    if (doc.exists && doc.data().v === 'ping') { result.ok = true; }
+    else { result.reason = 'Wrote but could not read back'; }
+  } catch (e) {
+    result.reason = (e && e.code ? e.code : '') + ' ' + (e && e.message ? e.message : String(e));
+    // permission-denied is the classic security-rules problem
+  }
+  return result;
+}
+
+async function checkSyncStatus() {
+  var el = document.getElementById('syncStatusMsg');
+  if (el) el.textContent = 'Checking\u2026';
+  var r = await _firebaseSelfTest();
+  if (el) {
+    if (r.ok) {
+      el.innerHTML = '\u2705 Cloud sync is working. Your data is shared across devices.';
+      el.style.color = '#2D7A4F';
+    } else {
+      el.innerHTML = '\u26a0\ufe0f Cloud sync is NOT working \u2014 data stays only on this device.<br><span style="font-size:12px;opacity:.8;">Reason: ' + _esc(r.reason || 'unknown') + '</span>';
+      el.style.color = '#B03A2E';
+    }
+  }
+  return r;
+}
+
 
 // Key sanitization: Firestore doesn't allow '/' or certain chars in doc IDs
 function _fsKey(key) {
@@ -7822,6 +7868,7 @@ async function refreshDashboard() {
     }).join('') +
   '</div>';
   try { await _renderDashToday(); } catch(e) {}
+  try { checkSyncStatus(); } catch(e) {}
 }
 
 // ════════════════════════════════════════════
