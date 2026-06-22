@@ -8785,17 +8785,30 @@ setTimeout(function() {
 })();
 
 function updateProgress() {
-  var names = window._upgradeRadioNames || [];
-  var total = window._upgradeTotalGroups || 1;
-  var answered = 0;
-  names.forEach(function(name) {
-    if (document.querySelector('#upgradeSheetContent input[name="' + name + '"]:checked')) answered++;
-  });
-  var pct = Math.round((answered / total) * 100);
+  var container = document.getElementById('upgradeSheetContent');
+  if (!container) return;
+  // Count every radio group (unique name) — that's one decision each
+  var radios = container.querySelectorAll('input[type="radio"]');
+  var groups = {};
+  radios.forEach(function(r){ if (r.name) groups[r.name] = groups[r.name] || false; });
+  // mark answered groups
+  container.querySelectorAll('input[type="radio"]:checked').forEach(function(r){ if (r.name) groups[r.name] = true; });
+  var names = Object.keys(groups);
+  var total = names.length;
+  var answered = names.filter(function(n){ return groups[n]; }).length;
+  var pct = total ? Math.round((answered / total) * 100) : 0;
   var fill = document.getElementById('progressFill');
   var pctEl = document.getElementById('progressPct');
   if (fill) fill.style.width = pct + '%';
   if (pctEl) pctEl.textContent = pct + '%';
+}
+
+// Attach a single delegated listener so any selection updates the bar
+function _wireUpgradeProgress() {
+  var container = document.getElementById('upgradeSheetContent');
+  if (!container || container._progressWired) return;
+  container.addEventListener('change', function(){ updateProgress(); });
+  container._progressWired = true;
 }
 function toggleGlass(name, value) {
   var wrap = document.getElementById('glass-' + name);
@@ -9517,20 +9530,22 @@ async function initUpgradeSheet() {
 function buildGallery(sections) {
   var container = document.getElementById('galleryContent');
   if (!container || !sections) return;
-  container.innerHTML = sections.map(function(sec, si) {
+  var html = sections.map(function(sec, si) {
     var secTitle = sec.label || sec.title || ('Section ' + (si+1));
-    var items = sec.fields || sec.items || [];
+    var items = (sec.fields || sec.items || []).filter(function(item){ return item.photo; }); // only items WITH a picture
+    if (!items.length) return ''; // skip categories that have no photos
     var cards = items.map(function(item) {
-      var onclick = item.photo
-        ? 'onclick="openLightbox(' + JSON.stringify(item.name).replace(/"/g, '&quot;') + ',' + JSON.stringify(item.photo).replace(/"/g, '&quot;') + ',' + JSON.stringify(secTitle).replace(/"/g, '&quot;') + ')"'
-        : '';
-      var imgHtml = item.photo
-        ? '<img src="' + item.photo + '" alt="' + _esc(item.name) + '" ' + onclick + '>'
-        : '<div class="upg-card__noimg" ' + onclick + '>\ud83c\udfe0</div>';
+      var onclick = 'onclick="openLightbox(' + JSON.stringify(item.name).replace(/"/g, '&quot;') + ',' + JSON.stringify(item.photo).replace(/"/g, '&quot;') + ',' + JSON.stringify(secTitle).replace(/"/g, '&quot;') + ')"';
+      var imgHtml = '<img src="' + item.photo + '" alt="' + _esc(item.name) + '" ' + onclick + '>';
       return '<div class="upg-card">' + imgHtml + '<div class="upg-card__label">' + _esc(item.name) + '</div></div>';
     }).join('');
     return '<div class="upg-cat">' + _esc(secTitle) + '</div><div class="upg-grid">' + cards + '</div>';
   }).join('');
+  // if nothing has a photo at all, show a gentle message
+  if (!html.trim()) {
+    html = '<p style="padding:20px;text-align:center;color:var(--muted);font-size:14px;">Photos coming soon.</p>';
+  }
+  container.innerHTML = html;
 }
 
 function openUpgradeSheet() {
@@ -10186,6 +10201,8 @@ function buildUpgradeSheet(sections) {
   });
 
   setTimeout(initSignatureCanvas, 100);
+  if (typeof _wireUpgradeProgress === 'function') _wireUpgradeProgress();
+  if (typeof updateProgress === 'function') updateProgress();
 }
 
 // ue_photoChanged — called by ue_buildItemRow file input
