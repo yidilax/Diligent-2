@@ -4330,6 +4330,14 @@ async function checkSyncStatus() {
 
 
 // Key sanitization: Firestore doesn't allow '/' or certain chars in doc IDs
+// Customer-facing prefixes go in the OPEN 'pub' collection; everything else is office-only in 'dd'.
+var _PUBLIC_PREFIXES = ['upgrades:', 'submission:', 'upgrade_sections', 'custupdate:'];
+function _fsCol(key) {
+  for (var i = 0; i < _PUBLIC_PREFIXES.length; i++) {
+    if (String(key).indexOf(_PUBLIC_PREFIXES[i]) === 0) return 'pub';
+  }
+  return 'dd';
+}
 function _fsKey(key) {
   // Produce an ALWAYS-valid Firestore document ID from any key.
   // Firestore rejects ids that contain '/', are '.' or '..', exceed 1500 bytes,
@@ -4354,12 +4362,24 @@ const DB = {
     try {
       const fs = _getFirestore();
       if (fs) {
-        const doc = await fs.collection('dd').doc(_fsKey(key)).get();
+        const doc = await fs.collection(_fsCol(key)).doc(_fsKey(key)).get();
         if (doc.exists) {
           const val = doc.data().v;
           _store[key] = val;
           _saveToLS();
           return JSON.parse(val);
+        }
+        // Migration fallback: public keys used to live in 'dd'. If not found
+        // in the new 'pub' collection, check the old location once.
+        if (_fsCol(key) === 'pub') {
+          const legacy = await fs.collection('dd').doc(_fsKey(key)).get();
+          if (legacy.exists) {
+            const lval = legacy.data().v;
+            _store[key] = lval;
+            _saveToLS();
+            try { await fs.collection('pub').doc(_fsKey(key)).set({ v: lval, k: key, t: Date.now() }); } catch(e) {}
+            return JSON.parse(lval);
+          }
         }
       }
     } catch(e) { console.warn('FB get error:', e); }
@@ -4381,7 +4401,7 @@ const DB = {
     try {
       const fs = _getFirestore();
       if (fs) {
-        await fs.collection('dd').doc(_fsKey(key)).set({ v: str, k: key, t: Date.now() });
+        await fs.collection(_fsCol(key)).doc(_fsKey(key)).set({ v: str, k: key, t: Date.now() });
       }
     } catch(e) { console.warn('FB set error:', e); }
     // 2. Also write to window.storage (Claude sync bonus)
@@ -4394,7 +4414,7 @@ const DB = {
     try {
       const fs = _getFirestore();
       if (fs) {
-        const snap = await fs.collection('dd')
+        const snap = await fs.collection(_fsCol(prefix))
           .where('k', '>=', prefix)
           .where('k', '<', prefix + '')
           .get();
@@ -4428,7 +4448,7 @@ const DB = {
     try {
       const fs = _getFirestore();
       if (fs) {
-        await fs.collection('dd').doc(_fsKey(key)).delete();
+        await fs.collection(_fsCol(key)).doc(_fsKey(key)).delete();
       }
     } catch(e) { console.warn('FB delete error:', e); }
     // 2. Delete from window.storage
@@ -4452,7 +4472,7 @@ function _bgRefresh(key) {
     try {
       const fs = _getFirestore();
       if (fs) {
-        const doc = await fs.collection('dd').doc(_fsKey(key)).get();
+        const doc = await fs.collection(_fsCol(key)).doc(_fsKey(key)).get();
         if (doc.exists) {
           const val = doc.data().v;
           if (_store[key] !== val) { _store[key] = val; _saveToLS(); }
@@ -4472,7 +4492,7 @@ function _bgListRefresh(prefix) {
     try {
       const fs = _getFirestore();
       if (fs) {
-        const snap = await fs.collection('dd')
+        const snap = await fs.collection(_fsCol(prefix))
           .where('k', '>=', prefix)
           .where('k', '<', prefix + '\uf8ff')
           .get();
