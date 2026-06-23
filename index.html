@@ -3697,7 +3697,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v108</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v109</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -3776,6 +3776,16 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
         <div style="font-size:12px;color:#8a6a1a;line-height:1.45;"><b>⚠️ For non-emergencies only.</b> For anything urgent, please call the office at <a href="tel:8452881036" style="color:#8a6a1a;font-weight:700;">845-288-1036 #5</a>.</div>
       </div>
       <div id="cdIssueList"></div>
+    </div>
+
+    <div id="cdChangeOrders"></div>
+
+    <!-- Request a Walkthrough -->
+    <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;margin-top:14px;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:0.5px;color:var(--navy);margin-bottom:6px;">🚶 Request a Walkthrough</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.45;">Want to visit the site or do a final walkthrough? Request a time and we'll confirm.</div>
+      <div id="cdWalkStatus"></div>
+      <button onclick="openWalkRequest()" style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;width:100%;">Request a Time</button>
     </div>
   </div>
 </div>
@@ -4002,6 +4012,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
         <button class="office-nav-btn nav-sub" onclick="switchTab('custUpdates');closeSidebar();" id="navbtn-custUpdates"><span class="nav-icon">📣</span> Customer Updates</button>
         <button class="office-nav-btn nav-sub" onclick="switchTab('custReports');closeSidebar();" id="navbtn-custReports"><span class="nav-icon">📝</span> Customer Reports <span id="custReportsBadge" style="display:none;background:#e07a6a;color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;margin-left:4px;"></span></button>
         <button class="office-nav-btn nav-sub" onclick="switchTab('custPortals');closeSidebar();" id="navbtn-custPortals"><span class="nav-icon">🏠</span> Customer Portals</button>
+        <button class="office-nav-btn nav-sub" onclick="switchTab('walkthroughs');closeSidebar();" id="navbtn-walkthroughs"><span class="nav-icon">🚶</span> Walkthroughs <span id="walkthroughsBadge" style="display:none;background:#e07a6a;color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;margin-left:4px;"></span></button>
         <button class="office-nav-btn nav-sub admin-only" style="display:none;" onclick="switchTab('upgradeEditor');closeSidebar();" id="navbtn-upgradeEditor"><span class="nav-icon">✏️</span> Upgrade Editor</button>
       </li>
 
@@ -4018,7 +4029,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v108</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v109</div>
     </div>
   </div>
 
@@ -4219,6 +4230,16 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
         <textarea id="teamChatInput" rows="1" onkeydown="_chatKeydown(event)" placeholder="Type a message..." style="flex:1;padding:11px 14px;border:1px solid var(--border);border-radius:22px;font-size:14px;font-family:Inter,sans-serif;resize:none;max-height:100px;"></textarea>
         <button onclick="sendTeamChat()" style="background:var(--navy);color:#fff;border:none;border-radius:50%;width:44px;height:44px;font-size:18px;cursor:pointer;flex-shrink:0;">↑</button>
       </div>
+    </div>
+
+    
+    <!-- WALKTHROUGHS TAB -->
+    <div id="tab-walkthroughs" class="office-tab" style="display:none;">
+      <div style="margin-bottom:18px;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;color:var(--navy);">Walkthroughs</div>
+        <div style="font-size:13px;color:var(--muted);">Walkthrough and site-visit requests from your customers.</div>
+      </div>
+      <div id="walkthroughsList"></div>
     </div>
 
     <!-- CUSTOMER REPORTS TAB -->
@@ -4759,7 +4780,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v108';
+<script>var APP_VERSION = 'v109';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -4849,7 +4870,7 @@ async function checkSyncStatus() {
 
 // Key sanitization: Firestore doesn't allow '/' or certain chars in doc IDs
 // Customer-facing prefixes go in the OPEN 'pub' collection; everything else is office-only in 'dd'.
-var _PUBLIC_PREFIXES = ['upgrades:', 'submission:', 'upgrade_sections', 'custupdate:', 'subcontractor:', 'subpunch:', 'pubaddr:', 'pubpunch:', 'pubfiles:', 'custpunch:', 'pubprogress:', 'pubnotif:', 'pubportalcfg:'];
+var _PUBLIC_PREFIXES = ['upgrades:', 'submission:', 'upgrade_sections', 'custupdate:', 'subcontractor:', 'subpunch:', 'pubaddr:', 'pubpunch:', 'pubfiles:', 'custpunch:', 'pubprogress:', 'pubnotif:', 'pubportalcfg:', 'walkreq:', 'pubchangeorder:'];
 function _fsCol(key) {
   for (var i = 0; i < _PUBLIC_PREFIXES.length; i++) {
     if (String(key).indexOf(_PUBLIC_PREFIXES[i]) === 0) return 'pub';
@@ -5939,6 +5960,198 @@ async function _loadCustomerProgress(address, unit, targetId) {
 }
 
 
+
+
+async function renderWalkthroughs() {
+  var host = document.getElementById('walkthroughsList');
+  if (!host) return;
+  host.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;">Loading…</div>';
+  var keys = await DB.list('walkreq:');
+  var reqs = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+  reqs.sort(function(a,b){ return b.at - a.at; });
+  if (!reqs.length) {
+    host.innerHTML = '<div class="tab-empty"><div class="tab-empty-icon">🚶</div><div class="tab-empty-title">No Requests</div><div class="tab-empty-desc">Walkthrough requests from customers will appear here.</div></div>';
+    return;
+  }
+  host.innerHTML = reqs.map(function(r){
+    var col = r.status==='confirmed' ? '#3a7d5d' : (r.status==='declined' ? '#c0392b' : '#b8860b');
+    return '<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:13px 15px;margin-bottom:10px;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:start;gap:10px;">' +
+        '<div><div style="font-size:14px;font-weight:700;color:var(--navy);">' + _esc(r.name||'Customer') + '</div>' +
+        '<div style="font-size:11px;color:var(--muted);">' + _esc(r.address||'') + (r.unit&&r.unit!=='Main'?(' \u00b7 Unit '+_esc(r.unit)):'') + '</div></div>' +
+        '<span style="background:'+col+';color:#fff;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;text-transform:capitalize;flex-shrink:0;">'+_esc(r.status||'')+'</span>' +
+      '</div>' +
+      '<div style="font-size:13px;color:#16233d;margin-top:6px;font-weight:600;">📅 ' + _fmtDate(r.date) + (r.time?(' at '+_esc(r.time)):'') + '</div>' +
+      (r.note?'<div style="font-size:12px;color:#3a3730;margin-top:4px;line-height:1.45;">'+_esc(r.note)+'</div>':'') +
+      '<div style="display:flex;gap:8px;margin-top:10px;">' +
+        '<button onclick="_walkSetStatus(\''+r.id+'\',\'confirmed\')" style="font-size:12px;padding:6px 12px;border-radius:7px;border:none;background:rgba(58,125,93,0.15);color:#3a7d5d;font-weight:700;cursor:pointer;">Confirm</button>' +
+        '<button onclick="_walkSetStatus(\''+r.id+'\',\'declined\')" style="font-size:12px;padding:6px 12px;border-radius:7px;border:none;background:rgba(192,57,43,0.12);color:#c0392b;font-weight:700;cursor:pointer;">Decline</button>' +
+        '<button onclick="_lbDelete(\'walkreq:'+r.id+'\',renderWalkthroughs)" style="font-size:12px;padding:6px 12px;border-radius:7px;border:none;background:rgba(0,0,0,0.05);color:#888;cursor:pointer;margin-left:auto;">Delete</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  _updateWalkBadge();
+}
+async function _walkSetStatus(id, status) {
+  var r = await DB.get('walkreq:' + id);
+  if (!r) return;
+  r.status = status; r._updatedAt = Date.now();
+  await DB.set('walkreq:' + id, r);
+  renderWalkthroughs();
+}
+async function _updateWalkBadge() {
+  try {
+    var keys = await DB.list('walkreq:');
+    var reqs = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+    var pending = reqs.filter(function(r){ return r.status === 'requested'; }).length;
+    var badge = document.getElementById('walkthroughsBadge');
+    if (badge) { if (pending>0){ badge.textContent = pending; badge.style.display='inline-block'; } else { badge.style.display='none'; } }
+  } catch(e) {}
+}
+
+
+// ===================== CUSTOMER CHANGE ORDER APPROVAL =====================
+async function _loadCustomerChangeOrders(address, unit) {
+  var host = document.getElementById('cdChangeOrders');
+  if (!host) return;
+  host.innerHTML = '';
+  try {
+    var keys = await DB.list('pubchangeorder:');
+    var cos = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+    var mine = cos.filter(function(c){
+      var addrMatch = (c.address||'').toLowerCase().trim() === (address||'').toLowerCase().trim();
+      if (!addrMatch) return false;
+      if (c.unit && String(c.unit).trim() && String(c.unit).toLowerCase().trim() !== String(unit||'').toLowerCase().trim()) return false;
+      return true;
+    });
+    if (!mine.length) { host.innerHTML = ''; return; }
+    host.innerHTML = mine.map(function(c){
+      var cost = c.cost ? (parseFloat(String(c.cost).replace(/[^0-9.\-]/g,''))||0) : 0;
+      var costStr = cost ? ((cost<0?'-':'+')+'$'+Math.abs(cost).toLocaleString()) : '';
+      var signed = c.custApproval && c.custApproval.signed;
+      return '<div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;margin-top:14px;border-left:3px solid ' + (signed?'#3a7d5d':'var(--gold)') + ';">' +
+        '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:17px;letter-spacing:0.5px;color:var(--navy);margin-bottom:6px;">📝 Change for Your Approval</div>' +
+        '<div style="font-size:14px;font-weight:700;color:#16233d;">' + _esc(c.title||'') + (costStr?(' <span style="color:'+(cost<0?'#3a7d5d':'#16233d')+';">'+costStr+'</span>'):'') + '</div>' +
+        (c.description?'<div style="font-size:13px;color:#3a3730;margin-top:5px;line-height:1.5;">'+_esc(c.description)+'</div>':'') +
+        (signed
+          ? '<div style="margin-top:10px;background:#eef6f0;border-radius:9px;padding:10px;font-size:12px;color:#3a7d5d;font-weight:700;">\u2705 Approved by you on ' + _fmtDate(new Date(c.custApproval.at).toISOString().slice(0,10)) + '</div>'
+          : '<button onclick="openCoApproval(\''+c.id+'\')" style="margin-top:10px;width:100%;background:var(--navy);color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;">Review & Approve</button>'
+        ) +
+      '</div>';
+    }).join('');
+  } catch(e) { host.innerHTML = ''; }
+}
+var _coApprovalId = null;
+async function openCoApproval(id) {
+  _coApprovalId = id;
+  var c = await DB.get('pubchangeorder:' + id);
+  if (!c) return;
+  var cost = c.cost ? (parseFloat(String(c.cost).replace(/[^0-9.\-]/g,''))||0) : 0;
+  var costStr = cost ? ((cost<0?'-':'+')+'$'+Math.abs(cost).toLocaleString()) : '';
+  document.getElementById('coApprovalBody').innerHTML =
+    '<div style="font-size:15px;font-weight:700;color:var(--navy);">' + _esc(c.title||'') + '</div>' +
+    (costStr?'<div style="font-size:16px;font-weight:700;color:'+(cost<0?'#3a7d5d':'#16233d')+';margin:4px 0;">'+costStr+'</div>':'') +
+    (c.description?'<div style="font-size:13px;color:#3a3730;margin-top:6px;line-height:1.5;">'+_esc(c.description)+'</div>':'');
+  document.getElementById('modal-coapproval').classList.add('open');
+  setTimeout(function(){ _initCoSig(); }, 150);
+}
+function closeCoApproval(){ document.getElementById('modal-coapproval').classList.remove('open'); _coApprovalId=null; }
+var _coSigCtx=null,_coSigDrawing=false,_coHasSig=false;
+function _initCoSig(){
+  var c=document.getElementById('coSigCanvas'); if(!c)return;
+  var r=c.getBoundingClientRect(); c.width=r.width; c.height=r.height;
+  _coSigCtx=c.getContext('2d'); _coSigCtx.strokeStyle='#16233d'; _coSigCtx.lineWidth=2; _coSigCtx.lineCap='round'; _coHasSig=false;
+  function pos(e){ var rect=c.getBoundingClientRect(); var t=e.touches?e.touches[0]:e; return {x:t.clientX-rect.left,y:t.clientY-rect.top}; }
+  function start(e){ e.preventDefault(); _coSigDrawing=true; _coHasSig=true; var p=pos(e); _coSigCtx.beginPath(); _coSigCtx.moveTo(p.x,p.y); }
+  function move(e){ if(!_coSigDrawing)return; e.preventDefault(); var p=pos(e); _coSigCtx.lineTo(p.x,p.y); _coSigCtx.stroke(); }
+  function end(){ _coSigDrawing=false; }
+  c.onmousedown=start; c.onmousemove=move; c.onmouseup=end; c.onmouseleave=end;
+  c.ontouchstart=start; c.ontouchmove=move; c.ontouchend=end;
+}
+function clearCoSig(){ if(_coSigCtx){ _coSigCtx.clearRect(0,0,9999,9999); _coHasSig=false; } }
+async function submitCoApproval(){
+  if(!_coHasSig){ alert('Please sign to approve.'); return; }
+  if(!_coApprovalId) return;
+  var c=await DB.get('pubchangeorder:'+_coApprovalId); if(!c) return;
+  var sig=document.getElementById('coSigCanvas').toDataURL();
+  c.custApproval={ signed:true, signature:sig, at:Date.now(), name:window._custName||'' };
+  c.status='customer_approved';
+  await DB.set('pubchangeorder:'+_coApprovalId, c);
+  // reflect back into the office record
+  var off=await DB.get('changeorder:'+_coApprovalId);
+  if(off){ off.custApproval=c.custApproval; off._updatedAt=Date.now(); await DB.set('changeorder:'+_coApprovalId, off); }
+  // notify office
+  try {
+    var owner='shmily@diligentdevelopersny.com'; var nid='cn_'+Date.now();
+    await DB.set('pubnotif:'+owner+':'+nid, { id:nid, forEmail:owner, type:'change', text:(window._custName||'A customer')+' approved change order: '+(c.title||''), at:Date.now(), read:false });
+  } catch(e){}
+  closeCoApproval();
+  await _loadCustomerChangeOrders(window._custAddress, window._custUnit);
+}
+
+// ===================== WALKTHROUGH REQUESTS =====================
+function _walkKey(address, unit) {
+  return btoa(unescape(encodeURIComponent((address||'') + '|' + (unit||'Main')))).replace(/=/g,'');
+}
+function openWalkRequest() {
+  var m = document.getElementById('modal-walkrequest');
+  document.getElementById('wr-date').value = '';
+  document.getElementById('wr-time').value = '';
+  document.getElementById('wr-note').value = '';
+  if (m) m.classList.add('open');
+}
+function closeWalkRequest() { var m = document.getElementById('modal-walkrequest'); if (m) m.classList.remove('open'); }
+async function submitWalkRequest() {
+  var date = document.getElementById('wr-date').value;
+  var time = document.getElementById('wr-time').value;
+  if (!date) { alert('Please pick a preferred date.'); return; }
+  var id = 'wr_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+  var rec = {
+    id: id,
+    address: window._custAddress || '',
+    unit: window._custUnit || '',
+    name: window._custName || '',
+    date: date, time: time,
+    note: document.getElementById('wr-note').value.trim(),
+    status: 'requested',
+    at: Date.now()
+  };
+  await DB.set('walkreq:' + id, rec);
+  // notify the office
+  try {
+    var owner = 'shmily@diligentdevelopersny.com';
+    var nid = 'wn_' + Date.now();
+    await DB.set('pubnotif:' + owner + ':' + nid, {
+      id: nid, forEmail: owner, type: 'walk',
+      text: (rec.name||'A customer') + ' requested a walkthrough at ' + rec.address + (rec.unit&&rec.unit!=='Main'?(' \u00b7 Unit '+rec.unit):'') + ' on ' + _fmtDate(date) + (time?(' at '+time):''),
+      at: Date.now(), read: false
+    });
+  } catch(e) {}
+  closeWalkRequest();
+  await _loadWalkStatus(window._custAddress, window._custUnit);
+}
+async function _loadWalkStatus(address, unit) {
+  var host = document.getElementById('cdWalkStatus');
+  if (!host) return;
+  try {
+    var keys = await DB.list('walkreq:');
+    var reqs = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+    var mine = reqs.filter(function(r){
+      return (r.address||'').toLowerCase().trim() === (address||'').toLowerCase().trim() &&
+             String(r.unit||'').toLowerCase().trim() === String(unit||'').toLowerCase().trim();
+    }).sort(function(a,b){ return b.at - a.at; });
+    if (!mine.length) { host.innerHTML = ''; return; }
+    host.innerHTML = mine.slice(0,3).map(function(r){
+      var col = r.status==='confirmed' ? '#3a7d5d' : (r.status==='declined' ? '#c0392b' : '#b8860b');
+      var label = r.status==='confirmed' ? 'Confirmed' : (r.status==='declined' ? 'Not available' : 'Requested');
+      return '<div style="background:#faf8f3;border:1px solid var(--border);border-radius:9px;padding:9px 11px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px;">' +
+        '<div style="font-size:12px;color:#3a3730;">' + _fmtDate(r.date) + (r.time?(' at '+_esc(r.time)):'') + '</div>' +
+        '<span style="background:'+col+';color:#fff;border-radius:20px;padding:2px 9px;font-size:10px;font-weight:700;">'+label+'</span>' +
+      '</div>';
+    }).join('');
+  } catch(e) { host.innerHTML = ''; }
+}
+
 // ===================== CUSTOMER DASHBOARD (post-login landing) =====================
 
 async function _loadCustomerUpdatesInto(address, unit, targetId) {
@@ -6092,6 +6305,8 @@ async function openCustomerDashboard(name, address, unit, saveKey, existing) {
   try { await _loadCustomerUpdatesInto(address, unit, 'cdUpdates'); } catch(e) {}
   try { await _loadCustomerFiles(address, unit, 'cdFiles'); } catch(e) {}
   try { await _cpRender('cdIssueList'); } catch(e) {}
+  try { await _loadWalkStatus(address, unit); } catch(e) {}
+  try { await _loadCustomerChangeOrders(address, unit); } catch(e) {}
 }
 async function cdGoGallery() {
   try {
@@ -9849,6 +10064,7 @@ async function switchTab(tab) {
     if (tab === 'changeOrders') renderChangeOrders();
   } catch(e) {}
   try { if (tab === 'teamChat') { renderTeamChat(); startChatPolling(); } else { stopChatPolling(); } } catch(e) {}
+  try { if (tab === 'walkthroughs') renderWalkthroughs(); } catch(e) {}
 }
 
 // ════════════════════════════════════════════
@@ -10490,6 +10706,7 @@ async function renderChangeOrders(){
         '</div>' +
       '</div>' +
       (it.description?'<div style="font-size:12px;color:#3a3730;margin-top:6px;line-height:1.45;">'+_esc(it.description)+'</div>':'') +
+      (it.needsApproval ? ('<div style="margin-top:7px;font-size:11px;font-weight:700;color:' + (it.custApproval&&it.custApproval.signed?'#3a7d5d':'#b8860b') + ';">' + (it.custApproval&&it.custApproval.signed ? ('✅ Customer approved' + (it.custApproval.signature?' (signed)':'')) : '⏳ Awaiting customer approval') + '</div>' + (it.custApproval&&it.custApproval.signature ? '<img src="'+it.custApproval.signature+'" style="height:44px;margin-top:4px;background:#fff;border:1px solid var(--border);border-radius:6px;padding:2px;">' : '')) : '') +
       '<div style="display:flex;gap:8px;margin-top:8px;">' +
         '<button onclick="_coSetStatus(\''+it.id+'\',\'approved\')" style="font-size:11px;padding:4px 10px;border-radius:6px;border:none;background:rgba(58,125,93,0.15);color:#3a7d5d;font-weight:700;cursor:pointer;">Approve</button>' +
         '<button onclick="_coSetStatus(\''+it.id+'\',\'rejected\')" style="font-size:11px;padding:4px 10px;border-radius:6px;border:none;background:rgba(192,57,43,0.12);color:#c0392b;font-weight:700;cursor:pointer;">Reject</button>' +
@@ -10507,6 +10724,9 @@ function openChangeOrderModal(){
   document.getElementById('co-cost').value='';
   document.getElementById('co-description').value='';
   document.getElementById('co-status').value='pending';
+  document.getElementById('co-address').value='';
+  document.getElementById('co-unit').value='';
+  document.getElementById('co-needsApproval').checked=false;
   document.getElementById('modal-changeorder').classList.add('open');
 }
 function closeChangeOrderModal(){ document.getElementById('modal-changeorder').classList.remove('open'); }
@@ -10515,11 +10735,19 @@ async function saveChangeOrder(){
   if(!title){ alert('Enter a title.'); return; }
   var date=document.getElementById('co-date').value;
   var id='co_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
+  var addr=document.getElementById('co-address').value.trim();
+  var unit=document.getElementById('co-unit').value.trim();
+  var needsApproval=document.getElementById('co-needsApproval').checked;
   var rec={ id:id, projectId:document.getElementById('co-project').value, title:title,
     cost:document.getElementById('co-cost').value.trim(), description:document.getElementById('co-description').value.trim(),
     date:date?new Date(date+'T12:00:00').getTime():Date.now(), status:document.getElementById('co-status').value,
+    address:addr, unit:unit, needsApproval:needsApproval, custApproval:null,
     author:_lbWho(), _createdAt:Date.now() };
   await DB.set('changeorder:'+id,rec);
+  // If it needs customer approval, mirror to public so the customer can see + sign it.
+  if (needsApproval && addr) {
+    await DB.set('pubchangeorder:'+id, { id:id, title:title, cost:rec.cost, description:rec.description, date:rec.date, address:addr, unit:unit, status:'awaiting_customer', custApproval:null });
+  }
   try{ logActivity('Added a change order'); }catch(e){}
   closeChangeOrderModal(); renderChangeOrders();
 }
@@ -17546,7 +17774,39 @@ if (document.readyState === 'loading') {
       <div class="form-group"><label class="form-label">Project</label><select class="form-input" id="co-project"></select></div>
       <div class="form-group"><label class="form-label">Status</label><select class="form-input" id="co-status"><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select></div>
       <div class="form-group"><label class="form-label">Description</label><textarea class="form-input" id="co-description" rows="3" placeholder="Details of the change..."></textarea></div>
+      <div class="form-group"><label class="form-label">Customer address (for approval)</label><input class="form-input" id="co-address" type="text" placeholder="Leave blank if internal only"></div>
+      <div class="form-group"><label class="form-label">Unit</label><input class="form-input" id="co-unit" type="text" placeholder="Optional"></div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#f3efe6;margin-bottom:12px;cursor:pointer;"><input type="checkbox" id="co-needsApproval"> Send to customer for signature/approval</label>
       <button onclick="saveChangeOrder()" style="width:100%;padding:13px;border-radius:9px;border:none;background:var(--gold);color:#0D1F3C;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px;">Save Change Order</button>
+    </div>
+  </div>
+</div>
+
+<!-- WALKTHROUGH REQUEST MODAL -->
+<div class="modal-overlay" id="modal-walkrequest">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-header"><div class="modal-title">🚶 Request a Walkthrough</div><button class="modal-close" onclick="closeWalkRequest()">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Preferred date</label><input class="form-input" id="wr-date" type="date"></div>
+      <div class="form-group"><label class="form-label">Preferred time</label><input class="form-input" id="wr-time" type="text" placeholder="e.g. Morning, or 2:00 PM"></div>
+      <div class="form-group"><label class="form-label">Anything to note?</label><textarea class="form-input" id="wr-note" rows="3" placeholder="Optional"></textarea></div>
+      <button onclick="submitWalkRequest()" style="width:100%;padding:13px;border-radius:9px;border:none;background:var(--gold);color:#0D1F3C;font-size:14px;font-weight:700;cursor:pointer;">Send Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHANGE ORDER APPROVAL MODAL (customer) -->
+<div class="modal-overlay" id="modal-coapproval">
+  <div class="modal-box" style="max-width:440px;">
+    <div class="modal-header"><div class="modal-title">📝 Approve Change</div><button class="modal-close" onclick="closeCoApproval()">✕</button></div>
+    <div class="modal-body">
+      <div id="coApprovalBody" style="background:#faf8f3;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px;"></div>
+      <div style="font-size:12px;color:rgba(243,239,230,0.75);margin-bottom:6px;">Sign below to approve this change:</div>
+      <canvas id="coSigCanvas" style="width:100%;height:120px;background:#fff;border:1px solid var(--border);border-radius:9px;touch-action:none;"></canvas>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <button onclick="clearCoSig()" style="flex:0 0 auto;padding:11px 16px;border-radius:9px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.08);color:#f3efe6;font-size:13px;font-weight:600;cursor:pointer;">Clear</button>
+        <button onclick="submitCoApproval()" style="flex:1;padding:11px;border-radius:9px;border:none;background:var(--gold);color:#0D1F3C;font-size:14px;font-weight:700;cursor:pointer;">Approve &amp; Sign</button>
+      </div>
     </div>
   </div>
 </div>
