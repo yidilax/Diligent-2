@@ -3987,6 +3987,10 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
             <span style="font-size:20px;">📊</span>
             <span>View Upgrades</span>
           </button>
+          <button class="dash-action" onclick="publishPublicData()" id="dashPublishBtn">
+            <span style="font-size:20px;">🔄</span>
+            <span>Publish for Customers &amp; Subs</span>
+          </button>
           <button class="dash-action admin-only" onclick="switchTab('upgradeEditor');" style="display:none;">
             <span style="font-size:20px;">✏️</span>
             <span>Edit Form</span>
@@ -9718,6 +9722,36 @@ async function _syncPublicPunch() {
     }
   } catch(e) {}
 }
+
+// Manually publish the public mirrors (addresses for customers, punch items for subs).
+// Reports what was published so the office can confirm it worked.
+async function publishPublicData() {
+  var btn = document.getElementById('dashPublishBtn');
+  if (btn) { btn.disabled = true; }
+  try {
+    if (typeof _syncAllPublicAddresses === 'function') await _syncAllPublicAddresses();
+    if (typeof _syncPublicPunch === 'function') await _syncPublicPunch();
+    // Verify what's now public
+    var addrCount = 0, addrHouses = 0, punchUnits = 0, punchItems = 0;
+    try {
+      var ak = await DB.list('pubaddr:');
+      var ad = (await Promise.all(ak.map(function(k){return DB.get(k);}))).filter(Boolean);
+      addrCount = ad.length;
+      ad.forEach(function(p){ addrHouses += (p.houses||[]).length; });
+    } catch(e) {}
+    try {
+      var pk = await DB.list('pubpunch:');
+      var pd = (await Promise.all(pk.map(function(k){return DB.get(k);}))).filter(Boolean);
+      punchUnits = pd.length;
+      pd.forEach(function(u){ (u.rooms||[]).forEach(function(r){ punchItems += (r.items||[]).length; }); });
+    } catch(e) {}
+    alert('Published!\n\nCustomer addresses: ' + addrHouses + ' (across ' + addrCount + ' project' + (addrCount!==1?'s':'') + ')\nSub punch units: ' + punchUnits + ' (' + punchItems + ' items)\n\nCustomers and subcontractors can now load on any device. If a number is 0, add/open that data first, then publish again.');
+  } catch(e) {
+    alert('Could not publish: ' + (e.message || e) + '\n\nMake sure you are online and signed in, then try again.');
+  }
+  if (btn) { btn.disabled = false; }
+}
+
 
 async function _collectSubPunchItems(sub) {
   var out = [];
