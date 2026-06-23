@@ -3723,6 +3723,54 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 <!-- ══════════════════════════════════════════ -->
 <!-- CUSTOMER GALLERY PAGE                      -->
 <!-- ══════════════════════════════════════════ -->
+<div class="page" id="customerDashboardPage">
+  <div style="background:var(--navy);padding:18px 20px;position:sticky;top:0;z-index:100;border-bottom:2px solid var(--gold);">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <div style="min-width:0;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1.5px;color:#fff;line-height:1.1;">Diligent Developers</div>
+        <div id="cdUnitInfo" style="font-size:12px;color:rgba(255,255,255,0.65);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+      </div>
+      <button onclick="showPage('customerAuthPage')" style="background:rgba(255,255,255,0.1);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;flex-shrink:0;">Exit</button>
+    </div>
+  </div>
+
+  <div style="max-width:720px;margin:0 auto;padding:18px 16px 40px;">
+    <div id="cdGreeting" style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;color:var(--navy);margin-bottom:4px;"></div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:18px;">Welcome to your home portal. Here's everything in one place.</div>
+
+    <!-- Primary actions -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px;">
+      <button onclick="cdGoGallery()" style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px 14px;cursor:pointer;text-align:left;box-shadow:0 2px 10px rgba(13,31,60,0.06);">
+        <div style="font-size:26px;margin-bottom:6px;">🖼️</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:0.5px;color:var(--navy);">View Gallery</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">Browse available upgrades</div>
+      </button>
+      <button onclick="cdGoForm()" style="background:var(--navy);border:none;border-radius:14px;padding:18px 14px;cursor:pointer;text-align:left;box-shadow:0 2px 10px rgba(13,31,60,0.12);">
+        <div style="font-size:26px;margin-bottom:6px;">✅</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:0.5px;color:var(--gold);">My Selections</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:2px;">Choose & submit upgrades</div>
+      </button>
+    </div>
+
+    <!-- Dynamic sections (progress, updates, files) injected here -->
+    <div id="cdProgress"></div>
+    <div id="cdUpdates"></div>
+    <div id="cdFiles"></div>
+
+    <!-- Issue / punch list -->
+    <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;margin-top:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:0.5px;color:var(--navy);">📝 Report an Issue</div>
+        <button onclick="_cpAddItem()" style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:8px 13px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">+ Add</button>
+      </div>
+      <div style="background:#fdf3e3;border:1px solid #f0d9a8;border-radius:9px;padding:10px 12px;margin-bottom:10px;">
+        <div style="font-size:12px;color:#8a6a1a;line-height:1.45;"><b>⚠️ For non-emergencies only.</b> For anything urgent, please call the office at <a href="tel:8452881036" style="color:#8a6a1a;font-weight:700;">845-288-1036 #5</a>.</div>
+      </div>
+      <div id="cdIssueList"></div>
+    </div>
+  </div>
+</div>
+
 <div class="page" id="customerGalleryPage">
 <div style="background:var(--navy);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:2px solid var(--gold);">
   <span style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:white;">Available Upgrades</span>
@@ -3732,6 +3780,8 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 <div id="galleryUpdate" class="portal-update" style="max-width:760px;margin:0 auto;padding:0 16px;"></div>
 
 <div id="customerFiles" style="max-width:760px;margin:0 auto;padding:0 16px;"></div>
+
+<div id="customerProgress" style="max-width:760px;margin:0 auto;padding:0 16px;"></div>
 
 <div id="customerPunchSection" style="max-width:760px;margin:14px auto;padding:0 16px;">
   <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;">
@@ -3790,7 +3840,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
     <div style="max-width:760px;margin:0 auto;padding:0 20px 40px;">
       <div id="submitMsg" style="display:none;padding:14px;border-radius:8px;margin-bottom:12px;font-size:13px;text-align:center;font-weight:600;"></div>
-      <button class="btn-submit" onclick="submitUpgrades()" id="submitUpgradesBtn">Submit My Selections</button>
+      <div id="upgradeTotalBar" style="display:none;background:var(--navy);color:#fff;border-radius:10px;padding:13px 16px;margin-bottom:12px;align-items:center;justify-content:space-between;"><span style="font-size:13px;color:rgba(255,255,255,0.8);">Selected upgrades total</span><span id="upgradeTotalAmount" style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;color:var(--gold);">$0</span></div><button class="btn-submit" onclick="submitUpgrades()" id="submitUpgradesBtn">Submit My Selections</button>
       <div id="printSaveRow" style="display:none;gap:10px;margin-top:12px;">
         <button class="btn-print" onclick="printMySelections()">&#128424; Print / Save PDF</button>
       </div>
@@ -4713,7 +4763,7 @@ async function checkSyncStatus() {
 
 // Key sanitization: Firestore doesn't allow '/' or certain chars in doc IDs
 // Customer-facing prefixes go in the OPEN 'pub' collection; everything else is office-only in 'dd'.
-var _PUBLIC_PREFIXES = ['upgrades:', 'submission:', 'upgrade_sections', 'custupdate:', 'subcontractor:', 'subpunch:', 'pubaddr:', 'pubpunch:', 'pubfiles:', 'custpunch:'];
+var _PUBLIC_PREFIXES = ['upgrades:', 'submission:', 'upgrade_sections', 'custupdate:', 'subcontractor:', 'subpunch:', 'pubaddr:', 'pubpunch:', 'pubfiles:', 'custpunch:', 'pubprogress:'];
 function _fsCol(key) {
   for (var i = 0; i < _PUBLIC_PREFIXES.length; i++) {
     if (String(key).indexOf(_PUBLIC_PREFIXES[i]) === 0) return 'pub';
@@ -5275,7 +5325,7 @@ async function _submitPinGate() {
   if (_pendingAccess.existing._pin && entered === _pendingAccess.existing._pin) {
     _closePinGate();
     var a = _pendingAccess; _pendingAccess = null;
-    openCustomerPortal(a.name, a.address, a.unit, a.saveKey, a.existing);
+    openCustomerDashboard(a.name, a.address, a.unit, a.saveKey, a.existing);
   } else {
     errEl.style.color = '#c0392b';
     errEl.textContent = 'Incorrect PIN. Please try again or use "Forgot PIN".';
@@ -5369,13 +5419,25 @@ async function customerAccess() {
   const saveKey = 'upgrades:' + btoa(unescape(encodeURIComponent(address + '|' + finalUnit))).replace(/=/g,'');
   const existing = await DB.get(saveKey) || {};
 
-  // If this unit already submitted and set a PIN, require the PIN before access
-  if (existing && existing._submittedAt && existing._pin) {
-    _pendingAccess = { name: name, address: address, unit: finalUnit, saveKey: saveKey, existing: existing };
+  // Store this access for after the PIN step.
+  _pendingAccess = { name: name, address: address, unit: finalUnit, saveKey: saveKey, existing: existing };
+
+  if (existing && existing._pin) {
+    // Returning resident: require their PIN to get in.
     _showPinGate(existing);
     return;
   }
-  openCustomerPortal(name, address, finalUnit, saveKey, existing);
+
+  // First-time resident: have them CREATE a PIN right away (before anything else).
+  var newPin = await _promptForPin();
+  if (!newPin) { return; } // they cancelled
+  var rec = existing || {};
+  rec._pin = newPin;
+  rec.name = name; rec.address = address; rec.unit = finalUnit;
+  if (!rec._createdAt) rec._createdAt = new Date().toISOString();
+  await DB.set(saveKey, rec);
+  _pendingAccess.existing = rec;
+  openCustomerDashboard(name, address, finalUnit, saveKey, rec);
 }
 
 // ════════════════════════════════════════════
@@ -5440,8 +5502,8 @@ async function _renderCustomerStatus(projId, address, unit) {
 
 
 // Customer view of files the office shared with them (reads the public mirror).
-async function _loadCustomerFiles(address, unit) {
-  var host = document.getElementById('customerFiles');
+async function _loadCustomerFiles(address, unit, targetId) {
+  var host = document.getElementById(targetId || 'customerFiles');
   if (!host) return;
   host.innerHTML = '';
   try {
@@ -5468,12 +5530,12 @@ async function _loadCustomerFiles(address, unit) {
     });
     if (!mine.length) { host.innerHTML = ''; return; }
     host.innerHTML = '<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin:14px 0;">' +
-      '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:17px;letter-spacing:1px;color:var(--navy);margin-bottom:10px;">\U0001F4CE Documents For You</div>' +
+      '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:17px;letter-spacing:1px;color:var(--navy);margin-bottom:10px;">📎 Documents For You</div>' +
       mine.map(function(f){
         var isImg = (f.type||'').indexOf('image') === 0;
         var thumb = isImg
           ? '<img src="' + f.data + '" style="width:44px;height:44px;border-radius:7px;object-fit:cover;flex-shrink:0;cursor:pointer;" onclick="_plLightbox(\'' + encodeURIComponent(f.data) + '\')">'
-          : '<div style="width:44px;height:44px;border-radius:7px;background:#eee;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px;">\U0001F4C4</div>';
+          : '<div style="width:44px;height:44px;border-radius:7px;background:#eee;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px;">📄</div>';
         return '<div style="display:flex;align-items:center;gap:11px;padding:8px 0;border-bottom:1px solid #f0ece2;">' +
           thumb +
           '<div style="flex:1;min-width:0;font-size:14px;color:#16233d;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + _esc(f.name||'File') + '</div>' +
@@ -5498,8 +5560,8 @@ async function _cpSave(rec) {
   rec.address = window._custAddress; rec.unit = window._custUnit;
   await DB.set(_cpKey(window._custAddress, window._custUnit), rec);
 }
-async function _cpRender() {
-  var host = document.getElementById('cpItemList');
+async function _cpRender(targetId) {
+  var host = document.getElementById(targetId || 'cdIssueList') || document.getElementById('cpItemList');
   if (!host) return;
   var rec = await _cpGet();
   if (!rec.items.length) {
@@ -5520,7 +5582,7 @@ async function _cpRender() {
         (it.status !== 'resolved' ? '<button onclick="_cpDelItem(' + i + ')" style="background:none;border:none;color:#e07a6a;font-size:14px;cursor:pointer;flex-shrink:0;">\u2715</button>' : '') +
       '</div>' +
       (thumbs ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:7px;">' + thumbs + '</div>' : '') +
-      (it.status !== 'resolved' ? '<button onclick="_cpAddPhoto(' + i + ')" style="background:none;border:none;color:var(--navy);font-size:12px;font-weight:700;cursor:pointer;padding:6px 0 0;">\U0001F4F7 Add photo</button>' : '') +
+      (it.status !== 'resolved' ? '<button onclick="_cpAddPhoto(' + i + ')" style="background:none;border:none;color:var(--navy);font-size:12px;font-weight:700;cursor:pointer;padding:6px 0 0;">📷 Add photo</button>' : '') +
     '</div>';
   }).join('');
 }
@@ -5554,6 +5616,138 @@ function _cpAddPhoto(i) {
     });
   };
   input.click();
+}
+
+
+// ===================== CUSTOMER PROGRESS TRACKER =====================
+var CUSTOMER_STAGES = ['Planning','Foundation','Framing','Roofing','Rough-Ins','Insulation & Drywall','Interior Finishes','Final Touches','Completed'];
+function _progKey(address, unit) {
+  return 'progress:' + btoa(unescape(encodeURIComponent((address||'') + '|' + (unit||'Main')))).replace(/=/g,'');
+}
+async function _progGet(address, unit) {
+  var rec = await DB.get(_progKey(address, unit));
+  return rec || { address: address, unit: unit, stageIndex: 0, note: '', _updatedAt: 0 };
+}
+// Office: open a small editor to set the current stage for a unit
+var _progEditTarget = null;
+async function openProgressEditor(address, unit) {
+  _progEditTarget = { address: address, unit: unit };
+  var rec = await _progGet(address, unit);
+  document.getElementById('prog-title').textContent = address + (unit ? (' \u00b7 Unit ' + unit) : '');
+  var sel = document.getElementById('prog-stage');
+  sel.innerHTML = CUSTOMER_STAGES.map(function(s, i){ return '<option value="' + i + '"' + (i === (rec.stageIndex||0) ? ' selected' : '') + '>' + s + '</option>'; }).join('');
+  document.getElementById('prog-note').value = rec.note || '';
+  document.getElementById('modal-progress').classList.add('open');
+}
+function closeProgressEditor() { document.getElementById('modal-progress').classList.remove('open'); _progEditTarget = null; }
+async function saveProgress() {
+  if (!_progEditTarget) return;
+  var stageIndex = parseInt(document.getElementById('prog-stage').value, 10) || 0;
+  var note = document.getElementById('prog-note').value.trim();
+  var rec = { address: _progEditTarget.address, unit: _progEditTarget.unit, stageIndex: stageIndex, note: note, _updatedAt: Date.now() };
+  await DB.set(_progKey(_progEditTarget.address, _progEditTarget.unit), rec);
+  // public mirror so customer can read on any device
+  await DB.set('pubprogress:' + _progKey(_progEditTarget.address, _progEditTarget.unit).replace('progress:',''), rec);
+  closeProgressEditor();
+  if (typeof renderProjects === 'function') renderProjects();
+}
+// Customer: render their progress timeline
+async function _loadCustomerProgress(address, unit, targetId) {
+  var host = document.getElementById(targetId || 'customerProgress');
+  if (!host) return;
+  host.innerHTML = '';
+  try {
+    var k = _progKey(address, unit).replace('progress:','');
+    var rec = await DB.get('pubprogress:' + k);
+    if (!rec) { host.innerHTML = ''; return; }
+    var cur = rec.stageIndex || 0;
+    host.innerHTML = '<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;margin:14px 0;">' +
+      '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:17px;letter-spacing:1px;color:var(--navy);margin-bottom:4px;">🏗 Your Home\'s Progress</div>' +
+      '<div style="font-size:13px;color:var(--gold);font-weight:700;margin-bottom:14px;">Currently: ' + _esc(CUSTOMER_STAGES[cur] || '') + '</div>' +
+      CUSTOMER_STAGES.map(function(s, i){
+        var done = i < cur, active = i === cur;
+        var dot = done ? '\u2713' : (active ? '\u25cf' : '');
+        var dotBg = done ? 'var(--green)' : (active ? 'var(--gold)' : '#e0ddd6');
+        var dotColor = (done||active) ? '#fff' : 'transparent';
+        var txtColor = active ? 'var(--navy)' : (done ? '#16233d' : 'var(--muted)');
+        var weight = active ? '700' : '500';
+        return '<div style="display:flex;align-items:center;gap:12px;padding:5px 0;">' +
+          '<div style="width:22px;height:22px;border-radius:50%;background:' + dotBg + ';color:' + dotColor + ';display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;">' + dot + '</div>' +
+          '<span style="font-size:14px;color:' + txtColor + ';font-weight:' + weight + ';">' + s + '</span>' +
+        '</div>';
+      }).join('') +
+      (rec.note ? '<div style="margin-top:12px;padding:10px;background:#f7f4ec;border-radius:8px;font-size:13px;color:#16233d;"><b>Update:</b> ' + _esc(rec.note) + '</div>' : '') +
+    '</div>';
+  } catch(e) { host.innerHTML = ''; }
+}
+
+
+// ===================== CUSTOMER DASHBOARD (post-login landing) =====================
+
+async function _loadCustomerUpdatesInto(address, unit, targetId) {
+  var host = document.getElementById(targetId);
+  if (!host) return;
+  host.innerHTML = '';
+  try {
+    var keys = await DB.list('custupdate:');
+    var ups = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+    // match updates for this address (and unit, or all-units)
+    var mine = ups.filter(function(u){
+      var addrMatch = ((u.address||'').toLowerCase().trim() === (address||'').toLowerCase().trim());
+      if (!addrMatch) return false;
+      if (u.unit && String(u.unit).trim() && String(u.unit).toLowerCase().trim() !== String(unit||'').toLowerCase().trim()) return false;
+      return true;
+    });
+    mine.sort(function(a,b){ return new Date(b.date||b._createdAt||0) - new Date(a.date||a._createdAt||0); });
+    if (!mine.length) { host.innerHTML = ''; return; }
+    host.innerHTML = '<div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;margin-top:14px;">' +
+      '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:17px;letter-spacing:0.5px;color:var(--navy);margin-bottom:10px;">\ud83d\udce3 Latest Updates</div>' +
+      mine.slice(0,5).map(function(u){
+        var when = (u.date || u._createdAt) ? new Date(u.date||u._createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+        var photos = (u.photos||[]).map(function(ph){ return '<img src="'+ph+'" style="width:60px;height:60px;border-radius:7px;object-fit:cover;cursor:pointer;" onclick="_plLightbox(\''+encodeURIComponent(ph)+'\')">'; }).join('');
+        return '<div style="border-bottom:1px solid #f0ece2;padding:9px 0;">' +
+          '<div style="font-size:14px;font-weight:700;color:#16233d;">' + _esc(u.title||'Update') + '</div>' +
+          (when ? '<div style="font-size:11px;color:var(--muted);margin-bottom:3px;">' + when + '</div>' : '') +
+          (u.body ? '<div style="font-size:13px;color:#3a3730;line-height:1.45;">' + _esc(u.body) + '</div>' : '') +
+          (photos ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:7px;">' + photos + '</div>' : '') +
+        '</div>';
+      }).join('') +
+    '</div>';
+  } catch(e) { host.innerHTML = ''; }
+}
+
+async function openCustomerDashboard(name, address, unit, saveKey, existing) {
+  window._custName = name; window._custAddress = address; window._custUnit = unit; _custSaveKey = saveKey;
+  var first = (name || '').split(' ')[0] || 'there';
+  var g = document.getElementById('cdGreeting');
+  if (g) {
+    var hr = new Date().getHours();
+    var greet = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
+    g.textContent = greet + ', ' + first;
+  }
+  var ui = document.getElementById('cdUnitInfo');
+  if (ui) ui.textContent = address + (unit && unit !== 'Main' ? (' \u00b7 Unit ' + unit) : '');
+  showPage('customerDashboardPage');
+  window.scrollTo(0,0);
+  // load the dynamic pieces into the dashboard slots
+  try { await _loadCustomerProgress(address, unit, 'cdProgress'); } catch(e) {}
+  try { await _loadCustomerUpdatesInto(address, unit, 'cdUpdates'); } catch(e) {}
+  try { await _loadCustomerFiles(address, unit, 'cdFiles'); } catch(e) {}
+  try { await _cpRender('cdIssueList'); } catch(e) {}
+}
+async function cdGoGallery() {
+  try {
+    if (typeof ue_load === 'function') window._upgradeSections = await ue_load();
+    if (typeof buildGallery === 'function' && window._upgradeSections) buildGallery(window._upgradeSections);
+  } catch(e) {}
+  var gui = document.getElementById('galleryUnitInfo');
+  if (gui) gui.textContent = '\ud83d\udccd ' + window._custAddress + '  \u00b7  Unit ' + window._custUnit;
+  showPage('customerGalleryPage');
+  window.scrollTo(0,0);
+}
+async function cdGoForm() {
+  // open the upgrade form directly
+  await openCustomerPortal(window._custName, window._custAddress, window._custUnit, _custSaveKey, _pendingAccess ? _pendingAccess.existing : {});
 }
 
 async function openCustomerPortal(name, address, unit, saveKey, selections) {
@@ -5688,6 +5882,7 @@ async function openCustomerPortal(name, address, unit, saveKey, selections) {
     var gui = document.getElementById('galleryUnitInfo');
     if (gui) gui.textContent = '📍 ' + address + '  ·  Unit ' + unit;
     try { _loadCustomerFiles(address, unit); } catch(e) {}
+    try { _loadCustomerProgress(address, unit); } catch(e) {}
     try { _cpRender(); } catch(e) {}
     showPage('customerGalleryPage');
   } catch(e) {
@@ -9521,7 +9716,17 @@ async function renderProjects() {
     var houses = p.houses || [];
     var totalUnits = houses.reduce(function(s,h) { return s+(h.units?h.units.length:0); },0);
     var addrRows = houses.map(function(h) {
-      return '<div class="proj-address-row">📍 ' + h.address + '<span class="proj-address-units">' + (h.units&&h.units.length?'Units: '+h.units.join(', '):'No units') + '</span></div>';
+      var addrEsc = (h.address||'').replace(/'/g, "\\'");
+      var progBtns;
+      if (h.units && h.units.length) {
+        progBtns = h.units.map(function(u){
+          var uEsc = String(u).replace(/'/g, "\\'");
+          return '<button onclick="openProgressEditor(\'' + addrEsc + '\',\'' + uEsc + '\')" style="background:rgba(201,168,76,0.15);color:var(--gold);border:none;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;cursor:pointer;margin:2px 3px 0 0;">📊 Unit ' + u + '</button>';
+        }).join('');
+      } else {
+        progBtns = '<button onclick="openProgressEditor(\'' + addrEsc + '\',\'\')" style="background:rgba(201,168,76,0.15);color:var(--gold);border:none;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;cursor:pointer;margin-top:2px;">📊 Set Progress</button>';
+      }
+      return '<div class="proj-address-row">📍 ' + h.address + '<span class="proj-address-units">' + (h.units&&h.units.length?'Units: '+h.units.join(', '):'No units') + '</span><div style="margin-top:4px;">' + progBtns + '</div></div>';
     }).join('');
     var canEditThis = canEdit(p);
     return '<div class="proj-card">' +
@@ -11269,6 +11474,8 @@ function ue_collectFromUI() {
           if (v) subOptions.push(v);
         });
       }
+      var priceEl = row.querySelector('.ue-item-price');
+      var priceVal = priceEl && priceEl.value !== '' ? parseFloat(priceEl.value) : null;
       var itemObj = {
         key: row.dataset.key || (sec.id + '_' + (ii + 1)),
         name: nameInput ? nameInput.value.trim() : 'Item',
@@ -11276,6 +11483,7 @@ function ue_collectFromUI() {
         hasGlass: hasGlass,
         options: options,
         subOptions: subOptions,
+        price: (priceVal != null && !isNaN(priceVal)) ? priceVal : null,
         photo: (row.querySelector('.ue-photo-store') || {}).value || null
       };
       sec.items.push(itemObj);
@@ -11461,6 +11669,23 @@ function ue_buildItemRow(item) {
   nameInput.placeholder = 'Upgrade / question text';
   nameInput.style.width = '100%';
   rightWrap.appendChild(nameInput);
+
+  // Price input (optional) — what this upgrade costs if the customer says Yes / picks it
+  var priceWrap = document.createElement('div');
+  priceWrap.style.cssText = 'display:flex;align-items:center;gap:6px;';
+  var priceLabel = document.createElement('span');
+  priceLabel.textContent = '$';
+  priceLabel.style.cssText = 'font-size:13px;color:var(--muted);font-weight:700;';
+  var priceInput = document.createElement('input');
+  priceInput.className = 'ue-item-price';
+  priceInput.type = 'number';
+  priceInput.min = '0';
+  priceInput.step = '1';
+  priceInput.placeholder = 'Price (optional)';
+  priceInput.value = (item.price != null && item.price !== '') ? item.price : '';
+  priceInput.style.cssText = 'flex:1;padding:5px 9px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:Inter,sans-serif;';
+  priceWrap.appendChild(priceLabel); priceWrap.appendChild(priceInput);
+  rightWrap.appendChild(priceWrap);
 
   // Type selector
   var typeRow = document.createElement('div');
@@ -12047,6 +12272,7 @@ async function submitUpgrades() {
     address: window._custAddress || '',
     unit: window._custUnit || '',
     selections: selections,
+    upgradeTotal: (function(){ try { var a=document.getElementById('upgradeTotalAmount'); return a?a.textContent:''; } catch(e){ return ''; } })(),
     signature: canvas ? canvas.toDataURL() : '',
     sigDate: sigDate.value,
     _submittedAt: isUpdate ? existing._submittedAt : now,
@@ -12278,6 +12504,38 @@ function attachPhoneFormat(input) {
   });
 }
 
+
+// Recalculate the customer's upgrade total from "Yes"-selected priced items.
+function _recalcUpgradeTotal() {
+  var container = document.getElementById('upgradeSheetContent');
+  var bar = document.getElementById('upgradeTotalBar');
+  var amtEl = document.getElementById('upgradeTotalAmount');
+  if (!container || !bar || !amtEl) return;
+  var total = 0;
+  var anyPriced = false;
+  container.querySelectorAll('tr[data-price]').forEach(function(tr){
+    var price = parseFloat(tr.getAttribute('data-price'));
+    var key = tr.getAttribute('data-pricekey');
+    if (isNaN(price)) return;
+    anyPriced = true;
+    // count it if this row's radio is "yes", its checkbox is checked, or a dropdown has a non-empty value
+    var counted = false;
+    var yesRadio = container.querySelector('input[name="' + key + '"][value="yes"]');
+    if (yesRadio && yesRadio.checked) counted = true;
+    var cb = container.querySelector('input[type="checkbox"][name="' + key + '"]');
+    if (cb && cb.checked) counted = true;
+    var sel = container.querySelector('select[name="' + key + '"]');
+    if (sel && sel.value) counted = true;
+    if (counted) total += price;
+  });
+  if (anyPriced) {
+    bar.style.display = 'flex';
+    amtEl.textContent = '$' + total.toLocaleString();
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
 function buildUpgradeSheet(sections) {
   var container = document.getElementById('upgradeSheetContent');
   if (!container) return;
@@ -12382,8 +12640,15 @@ function buildUpgradeSheet(sections) {
 
       // ── Default: radio (Yes/No) ──
       var tr = document.createElement('tr');
+      if (item.price != null && item.price !== '') { tr.setAttribute('data-price', item.price); tr.setAttribute('data-pricekey', itemKey); }
       var nameTd = document.createElement('td');
       nameTd.textContent = itemName;
+      if (item.price != null && item.price !== '' && Number(item.price) > 0) {
+        var priceTag = document.createElement('span');
+        priceTag.textContent = '  +$' + Number(item.price).toLocaleString();
+        priceTag.style.cssText = 'color:var(--gold);font-weight:700;font-size:12px;white-space:nowrap;';
+        nameTd.appendChild(priceTag);
+      }
       if (itemPhoto) {
         var br = document.createElement('br');
         var photoBtn = document.createElement('button');
@@ -12489,6 +12754,16 @@ function buildUpgradeSheet(sections) {
   setTimeout(initSignatureCanvas, 100);
   if (typeof _wireUpgradeProgress === 'function') _wireUpgradeProgress();
   if (typeof updateProgress === 'function') updateProgress();
+  // wire total recalculation
+  try {
+    var _c = document.getElementById('upgradeSheetContent');
+    if (_c && !_c._totalWired) {
+      _c.addEventListener('change', function(){ _recalcUpgradeTotal(); });
+      _c.addEventListener('click', function(){ setTimeout(_recalcUpgradeTotal, 0); });
+      _c._totalWired = true;
+    }
+    setTimeout(_recalcUpgradeTotal, 50);
+  } catch(e) {}
 }
 
 // ue_photoChanged — called by ue_buildItemRow file input
@@ -13669,12 +13944,12 @@ async function _renderOfficeCustomerIssues() {
     groups.forEach(function(g){ (g.items||[]).forEach(function(it){ if (it.status !== 'resolved') openCount++; }); });
     if (!groups.length || openCount === 0) { host.innerHTML = ''; return; }
     host.innerHTML = '<div style="background:#fff;border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:12px;padding:14px 16px;">' +
-      '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:17px;letter-spacing:1px;color:var(--navy);margin-bottom:10px;">\U0001F4DD Customer-Reported Issues (' + openCount + ')</div>' +
+      '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:17px;letter-spacing:1px;color:var(--navy);margin-bottom:10px;">📝 Customer-Reported Issues (' + openCount + ')</div>' +
       groups.map(function(g){
         var openItems = (g.items||[]).filter(function(it){ return it.status !== 'resolved'; });
         if (!openItems.length) return '';
         return '<div style="margin-bottom:10px;">' +
-          '<div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:4px;">\U0001F4CD ' + _esc(g.address||'') + (g.unit?(' \u00b7 Unit '+_esc(g.unit)):'') + '</div>' +
+          '<div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:4px;">📍 ' + _esc(g.address||'') + (g.unit?(' \u00b7 Unit '+_esc(g.unit)):'') + '</div>' +
           openItems.map(function(it){
             var origIdx = g.items.indexOf(it);
             var thumbs = (it.photos||[]).map(function(ph){ return '<img src="' + ph + '" style="width:40px;height:40px;border-radius:5px;object-fit:cover;cursor:pointer;" onclick="_plLightbox(\'' + encodeURIComponent(ph) + '\')">'; }).join('');
@@ -16261,7 +16536,7 @@ if (document.readyState === 'loading') {
     <div id="pinSetError" class="pin-error" style="display:none;"></div>
     <div class="pin-actions">
       <button class="pin-btn-ghost" onclick="_cancelSetPin()">Cancel</button>
-      <button class="pin-btn-primary" onclick="_confirmSetPin()">Set PIN &amp; Submit</button>
+      <button class="pin-btn-primary" onclick="_confirmSetPin()">Set PIN &amp; Continue</button>
     </div>
   </div>
 </div>
@@ -16294,6 +16569,23 @@ if (document.readyState === 'loading') {
   });
 })();
 </script>
+
+<!-- PROGRESS EDITOR MODAL -->
+<div class="modal-overlay" id="modal-progress">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-header">
+      <div class="modal-title" id="prog-title">Set Progress</div>
+      <button class="modal-close" onclick="closeProgressEditor()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Current build stage</label>
+        <select class="form-input" id="prog-stage"></select></div>
+      <div class="form-group"><label class="form-label">Update note for customer (optional)</label>
+        <textarea class="form-input" id="prog-note" rows="2" placeholder="e.g. Framing inspection scheduled for next week"></textarea></div>
+      <button onclick="saveProgress()" style="width:100%;padding:12px;border-radius:8px;border:none;background:var(--gold);color:#0D1F3C;font-weight:700;font-size:14px;cursor:pointer;">Save Progress</button>
+    </div>
+  </div>
+</div>
 
 <!-- PROJECT FILES MODAL -->
 <div class="modal-overlay" id="modal-projectfiles">
