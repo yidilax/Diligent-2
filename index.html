@@ -3697,7 +3697,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v114</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v115</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4049,7 +4049,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     <div class="office-sidebar-footer">
       <div id="bioToggleRow" style="margin-bottom:10px;"></div>
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v114</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v115</div>
     </div>
   </div>
 
@@ -4441,6 +4441,14 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
           <div class="tab-count">Edit sections and items on the customer upgrade form</div>
         </div>
         <button class="ue-add-section-btn" onclick="ue_addSection()">+ Add Section</button>
+      </div>
+      <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:13px 15px;margin-bottom:14px;">
+        <label class="form-label" style="display:block;margin-bottom:6px;">Which sheet are you editing?</label>
+        <select id="ue-scopeSelect" class="form-input" onchange="ue_switchScope()" style="margin-bottom:6px;">
+          <option value="">Default sheet (used by most projects)</option>
+        </select>
+        <div style="font-size:11px;color:var(--muted);line-height:1.4;">The default is used everywhere unless a project has its own sheet. Pick a project to give it a different upgrade sheet (e.g. basement-heavy builds).</div>
+        <div id="ue-scopeStatus" style="font-size:12px;color:var(--gold);font-weight:700;margin-top:6px;"></div>
       </div>
       <div id="ue_sections"></div>
       <div class="ue-save-bar">
@@ -4862,7 +4870,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v114';
+<script>var APP_VERSION = 'v115';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -4952,7 +4960,7 @@ async function checkSyncStatus() {
 
 // Key sanitization: Firestore doesn't allow '/' or certain chars in doc IDs
 // Customer-facing prefixes go in the OPEN 'pub' collection; everything else is office-only in 'dd'.
-var _PUBLIC_PREFIXES = ['upgrades:', 'submission:', 'upgrade_sections', 'custupdate:', 'subcontractor:', 'subpunch:', 'pubaddr:', 'pubpunch:', 'pubfiles:', 'custpunch:', 'pubprogress:', 'pubnotif:', 'pubportalcfg:', 'walkreq:', 'pubchangeorder:'];
+var _PUBLIC_PREFIXES = ['upgrades:', 'submission:', 'upgrade_sections', 'upgrade_sections_proj:', 'custupdate:', 'subcontractor:', 'subpunch:', 'pubaddr:', 'pubpunch:', 'pubfiles:', 'custpunch:', 'pubprogress:', 'pubnotif:', 'pubportalcfg:', 'walkreq:', 'pubchangeorder:'];
 function _fsCol(key) {
   for (var i = 0; i < _PUBLIC_PREFIXES.length; i++) {
     if (String(key).indexOf(_PUBLIC_PREFIXES[i]) === 0) return 'pub';
@@ -5953,7 +5961,33 @@ async function openPortalSettings(address, unit) {
   document.getElementById('ps-dateNextLabel').value = rec.dateNextLabel || '';
   document.getElementById('ps-dateNext').value = rec.dateNext || '';
   _psRenderPhotos();
+  await _psRenderMultiUnits(address, unit);
   document.getElementById('modal-portalsettings').classList.add('open');
+}
+// Build a checklist of OTHER units at the same address so info can be applied to several at once.
+async function _psRenderMultiUnits(address, currentUnit) {
+  var wrap = document.getElementById('ps-multiUnitWrap');
+  var list = document.getElementById('ps-multiUnitList');
+  if (!wrap || !list) return;
+  try {
+    var projKeys = await DB.list('project:');
+    var projects = (await Promise.all(projKeys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+    var units = [];
+    projects.forEach(function(p){
+      (p.houses||[]).forEach(function(h){
+        if ((h.address||'').toLowerCase().trim() === (address||'').toLowerCase().trim()) {
+          (h.units||[]).forEach(function(u){ if (String(u) !== String(currentUnit)) units.push(String(u)); });
+        }
+      });
+    });
+    // de-dupe
+    units = units.filter(function(u,i){ return units.indexOf(u) === i; });
+    if (!units.length) { wrap.style.display = 'none'; list.innerHTML = ''; return; }
+    list.innerHTML = units.map(function(u){
+      return '<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#16233d;padding:5px 0;cursor:pointer;"><input type="checkbox" class="ps-multiunit-cb" value="' + _esc(u) + '"> Unit ' + _esc(u) + '</label>';
+    }).join('');
+    wrap.style.display = 'block';
+  } catch(e) { wrap.style.display = 'none'; }
 }
 function closePortalSettings() { document.getElementById('modal-portalsettings').classList.remove('open'); _psTarget = null; _psPhotos = []; }
 function _psRenderPhotos() {
@@ -5998,8 +6032,19 @@ async function savePortalSettings() {
   var k = _psKey(_psTarget.address, _psTarget.unit);
   await DB.set('portalcfg:' + k, rec);
   await DB.set('pubportalcfg:' + k, rec); // public mirror for the customer
+  // Apply to any additional checked units at the same address.
+  var extra = Array.prototype.slice.call(document.querySelectorAll('.ps-multiunit-cb:checked')).map(function(cb){ return cb.value; });
+  for (var i=0;i<extra.length;i++) {
+    var rec2 = {}; for (var kk in rec) rec2[kk] = rec[kk];
+    rec2.unit = extra[i];
+    var k2 = _psKey(_psTarget.address, extra[i]);
+    await DB.set('portalcfg:' + k2, rec2);
+    await DB.set('pubportalcfg:' + k2, rec2);
+  }
   closePortalSettings();
+  if (extra.length) { try { alert('Applied to ' + (extra.length+1) + ' units.'); } catch(e){} }
   if (typeof renderProjects === 'function') renderProjects();
+  if (typeof renderCustPortals === 'function') renderCustPortals();
 }
 
 // ===================== CUSTOMER PROGRESS TRACKER =====================
@@ -6438,12 +6483,13 @@ async function openCustomerPortal(name, address, unit, saveKey, selections) {
   window._custAddress = address;
   window._custUnit = unit;
 
-  // Always load the LATEST sections from DB (so editor changes show up)
+  // Load the right sheet for this customer (project override if any) and filter by unit type.
   try {
-    window._upgradeSections = await ue_load();
+    window._upgradeSections = await _loadSheetForCustomer(address, unit);
     buildUpgradeSheet(window._upgradeSections);
   } catch(e) {
-    console.warn('ue_load failed, using sheet as-is:', e);
+    console.warn('sheet load failed, using global:', e);
+    try { window._upgradeSections = await ue_load(); buildUpgradeSheet(window._upgradeSections); } catch(e2) {}
   }
 
   // Set header info
@@ -10173,6 +10219,7 @@ async function switchTab(tab) {
   try { if (tab === 'vendors') renderVendors(); if (tab === 'subCalendar') renderSubCalendar(); } catch(e) {}
   try { if (tab === 'taskTemplates') renderTaskTemplates(); } catch(e) {}
   try { if (tab==='reporting') renderReporting(); if (tab==='photoTimeline') renderPhotoTimeline(); if (tab==='weeklyDigest') renderWeeklyDigest(); } catch(e) {}
+  try { if (tab === 'upgradeEditor') ue_populateScopeSelect(); } catch(e) {}
 }
 
 // ════════════════════════════════════════════
@@ -13184,9 +13231,62 @@ async function ue_load() {
   }
 }
 
+
+// ===================== UPGRADE EDITOR: PROJECT SCOPE =====================
+var _ueScope = ''; // '' = default sheet; otherwise a projectId
+async function ue_populateScopeSelect() {
+  var sel = document.getElementById('ue-scopeSelect');
+  if (!sel) return;
+  var keys = await DB.list('project:');
+  var projects = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+  // mark which projects already have an override
+  var ovKeys = await DB.list('upgrade_sections_proj:');
+  var have = {}; ovKeys.forEach(function(k){ have[k.replace('upgrade_sections_proj:','')] = true; });
+  sel.innerHTML = '<option value="">Default sheet (used by most projects)</option>' +
+    projects.map(function(p){ return '<option value="'+p.id+'"'+(p.id===_ueScope?' selected':'')+'>'+_esc(p.name||'Untitled')+(have[p.id]?'  \u2713 own sheet':'')+'</option>'; }).join('');
+}
+async function ue_switchScope() {
+  var sel = document.getElementById('ue-scopeSelect');
+  _ueScope = sel ? sel.value : '';
+  var status = document.getElementById('ue-scopeStatus');
+  var sections;
+  if (_ueScope) {
+    var override = await DB.get('upgrade_sections_proj:' + _ueScope);
+    if (override && override.length) {
+      sections = override;
+      if (status) status.textContent = 'Editing this project\u2019s own sheet.';
+    } else {
+      sections = await ue_load(); // start from the default as a base
+      if (status) status.textContent = 'New project sheet \u2014 starting from the default. Save to create it.';
+    }
+  } else {
+    sections = await ue_load();
+    if (status) status.textContent = '';
+  }
+  // Re-render the editor with these sections
+  window._upgradeSections = sections;
+  if (typeof ue_renderEditor === 'function') ue_renderEditor(sections);
+  else if (typeof ue_render === 'function') ue_render(sections);
+}
+async function ue_deleteProjectSheet() {
+  if (!_ueScope) return;
+  if (!confirm('Delete this project\u2019s own sheet and go back to using the default?')) return;
+  await DB.delete('upgrade_sections_proj:' + _ueScope);
+  _ueScope = '';
+  await ue_populateScopeSelect();
+  await ue_switchScope();
+}
+
 async function ue_save() {
   const sections = ue_collectFromUI();
-  await DB.set('upgrade_sections', sections);
+  if (_ueScope) {
+    await DB.set('upgrade_sections_proj:' + _ueScope, sections);
+    await ue_populateScopeSelect();
+    var st = document.getElementById('ue-scopeStatus');
+    if (st) st.textContent = 'Saved — this project now has its own sheet.';
+  } else {
+    await DB.set('upgrade_sections', sections);
+  }
   window._upgradeSections = sections;
   // Rebuild BOTH the customer upgrade sheet and the gallery
   buildUpgradeSheet(sections);
@@ -13243,7 +13343,8 @@ function ue_collectFromUI() {
         options: options,
         subOptions: subOptions,
         price: (priceVal != null && !isNaN(priceVal)) ? priceVal : null,
-        photo: (row.querySelector('.ue-photo-store') || {}).value || null
+        photo: (row.querySelector('.ue-photo-store') || {}).value || null,
+        unitType: (row.querySelector('.ue-item-unittype') || {}).value || 'all'
       };
       sec.items.push(itemObj);
       sec.fields.push(itemObj);
@@ -13464,6 +13565,22 @@ function ue_buildItemRow(item) {
     typeSel.appendChild(opt);
   });
   typeRow.appendChild(typeSel);
+
+  // Unit-type targeting: which units this upgrade applies to.
+  var unitLabel = document.createElement('span');
+  unitLabel.textContent = 'Applies to:';
+  unitLabel.style.cssText = 'font-size:11px;color:var(--muted);font-weight:600;margin-left:10px;';
+  typeRow.appendChild(unitLabel);
+  var unitSel = document.createElement('select');
+  unitSel.className = 'ue-item-unittype';
+  unitSel.style.cssText = 'padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;font-family:Inter,sans-serif;cursor:pointer;';
+  [['all','All units'],['upper','Upper units only'],['basement','Basement only']].forEach(function(o){
+    var opt = document.createElement('option');
+    opt.value = o[0]; opt.textContent = o[1];
+    if ((item.unitType || 'all') === o[0]) opt.selected = true;
+    unitSel.appendChild(opt);
+  });
+  typeRow.appendChild(unitSel);
   rightWrap.appendChild(typeRow);
 
   // ── Dropdown options builder (visual) ──
@@ -14293,6 +14410,48 @@ function _recalcUpgradeTotal() {
   } else {
     bar.style.display = 'none';
   }
+}
+
+
+// ===================== UNIT-TYPE UPGRADE FILTERING =====================
+// Determine whether a unit is a basement or upper unit from its name/number.
+function _unitTypeOf(unit) {
+  var u = String(unit||'').toLowerCase().trim();
+  // basement if it says basement/bsmt/garden/lower/ground, is just "b", or starts with b+digit (b1, b2)
+  if (/base|bsmt|garden|lower|ground/.test(u)) return 'basement';
+  if (/^b$/.test(u)) return 'basement';
+  if (/^b\s*\d/.test(u)) return 'basement';
+  return 'upper'; // everything else defaults to "upper"
+}
+// Filter sections' items so only those matching the unit type (or 'all') remain.
+function _filterSectionsByUnitType(sections, unitType) {
+  if (!sections) return sections;
+  return sections.map(function(sec){
+    var copy = {}; for (var k in sec) copy[k] = sec[k];
+    function keep(it){ var t = it.unitType || 'all'; return t === 'all' || t === unitType; }
+    copy.items = (sec.items||[]).filter(keep);
+    copy.fields = (sec.fields||[]).filter(keep);
+    return copy;
+  }).filter(function(sec){ return (sec.items&&sec.items.length) || (sec.fields&&sec.fields.length); });
+}
+// Load the right sheet for a customer: project-specific override if one exists, else the global default.
+async function _loadSheetForCustomer(address, unit) {
+  var sections = null;
+  // Look for a project-specific override keyed by the project that owns this address.
+  try {
+    var projKeys = await DB.list('project:');
+    var projects = (await Promise.all(projKeys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+    var owning = projects.find(function(p){
+      return (p.houses||[]).some(function(h){ return (h.address||'').toLowerCase().trim() === (address||'').toLowerCase().trim(); });
+    });
+    if (owning) {
+      var override = await DB.get('upgrade_sections_proj:' + owning.id);
+      if (override && override.length) sections = override;
+    }
+  } catch(e) {}
+  if (!sections) { sections = await ue_load(); }
+  var unitType = _unitTypeOf(unit);
+  return _filterSectionsByUnitType(sections, unitType);
 }
 
 function buildUpgradeSheet(sections) {
@@ -18414,6 +18573,11 @@ if (document.readyState === 'loading') {
       <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;color:var(--gold);margin:16px 0 8px;">Progress Photos</div>
       <div id="ps-photos" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;"></div>
       <button onclick="_psAddPhoto()" style="width:100%;padding:10px;border-radius:8px;border:1px dashed rgba(255,255,255,0.3);background:rgba(255,255,255,0.06);color:#f3efe6;font-size:13px;font-weight:600;cursor:pointer;">📷 Add Progress Photo</button>
+      <div id="ps-multiUnitWrap" style="background:#faf8f3;border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px;display:none;">
+        <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:8px;">Also apply this to other units</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Check any units that should get the same welcome info.</div>
+        <div id="ps-multiUnitList"></div>
+      </div>
       <button onclick="savePortalSettings()" style="width:100%;padding:13px;border-radius:9px;border:none;background:var(--gold);color:#0D1F3C;font-size:14px;font-weight:700;cursor:pointer;margin-top:16px;">Save Portal Settings</button>
     </div>
   </div>
