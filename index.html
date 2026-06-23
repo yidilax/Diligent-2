@@ -703,6 +703,11 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
   .ue-section-header { background:var(--navy); padding:14px 18px; display:flex; align-items:center; gap:10px; }
   .ue-section-body { padding:4px 0; }
   .ue-item-row { display:flex; align-items:center; gap:10px; padding:10px 18px; border-bottom:1px solid #F9F7F4; }
+.ue-item-row { flex-wrap: wrap; }
+.ue-item-row .ue-item-name, .ue-item-row .ue-item-options { max-width: 100%; box-sizing: border-box; }
+.ue-suboption-builder input, .ue-dropdown-builder input { font-size: 12px; padding: 5px 7px; box-sizing: border-box; max-width: 100%; }
+.ue-suboption-builder .ue-sub-value, .ue-dropdown-builder .ue-opt-value { width: 100%; }
+
   .ue-item-row:last-of-type { border-bottom:none; }
   .ue-section-actions { padding:12px 18px; display:flex; gap:8px; border-top:1px solid #F0EDE8; }
   .cust-detail-card { background:white; border-radius:14px; border:1px solid var(--border); margin-bottom:14px; overflow:hidden; }
@@ -3697,7 +3702,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v115</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v116</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4049,7 +4054,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     <div class="office-sidebar-footer">
       <div id="bioToggleRow" style="margin-bottom:10px;"></div>
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v115</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v116</div>
     </div>
   </div>
 
@@ -4870,7 +4875,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v115';
+<script>var APP_VERSION = 'v116';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -13549,7 +13554,7 @@ function ue_buildItemRow(item) {
 
   // Type selector
   var typeRow = document.createElement('div');
-  typeRow.style.cssText = 'display:flex;gap:6px;align-items:center;';
+  typeRow.style.cssText = 'display:flex;gap:6px 10px;align-items:center;flex-wrap:wrap;';
   var typeLabel = document.createElement('span');
   typeLabel.textContent = 'Answer type:';
   typeLabel.style.cssText = 'font-size:11px;color:var(--muted);font-weight:600;';
@@ -13557,7 +13562,7 @@ function ue_buildItemRow(item) {
 
   var typeSel = document.createElement('select');
   typeSel.className = 'ue-item-type';
-  typeSel.style.cssText = 'padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;font-family:Inter,sans-serif;cursor:pointer;';
+  typeSel.style.cssText = 'padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:11.5px;font-family:Inter,sans-serif;cursor:pointer;max-width:140px;';
   [['radio','Yes / No'],['checkbox','Checkbox (agree)'],['dropdown','Dropdown (choices)']].forEach(function(o) {
     var opt = document.createElement('option');
     opt.value = o[0]; opt.textContent = o[1];
@@ -13573,7 +13578,7 @@ function ue_buildItemRow(item) {
   typeRow.appendChild(unitLabel);
   var unitSel = document.createElement('select');
   unitSel.className = 'ue-item-unittype';
-  unitSel.style.cssText = 'padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;font-family:Inter,sans-serif;cursor:pointer;';
+  unitSel.style.cssText = 'padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:11.5px;font-family:Inter,sans-serif;cursor:pointer;max-width:140px;';
   [['all','All units'],['upper','Upper units only'],['basement','Basement only']].forEach(function(o){
     var opt = document.createElement('option');
     opt.value = o[0]; opt.textContent = o[1];
@@ -13629,7 +13634,7 @@ function ue_buildItemRow(item) {
   // ── Sub-options builder (for Yes/No items — "if yes, choose type") ──
   var subBox = document.createElement('div');
   subBox.className = 'ue-suboption-builder';
-  subBox.style.cssText = 'display:' + (((item.type || 'radio') === 'radio') ? 'block' : 'none') + ';background:#EEF4FB;border:1px solid #6B8FC7;border-radius:7px;padding:7px 8px;';
+  subBox.style.cssText = 'display:' + (((item.type || 'radio') === 'radio') ? 'block' : 'none') + ';background:#EEF4FB;border:1px solid #6B8FC7;border-radius:7px;padding:6px 8px;max-width:100%;';
   subBox.innerHTML = '<div style="font-size:10.5px;font-weight:700;color:var(--navy);margin-bottom:3px;text-transform:uppercase;letter-spacing:0.5px;">If "Yes" — types (optional):</div>' +
     '<div style="font-size:9.5px;color:var(--muted);margin-bottom:6px;line-height:1.3;">Leave empty for simple Yes/No, or add types the customer picks after Yes.</div>';
 
