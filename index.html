@@ -3697,7 +3697,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v103</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v104</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4000,7 +4000,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v103</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v104</div>
     </div>
   </div>
 
@@ -4693,7 +4693,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v103';
+<script>var APP_VERSION = 'v104';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -5923,6 +5923,22 @@ function cdBackToDashboard() {
 }
 
 
+
+// Build a dial-safe tel: value. Keeps the main number's digits, and turns an
+// extension (after #, x, or "ext") into a pause + digits so phones can dial it.
+function _telHref(phone) {
+  if (!phone) return '';
+  var s = String(phone).trim();
+  // split off an extension if present
+  var m = s.match(/(?:#|x|ext\.?|extension)\s*(\d+)\s*$/i);
+  var ext = m ? m[1] : '';
+  var main = ext ? s.slice(0, m.index) : s;
+  var mainDigits = (main.match(/[0-9]+/g) || []).join('');
+  // leading + is allowed for international; preserve it
+  var plus = /^\s*\+/.test(s) ? '+' : '';
+  return plus + mainDigits + (ext ? (',' + ext) : '');
+}
+
 async function _loadPortalConfig(address, unit) {
   var k = btoa(unescape(encodeURIComponent((address||'') + '|' + (unit||'Main')))).replace(/=/g,'');
   var cfg = null;
@@ -5972,7 +5988,7 @@ async function _loadPortalConfig(address, unit) {
     if (cfg && (cfg.contactName || cfg.contactPhone || cfg.contactEmail)) {
       var initial = (cfg.contactName || 'D')[0].toUpperCase();
       var actions = '';
-      if (cfg.contactPhone) actions += '<a href="tel:' + cfg.contactPhone.replace(/[^0-9]/g,'') + '" style="flex:1;text-align:center;background:var(--navy);color:#fff;border-radius:8px;padding:9px;font-size:13px;font-weight:700;text-decoration:none;">📞 Call</a>';
+      if (cfg.contactPhone) actions += '<a href="tel:' + _telHref(cfg.contactPhone) + '" style="flex:1;text-align:center;background:var(--navy);color:#fff;border-radius:8px;padding:9px;font-size:13px;font-weight:700;text-decoration:none;">📞 Call</a>';
       if (cfg.contactEmail) actions += '<a href="mailto:' + _esc(cfg.contactEmail) + '" style="flex:1;text-align:center;background:rgba(13,31,60,0.08);color:var(--navy);border-radius:8px;padding:9px;font-size:13px;font-weight:700;text-decoration:none;">\u2709 Email</a>';
       cc.innerHTML = '<div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px;">' +
         '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:17px;letter-spacing:0.5px;color:var(--navy);margin-bottom:10px;">👤 Your Point of Contact</div>' +
