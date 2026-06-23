@@ -3697,7 +3697,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v100</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v103</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -3747,16 +3747,14 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     <div id="cdWelcomeBanner"></div>
 
     <!-- Primary actions -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px;">
-      <button onclick="cdGoGallery()" style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px 14px;cursor:pointer;text-align:left;box-shadow:0 2px 10px rgba(13,31,60,0.06);">
-        <div style="font-size:26px;margin-bottom:6px;">🖼️</div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:0.5px;color:var(--navy);">View Gallery</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px;">Browse available upgrades</div>
-      </button>
-      <button onclick="cdGoForm()" style="background:var(--navy);border:none;border-radius:14px;padding:18px 14px;cursor:pointer;text-align:left;box-shadow:0 2px 10px rgba(13,31,60,0.12);">
-        <div style="font-size:26px;margin-bottom:6px;">✅</div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:0.5px;color:var(--gold);">My Selections</div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:2px;">Choose & submit upgrades</div>
+    <div style="margin-bottom:8px;">
+      <button onclick="cdGoForm()" style="width:100%;background:var(--navy);border:none;border-radius:14px;padding:20px 18px;cursor:pointer;text-align:left;box-shadow:0 2px 12px rgba(13,31,60,0.15);display:flex;align-items:center;gap:14px;">
+        <div style="font-size:30px;flex-shrink:0;">✅</div>
+        <div style="flex:1;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:0.5px;color:var(--gold);">My Upgrade Selections</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:2px;">View, choose, and submit your upgrades</div>
+        </div>
+        <div style="font-size:22px;color:var(--gold);flex-shrink:0;">›</div>
       </button>
     </div>
 
@@ -4002,7 +4000,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v100</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v103</div>
     </div>
   </div>
 
@@ -4695,7 +4693,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v100';
+<script>var APP_VERSION = 'v103';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -5884,24 +5882,28 @@ async function _loadCustomerUpdatesInto(address, unit, targetId) {
   try {
     var keys = await DB.list('custupdate:');
     var ups = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
-    // match updates for this address (and unit, or all-units)
+    var myAddr = (address||'').toLowerCase().trim();
+    var myUnit = String(unit||'').toLowerCase().trim();
+    // Office saves these as: houseAddress, unit, text, photos, createdAt, projectName
     var mine = ups.filter(function(u){
-      var addrMatch = ((u.address||'').toLowerCase().trim() === (address||'').toLowerCase().trim());
-      if (!addrMatch) return false;
-      if (u.unit && String(u.unit).trim() && String(u.unit).toLowerCase().trim() !== String(unit||'').toLowerCase().trim()) return false;
+      var uAddr = (u.houseAddress || u.address || '').toLowerCase().trim();
+      if (uAddr && uAddr !== myAddr) return false;        // must match this home (blank = all homes)
+      var uUnit = String(u.unit||'').toLowerCase().trim();
+      if (uUnit && uUnit !== myUnit) return false;        // unit-specific (blank = all units)
       return true;
     });
-    mine.sort(function(a,b){ return new Date(b.date||b._createdAt||0) - new Date(a.date||a._createdAt||0); });
+    mine.sort(function(a,b){ return new Date(b.createdAt||b._updatedAt||0) - new Date(a.createdAt||a._updatedAt||0); });
     if (!mine.length) { host.innerHTML = ''; return; }
     host.innerHTML = '<div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;margin-top:14px;">' +
       '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:17px;letter-spacing:0.5px;color:var(--navy);margin-bottom:10px;">\ud83d\udce3 Latest Updates</div>' +
-      mine.slice(0,5).map(function(u){
-        var when = (u.date || u._createdAt) ? new Date(u.date||u._createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+      mine.slice(0,8).map(function(u){
+        var ts = u.createdAt || u._updatedAt;
+        var when = ts ? new Date(ts).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+        var body = u.text || u.body || '';
         var photos = (u.photos||[]).map(function(ph){ return '<img src="'+ph+'" style="width:60px;height:60px;border-radius:7px;object-fit:cover;cursor:pointer;" onclick="_plLightbox(\''+encodeURIComponent(ph)+'\')">'; }).join('');
         return '<div style="border-bottom:1px solid #f0ece2;padding:9px 0;">' +
-          '<div style="font-size:14px;font-weight:700;color:#16233d;">' + _esc(u.title||'Update') + '</div>' +
-          (when ? '<div style="font-size:11px;color:var(--muted);margin-bottom:3px;">' + when + '</div>' : '') +
-          (u.body ? '<div style="font-size:13px;color:#3a3730;line-height:1.45;">' + _esc(u.body) + '</div>' : '') +
+          (when ? '<div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:3px;">' + when + '</div>' : '') +
+          (body ? '<div style="font-size:13px;color:#16233d;line-height:1.5;">' + _esc(body) + '</div>' : '') +
           (photos ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:7px;">' + photos + '</div>' : '') +
         '</div>';
       }).join('') +
@@ -6162,14 +6164,12 @@ function _applySelectionLockState(savedSel) {
   var sheet = document.getElementById('upgradeSheetContent');
   var btn = document.getElementById('submitUpgradesBtn');
   var submitted = savedSel && (savedSel._submittedAt || (savedSel.selections && savedSel.selections._submittedAt));
-  // normalize: work off a single timestamp
   var subAt = submitted;
   var locked = false;
   if (submitted) {
     var elapsed = Date.now() - new Date(subAt).getTime();
     locked = elapsed > (5 * 60 * 60 * 1000);
   }
-  // Create the banner if it isn't there yet.
   if (!banner) {
     var page = document.getElementById('customerPortalPage');
     var firstCard = page ? page.querySelector('.portal-section, .upg-section, form, #upgradeSheetContent') : null;
@@ -6179,22 +6179,15 @@ function _applySelectionLockState(savedSel) {
     if (firstCard && firstCard.parentNode) firstCard.parentNode.insertBefore(banner, firstCard);
   }
   if (locked) {
-    // read-only: disable all inputs in the sheet
-    if (sheet) sheet.querySelectorAll('input, select, textarea, button').forEach(function(el){ el.disabled = true; });
-    if (btn) { btn.disabled = true; btn.textContent = 'Submission Locked \ud83d\udd12'; btn.style.background = '#9CA3AF'; }
-    if (banner) {
-      banner.style.background = '#fdeaea';
-      banner.style.border = '1px solid #f0b8b8';
-      banner.style.color = '#9a3a3a';
-      banner.innerHTML = '<b>\ud83d\udd12 No changes can be made.</b> Your 5-hour edit window has passed and your upgrade selections are now final. The choices below are what you submitted. If you need any changes, please call the office at <a href="tel:8452881036" style="color:#9a3a3a;font-weight:700;">845-288-1036 #5</a>.';
-      banner.style.display = 'block';
-    }
-    // also disable the signature pad if present
-    var sigClear = document.getElementById('clearSignature'); if (sigClear) sigClear.disabled = true;
+    // After the 5-hour window: show the FINALIZED PAPER view (like the printout), not the form.
+    _renderFinalizedPaper(savedSel);
   } else {
+    // Within the window (or not yet submitted): normal editable form.
+    var paper = document.getElementById('finalizedPaperView');
+    if (paper) paper.style.display = 'none';
+    _showPortalFormParts(true);
     if (sheet) sheet.querySelectorAll('input, select, textarea, button').forEach(function(el){ el.disabled = false; });
     if (submitted && banner) {
-      // within window: gentle reminder they can still edit
       var leftMs = (5 * 60 * 60 * 1000) - (Date.now() - new Date(subAt).getTime());
       var hrs = Math.floor(leftMs / 3600000); var mins = Math.floor((leftMs % 3600000) / 60000);
       banner.style.background = '#fff7e6';
@@ -6206,6 +6199,98 @@ function _applySelectionLockState(savedSel) {
       banner.style.display = 'none';
     }
   }
+}
+
+// Show/hide the editable portal parts (form sections, submit button, etc.)
+function _showPortalFormParts(show) {
+  var disp = show ? '' : 'none';
+  var page = document.getElementById('customerPortalPage');
+  if (!page) return;
+  // hide everything inside the portal body except our paper view + header
+  ['upgradeSheetContent','submitUpgradesBtn','printSaveRow','submitMsg','upgradeTotalBar'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.style.display = show ? '' : 'none';
+  });
+  page.querySelectorAll('.submit-note').forEach(function(n){ n.style.display = show ? '' : 'none'; });
+  // hide the customer-details section + signature area when showing paper
+  page.querySelectorAll('.portal-section, .upg-section').forEach(function(sec){
+    if (sec.id === 'finalizedPaperWrap') return;
+    sec.style.display = disp;
+  });
+}
+
+// Render the customer's submitted selections as a clean printed-paper layout, inline.
+function _renderFinalizedPaper(saved) {
+  _showPortalFormParts(false);
+  var lockBanner = document.getElementById('selectionLockBanner');
+  if (lockBanner) lockBanner.style.display = 'none';
+  var page = document.getElementById('customerPortalPage');
+  if (!page) return;
+  var paper = document.getElementById('finalizedPaperView');
+  if (!paper) {
+    paper = document.createElement('div');
+    paper.id = 'finalizedPaperView';
+    paper.style.cssText = 'max-width:760px;margin:16px auto;padding:0 16px 40px;';
+    var inner = page.querySelector('.portal-inner, .container, .portal-body') || page;
+    inner.appendChild(paper);
+  }
+  paper.style.display = 'block';
+
+  var sections = window._upgradeSections || [];
+  var sel = (saved && saved.selections) ? saved.selections : {};
+  var rowsHtml = '';
+  sections.forEach(function(sec){
+    var title = sec.label || sec.title || '';
+    var items = sec.fields || sec.items || [];
+    var secRows = '';
+    items.forEach(function(it){
+      if ((it.key||'').indexOf('_glass') > -1) return;
+      var val = sel[it.key];
+      if (val === undefined || val === '' || val === null) return;
+      var disp = val === 'yes' ? 'YES' : (val === 'no' ? 'No' : val);
+      var priceTxt = (it.price && (val==='yes' || (val && val!=='no'))) ? (' &nbsp;<span style="color:#9a7d2e;">+$' + Number(it.price).toLocaleString() + '</span>') : '';
+      secRows += '<tr><td style="padding:7px 12px;border-bottom:1px solid #eee;font-size:13px;color:#222;">' + _esc(it.name||it.key) + priceTxt + '</td>' +
+                 '<td style="padding:7px 12px;border-bottom:1px solid #eee;font-weight:700;text-align:right;font-size:13px;color:#1a2b4a;">' + _esc(disp) + '</td></tr>';
+    });
+    if (secRows) {
+      rowsHtml += '<tr><td colspan="2" style="background:#1a2b4a;color:#fff;padding:8px 12px;font-weight:700;letter-spacing:1px;font-size:12px;">' + _esc(title.toUpperCase()) + '</td></tr>' + secRows;
+    }
+  });
+
+  var totalTxt = saved && saved.upgradeTotal ? saved.upgradeTotal : '';
+  var sigImg = saved && saved.signature ? '<img src="' + saved.signature + '" style="height:50px;">' : '';
+  var when = saved && saved._submittedAt ? new Date(saved._submittedAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '';
+
+  paper.innerHTML =
+    '<div style="background:#fdeaea;border:1px solid #f0b8b8;border-radius:10px;padding:13px 15px;margin-bottom:16px;font-size:13px;color:#9a3a3a;line-height:1.5;">' +
+      '<b>\ud83d\udd12 Your selections are final.</b> The 5-hour edit window has passed, so this is your finalized upgrade sheet. If you need any changes, please call the office at <a href="tel:8452881036" style="color:#9a3a3a;font-weight:700;">845-288-1036 #5</a>.' +
+    '</div>' +
+    '<div id="paperPrintable" style="background:#fff;border:1px solid #ddd;border-radius:12px;padding:24px;">' +
+      '<div style="text-align:center;border-bottom:2px solid #1a2b4a;padding-bottom:14px;margin-bottom:16px;">' +
+        '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:24px;letter-spacing:2px;color:#1a2b4a;">DILIGENT DEVELOPERS</div>' +
+        '<div style="font-size:12px;color:#888;letter-spacing:1px;">UPGRADE SELECTIONS</div>' +
+      '</div>' +
+      '<div style="font-size:13px;color:#444;margin-bottom:14px;line-height:1.7;">' +
+        '<b>Name:</b> ' + _esc(saved.name||'') + '<br>' +
+        '<b>Address:</b> ' + _esc(saved.address||'') + (saved.unit ? (' &nbsp; <b>Unit:</b> ' + _esc(saved.unit)) : '') + '<br>' +
+        (when ? '<b>Submitted:</b> ' + when : '') +
+      '</div>' +
+      '<table style="width:100%;border-collapse:collapse;border:1px solid #eee;">' + rowsHtml + '</table>' +
+      (totalTxt ? '<div style="text-align:right;font-size:16px;font-weight:700;color:#1a2b4a;margin-top:14px;">Total: ' + _esc(totalTxt) + '</div>' : '') +
+      (sigImg ? '<div style="margin-top:20px;border-top:1px solid #eee;padding-top:12px;"><div style="font-size:11px;color:#888;">Signature</div>' + sigImg + '</div>' : '') +
+    '</div>' +
+    '<button onclick="_printFinalizedPaper()" style="width:100%;margin-top:16px;padding:13px;border-radius:9px;border:none;background:var(--navy);color:#fff;font-size:14px;font-weight:700;cursor:pointer;">\ud83d\udda8\ufe0f Print / Save as PDF</button>' +
+    '<button onclick="cdBackToDashboard()" style="width:100%;margin-top:8px;padding:12px;border-radius:9px;border:1px solid var(--border);background:#fff;color:var(--navy);font-size:13px;font-weight:600;cursor:pointer;">\u2190 Back to My Home</button>';
+}
+
+function _printFinalizedPaper() {
+  var el = document.getElementById('paperPrintable');
+  if (!el) { window.print(); return; }
+  var w = window.open('', '_blank');
+  if (!w) { alert('Please allow pop-ups to print/save.'); return; }
+  w.document.write('<!DOCTYPE html><html><head><title>Upgrade Selections</title></head><body style="font-family:Arial,sans-serif;max-width:720px;margin:0 auto;padding:24px;">' + el.innerHTML + '</body></html>');
+  w.document.close();
+  setTimeout(function(){ w.print(); }, 300);
 }
 
 
