@@ -3697,7 +3697,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v109</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v113</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -3969,6 +3969,11 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
         </button>
       </li>
       <li class="office-nav-item">
+        <button class="office-nav-btn" onclick="openGlobalSearch();closeSidebar();" id="navbtn-globalSearch">
+          <span class="nav-icon">🔍</span> Search Everything
+        </button>
+      </li>
+      <li class="office-nav-item">
         <button class="office-nav-btn" onclick="switchTab('teamChat');closeSidebar();" id="navbtn-teamChat">
           <span class="nav-icon">💬</span> Team Chat
         </button>
@@ -3985,6 +3990,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
         <button class="office-nav-btn nav-sub" onclick="switchTab('punchlist');closeSidebar();" id="navbtn-punchlist"><span class="nav-icon">✅</span> Punch Lists</button>
         <button class="office-nav-btn nav-sub" onclick="switchTab('specs');closeSidebar();" id="navbtn-specs"><span class="nav-icon">🏠</span> House Specs</button>
         <button class="office-nav-btn nav-sub" onclick="switchTab('tasks');closeSidebar();" id="navbtn-tasks"><span class="nav-icon">📝</span> Tasks</button>
+        <button class="office-nav-btn nav-sub" onclick="switchTab('taskTemplates');closeSidebar();" id="navbtn-taskTemplates"><span class="nav-icon">📋</span> Task Templates</button>
         <button class="office-nav-btn nav-sub" onclick="switchTab('scheduling');closeSidebar();" id="navbtn-scheduling"><span class="nav-icon">📅</span> Scheduling</button>
       </li>
       <!-- LOGBOOK group -->
@@ -4024,12 +4030,15 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       </li>
       <li class="office-nav-group" id="grp-sub" style="display:none;">
         <button class="office-nav-btn nav-sub" onclick="switchTab('subs');closeSidebar();" id="navbtn-subs"><span class="nav-icon">🔧</span> Subcontractors</button>
+        <button class="office-nav-btn nav-sub" onclick="switchTab('subCalendar');closeSidebar();" id="navbtn-subCalendar"><span class="nav-icon">📅</span> Sub Calendar</button>
+        <button class="office-nav-btn nav-sub" onclick="switchTab('vendors');closeSidebar();" id="navbtn-vendors"><span class="nav-icon">📇</span> Vendors</button>
         <button class="office-nav-btn nav-sub admin-only" style="display:none;" onclick="switchTab('employees');closeSidebar();" id="navbtn-employees"><span class="nav-icon">👤</span> Employees</button>
       </li>
     </ul>
     <div class="office-sidebar-footer">
+      <div id="bioToggleRow" style="margin-bottom:10px;"></div>
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v109</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v113</div>
     </div>
   </div>
 
@@ -4240,6 +4249,38 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
         <div style="font-size:13px;color:var(--muted);">Walkthrough and site-visit requests from your customers.</div>
       </div>
       <div id="walkthroughsList"></div>
+    </div>
+
+    
+    <!-- SUB CALENDAR TAB -->
+    <div id="tab-subCalendar" class="office-tab" style="display:none;">
+      <div style="margin-bottom:16px;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;color:var(--navy);">Subcontractor Calendar</div>
+        <div style="font-size:13px;color:var(--muted);">Tap any day to schedule a sub. Gold dots mean someone's booked.</div>
+      </div>
+      <div id="subCalendar"></div>
+    </div>
+
+    <!-- VENDORS TAB -->
+    <div id="tab-vendors" class="office-tab" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+        <div><div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;color:var(--navy);">Vendors &amp; Suppliers</div>
+        <div style="font-size:13px;color:var(--muted);">Your supplier and vendor contacts.</div></div>
+        <button onclick="openVendorModal()" style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;">+ New</button>
+      </div>
+      <input id="vendorSearch" oninput="renderVendors()" class="form-input" placeholder="Search vendors..." style="margin-bottom:14px;">
+      <div id="vendorsList"></div>
+    </div>
+
+    
+    <!-- TASK TEMPLATES TAB -->
+    <div id="tab-taskTemplates" class="office-tab" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+        <div><div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;color:var(--navy);">Task Templates</div>
+        <div style="font-size:13px;color:var(--muted);">Reusable task lists you can apply to any project in one tap.</div></div>
+        <button onclick="openTemplateModal()" style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;">+ New</button>
+      </div>
+      <div id="taskTemplatesList"></div>
     </div>
 
     <!-- CUSTOMER REPORTS TAB -->
@@ -4780,7 +4821,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v109';
+<script>var APP_VERSION = 'v113';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -5162,8 +5203,31 @@ let currentUser = null;
 // ════════════════════════════════════════════
 async function init() {
   if (typeof applyTheme === 'function') { try { applyTheme(); } catch(e){} }
+  // Biometric app lock: if enabled, require fingerprint/Face ID before restoring any session.
+  try {
+    if (typeof biometricEnabled === 'function' && biometricEnabled() && _isInstalledPhoneApp()) {
+      var _lp = localStorage.getItem('dd_lastPage');
+      if (_lp) { await _showBioLock(); }
+    }
+  } catch(e) {}
   try { var _vl = document.getElementById('appVersionLabel'); if (_vl) _vl.textContent = APP_VERSION; } catch(e) {}
   try { var _cv = document.getElementById('custAuthVersion'); if (_cv) _cv.textContent = APP_VERSION; } catch(e) {}
+  // ── Restore a logged-in subcontractor (stay logged in) ──
+  try {
+    var _subCode = localStorage.getItem('dd_subSession');
+    if (_subCode && localStorage.getItem('dd_lastPage') === 'subPortalPage') {
+      var _sub = await _findSubByCode(_subCode);
+      if (_sub) {
+        var l0 = document.getElementById('bootLoader'); if (l0) l0.style.display = 'none';
+        _currentSub = _sub;
+        document.getElementById('subPortalName').textContent = _sub.name || 'Subcontractor';
+        document.getElementById('subPortalTrade').textContent = _sub.trade || '';
+        showPage('subPortalPage');
+        await renderSubPortal();
+        return;
+      }
+    }
+  } catch(e) {}
   // ── Restore a customer's portal session on refresh (so they stay where they were) ──
   try {
     var _lastPage = localStorage.getItem('dd_lastPage');
@@ -10065,6 +10129,8 @@ async function switchTab(tab) {
   } catch(e) {}
   try { if (tab === 'teamChat') { renderTeamChat(); startChatPolling(); } else { stopChatPolling(); } } catch(e) {}
   try { if (tab === 'walkthroughs') renderWalkthroughs(); } catch(e) {}
+  try { if (tab === 'vendors') renderVendors(); if (tab === 'subCalendar') renderSubCalendar(); } catch(e) {}
+  try { if (tab === 'taskTemplates') renderTaskTemplates(); } catch(e) {}
 }
 
 // ════════════════════════════════════════════
@@ -10492,6 +10558,368 @@ function startChatPolling() {
   _chatTimer = setInterval(function(){ if (document.getElementById('tab-teamChat') && getComputedStyle(document.getElementById('tab-teamChat')).display !== 'none') renderTeamChat(); }, 8000);
 }
 function stopChatPolling() { if (_chatTimer) { clearInterval(_chatTimer); _chatTimer = null; } }
+
+
+
+
+
+function _renderBioToggle() {
+  var host = document.getElementById('bioToggleRow');
+  if (!host) return;
+  if (typeof _biometricSupported === 'function' && !_biometricSupported()) { host.innerHTML = ''; return; }
+  var on = (typeof biometricEnabled === 'function') && biometricEnabled();
+  host.innerHTML = '<button onclick="' + (on ? 'disableBiometric()' : 'enableBiometric()') + '" style="width:100%;background:' + (on?'rgba(201,168,76,0.18)':'rgba(255,255,255,0.06)') + ';color:' + (on?'var(--gold)':'#fff') + ';border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:9px;font-size:12px;font-weight:600;cursor:pointer;">👆 Fingerprint / Face ID: ' + (on ? 'On' : 'Off') + '</button>';
+}
+
+// ===================== BIOMETRIC APP LOCK (fingerprint / Face ID) =====================
+function _isInstalledPhoneApp() {
+  // Must be running as an installed PWA (standalone), not a browser tab.
+  var standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+                   (window.navigator.standalone === true);
+  // Must be a phone (mobile user agent), not desktop.
+  var isPhone = /Android|iPhone|iPod|Windows Phone/i.test(navigator.userAgent || '');
+  return standalone && isPhone;
+}
+function _biometricSupported() {
+  // Only offer biometrics on the installed phone app — never desktop or a browser tab.
+  if (!_isInstalledPhoneApp()) return false;
+  return !!(window.PublicKeyCredential && navigator.credentials && navigator.credentials.create);
+}
+function _b64ToBuf(b64) { var bin = atob(b64.replace(/-/g,'+').replace(/_/g,'/')); var buf = new Uint8Array(bin.length); for (var i=0;i<bin.length;i++) buf[i]=bin.charCodeAt(i); return buf.buffer; }
+function _bufToB64(buf) { var bytes = new Uint8Array(buf); var s=''; for (var i=0;i<bytes.length;i++) s+=String.fromCharCode(bytes[i]); return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,''); }
+function biometricEnabled() { try { return !!localStorage.getItem('dd_bioCredId'); } catch(e){ return false; } }
+async function enableBiometric() {
+  if (!_biometricSupported()) { alert('Your device or browser doesn\u2019t support fingerprint/Face ID here. Try the installed app over HTTPS.'); return false; }
+  try {
+    var challenge = new Uint8Array(32); crypto.getRandomValues(challenge);
+    var userId = new Uint8Array(16); crypto.getRandomValues(userId);
+    var cred = await navigator.credentials.create({ publicKey: {
+      challenge: challenge,
+      rp: { name: 'Diligent Developers' },
+      user: { id: userId, name: (currentUser&&currentUser.email)||'user', displayName: (currentUser&&currentUser.name)||'User' },
+      pubKeyCredParams: [{ type:'public-key', alg:-7 }, { type:'public-key', alg:-257 }],
+      authenticatorSelection: { authenticatorAttachment:'platform', userVerification:'required' },
+      timeout: 60000, attestation: 'none'
+    }});
+    localStorage.setItem('dd_bioCredId', _bufToB64(cred.rawId));
+    alert('Fingerprint / Face ID unlock is now on.');
+    if (typeof _renderBioToggle === 'function') _renderBioToggle();
+    return true;
+  } catch(e) { alert('Could not set up biometric unlock.'); return false; }
+}
+function disableBiometric() {
+  try { localStorage.removeItem('dd_bioCredId'); } catch(e){}
+  if (typeof _renderBioToggle === 'function') _renderBioToggle();
+  alert('Fingerprint / Face ID unlock turned off.');
+}
+async function _biometricVerify() {
+  var credId = localStorage.getItem('dd_bioCredId');
+  if (!credId) return true; // not enabled
+  if (!_biometricSupported()) return true;
+  try {
+    var challenge = new Uint8Array(32); crypto.getRandomValues(challenge);
+    await navigator.credentials.get({ publicKey: {
+      challenge: challenge,
+      allowCredentials: [{ type:'public-key', id: _b64ToBuf(credId) }],
+      userVerification: 'required', timeout: 60000
+    }});
+    return true;
+  } catch(e) { return false; }
+}
+// Show a lock screen overlay; resolve when unlocked.
+function _showBioLock() {
+  return new Promise(function(resolve) {
+    var ov = document.getElementById('bioLockOverlay');
+    if (!ov) { resolve(true); return; }
+    ov.style.display = 'flex';
+    window._bioUnlock = async function() {
+      var ok = await _biometricVerify();
+      if (ok) { ov.style.display = 'none'; resolve(true); }
+      else { var m=document.getElementById('bioLockMsg'); if(m){ m.textContent='Not recognized. Try again.'; } }
+    };
+    // auto-prompt once
+    setTimeout(function(){ window._bioUnlock(); }, 400);
+  });
+}
+
+// ===================== TASK TEMPLATES =====================
+async function renderTaskTemplates() {
+  var host = document.getElementById('taskTemplatesList');
+  if (!host) return;
+  host.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;">Loading…</div>';
+  var keys = await DB.list('tasktmpl:');
+  var tmpls = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+  tmpls.sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); });
+  if (!tmpls.length) {
+    host.innerHTML = '<div class="tab-empty"><div class="tab-empty-icon">📋</div><div class="tab-empty-title">No Templates</div><div class="tab-empty-desc">Create a reusable task list (e.g. "New Build Checklist") and apply it to any project.</div></div>';
+    return;
+  }
+  host.innerHTML = tmpls.map(function(t){
+    var items = (t.tasks||[]).map(function(x){ return '<li style="font-size:12px;color:#3a3730;margin:2px 0;">'+_esc(x)+'</li>'; }).join('');
+    return '<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:13px 15px;margin-bottom:10px;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:start;gap:10px;">' +
+        '<div style="font-size:15px;font-weight:700;color:var(--navy);">' + _esc(t.name||'') + ' <span style="font-size:11px;color:var(--muted);font-weight:400;">(' + (t.tasks||[]).length + ' tasks)</span></div>' +
+        '<button onclick="_lbDelete(\'tasktmpl:'+t.id+'\',renderTaskTemplates)" style="background:none;border:none;color:#c0392b;font-size:13px;cursor:pointer;flex-shrink:0;">\u2715</button>' +
+      '</div>' +
+      '<ul style="margin:8px 0 0;padding-left:18px;">' + items + '</ul>' +
+      '<button onclick="openApplyTemplate(\''+t.id+'\')" style="margin-top:10px;background:var(--navy);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;">Apply to Project</button>' +
+    '</div>';
+  }).join('');
+}
+var _tmplTasks = [];
+function openTemplateModal() {
+  _tmplTasks = [];
+  document.getElementById('tmpl-name').value = '';
+  document.getElementById('tmpl-taskInput').value = '';
+  _tmplRender();
+  document.getElementById('modal-tasktmpl').classList.add('open');
+}
+function closeTemplateModal(){ document.getElementById('modal-tasktmpl').classList.remove('open'); _tmplTasks=[]; }
+function _tmplAddTask() {
+  var inp = document.getElementById('tmpl-taskInput');
+  var v = inp.value.trim();
+  if (!v) return;
+  _tmplTasks.push(v); inp.value=''; inp.focus(); _tmplRender();
+}
+function _tmplRender() {
+  var h = document.getElementById('tmpl-taskList');
+  if (!h) return;
+  h.innerHTML = _tmplTasks.map(function(t,i){
+    return '<div style="display:flex;justify-content:space-between;align-items:center;background:#faf8f3;border-radius:7px;padding:7px 10px;margin-bottom:5px;"><span style="font-size:13px;color:#16233d;">'+_esc(t)+'</span><button onclick="_tmplTasks.splice('+i+',1);_tmplRender()" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:12px;">\u2715</button></div>';
+  }).join('');
+}
+function _tmplKeydown(e){ if(e.key==='Enter'){ e.preventDefault(); _tmplAddTask(); } }
+async function saveTemplate() {
+  var name = document.getElementById('tmpl-name').value.trim();
+  if (!name) { alert('Name your template.'); return; }
+  if (!_tmplTasks.length) { alert('Add at least one task.'); return; }
+  var id = 'tt_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+  await DB.set('tasktmpl:'+id, { id:id, name:name, tasks:_tmplTasks.slice(), _createdAt:Date.now() });
+  closeTemplateModal(); renderTaskTemplates();
+}
+var _applyTmplId = null;
+async function openApplyTemplate(id) {
+  _applyTmplId = id;
+  var keys = await DB.list('project:');
+  var projects = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+  var sel = document.getElementById('applyTmpl-project');
+  sel.innerHTML = '<option value="">No specific project</option>' + projects.map(function(p){ return '<option value="'+p.id+'">'+_esc(p.name||'')+'</option>'; }).join('');
+  document.getElementById('modal-applytmpl').classList.add('open');
+}
+function closeApplyTemplate(){ document.getElementById('modal-applytmpl').classList.remove('open'); _applyTmplId=null; }
+async function confirmApplyTemplate() {
+  if (!_applyTmplId) return;
+  var tmpl = await DB.get('tasktmpl:'+_applyTmplId);
+  if (!tmpl) return;
+  var projId = document.getElementById('applyTmpl-project').value;
+  var projName = '';
+  if (projId) { var pj = await DB.get('project:'+projId); projName = pj ? (pj.name||'') : ''; }
+  var made = 0;
+  for (var i=0;i<(tmpl.tasks||[]).length;i++) {
+    var tid = 'task_' + Date.now() + '_' + Math.floor(Math.random()*100000) + '_' + i;
+    var t = { id:tid, title:tmpl.tasks[i], description:'', ownerId:(typeof _effectiveUserId==='function'?_effectiveUserId():''),
+      assigneeId:'', assigneeName:'', assignee2Id:'', dueDate:'', startDate:'', priority:'medium', status:'todo',
+      projectId:projId, projectName:projName, tags:[], subtasks:[], comments:[], followers:[], createdAt:new Date().toISOString() };
+    await DB.set('task:'+tid, t);
+    made++;
+  }
+  closeApplyTemplate();
+  alert(made + ' tasks created' + (projName?(' for '+projName):'') + '.');
+  try { if (typeof renderTasks === 'function') renderTasks(); } catch(e) {}
+}
+
+// ===================== GLOBAL SEARCH =====================
+function openGlobalSearch() {
+  document.getElementById('modal-globalsearch').classList.add('open');
+  var inp = document.getElementById('globalSearchInput');
+  inp.value = '';
+  document.getElementById('globalSearchResults').innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px;">Start typing to search everything…</div>';
+  setTimeout(function(){ inp.focus(); }, 150);
+}
+function closeGlobalSearch(){ document.getElementById('modal-globalsearch').classList.remove('open'); }
+var _gsTimer = null;
+function _gsInput() {
+  if (_gsTimer) clearTimeout(_gsTimer);
+  _gsTimer = setTimeout(runGlobalSearch, 250);
+}
+async function runGlobalSearch() {
+  var q = document.getElementById('globalSearchInput').value.trim().toLowerCase();
+  var host = document.getElementById('globalSearchResults');
+  if (!q || q.length < 2) { host.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px;">Type at least 2 characters…</div>'; return; }
+  host.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;">Searching…</div>';
+  var groups = [
+    { key:'project:', label:'Projects', icon:'🏗\uFE0F', tab:'projects', fields:['name'] },
+    { key:'task:', label:'Tasks', icon:'📝', tab:'tasks', fields:['title','description','projectName','assigneeName'] },
+    { key:'upgrades:', label:'Customers', icon:'👥', tab:'customers', fields:['name','address','email','phone'] },
+    { key:'vendor:', label:'Vendors', icon:'📇', tab:'vendors', fields:['name','category','contact'] },
+    { key:'sitelog:', label:'Site Logs', icon:'📓', tab:'dailyLog', fields:['notes','weather','crew'] },
+    { key:'changeorder:', label:'Change Orders', icon:'📝', tab:'changeOrders', fields:['title','description'] },
+    { key:'subcontractor:', label:'Subcontractors', icon:'🔧', tab:'subs', fields:['name','trade'] }
+  ];
+  var out = '';
+  for (var g=0; g<groups.length; g++) {
+    var grp = groups[g];
+    try {
+      var keys = await DB.list(grp.key);
+      var recs = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+      var matches = recs.filter(function(r){
+        return grp.fields.some(function(f){ return r[f] && String(r[f]).toLowerCase().indexOf(q) > -1; });
+      });
+      if (matches.length) {
+        out += '<div style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--gold);font-weight:700;margin:12px 0 6px;">' + grp.icon + ' ' + grp.label + ' (' + matches.length + ')</div>';
+        out += matches.slice(0,6).map(function(r){
+          var title = r.name || r.title || 'Item';
+          var sub = r.address || r.projectName || r.category || r.trade || r.description || '';
+          return '<div onclick="_gsGo(\''+grp.tab+'\')" style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:9px 12px;margin-bottom:6px;cursor:pointer;">' +
+            '<div style="font-size:13px;font-weight:700;color:var(--navy);">'+_esc(String(title))+'</div>' +
+            (sub?'<div style="font-size:11px;color:var(--muted);">'+_esc(String(sub).slice(0,80))+'</div>':'') +
+          '</div>';
+        }).join('');
+      }
+    } catch(e) {}
+  }
+  host.innerHTML = out || '<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px;">No matches found.</div>';
+}
+function _gsGo(tab) {
+  closeGlobalSearch();
+  try { switchTab(tab); } catch(e) {}
+}
+
+// ===================== VENDOR / SUPPLIER DIRECTORY =====================
+async function renderVendors() {
+  var host = document.getElementById('vendorsList');
+  if (!host) return;
+  host.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;">Loading…</div>';
+  var keys = await DB.list('vendor:');
+  var vendors = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+  vendors.sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); });
+  var q = (document.getElementById('vendorSearch')||{}).value;
+  if (q) { q = q.toLowerCase(); vendors = vendors.filter(function(v){ return ((v.name||'')+(v.category||'')+(v.contact||'')).toLowerCase().indexOf(q) > -1; }); }
+  if (!vendors.length) {
+    host.innerHTML = '<div class="tab-empty"><div class="tab-empty-icon">📇</div><div class="tab-empty-title">No Vendors</div><div class="tab-empty-desc">Add your suppliers and vendors above.</div></div>';
+    return;
+  }
+  host.innerHTML = vendors.map(function(v){
+    var tel = v.phone ? _telHref(v.phone) : '';
+    return '<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:13px 15px;margin-bottom:10px;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:start;gap:10px;">' +
+        '<div><div style="font-size:14px;font-weight:700;color:var(--navy);">' + _esc(v.name||'') + '</div>' +
+        (v.category?'<div style="font-size:11px;color:var(--gold);font-weight:600;">'+_esc(v.category)+'</div>':'') +
+        (v.contact?'<div style="font-size:12px;color:var(--muted);">'+_esc(v.contact)+'</div>':'') + '</div>' +
+        '<button onclick="_lbDelete(\'vendor:'+v.id+'\',renderVendors)" style="background:none;border:none;color:#c0392b;font-size:13px;cursor:pointer;flex-shrink:0;">\u2715</button>' +
+      '</div>' +
+      (v.note?'<div style="font-size:12px;color:#3a3730;margin-top:5px;line-height:1.45;">'+_esc(v.note)+'</div>':'') +
+      '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">' +
+        (v.phone?'<a href="tel:'+tel+'" style="font-size:12px;padding:5px 12px;border-radius:6px;background:var(--navy);color:#fff;text-decoration:none;font-weight:700;">📞 Call</a>':'') +
+        (v.phone?'<a href="sms:'+tel+'" style="font-size:12px;padding:5px 12px;border-radius:6px;background:rgba(13,31,60,0.08);color:var(--navy);text-decoration:none;font-weight:700;">💬 Text</a>':'') +
+        (v.email?'<a href="mailto:'+_esc(v.email)+'" style="font-size:12px;padding:5px 12px;border-radius:6px;background:rgba(13,31,60,0.08);color:var(--navy);text-decoration:none;font-weight:700;">\u2709 Email</a>':'') +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+function openVendorModal() {
+  ['vend-name','vend-category','vend-contact','vend-phone','vend-email','vend-note'].forEach(function(f){ var el=document.getElementById(f); if(el) el.value=''; });
+  document.getElementById('modal-vendor').classList.add('open');
+}
+function closeVendorModal(){ document.getElementById('modal-vendor').classList.remove('open'); }
+async function saveVendor() {
+  var name = document.getElementById('vend-name').value.trim();
+  if (!name) { alert('Enter a vendor name.'); return; }
+  var id = 'vn_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+  var rec = { id:id, name:name, category:document.getElementById('vend-category').value.trim(),
+    contact:document.getElementById('vend-contact').value.trim(), phone:document.getElementById('vend-phone').value.trim(),
+    email:document.getElementById('vend-email').value.trim(), note:document.getElementById('vend-note').value.trim(), _createdAt:Date.now() };
+  await DB.set('vendor:'+id, rec);
+  try{ logActivity('Added a vendor'); }catch(e){}
+  closeVendorModal(); renderVendors();
+}
+
+// ===================== SUBCONTRACTOR CALENDAR =====================
+var _subCalMonth = null; // first day of displayed month (timestamp)
+async function renderSubCalendar() {
+  var host = document.getElementById('subCalendar');
+  if (!host) return;
+  if (!_subCalMonth) { var n=new Date(); _subCalMonth = new Date(n.getFullYear(), n.getMonth(), 1).getTime(); }
+  var first = new Date(_subCalMonth);
+  var year = first.getFullYear(), month = first.getMonth();
+  var monthName = first.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  // load schedule entries + subs
+  var keys = await DB.list('subsched:');
+  var sched = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+  var subKeys = await DB.list('subcontractor:');
+  var subs = (await Promise.all(subKeys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+  window._calSubs = subs;
+  // build calendar grid
+  var daysInMonth = new Date(year, month+1, 0).getDate();
+  var startDow = new Date(year, month, 1).getDay();
+  var byDay = {};
+  sched.forEach(function(s){
+    var d = new Date(s.date);
+    if (d.getFullYear()===year && d.getMonth()===month) {
+      var day = d.getDate();
+      (byDay[day] = byDay[day] || []).push(s);
+    }
+  });
+  var html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">' +
+    '<button onclick="_subCalNav(-1)" style="background:rgba(13,31,60,0.08);border:none;border-radius:7px;padding:7px 12px;font-size:14px;cursor:pointer;color:var(--navy);font-weight:700;">\u2039</button>' +
+    '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:20px;letter-spacing:1px;color:var(--navy);">' + monthName + '</div>' +
+    '<button onclick="_subCalNav(1)" style="background:rgba(13,31,60,0.08);border:none;border-radius:7px;padding:7px 12px;font-size:14px;cursor:pointer;color:var(--navy);font-weight:700;">\u203a</button>' +
+  '</div>';
+  html += '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;">';
+  ['S','M','T','W','T','F','S'].forEach(function(d){ html += '<div style="text-align:center;font-size:10px;color:var(--muted);font-weight:700;padding:4px 0;">'+d+'</div>'; });
+  for (var i=0;i<startDow;i++) html += '<div></div>';
+  for (var day=1; day<=daysInMonth; day++) {
+    var entries = byDay[day] || [];
+    var dots = entries.slice(0,3).map(function(){ return '<span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--gold);margin:0 1px;"></span>'; }).join('');
+    html += '<div onclick="_subCalDay('+year+','+month+','+day+')" style="min-height:46px;border:1px solid var(--border);border-radius:7px;padding:3px;cursor:pointer;background:'+(entries.length?'#fffdf6':'#fff')+';">' +
+      '<div style="font-size:11px;color:#16233d;font-weight:600;">'+day+'</div>' +
+      '<div style="text-align:center;margin-top:2px;">'+dots+'</div>' +
+      (entries.length>3?'<div style="font-size:8px;color:var(--muted);text-align:center;">+'+(entries.length-3)+'</div>':'') +
+    '</div>';
+  }
+  html += '</div>';
+  host.innerHTML = html;
+}
+function _subCalNav(dir) {
+  var d = new Date(_subCalMonth);
+  _subCalMonth = new Date(d.getFullYear(), d.getMonth()+dir, 1).getTime();
+  renderSubCalendar();
+}
+async function _subCalDay(year, month, day) {
+  _scDate = new Date(year, month, day, 12, 0, 0).getTime();
+  var keys = await DB.list('subsched:');
+  var sched = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+  var dayEntries = sched.filter(function(s){ var d=new Date(s.date); return d.getFullYear()===year&&d.getMonth()===month&&d.getDate()===day; });
+  var subs = window._calSubs || [];
+  var listHtml = dayEntries.length ? dayEntries.map(function(s){
+    var sub = subs.find(function(x){ return x.id===s.subId; });
+    return '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;background:#faf8f3;border-radius:8px;padding:8px 11px;margin-bottom:6px;">' +
+      '<div><div style="font-size:13px;font-weight:700;color:var(--navy);">'+_esc(sub?sub.name:'Subcontractor')+'</div>' +
+      '<div style="font-size:11px;color:var(--muted);">'+_esc(s.site||'')+(s.note?(' \u00b7 '+_esc(s.note)):'')+'</div></div>' +
+      '<button onclick="_subSchedDelete(\''+s.id+'\')" style="background:none;border:none;color:#c0392b;font-size:13px;cursor:pointer;">\u2715</button>' +
+    '</div>';
+  }).join('') : '<div style="font-size:12px;color:var(--muted);padding:6px 0;">Nothing scheduled.</div>';
+  document.getElementById('scDayTitle').textContent = new Date(year,month,day).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  document.getElementById('scDayList').innerHTML = listHtml;
+  document.getElementById('sc-sub').innerHTML = subs.map(function(s){ return '<option value="'+s.id+'">'+_esc(s.name||'')+(s.trade?(' ('+_esc(s.trade)+')'):'')+'</option>'; }).join('');
+  document.getElementById('sc-site').value='';
+  document.getElementById('sc-note').value='';
+  document.getElementById('modal-subsched').classList.add('open');
+}
+var _scDate = null;
+function closeSubSched(){ document.getElementById('modal-subsched').classList.remove('open'); }
+async function saveSubSched() {
+  var subId = document.getElementById('sc-sub').value;
+  if (!subId) { alert('Add a subcontractor first (Subcontractors tab).'); return; }
+  var id = 'ss_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+  await DB.set('subsched:'+id, { id:id, subId:subId, date:_scDate, site:document.getElementById('sc-site').value.trim(), note:document.getElementById('sc-note').value.trim(), _createdAt:Date.now() });
+  closeSubSched(); renderSubCalendar();
+}
+async function _subSchedDelete(id) {
+  if(!confirm('Remove this scheduling?')) return;
+  await DB.delete('subsched:'+id);
+  closeSubSched(); renderSubCalendar();
+}
 
 // ===================== LOGBOOK CLUSTER =====================
 // Shared helpers
@@ -11433,10 +11861,13 @@ async function subLogin() {
   _currentSub = sub;
   document.getElementById('subPortalName').textContent = sub.name || 'Subcontractor';
   document.getElementById('subPortalTrade').textContent = sub.trade || '';
+  // Remember this sub so they stay logged in next time.
+  try { localStorage.setItem('dd_subSession', code); localStorage.setItem('dd_lastPage', 'subPortalPage'); } catch(e) {}
   showPage('subPortalPage');
   await renderSubPortal();
 }
-function subLogout() { _currentSub = null; document.getElementById('subCodeInput').value=''; showPage('landingPage'); }
+function subLogout() { _currentSub = null; document.getElementById('subCodeInput').value=''; showPage('landingPage');   try { localStorage.removeItem('dd_subSession'); localStorage.removeItem('dd_lastPage'); } catch(e) {}
+}
 
 async function renderSubPortal() {
   var host = document.getElementById('subPortalContent');
@@ -17173,6 +17604,7 @@ async function handleAuthedUser(fbUser) {
       setTimeout(function(){ try { switchTab(_lastTab); } catch(e) {} }, 300);
     }
   } catch(e) {}
+  try { _renderBioToggle(); } catch(e) {}
 }
 
 // Google sign-in
@@ -17809,6 +18241,85 @@ if (document.readyState === 'loading') {
       </div>
     </div>
   </div>
+</div>
+
+<!-- VENDOR MODAL -->
+<div class="modal-overlay" id="modal-vendor">
+  <div class="modal-box" style="max-width:440px;">
+    <div class="modal-header"><div class="modal-title">📇 Vendor / Supplier</div><button class="modal-close" onclick="closeVendorModal()">✕</button></div>
+    <div class="modal-body" style="max-height:72vh;overflow-y:auto;">
+      <div class="form-group"><label class="form-label">Name</label><input class="form-input" id="vend-name" type="text" placeholder="Company name"></div>
+      <div class="form-group"><label class="form-label">Category</label><input class="form-input" id="vend-category" type="text" placeholder="e.g. Lumber, Plumbing, Electrical"></div>
+      <div class="form-group"><label class="form-label">Contact person</label><input class="form-input" id="vend-contact" type="text" placeholder="Optional"></div>
+      <div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="vend-phone" type="text" placeholder="Phone number"></div>
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="vend-email" type="email" placeholder="Optional"></div>
+      <div class="form-group"><label class="form-label">Notes</label><textarea class="form-input" id="vend-note" rows="2" placeholder="Account number, terms, etc."></textarea></div>
+      <button onclick="saveVendor()" style="width:100%;padding:13px;border-radius:9px;border:none;background:var(--gold);color:#0D1F3C;font-size:14px;font-weight:700;cursor:pointer;">Save Vendor</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUB SCHEDULE MODAL -->
+<div class="modal-overlay" id="modal-subsched">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-header"><div class="modal-title" id="scDayTitle">Schedule</div><button class="modal-close" onclick="closeSubSched()">✕</button></div>
+    <div class="modal-body">
+      <div id="scDayList" style="margin-bottom:14px;"></div>
+      <div style="border-top:1px solid var(--border);padding-top:12px;">
+        <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:8px;">Add to this day</div>
+        <div class="form-group"><label class="form-label">Subcontractor</label><select class="form-input" id="sc-sub"></select></div>
+        <div class="form-group"><label class="form-label">Site / address</label><input class="form-input" id="sc-site" type="text" placeholder="e.g. 12 Maple"></div>
+        <div class="form-group"><label class="form-label">Note</label><input class="form-input" id="sc-note" type="text" placeholder="e.g. Rough-in plumbing"></div>
+        <button onclick="saveSubSched()" style="width:100%;padding:12px;border-radius:9px;border:none;background:var(--gold);color:#0D1F3C;font-size:14px;font-weight:700;cursor:pointer;">Add to Schedule</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TASK TEMPLATE MODAL -->
+<div class="modal-overlay" id="modal-tasktmpl">
+  <div class="modal-box" style="max-width:440px;">
+    <div class="modal-header"><div class="modal-title">📋 Task Template</div><button class="modal-close" onclick="closeTemplateModal()">✕</button></div>
+    <div class="modal-body" style="max-height:72vh;overflow-y:auto;">
+      <div class="form-group"><label class="form-label">Template name</label><input class="form-input" id="tmpl-name" type="text" placeholder="e.g. New Build Checklist"></div>
+      <div class="form-group"><label class="form-label">Add tasks</label>
+        <div style="display:flex;gap:8px;"><input class="form-input" id="tmpl-taskInput" type="text" placeholder="Type a task & press Enter" onkeydown="_tmplKeydown(event)" style="flex:1;"><button onclick="_tmplAddTask()" style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:0 16px;font-weight:700;cursor:pointer;">+</button></div>
+      </div>
+      <div id="tmpl-taskList" style="margin-bottom:12px;"></div>
+      <button onclick="saveTemplate()" style="width:100%;padding:13px;border-radius:9px;border:none;background:var(--gold);color:#0D1F3C;font-size:14px;font-weight:700;cursor:pointer;">Save Template</button>
+    </div>
+  </div>
+</div>
+
+<!-- APPLY TEMPLATE MODAL -->
+<div class="modal-overlay" id="modal-applytmpl">
+  <div class="modal-box" style="max-width:400px;">
+    <div class="modal-header"><div class="modal-title">Apply Template</div><button class="modal-close" onclick="closeApplyTemplate()">✕</button></div>
+    <div class="modal-body">
+      <div style="font-size:13px;color:rgba(243,239,230,0.75);margin-bottom:12px;">This will create all the template's tasks. Pick a project to assign them to (optional).</div>
+      <div class="form-group"><label class="form-label">Project</label><select class="form-input" id="applyTmpl-project"></select></div>
+      <button onclick="confirmApplyTemplate()" style="width:100%;padding:13px;border-radius:9px;border:none;background:var(--gold);color:#0D1F3C;font-size:14px;font-weight:700;cursor:pointer;">Create Tasks</button>
+    </div>
+  </div>
+</div>
+
+<!-- GLOBAL SEARCH MODAL -->
+<div class="modal-overlay" id="modal-globalsearch">
+  <div class="modal-box" style="max-width:480px;">
+    <div class="modal-header"><div class="modal-title">🔍 Search Everything</div><button class="modal-close" onclick="closeGlobalSearch()">✕</button></div>
+    <div class="modal-body" style="max-height:74vh;overflow-y:auto;">
+      <input class="form-input" id="globalSearchInput" type="text" placeholder="Search projects, customers, tasks, vendors, logs..." oninput="_gsInput()" style="margin-bottom:12px;">
+      <div id="globalSearchResults"></div>
+    </div>
+  </div>
+</div>
+
+<!-- BIOMETRIC LOCK OVERLAY -->
+<div id="bioLockOverlay" style="display:none;position:fixed;inset:0;z-index:99999;background:linear-gradient(160deg,#0D1F3C,#1a2b4a);flex-direction:column;align-items:center;justify-content:center;padding:24px;">
+  <div style="font-size:54px;margin-bottom:14px;">🔐</div>
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:#fff;">DILIGENT DEVELOPERS</div>
+  <div id="bioLockMsg" style="font-size:13px;color:rgba(255,255,255,0.7);margin:8px 0 22px;">Unlock to continue</div>
+  <button onclick="window._bioUnlock && window._bioUnlock()" style="background:var(--gold);color:#0D1F3C;border:none;border-radius:10px;padding:13px 28px;font-size:15px;font-weight:700;cursor:pointer;">👆 Unlock</button>
 </div>
 
 <!-- PROGRESS EDITOR MODAL -->
