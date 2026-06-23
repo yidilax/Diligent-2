@@ -4654,7 +4654,7 @@ async function checkSyncStatus() {
 
 // Key sanitization: Firestore doesn't allow '/' or certain chars in doc IDs
 // Customer-facing prefixes go in the OPEN 'pub' collection; everything else is office-only in 'dd'.
-var _PUBLIC_PREFIXES = ['upgrades:', 'submission:', 'upgrade_sections', 'custupdate:', 'subcontractor:', 'subpunch:'];
+var _PUBLIC_PREFIXES = ['upgrades:', 'submission:', 'upgrade_sections', 'custupdate:', 'subcontractor:', 'subpunch:', 'pubaddr:', 'pubpunch:'];
 function _fsCol(key) {
   for (var i = 0; i < _PUBLIC_PREFIXES.length; i++) {
     if (String(key).indexOf(_PUBLIC_PREFIXES[i]) === 0) return 'pub';
@@ -5087,9 +5087,44 @@ let _allProjects = [];
 let _selectedHouse = null;
 let _selectedProject = null;
 
+
+// ===== Public address book (lets customers see valid addresses without office login) =====
+// We mirror ONLY address + units (no sensitive project data) into the open 'pub' collection,
+// so a customer on any device can find their address even if they can't read project: records.
+async function _syncPublicAddress(project) {
+  if (!project || !project.id) return;
+  try {
+    // Only publish addresses for projects that customers should reach (public visibility)
+    if (project.visibility && project.visibility === 'private') {
+      try { await DB.delete('pubaddr:' + project.id); } catch(e) {}
+      return;
+    }
+    var houses = (project.houses || []).map(function(h){
+      return { address: h.address || '', units: h.units || [] };
+    }).filter(function(h){ return h.address; });
+    await DB.set('pubaddr:' + project.id, { id: project.id, name: project.name || '', houses: houses, _updatedAt: Date.now() });
+  } catch(e) {}
+}
+// Push every current project into the public address book (run by office on load).
+async function _syncAllPublicAddresses() {
+  try {
+    var keys = await DB.list('project:');
+    var projects = (await Promise.all(keys.map(function(k){return DB.get(k);}))).filter(Boolean);
+    for (var i = 0; i < projects.length; i++) { await _syncPublicAddress(projects[i]); }
+  } catch(e) {}
+}
+
 async function loadProjectsForCustomer() {
-  const keys = await DB.list('project:');
-  const projects = await Promise.all(keys.map(k => DB.get(k)));
+  // Customers read the public address book (works without office login on any device).
+  var pubKeys = await DB.list('pubaddr:');
+  var pub = (await Promise.all(pubKeys.map(function(k){return DB.get(k);}))).filter(Boolean);
+  if (pub.length) {
+    _allProjects = pub.map(function(p){ return { id: p.id, name: p.name, houses: p.houses || [] }; });
+    return;
+  }
+  // Fallback (e.g. office user browsing): try the full project records.
+  var keys = await DB.list('project:');
+  var projects = (await Promise.all(keys.map(function(k){return DB.get(k);}))).filter(Boolean);
   _allProjects = projects.filter(Boolean);
 }
 
@@ -6058,6 +6093,9 @@ async function openOfficeDashboard() {
   if (!_canAccessTab(_land)) _land = 'dashboard';
   switchTab(_land);
   if (_land === 'dashboard') await refreshDashboard();
+  // Backfill the public address book so customers can find addresses on any device.
+  if (typeof _syncAllPublicAddresses === 'function') { setTimeout(function(){ _syncAllPublicAddresses(); }, 1500); }
+  if (typeof _syncPublicPunch === 'function') { setTimeout(function(){ _syncPublicPunch(); }, 2200); }
 }
 
 // ════════════════════════════════════════════
@@ -9163,6 +9201,7 @@ async function saveProject() {
         updatedBy: currentUser ? currentUser.name : 'Admin'
       });
       await DB.set('project:' + _editingProjectId, updated);
+      if (typeof _syncPublicAddress === 'function') await _syncPublicAddress(updated);
     } else {
       // Create new project
       const project = {
@@ -9175,6 +9214,7 @@ async function saveProject() {
         createdBy: currentUser ? currentUser.name : 'Admin'
       };
       await DB.set('project:' + project.id, project);
+      if (typeof _syncPublicAddress === 'function') await _syncPublicAddress(project);
     }
 
     closeModal('addProject');
@@ -9641,11 +9681,55 @@ async function saveSubNote() {
 }
 
 // Collect all punch items matching a sub across all units (auto by trade + manual)
-async function _collectSubPunchItems(sub) {
-  var out = [];
+
+// ===== Public punch mirror (lets subcontractors read their items on any device) =====
+// Office mirrors a minimal copy of each punch unit (text, trade, room, address, unit, done)
+// into the open 'pub' collection so a logged-in sub can read their items without office auth.
+async function _syncPublicPunch() {
   try {
     var keys = await DB.list('punch:');
     var units = (await Promise.all(keys.map(function(k){return DB.get(k);}))).filter(Boolean);
+    // Build one public doc per unit (mirror), and track which still exist.
+    var liveIds = {};
+    for (var i = 0; i < units.length; i++) {
+      var u = units[i];
+      var unitId = u.unitId || u.id || '';
+      if (!unitId) continue;
+      var mirror = {
+        unitId: unitId,
+        phase: u.phase || '',
+        address: u.address || u.unitName || '',
+        unit: u.unit || '',
+        rooms: (u.rooms || []).map(function(r){
+          return { name: r.name || '', items: (r.items || []).map(function(it){
+            return { text: it.text || '', sub: it.sub || '', trade: it.trade || '', note: it.note || '', done: !!it.done };
+          })};
+        }),
+        _updatedAt: Date.now()
+      };
+      liveIds[unitId] = true;
+      await DB.set('pubpunch:' + unitId, mirror);
+    }
+    // Clean up mirrors for units that no longer exist
+    var pubKeys = await DB.list('pubpunch:');
+    for (var j = 0; j < pubKeys.length; j++) {
+      var id = pubKeys[j].replace('pubpunch:', '');
+      if (!liveIds[id]) { try { await DB.delete('pubpunch:' + id); } catch(e) {} }
+    }
+  } catch(e) {}
+}
+
+async function _collectSubPunchItems(sub) {
+  var out = [];
+  try {
+    // Subs read the public punch mirror (works on any device without office login).
+    var keys = await DB.list('pubpunch:');
+    var units = (await Promise.all(keys.map(function(k){return DB.get(k);}))).filter(Boolean);
+    // Fallback to real punch: records if the mirror is empty (e.g. office user previewing).
+    if (!units.length) {
+      var pk = await DB.list('punch:');
+      units = (await Promise.all(pk.map(function(k){return DB.get(k);}))).filter(Boolean);
+    }
     units.forEach(function(u){
       var unitId = u.unitId || u.id || '';
       var addr = (u.address || u.unitName || unitId || 'Other');
@@ -13235,6 +13319,7 @@ async function renderPunchList() {
       '</div>' +
     '</div>';
   }).join('');
+  if (typeof _syncPublicPunch === 'function') { setTimeout(function(){ _syncPublicPunch(); }, 800); }
 }
 
 // ── Add Unit Modal ──
@@ -13324,6 +13409,7 @@ async function savePunchUnit() {
     ownerName: currentUser ? currentUser.name : 'Admin',
     createdAt: new Date().toISOString() };
   await DB.set('punch:' + _plPhase + ':' + id, unitData);
+  if (typeof _syncPublicPunch === 'function') { _syncPublicPunch(); }
   var popup = document.getElementById('pl_add_unit_popup');
   if (popup) popup.remove();
   renderPunchList();
@@ -13638,6 +13724,7 @@ async function saveEditItem(unitId, roomIdx, itemIdx) {
     _plCurrentUnit.rooms[newRoom].items.push(item);
   }
   await DB.set('punch:' + _plPhase + ':' + unitId, _plCurrentUnit);
+  if (typeof _syncPublicPunch === 'function') { _syncPublicPunch(); }
   var popup = document.getElementById('pl_edit_item_popup');
   if (popup) popup.remove();
   openUnit(unitId);
@@ -13741,6 +13828,7 @@ async function saveItem(unitId, roomIdx) {
   room.items.push({ id: 'pi_' + Date.now(), text: text, sub: sub, note: note, done: false });
   _plUnitMode = 'edit';
   await DB.set('punch:' + _plPhase + ':' + unitId, _plCurrentUnit);
+  if (typeof _syncPublicPunch === 'function') { _syncPublicPunch(); }
   var popup = document.getElementById('pl_add_item_popup');
   if (popup) popup.remove();
   openUnit(unitId);
@@ -13751,6 +13839,7 @@ async function toggleItem(unitId, roomIdx, itemIdx, checked) {
   var item = _plCurrentUnit.rooms[roomIdx].items[itemIdx];
   if (item) item.done = checked;
   await DB.set('punch:' + _plPhase + ':' + unitId, _plCurrentUnit);
+  if (typeof _syncPublicPunch === 'function') { _syncPublicPunch(); }
   // Just update progress without re-rendering the whole view
   var allItems = [];
   (_plCurrentUnit.rooms || []).forEach(function(r) { (r.items || []).forEach(function(it) { allItems.push(it); }); });
@@ -13761,6 +13850,7 @@ async function deleteItem(unitId, roomIdx, itemIdx) {
   if (!_plCurrentUnit) return;
   _plCurrentUnit.rooms[roomIdx].items.splice(itemIdx, 1);
   await DB.set('punch:' + _plPhase + ':' + unitId, _plCurrentUnit);
+  if (typeof _syncPublicPunch === 'function') { _syncPublicPunch(); }
   openUnit(unitId);
 }
 
