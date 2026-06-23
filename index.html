@@ -3381,19 +3381,6 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .office-nav-btn.nav-sub { padding-left:46px; font-size:13.5px; }
 
 
-/* ===== Yiddish / RTL layout ===== */
-body.rtl-lang { direction: rtl; }
-body.rtl-lang .office-sidebar { left: auto; right: 0; transform: translateX(100%); }
-body.rtl-lang .office-sidebar.open { transform: translateX(0); }
-body.rtl-lang .office-nav-btn,
-body.rtl-lang .office-nav-group-btn { text-align: right; }
-body.rtl-lang .office-nav-btn.active { border-right: none; border-left: 3px solid var(--gold); }
-body.rtl-lang .nav-icon { margin-left: 0; }
-body.rtl-lang .form-input,
-body.rtl-lang input,
-body.rtl-lang textarea { text-align: right; }
-body.rtl-lang .auth-back { left: auto; right: 16px; }
-
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -3743,6 +3730,19 @@ body.rtl-lang .auth-back { left: auto; right: 16px; }
 </div>
 
 <div id="galleryUpdate" class="portal-update" style="max-width:760px;margin:0 auto;padding:0 16px;"></div>
+
+<div id="customerFiles" style="max-width:760px;margin:0 auto;padding:0 16px;"></div>
+
+<div id="customerPunchSection" style="max-width:760px;margin:14px auto;padding:0 16px;">
+  <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1px;color:var(--navy);">📝 My Issue List</div>
+      <button onclick="_cpAddItem()" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;">+ Report an Issue</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Found something that needs attention? Add it here with a photo and we'll see it.</div>
+    <div id="cpItemList"></div>
+  </div>
+</div>
 
 <div class="upg-gallery">
   <h2 class="upg-gallery__title">AVAILABLE UPGRADES GALLERY</h2>
@@ -4264,11 +4264,7 @@ body.rtl-lang .auth-back { left: auto; right: 16px; }
             <button type="button" id="prof-theme-light" onclick="_profSetTheme('light')" style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.06);color:#f3efe6;font-family:Inter,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">☀️ Light</button>
             <button type="button" id="prof-theme-dark" onclick="_profSetTheme('dark')" style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.06);color:#f3efe6;font-family:Inter,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">🌙 Dark</button>
           </div></div>
-        <div class="form-group"><label class="form-label">Language / שפראך</label>
-          <div style="display:flex;gap:8px;">
-            <button type="button" id="prof-lang-en" onclick="_profSetLang('en')" style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.06);color:#f3efe6;font-family:Inter,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">English</button>
-            <button type="button" id="prof-lang-yi" onclick="_profSetLang('yi')" style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.06);color:#f3efe6;font-family:Inter,sans-serif;font-size:15px;font-weight:700;cursor:pointer;">יידיש</button>
-          </div></div>
+        
         <div class="form-group"><label class="form-label">Text size</label>
           <select class="form-input" id="prof-textsize">
             <option value="small">Small</option><option value="normal">Normal</option><option value="large">Large</option>
@@ -4465,6 +4461,8 @@ body.rtl-lang .auth-back { left: auto; right: 16px; }
 
     <!-- PUNCH LIST TAB -->
     <div id="tab-punchlist" class="office-tab" style="display:none;">
+
+      <div id="officeCustomerIssues" style="margin-bottom:18px;"></div>
 
       <!-- Top bar: phase toggle + actions -->
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px;">
@@ -4715,7 +4713,7 @@ async function checkSyncStatus() {
 
 // Key sanitization: Firestore doesn't allow '/' or certain chars in doc IDs
 // Customer-facing prefixes go in the OPEN 'pub' collection; everything else is office-only in 'dd'.
-var _PUBLIC_PREFIXES = ['upgrades:', 'submission:', 'upgrade_sections', 'custupdate:', 'subcontractor:', 'subpunch:', 'pubaddr:', 'pubpunch:'];
+var _PUBLIC_PREFIXES = ['upgrades:', 'submission:', 'upgrade_sections', 'custupdate:', 'subcontractor:', 'subpunch:', 'pubaddr:', 'pubpunch:', 'pubfiles:', 'custpunch:'];
 function _fsCol(key) {
   for (var i = 0; i < _PUBLIC_PREFIXES.length; i++) {
     if (String(key).indexOf(_PUBLIC_PREFIXES[i]) === 0) return 'pub';
@@ -5112,7 +5110,6 @@ function showPage(id) {
     _selectedHouse = null;
     _selectedProject = null;
   }
-  try { if (_curLang === 'yi') { applyLanguage(); } } catch(e) {}
 }
 
 // ════════════════════════════════════════════
@@ -5441,6 +5438,124 @@ async function _renderCustomerStatus(projId, address, unit) {
     '</div>';
 }
 
+
+// Customer view of files the office shared with them (reads the public mirror).
+async function _loadCustomerFiles(address, unit) {
+  var host = document.getElementById('customerFiles');
+  if (!host) return;
+  host.innerHTML = '';
+  try {
+    var keys = await DB.list('pubfiles:');
+    var recs = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+    // Match files to this customer's project by checking the public address book.
+    var myProjIds = {};
+    try {
+      var aKeys = await DB.list('pubaddr:');
+      var addrs = (await Promise.all(aKeys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+      addrs.forEach(function(p){
+        (p.houses||[]).forEach(function(h){
+          if ((h.address||'').toLowerCase().trim() === (address||'').toLowerCase().trim()) myProjIds[p.id] = true;
+        });
+      });
+    } catch(e) {}
+    var mine = [];
+    recs.forEach(function(rec){
+      if (!myProjIds[rec.id]) return; // only files from my project
+      (rec.files||[]).forEach(function(f){
+        // file shared to all units (no unit) OR specifically to my unit
+        if (!f.unit || String(f.unit).toLowerCase().trim() === String(unit||'').toLowerCase().trim()) mine.push(f);
+      });
+    });
+    if (!mine.length) { host.innerHTML = ''; return; }
+    host.innerHTML = '<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin:14px 0;">' +
+      '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:17px;letter-spacing:1px;color:var(--navy);margin-bottom:10px;">\U0001F4CE Documents For You</div>' +
+      mine.map(function(f){
+        var isImg = (f.type||'').indexOf('image') === 0;
+        var thumb = isImg
+          ? '<img src="' + f.data + '" style="width:44px;height:44px;border-radius:7px;object-fit:cover;flex-shrink:0;cursor:pointer;" onclick="_plLightbox(\'' + encodeURIComponent(f.data) + '\')">'
+          : '<div style="width:44px;height:44px;border-radius:7px;background:#eee;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px;">\U0001F4C4</div>';
+        return '<div style="display:flex;align-items:center;gap:11px;padding:8px 0;border-bottom:1px solid #f0ece2;">' +
+          thumb +
+          '<div style="flex:1;min-width:0;font-size:14px;color:#16233d;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + _esc(f.name||'File') + '</div>' +
+          '<a href="' + f.data + '" download="' + _esc(f.name||'file') + '" style="color:var(--gold);font-size:18px;text-decoration:none;flex-shrink:0;">\u2b07</a>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+  } catch(e) { host.innerHTML = ''; }
+}
+
+
+// ===================== CUSTOMER ISSUE / PUNCH LIST =====================
+function _cpKey(address, unit) {
+  return 'custpunch:' + btoa(unescape(encodeURIComponent((address||'') + '|' + (unit||'Main')))).replace(/=/g,'');
+}
+async function _cpGet() {
+  var rec = await DB.get(_cpKey(window._custAddress, window._custUnit));
+  return (rec && rec.items) ? rec : { address: window._custAddress, unit: window._custUnit, items: [] };
+}
+async function _cpSave(rec) {
+  rec._updatedAt = Date.now();
+  rec.address = window._custAddress; rec.unit = window._custUnit;
+  await DB.set(_cpKey(window._custAddress, window._custUnit), rec);
+}
+async function _cpRender() {
+  var host = document.getElementById('cpItemList');
+  if (!host) return;
+  var rec = await _cpGet();
+  if (!rec.items.length) {
+    host.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:6px 0;">No issues reported yet.</div>';
+    return;
+  }
+  host.innerHTML = rec.items.map(function(it, i){
+    var thumbs = (it.photos||[]).map(function(ph){ return '<img src="' + ph + '" style="width:46px;height:46px;border-radius:6px;object-fit:cover;cursor:pointer;" onclick="_plLightbox(\'' + encodeURIComponent(ph) + '\')">'; }).join('');
+    var statusBadge = it.status === 'resolved'
+      ? '<span style="font-size:10px;background:#dff3e6;color:#2D7A4F;border-radius:10px;padding:2px 8px;font-weight:700;">Resolved</span>'
+      : (it.status === 'seen' ? '<span style="font-size:10px;background:#fef3d6;color:#9a7a1a;border-radius:10px;padding:2px 8px;font-weight:700;">Seen by office</span>' : '<span style="font-size:10px;background:#eef;color:#445;border-radius:10px;padding:2px 8px;font-weight:700;">Submitted</span>');
+    return '<div style="border-bottom:1px solid #f0ece2;padding:9px 0;">' +
+      '<div style="display:flex;align-items:flex-start;gap:8px;">' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-size:14px;color:#16233d;font-weight:600;">' + _esc(it.text) + '</div>' +
+          '<div style="margin-top:3px;">' + statusBadge + '</div>' +
+        '</div>' +
+        (it.status !== 'resolved' ? '<button onclick="_cpDelItem(' + i + ')" style="background:none;border:none;color:#e07a6a;font-size:14px;cursor:pointer;flex-shrink:0;">\u2715</button>' : '') +
+      '</div>' +
+      (thumbs ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:7px;">' + thumbs + '</div>' : '') +
+      (it.status !== 'resolved' ? '<button onclick="_cpAddPhoto(' + i + ')" style="background:none;border:none;color:var(--navy);font-size:12px;font-weight:700;cursor:pointer;padding:6px 0 0;">\U0001F4F7 Add photo</button>' : '') +
+    '</div>';
+  }).join('');
+}
+async function _cpAddItem() {
+  var text = prompt('Describe the issue (e.g. "Crack in living room ceiling"):');
+  if (!text || !text.trim()) return;
+  var rec = await _cpGet();
+  rec.items.push({ id: 'ci_' + Date.now(), text: text.trim(), photos: [], at: Date.now(), status: 'submitted' });
+  await _cpSave(rec);
+  await _cpRender();
+}
+async function _cpDelItem(i) {
+  if (!confirm('Remove this issue?')) return;
+  var rec = await _cpGet();
+  rec.items.splice(i, 1);
+  await _cpSave(rec);
+  await _cpRender();
+}
+function _cpAddPhoto(i) {
+  var input = document.createElement('input');
+  input.type = 'file'; input.accept = 'image/*';
+  input.onchange = function() {
+    var file = input.files && input.files[0];
+    if (!file) return;
+    _plCompressImage(file, async function(dataUrl){
+      var rec = await _cpGet();
+      if (!rec.items[i]) return;
+      rec.items[i].photos = (rec.items[i].photos||[]).concat([dataUrl]);
+      await _cpSave(rec);
+      await _cpRender();
+    });
+  };
+  input.click();
+}
+
 async function openCustomerPortal(name, address, unit, saveKey, selections) {
   _custSaveKey = saveKey;
   // Store customer info for submission
@@ -5572,13 +5687,14 @@ async function openCustomerPortal(name, address, unit, saveKey, selections) {
     }
     var gui = document.getElementById('galleryUnitInfo');
     if (gui) gui.textContent = '📍 ' + address + '  ·  Unit ' + unit;
+    try { _loadCustomerFiles(address, unit); } catch(e) {}
+    try { _cpRender(); } catch(e) {}
     showPage('customerGalleryPage');
   } catch(e) {
     // Fall back to showing the portal directly
     showPage('customerPortalPage');
   setTimeout(initSignatureCanvas, 200);
   }
-  try { if (_curLang === 'yi') { setTimeout(function(){ _translateDOM(document.body); }, 50); } } catch(e) {}
 }
 
 
@@ -5706,8 +5822,6 @@ function openProfileModal() {
   }).join('');
   _profPhoto = currentUser.photo || null;
   _profTheme = currentUser.theme || localStorage.getItem('dd_theme') || 'light';
-  _profLang = currentUser.lang || localStorage.getItem('dd_lang') || 'en';
-  if (typeof _profSetLang === 'function') setTimeout(function(){ _profSetLang(_profLang); }, 0);
   _renderProfileAvatar(_profPickedColor);
 
   // Default landing tab options (only tabs the user can access)
@@ -5934,17 +6048,7 @@ function _profRemovePhoto() {
   var rm = document.getElementById('prof-removephoto'); if (rm) rm.style.display = 'none';
 }
 
-var _profLang = 'en';
-function _profSetLang(l) {
-  _profLang = l;
-  var en = document.getElementById('prof-lang-en'), yi = document.getElementById('prof-lang-yi');
-  if (en && yi) {
-    en.style.background = (l==='en') ? 'var(--gold)' : 'rgba(255,255,255,0.06)';
-    en.style.color = (l==='en') ? '#0D1F3C' : '#f3efe6';
-    yi.style.background = (l==='yi') ? 'var(--gold)' : 'rgba(255,255,255,0.06)';
-    yi.style.color = (l==='yi') ? '#0D1F3C' : '#f3efe6';
-  }
-}
+
 
 function _profSetTheme(theme, silent) {
   _profTheme = theme;
@@ -6059,11 +6163,9 @@ async function saveProfile() {
     await DB.set(key, rec);
     currentUser.name = name; currentUser.title = title; currentUser.phone = phone; currentUser.avatarColor = _profPickedColor;
     currentUser.photo = _profPhoto || null;
-    currentUser.landingTab = landing; currentUser.theme = _profTheme; currentUser.lang = _profLang; currentUser.textSize = textSize; currentUser.notifPrefs = notifPrefs;
+    currentUser.landingTab = landing; currentUser.theme = _profTheme; currentUser.textSize = textSize; currentUser.notifPrefs = notifPrefs;
     currentUser.density = density; currentUser.workHours = workHours; currentUser.quietHours = quietHours; currentUser.recoveryEmail = recoveryEmail; currentUser.recoveryPhone = recoveryPhone;
     if (typeof applyTheme === 'function') applyTheme();
-    if (typeof applyLanguage === 'function') applyLanguage();
-  if (typeof applyLanguage === 'function') applyLanguage();
     if (typeof applyDensity === 'function') applyDensity();
     if (typeof logActivity === 'function') logActivity('Updated their profile');
     if (typeof _renderSidebarIdentity === 'function') _renderSidebarIdentity();
@@ -6184,7 +6286,6 @@ async function openOfficeDashboard() {
 
   if (typeof applyTabPermissions === 'function') applyTabPermissions();
   if (typeof applyTheme === 'function') applyTheme();
-  if (typeof applyLanguage === 'function') applyLanguage();
   var _land = (currentUser && currentUser.landingTab) || 'dashboard';
   if (!_canAccessTab(_land)) _land = 'dashboard';
   switchTab(_land);
@@ -8539,140 +8640,7 @@ async function _findUserById(id) {
 
 // Apply the saved theme + text size (called at startup and after profile save).
 
-// ====================== YIDDISH TRANSLATION ENGINE ======================
-var I18N = {
-  // Landing / app shell
-  'Where Quality Meets Home': '\u05d5\u05d5\u05d5 \u05e7\u05d5\u05d5\u05d0\u05dc\u05d9\u05d8\u05e2\u05d8 \u05d1\u05d0\u05d2\u05e2\u05d2\u05e0\u05d8 \u05d6\u05d9\u05da \u05de\u05d9\u05d8\u0027\u05df \u05d4\u05d9\u05d9\u05dd',
-  'Make My Selections': '\u05de\u05d0\u05da \u05de\u05d9\u05d9\u05e0\u05e2 \u05d0\u05d5\u05d9\u05e1\u05e7\u05dc\u05d9\u05d9\u05d1\u05d5\u05e0\u05d2\u05e2\u05df',
-  'Maybe later': '\u05d8\u05d0\u05de\u05e2\u05e8 \u05e9\u05e4\u05e2\u05d8\u05e2\u05e8',
-  'Download': '\u05d0\u05e8\u05d0\u05e4\u05dc\u05d0\u05d3\u05df',
-  'Later': '\u05e9\u05e4\u05e2\u05d8\u05e2\u05e8',
-  'Update Now': '\u05d3\u05e2\u05e8\u05d4\u05d9\u05d9\u05e0\u05d8\u05d9\u05e7\u05df \u05d0\u05e6\u05d5\u05e0\u05d8',
-  'Not now': '\u05e0\u05d9\u05e9\u05d8 \u05d0\u05e6\u05d5\u05e0\u05d8',
-  'Install': '\u05d0\u05d9\u05e0\u05e1\u05d8\u05d0\u05dc\u05d9\u05e8\u05df',
-  // Login / roles
-  'Office Login': '\u05d0\u05e4\u05d9\u05e1 \u05dc\u05d0\u05d2\u05d9\u05df',
-  'Subcontractor': '\u05e1\u05d0\u05d1\u05e7\u05d0\u05e0\u05d8\u05e8\u05d0\u05e7\u05d8\u05d0\u05e8',
-  'Customer': '\u05e7\u05d5\u05e0\u05d4',
-  'Log In': '\u05dc\u05d0\u05d2 \u05d0\u05d9\u05d9\u05df',
-  'Logout': '\u05dc\u05d0\u05d2 \u05d0\u05d5\u05d9\u05e1',
-  'Back': '\u05e6\u05d5\u05e8\u05d9\u05e7',
-  'Enter your 4-digit access code': '\u05dc\u05d9\u05d9\u05d2\u05d8 \u05d0\u05e8\u05d9\u05d9\u05df \u05d0\u05d9\u05d9\u05e2\u05e8 4-\u05e6\u05d9\u05e4\u05e2\u05e8 \u05e7\u05d0\u05d3',
-  // Sidebar / nav
-  'Dashboard': '\u05d3\u05d0\u05e9\u05d1\u05d0\u05e8\u05d3',
-  'Notifications': '\u05d3\u05e2\u05e8\u05de\u05d0\u05e0\u05d5\u05e0\u05d2\u05e2\u05df',
-  'Work': '\u05d0\u05e8\u05d1\u05e2\u05d8',
-  'Customers': '\u05e7\u05d5\u05e0\u05d4\u0027\u05d9\u05dd',
-  'Subcontractors': '\u05e1\u05d0\u05d1\u05e7\u05d0\u05e0\u05d8\u05e8\u05d0\u05e7\u05d8\u05d0\u05e8\u05df',
-  'Projects': '\u05e4\u05e8\u05d0\u05d9\u05e2\u05e7\u05d8\u05df',
-  'Punch Lists': '\u05e4\u05d0\u05e0\u05e9 \u05e8\u05e9\u05d9\u05de\u05d5\u05ea',
-  'House Specs': '\u05d4\u05d9\u05d9\u05d6 \u05e1\u05e4\u05e2\u05e7\u05e1',
-  'Tasks': '\u05d0\u05d5\u05d9\u05e4\u05d2\u05d0\u05d1\u05df',
-  'Scheduling': '\u05e6\u05d9\u05d9\u05d8\u05e4\u05dc\u05d0\u05e0\u05d9\u05e8\u05d5\u05e0\u05d2',
-  'Upgrades': '\u05d0\u05e4\u05d2\u05e8\u05d9\u05d9\u05d3\u05e1',
-  'Customer Updates': '\u05e7\u05d5\u05e0\u05d4 \u05d3\u05e2\u05e8\u05d4\u05d9\u05d9\u05e0\u05d8\u05d9\u05e7\u05d5\u05e0\u05d2\u05e2\u05df',
-  'Upgrade Editor': '\u05d0\u05e4\u05d2\u05e8\u05d9\u05d9\u05d3 \u05e2\u05d3\u05d9\u05d8\u05d0\u05e8',
-  'Employees': '\u05d0\u05e0\u05d2\u05e2\u05e9\u05d8\u05e2\u05dc\u05d8\u05e2',
-  'Menu': '\u05de\u05e2\u05e0\u05d9\u05d5',
-  // Dashboard
-  'Good morning': '\u05d0 \u05d2\u05d5\u05d8\u05df \u05de\u05d0\u05e8\u05d2\u05df',
-  'Good afternoon': '\u05d0 \u05d2\u05d5\u05d8\u05df \u05e0\u05d0\u05db\u05de\u05d9\u05d8\u05d0\u05d2',
-  'Good evening': '\u05d0 \u05d2\u05d5\u05d8\u05df \u05d5\u05d5\u05d0\u05d1\u05d6\u05dc',
-  'Quick Actions': '\u05d2\u05d9\u05da \u05e4\u05e2\u05d5\u05dc\u05d5\u05ea',
-  'Recent Activity': '\u05dc\u05e2\u05e6\u05d8\u05e2 \u05d0\u05e7\u05d8\u05d9\u05d5\u05d5\u05d9\u05d8\u05e2\u05d8',
-  'No recent activity': '\u05e7\u05d9\u05d9\u05df \u05dc\u05e2\u05e6\u05d8\u05e2 \u05d0\u05e7\u05d8\u05d9\u05d5\u05d5\u05d9\u05d8\u05e2\u05d8 \u05e0\u05d9\u05d8\u05d0',
-  'New Project': '\u05e0\u05d9\u05d9\u05e2\u05e8 \u05e4\u05e8\u05d0\u05d9\u05e2\u05e7\u05d8',
-  'Add Customer': '\u05e6\u05d5\u05d2\u05d9\u05d1\u05df \u05e7\u05d5\u05e0\u05d4',
-  'View Upgrades': '\u05d6\u05e2\u05df \u05d0\u05e4\u05d2\u05e8\u05d9\u05d9\u05d3\u05e1',
-  'Projects': '\u05e4\u05e8\u05d0\u05d9\u05e2\u05e7\u05d8\u05df',
-  'Submissions': '\u05d0\u05e8\u05d9\u05d9\u05e0\u05d2\u05d0\u05d1\u05df',
-  'Open Tasks': '\u05d0\u05e4\u05e2\u05e0\u05e2 \u05d0\u05d5\u05d9\u05e4\u05d2\u05d0\u05d1\u05df',
-  // Common buttons
-  'Save': '\u05e9\u05e4\u05d9\u05d9\u05db\u05e2\u05e8\u05df',
-  'Cancel': '\u05d0\u05e4\u05d6\u05d0\u05d2\u05df',
-  'Delete': '\u05d0\u05d5\u05d9\u05e1\u05de\u05e2\u05e7\u05df',
-  'Edit': '\u05e8\u05e2\u05d3\u05d0\u05e7\u05d8\u05d9\u05e8\u05df',
-  'Add': '\u05e6\u05d5\u05d2\u05d9\u05d1\u05df',
-  'Close': '\u05e4\u05d0\u05e8\u05de\u05d0\u05db\u05df',
-  'Manage Profile': '\u05e4\u05e8\u05d0\u05e4\u05d9\u05dc \u05e4\u05d0\u05e8\u05d5\u05d5\u05d0\u05dc\u05d8\u05d5\u05e0\u05d2',
-  'Inbox': '\u05d0\u05d9\u05d9\u05e0\u05d1\u05d0\u05e7\u05e1',
-  // ---- Round 2: customer portal ----
-  'Customer Portal': '\u05e7\u05d5\u05e0\u05d4 \u05e4\u05d0\u05e8\u05d8\u05d0\u05dc',
-  'Enter your address and unit to access your upgrades': '\u05dc\u05d9\u05d9\u05d2\u05d8 \u05d0\u05e8\u05d9\u05d9\u05df \u05d0\u05d9\u05d9\u05e2\u05e8 \u05d0\u05d3\u05e8\u05e2\u05e1 \u05d0\u05d5\u05df \u05d9\u05d5\u05e0\u05d9\u05d8 \u05e6\u05d5 \u05d6\u05e2\u05df \u05d0\u05d9\u05d9\u05e2\u05e8\u05e2 \u05d0\u05e4\u05d2\u05e8\u05d9\u05d9\u05d3\u05e1',
-  'Your Name': '\u05d0\u05d9\u05d9\u05e2\u05e8 \u05e0\u05d0\u05de\u05e2\u05df',
-  'Street Address': '\u05e1\u05d8\u05e8\u05d9\u05d8 \u05d0\u05d3\u05e8\u05e2\u05e1',
-  'Unit Number': '\u05d9\u05d5\u05e0\u05d9\u05d8 \u05e0\u05d5\u05de\u05e2\u05e8',
-  '\u2014 Select your unit \u2014': '\u2014 \u05e7\u05dc\u05d9\u05d9\u05d1\u05d8 \u05d0\u05d9\u05d9\u05e2\u05e8 \u05d9\u05d5\u05e0\u05d9\u05d8 \u2014',
-  'Available Upgrades': '\u05e4\u05d0\u05e8\u05d0\u05df \u05d0\u05e4\u05d2\u05e8\u05d9\u05d9\u05d3\u05e1',
-  'Make My Selections': '\u05de\u05d0\u05da \u05de\u05d9\u05d9\u05e0\u05e2 \u05d0\u05d5\u05d9\u05e1\u05e7\u05dc\u05d9\u05d9\u05d1\u05d5\u05e0\u05d2\u05e2\u05df',
-  'Click any image to see a larger view': '\u05e7\u05dc\u05d9\u05e7\u05d8 \u05d0\u05d5\u05d9\u05e3 \u05d0 \u05d1\u05d9\u05dc\u05d3 \u05e6\u05d5 \u05d6\u05e2\u05df \u05d2\u05e8\u05e2\u05e1\u05e2\u05e8',
-  'Exit': '\u05d0\u05e8\u05d5\u05d9\u05e1',
-  'Submit My Selections': '\u05d0\u05e8\u05d9\u05d9\u05e0\u05e9\u05d9\u05e7\u05df \u05de\u05d9\u05d9\u05e0\u05e2 \u05d0\u05d5\u05d9\u05e1\u05e7\u05dc\u05d9\u05d9\u05d1\u05d5\u05e0\u05d2\u05e2\u05df',
-  // ---- Round 2: subcontractor portal ----
-  'Your Tasks': '\u05d0\u05d9\u05d9\u05e2\u05e8\u05e2 \u05d0\u05d5\u05d9\u05e4\u05d2\u05d0\u05d1\u05df',
-  'Punch List': '\u05e4\u05d0\u05e0\u05e9 \u05e8\u05e9\u05d9\u05de\u05d4',
-  'Nothing assigned yet': '\u05e0\u05d0\u05da \u05e0\u05d9\u05e9\u05d8\u05d0 \u05e6\u05d5\u05d2\u05e2\u05d8\u05d9\u05d9\u05dc\u05d8',
-  'Add note': '\u05e6\u05d5\u05d2\u05d9\u05d1\u05df \u05e0\u05d0\u05d8\u05d9\u05e5',
-  'Edit note': '\u05e8\u05e2\u05d3\u05d0\u05e7\u05d8\u05d9\u05e8\u05df \u05e0\u05d0\u05d8\u05d9\u05e5',
-  'Delete note': '\u05d0\u05d5\u05d9\u05e1\u05de\u05e2\u05e7\u05df \u05e0\u05d0\u05d8\u05d9\u05e5',
-  'Add photo': '\u05e6\u05d5\u05d2\u05d9\u05d1\u05df \u05d1\u05d9\u05dc\u05d3',
-  'Add Photo': '\u05e6\u05d5\u05d2\u05d9\u05d1\u05df \u05d1\u05d9\u05dc\u05d3',
-  // ---- Round 2: common forms ----
-  'Name': '\u05e0\u05d0\u05de\u05e2\u05df',
-  'Phone': '\u05d8\u05e2\u05dc\u05e2\u05e4\u05d0\u05df',
-  'Email': '\u05d0\u05d9\u05de\u05d9\u05d9\u05dc',
-  'Address': '\u05d0\u05d3\u05e8\u05e2\u05e1',
-  'Unit': '\u05d9\u05d5\u05e0\u05d9\u05d8',
-  'Status': '\u05e1\u05d8\u05d0\u05d8\u05d5\u05e1',
-  'Notes': '\u05e0\u05d0\u05d8\u05d9\u05e6\u05df',
-  'Trade': '\u05e4\u05d0\u05da',
-  'Active': '\u05d0\u05e7\u05d8\u05d9\u05d5\u05d5',
-  'Inactive': '\u05d0\u05d9\u05e0\u05d0\u05e7\u05d8\u05d9\u05d5\u05d5',
-  'Approve': '\u05d0\u05e4\u05e8\u05d5\u05d5',
-  'Search': '\u05d6\u05d5\u05db\u05df',
-  'Loading...': '\u05dc\u05d0\u05d3\u05d8 ...',
-  'Save Changes': '\u05e9\u05e4\u05d9\u05d9\u05db\u05e2\u05e8\u05df \u05e2\u05e0\u05d3\u05e2\u05e8\u05d5\u05e0\u05d2\u05e2\u05df'
-};
 
-var _curLang = (localStorage.getItem('dd_lang') || 'en');
-
-function t(s) {
-  if (_curLang !== 'yi' || !s) return s;
-  var key = String(s).trim();
-  return I18N[key] || s;
-}
-
-// Walk the DOM and translate text nodes + common attributes.
-function _translateDOM(root) {
-  if (_curLang !== 'yi') return;
-  root = root || document.body;
-  try {
-    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
-    var nodes = [];
-    while (walker.nextNode()) nodes.push(walker.currentNode);
-    nodes.forEach(function(n){
-      var txt = n.nodeValue;
-      if (!txt) return;
-      var trimmed = txt.trim();
-      if (!trimmed) return;
-      if (I18N[trimmed]) { n.nodeValue = txt.replace(trimmed, I18N[trimmed]); }
-    });
-    // placeholders + button values
-    root.querySelectorAll('[placeholder]').forEach(function(el){
-      var p = el.getAttribute('placeholder'); if (p && I18N[p.trim()]) el.setAttribute('placeholder', I18N[p.trim()]);
-    });
-  } catch(e) {}
-}
-
-function applyLanguage() {
-  _curLang = (currentUser && currentUser.lang) || localStorage.getItem('dd_lang') || 'en';
-  try { localStorage.setItem('dd_lang', _curLang); } catch(e) {}
-  var rtl = (_curLang === 'yi');
-  document.documentElement.setAttribute('lang', rtl ? 'yi' : 'en');
-  document.documentElement.setAttribute('dir', rtl ? 'rtl' : 'ltr');
-  if (rtl) { document.body.classList.add('rtl-lang'); _translateDOM(document.body); }
-  else { document.body.classList.remove('rtl-lang'); }
-}
 
 function applyTheme() {
   var theme = (currentUser && currentUser.theme) || localStorage.getItem('dd_theme') || 'light';
@@ -9184,7 +9152,6 @@ async function switchTab(tab) {
   if (tab === 'scheduling') { _toggleTabChrome('tab-scheduling', true); renderScheduling(); }
   if (tab === 'specs') renderSpecs();
   try { _openNavGroupForTab(tabId); } catch(e) {}
-  try { if (_curLang === 'yi') { setTimeout(function(){ _translateDOM(document.body); }, 60); } } catch(e) {}
 }
 
 // ════════════════════════════════════════════
@@ -9568,6 +9535,7 @@ async function renderProjects() {
         (p.notes ? '<div class="proj-card-meta" style="margin-top:6px;font-style:italic;">' + p.notes + '</div>' : '') +
       '</div>' +
       (canEditThis ? '<div class="proj-card-actions">' +
+        '<button class="icon-btn" onclick="openProjectFiles(\'' + p.id + '\')">📎 Files</button>' +
         '<button class="icon-btn" onclick="editProject(\'' + p.id + '\')">✏️ Edit</button>' +
         '<button class="icon-btn icon-btn-danger" onclick="deleteProject(\'' + p.id + '\')">🗑</button>' +
       '</div>' : '') +
@@ -9578,6 +9546,119 @@ async function renderProjects() {
         '<span class="proj-footer-stat"><span>' + totalUnits + '</span> unit' + (totalUnits!==1?'s':'') + '</span>' +
       '</div></div>';
   }).join('');
+}
+
+
+// ===================== PROJECT DOCUMENTS / PHOTOS (office) =====================
+var _pfProjectId = null;
+async function openProjectFiles(projectId) {
+  _pfProjectId = projectId;
+  var proj = await DB.get('project:' + projectId);
+  document.getElementById('pf-title').textContent = proj ? (proj.name || 'Project Files') : 'Project Files';
+  document.getElementById('modal-projectfiles').classList.add('open');
+  await _renderProjectFiles();
+}
+function closeProjectFiles() {
+  document.getElementById('modal-projectfiles').classList.remove('open');
+  _pfProjectId = null;
+}
+async function _getProjectFiles(projectId) {
+  var rec = await DB.get('projectfiles:' + projectId);
+  return (rec && rec.files) ? rec.files : [];
+}
+async function _saveProjectFiles(projectId, files) {
+  await DB.set('projectfiles:' + projectId, { id: projectId, files: files, _updatedAt: Date.now() });
+}
+async function _renderProjectFiles() {
+  var host = document.getElementById('pf-body');
+  if (!host) return;
+  host.innerHTML = '<div style="text-align:center;color:rgba(243,239,230,0.6);padding:16px;">Loading...</div>';
+  var files = await _getProjectFiles(_pfProjectId);
+  if (!files.length) {
+    host.innerHTML = '<div style="text-align:center;color:rgba(243,239,230,0.6);padding:24px;font-size:13px;">No files yet. Upload a photo or document below.</div>';
+    return;
+  }
+  host.innerHTML = files.map(function(f, i){
+    var isImg = (f.type || '').indexOf('image') === 0;
+    var thumb = isImg
+      ? '<img src="' + f.data + '" style="width:46px;height:46px;border-radius:7px;object-fit:cover;flex-shrink:0;cursor:pointer;" onclick="_plLightbox(\'' + encodeURIComponent(f.data) + '\')">'
+      : '<div style="width:46px;height:46px;border-radius:7px;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px;">📄</div>';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.08);">' +
+      thumb +
+      '<div style="flex:1;min-width:0;">' +
+        '<div style="font-size:13px;color:#f3efe6;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + _esc(f.name||'File') + '</div>' +
+        '<div style="font-size:11px;color:rgba(243,239,230,0.5);">' + (f.sharedWithCustomer ? '👁 Shared with customer' + (f.unit?(' (Unit '+_esc(f.unit)+')'):'') : 'Office only') + '</div>' +
+      '</div>' +
+      '<button onclick="_pfToggleShare(' + i + ')" style="background:none;border:1px solid rgba(255,255,255,0.25);color:#f3efe6;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;flex-shrink:0;">' + (f.sharedWithCustomer?'Unshare':'Share') + '</button>' +
+      '<button onclick="_pfDownload(' + i + ')" style="background:none;border:none;color:var(--gold);font-size:16px;cursor:pointer;flex-shrink:0;">⬇</button>' +
+      '<button onclick="_pfDelete(' + i + ')" style="background:none;border:none;color:#e07a6a;font-size:15px;cursor:pointer;flex-shrink:0;">✕</button>' +
+    '</div>';
+  }).join('');
+}
+function _pfUpload() {
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*,application/pdf';
+  input.onchange = function() {
+    var file = input.files && input.files[0];
+    if (!file) return;
+    var addFile = async function(dataUrl, type, name) {
+      var files = await _getProjectFiles(_pfProjectId);
+      files.push({ id: 'pf_' + Date.now(), name: name, type: type, data: dataUrl, sharedWithCustomer: false, unit: '', addedBy: (currentUser?currentUser.name:''), at: Date.now() });
+      await _saveProjectFiles(_pfProjectId, files);
+      await _renderProjectFiles();
+    };
+    if ((file.type || '').indexOf('image') === 0) {
+      _plCompressImage(file, function(dataUrl){ addFile(dataUrl, file.type, file.name); });
+    } else {
+      if (file.size > 900000) { alert('This file is too large to store inline (max ~900KB). For big plans/PDFs we can set up Firebase Storage later.'); return; }
+      var r = new FileReader();
+      r.onload = function(){ addFile(r.result, file.type, file.name); };
+      r.readAsDataURL(file);
+    }
+  };
+  input.click();
+}
+async function _pfToggleShare(i) {
+  var files = await _getProjectFiles(_pfProjectId);
+  if (!files[i]) return;
+  if (!files[i].sharedWithCustomer) {
+    var unit = prompt('Share with a specific unit? Enter the unit number, or leave blank to share with all units at this project:', '');
+    if (unit === null) return;
+    files[i].sharedWithCustomer = true;
+    files[i].unit = (unit || '').trim();
+  } else {
+    files[i].sharedWithCustomer = false;
+    files[i].unit = '';
+  }
+  await _saveProjectFiles(_pfProjectId, files);
+  await _syncSharedFiles(_pfProjectId);
+  await _renderProjectFiles();
+}
+async function _pfDelete(i) {
+  if (!confirm('Delete this file?')) return;
+  var files = await _getProjectFiles(_pfProjectId);
+  files.splice(i, 1);
+  await _saveProjectFiles(_pfProjectId, files);
+  await _syncSharedFiles(_pfProjectId);
+  await _renderProjectFiles();
+}
+function _pfDownload(i) {
+  _getProjectFiles(_pfProjectId).then(function(files){
+    var f = files[i]; if (!f) return;
+    var a = document.createElement('a');
+    a.href = f.data; a.download = f.name || 'file';
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+}
+async function _syncSharedFiles(projectId) {
+  try {
+    var files = await _getProjectFiles(projectId);
+    var shared = files.filter(function(f){ return f.sharedWithCustomer; })
+      .map(function(f){ return { id:f.id, name:f.name, type:f.type, data:f.data, unit:f.unit||'' }; });
+    if (shared.length) { await DB.set('pubfiles:' + projectId, { id: projectId, files: shared, _updatedAt: Date.now() }); }
+    else { try { await DB.delete('pubfiles:' + projectId); } catch(e) {} }
+  } catch(e) {}
 }
 
 async function deleteProject(id) {
@@ -10195,7 +10276,6 @@ async function renderSubPortal() {
     html += '</div></div>';
   });
   host.innerHTML = html;
-  try { if (_curLang === 'yi') { setTimeout(function(){ _translateDOM(document.body); }, 50); } } catch(e) {}
 }
 
 function _spExpand(iid) {
@@ -12409,7 +12489,6 @@ function buildUpgradeSheet(sections) {
   setTimeout(initSignatureCanvas, 100);
   if (typeof _wireUpgradeProgress === 'function') _wireUpgradeProgress();
   if (typeof updateProgress === 'function') updateProgress();
-  try { if (_curLang === 'yi') { setTimeout(function(){ _translateDOM(document.body); }, 50); } } catch(e) {}
 }
 
 // ue_photoChanged — called by ue_buildItemRow file input
@@ -13576,6 +13655,54 @@ function setPunchPhase(phase) {
   renderPunchList();
 }
 
+
+// Office: view of issues customers reported (from custpunch: public records)
+async function _renderOfficeCustomerIssues() {
+  var host = document.getElementById('officeCustomerIssues');
+  if (!host) return;
+  try {
+    var keys = await DB.list('custpunch:');
+    var recs = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+    // flatten to open (non-resolved) items
+    var groups = recs.filter(function(r){ return (r.items||[]).length; });
+    var openCount = 0;
+    groups.forEach(function(g){ (g.items||[]).forEach(function(it){ if (it.status !== 'resolved') openCount++; }); });
+    if (!groups.length || openCount === 0) { host.innerHTML = ''; return; }
+    host.innerHTML = '<div style="background:#fff;border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:12px;padding:14px 16px;">' +
+      '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:17px;letter-spacing:1px;color:var(--navy);margin-bottom:10px;">\U0001F4DD Customer-Reported Issues (' + openCount + ')</div>' +
+      groups.map(function(g){
+        var openItems = (g.items||[]).filter(function(it){ return it.status !== 'resolved'; });
+        if (!openItems.length) return '';
+        return '<div style="margin-bottom:10px;">' +
+          '<div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:4px;">\U0001F4CD ' + _esc(g.address||'') + (g.unit?(' \u00b7 Unit '+_esc(g.unit)):'') + '</div>' +
+          openItems.map(function(it){
+            var origIdx = g.items.indexOf(it);
+            var thumbs = (it.photos||[]).map(function(ph){ return '<img src="' + ph + '" style="width:40px;height:40px;border-radius:5px;object-fit:cover;cursor:pointer;" onclick="_plLightbox(\'' + encodeURIComponent(ph) + '\')">'; }).join('');
+            return '<div style="border-bottom:1px solid #f0ece2;padding:7px 0;">' +
+              '<div style="display:flex;align-items:flex-start;gap:8px;">' +
+                '<div style="flex:1;min-width:0;font-size:13px;color:#16233d;">' + _esc(it.text) + '</div>' +
+                '<button onclick="_officeResolveIssue(\'' + g.address.replace(/\'/g,"") + '\',\'' + (g.unit||'').replace(/\'/g,"") + '\',' + origIdx + ')" style="background:#2D7A4F;color:#fff;border:none;border-radius:5px;padding:3px 9px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;">Resolve</button>' +
+              '</div>' +
+              (thumbs ? '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px;">' + thumbs + '</div>' : '') +
+            '</div>';
+          }).join('') +
+        '</div>';
+      }).join('') +
+    '</div>';
+  } catch(e) { host.innerHTML = ''; }
+}
+async function _officeResolveIssue(address, unit, idx) {
+  try {
+    var key = 'custpunch:' + btoa(unescape(encodeURIComponent((address||'') + '|' + (unit||'Main')))).replace(/=/g,'');
+    var rec = await DB.get(key);
+    if (rec && rec.items && rec.items[idx]) {
+      rec.items[idx].status = 'resolved';
+      await DB.set(key, rec);
+      await _renderOfficeCustomerIssues();
+    }
+  } catch(e) {}
+}
+
 async function renderPunchList() {
   var container = document.getElementById('punchUnitList');
   if (!container) return;
@@ -13650,6 +13777,7 @@ async function renderPunchList() {
     '</div>';
   }).join('');
   if (typeof _syncPublicPunch === 'function') { setTimeout(function(){ _syncPublicPunch(); }, 800); }
+  try { _renderOfficeCustomerIssues(); } catch(e) {}
 }
 
 // ── Add Unit Modal ──
@@ -16166,6 +16294,21 @@ if (document.readyState === 'loading') {
   });
 })();
 </script>
+
+<!-- PROJECT FILES MODAL -->
+<div class="modal-overlay" id="modal-projectfiles">
+  <div class="modal-box" style="max-width:480px;">
+    <div class="modal-header">
+      <div class="modal-title" id="pf-title">Project Files</div>
+      <button class="modal-close" onclick="closeProjectFiles()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="pf-body" style="max-height:50vh;overflow-y:auto;margin-bottom:14px;"></div>
+      <button onclick="_pfUpload()" style="width:100%;padding:12px;border-radius:8px;border:none;background:var(--gold);color:#0D1F3C;font-family:Inter,sans-serif;font-size:14px;font-weight:700;cursor:pointer;">📎 Upload Photo or Document</button>
+      <div style="font-size:11px;color:rgba(243,239,230,0.5);margin-top:8px;text-align:center;">Photos are compressed automatically. Use "Share" to let a customer see a specific file.</div>
+    </div>
+  </div>
+</div>
 
 </body>
 </html
