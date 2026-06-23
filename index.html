@@ -3697,7 +3697,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v113</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v114</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -3974,6 +3974,16 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
         </button>
       </li>
       <li class="office-nav-item">
+        <button class="office-nav-btn" onclick="switchTab('reporting');closeSidebar();" id="navbtn-reporting">
+          <span class="nav-icon">📈</span> Reports
+        </button>
+      </li>
+      <li class="office-nav-item">
+        <button class="office-nav-btn" onclick="switchTab('weeklyDigest');closeSidebar();" id="navbtn-weeklyDigest">
+          <span class="nav-icon">🗓️</span> Weekly Digest
+        </button>
+      </li>
+      <li class="office-nav-item">
         <button class="office-nav-btn" onclick="switchTab('teamChat');closeSidebar();" id="navbtn-teamChat">
           <span class="nav-icon">💬</span> Team Chat
         </button>
@@ -3992,6 +4002,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
         <button class="office-nav-btn nav-sub" onclick="switchTab('tasks');closeSidebar();" id="navbtn-tasks"><span class="nav-icon">📝</span> Tasks</button>
         <button class="office-nav-btn nav-sub" onclick="switchTab('taskTemplates');closeSidebar();" id="navbtn-taskTemplates"><span class="nav-icon">📋</span> Task Templates</button>
         <button class="office-nav-btn nav-sub" onclick="switchTab('scheduling');closeSidebar();" id="navbtn-scheduling"><span class="nav-icon">📅</span> Scheduling</button>
+        <button class="office-nav-btn nav-sub" onclick="switchTab('photoTimeline');closeSidebar();" id="navbtn-photoTimeline"><span class="nav-icon">📸</span> Photo Timeline</button>
       </li>
       <!-- LOGBOOK group -->
       <li class="office-nav-item">
@@ -4038,7 +4049,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     <div class="office-sidebar-footer">
       <div id="bioToggleRow" style="margin-bottom:10px;"></div>
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v113</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v114</div>
     </div>
   </div>
 
@@ -4281,6 +4292,36 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
         <button onclick="openTemplateModal()" style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;">+ New</button>
       </div>
       <div id="taskTemplatesList"></div>
+    </div>
+
+    
+    <!-- REPORTING TAB -->
+    <div id="tab-reporting" class="office-tab" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+        <div><div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;color:var(--navy);">Reports</div>
+        <div style="font-size:13px;color:var(--muted);">Your at-a-glance status across all projects.</div></div>
+        <button onclick="openReportExport()" style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;">📄 Export PDF</button>
+      </div>
+      <div id="reportingContent"></div>
+    </div>
+
+    <!-- WEEKLY DIGEST TAB -->
+    <div id="tab-weeklyDigest" class="office-tab" style="display:none;">
+      <div style="margin-bottom:16px;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;color:var(--navy);">Weekly Digest</div>
+        <div style="font-size:13px;color:var(--muted);">A summary of the last 7 days of activity.</div>
+      </div>
+      <div id="weeklyDigestContent"></div>
+    </div>
+
+    <!-- PHOTO TIMELINE TAB -->
+    <div id="tab-photoTimeline" class="office-tab" style="display:none;">
+      <div style="margin-bottom:14px;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;color:var(--navy);">Photo Timeline</div>
+        <div style="font-size:13px;color:var(--muted);">All site photos, newest first — from daily logs and progress updates.</div>
+      </div>
+      <select id="ptProjectFilter" onchange="renderPhotoTimeline()" class="form-input" style="margin-bottom:14px;max-width:260px;"></select>
+      <div id="photoTimelineContent"></div>
     </div>
 
     <!-- CUSTOMER REPORTS TAB -->
@@ -4821,7 +4862,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v113';
+<script>var APP_VERSION = 'v114';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -10131,6 +10172,7 @@ async function switchTab(tab) {
   try { if (tab === 'walkthroughs') renderWalkthroughs(); } catch(e) {}
   try { if (tab === 'vendors') renderVendors(); if (tab === 'subCalendar') renderSubCalendar(); } catch(e) {}
   try { if (tab === 'taskTemplates') renderTaskTemplates(); } catch(e) {}
+  try { if (tab==='reporting') renderReporting(); if (tab==='photoTimeline') renderPhotoTimeline(); if (tab==='weeklyDigest') renderWeeklyDigest(); } catch(e) {}
 }
 
 // ════════════════════════════════════════════
@@ -10640,6 +10682,237 @@ function _showBioLock() {
     // auto-prompt once
     setTimeout(function(){ window._bioUnlock(); }, 400);
   });
+}
+
+
+// ===================== REPORTING DASHBOARD =====================
+async function renderReporting() {
+  var host = document.getElementById('reportingContent');
+  if (!host) return;
+  host.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;">Loading…</div>';
+  async function load(prefix) {
+    var keys = await DB.list(prefix);
+    return (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+  }
+  var tasks = await load('task:');
+  var issues = await load('custpunch:');
+  var inspections = await load('inspection:');
+  var deliveries = await load('delivery:');
+  var walks = await load('walkreq:');
+  var changeOrders = await load('changeorder:');
+  var projects = await load('project:');
+
+  // Open customer issues
+  var openIssues = 0;
+  issues.forEach(function(r){ (r.items||[]).forEach(function(it){ if (it.status !== 'resolved') openIssues++; }); });
+  // Overdue / open tasks
+  var now = Date.now();
+  var openTasks = tasks.filter(function(t){ return t.status !== 'done'; });
+  var overdueTasks = openTasks.filter(function(t){ return t.dueDate && new Date(t.dueDate).getTime() < now; });
+  // Upcoming inspections (scheduled, future or undated)
+  var upcomingInsp = inspections.filter(function(i){ return i.status === 'scheduled'; });
+  // Pending deliveries
+  var pendingDeliv = deliveries.filter(function(d){ return d.status !== 'arrived'; });
+  // Pending walk requests
+  var pendingWalks = walks.filter(function(w){ return w.status === 'requested'; });
+  // Pending change orders
+  var pendingCO = changeOrders.filter(function(c){ return c.status === 'pending'; });
+
+  function stat(num, label, color, tab) {
+    return '<div onclick="' + (tab?('switchTab(\''+tab+'\')'):'') + '" style="background:#fff;border:1px solid var(--border);border-left:3px solid '+color+';border-radius:12px;padding:14px;cursor:'+(tab?'pointer':'default')+';">' +
+      '<div style="font-size:30px;font-family:\'Bebas Neue\',sans-serif;color:'+color+';line-height:1;">'+num+'</div>' +
+      '<div style="font-size:12px;color:var(--muted);margin-top:3px;">'+label+'</div>' +
+    '</div>';
+  }
+  var html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;">' +
+    stat(openIssues, 'Open customer issues', '#c0392b', 'custReports') +
+    stat(overdueTasks.length, 'Overdue tasks', '#e07a6a', 'tasks') +
+    stat(openTasks.length, 'Open tasks', '#b8860b', 'tasks') +
+    stat(pendingWalks.length, 'Walkthrough requests', '#2c6fb8', 'walkthroughs') +
+    stat(upcomingInsp.length, 'Upcoming inspections', '#7a5bb5', 'inspections') +
+    stat(pendingDeliv.length, 'Pending deliveries', '#3a7d5d', 'deliveries') +
+    stat(pendingCO.length, 'Change orders pending', '#b8860b', 'changeOrders') +
+    stat(projects.length, 'Active projects', '#0D1F3C', 'projects') +
+  '</div>';
+
+  // Needs attention list
+  var attention = [];
+  overdueTasks.slice(0,5).forEach(function(t){ attention.push({ icon:'\u23f0', text:'Overdue: ' + (t.title||'task') + (t.projectName?(' ('+t.projectName+')'):''), tab:'tasks' }); });
+  pendingWalks.slice(0,5).forEach(function(w){ attention.push({ icon:'🚶', text:'Walkthrough request from ' + (w.name||'customer'), tab:'walkthroughs' }); });
+  pendingCO.slice(0,5).forEach(function(c){ attention.push({ icon:'📝', text:'Change order pending: ' + (c.title||''), tab:'changeOrders' }); });
+  if (openIssues > 0) attention.push({ icon:'\u26A0\uFE0F', text:openIssues + ' open customer issue' + (openIssues>1?'s':''), tab:'custReports' });
+
+  html += '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:18px;letter-spacing:1px;color:var(--navy);margin-bottom:10px;">Needs Attention</div>';
+  if (attention.length) {
+    html += attention.map(function(a){
+      return '<div onclick="switchTab(\''+a.tab+'\')" style="background:#fff;border:1px solid var(--border);border-radius:9px;padding:11px 14px;margin-bottom:8px;cursor:pointer;display:flex;gap:10px;align-items:center;">' +
+        '<span style="font-size:16px;">'+a.icon+'</span><span style="font-size:13px;color:#16233d;">'+_esc(a.text)+'</span></div>';
+    }).join('');
+  } else {
+    html += '<div style="background:#eef6f0;border-radius:10px;padding:16px;text-align:center;color:#3a7d5d;font-size:13px;font-weight:600;">\u2705 All caught up! Nothing needs attention.</div>';
+  }
+  host.innerHTML = html;
+}
+
+// ===================== PHOTO TIMELINE =====================
+async function renderPhotoTimeline() {
+  var host = document.getElementById('photoTimelineContent');
+  if (!host) return;
+  host.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;">Loading…</div>';
+  var projKeys = await DB.list('project:');
+  var projects = (await Promise.all(projKeys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+  // populate project filter
+  var sel = document.getElementById('ptProjectFilter');
+  if (sel && !sel.dataset.filled) {
+    sel.innerHTML = '<option value="">All Projects</option>' + projects.map(function(p){ return '<option value="'+p.id+'">'+_esc(p.name||'')+'</option>'; }).join('');
+    sel.dataset.filled = '1';
+  }
+  var filterId = sel ? sel.value : '';
+  // gather photos from site logs (each has date + photos + projectId)
+  var logKeys = await DB.list('sitelog:');
+  var logs = (await Promise.all(logKeys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+  var photos = [];
+  logs.forEach(function(l){
+    if (filterId && l.projectId !== filterId) return;
+    (l.photos||[]).forEach(function(ph){
+      photos.push({ data:ph, date:l.date, projectId:l.projectId, note:l.notes||'' });
+    });
+  });
+  // also pull progress photos from portal configs
+  var cfgKeys = await DB.list('pubportalcfg:');
+  var cfgs = (await Promise.all(cfgKeys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+  cfgs.forEach(function(c){
+    (c.photos||[]).forEach(function(ph){ photos.push({ data:ph.data, date:ph.at, projectId:'', note:'Progress photo' }); });
+  });
+  photos.sort(function(a,b){ return (b.date||0) - (a.date||0); });
+  if (!photos.length) {
+    host.innerHTML = '<div class="tab-empty"><div class="tab-empty-icon">📸</div><div class="tab-empty-title">No Photos Yet</div><div class="tab-empty-desc">Photos from daily site logs and progress updates will appear here over time.</div></div>';
+    return;
+  }
+  // group by date
+  var byDate = {};
+  photos.forEach(function(p){
+    var d = p.date ? new Date(p.date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : 'Undated';
+    (byDate[d] = byDate[d] || []).push(p);
+  });
+  var html = '';
+  Object.keys(byDate).forEach(function(d){
+    html += '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:16px;letter-spacing:1px;color:var(--gold);margin:14px 0 8px;">' + d + '</div>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">';
+    html += byDate[d].map(function(p){
+      return '<img src="'+p.data+'" style="width:100%;aspect-ratio:1;border-radius:8px;object-fit:cover;cursor:pointer;" onclick="_plLightbox(\''+encodeURIComponent(p.data)+'\')">';
+    }).join('');
+    html += '</div>';
+  });
+  host.innerHTML = html;
+}
+
+// ===================== PDF / PROJECT REPORT EXPORT =====================
+async function openReportExport() {
+  var keys = await DB.list('project:');
+  var projects = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+  var sel = document.getElementById('exportProjectSelect');
+  sel.innerHTML = projects.map(function(p){ return '<option value="'+p.id+'">'+_esc(p.name||'')+'</option>'; }).join('');
+  document.getElementById('modal-exportreport').classList.add('open');
+}
+function closeReportExport(){ document.getElementById('modal-exportreport').classList.remove('open'); }
+async function generateProjectReport() {
+  var projId = document.getElementById('exportProjectSelect').value;
+  if (!projId) { alert('Pick a project.'); return; }
+  var proj = await DB.get('project:'+projId);
+  if (!proj) return;
+  async function load(prefix){ var keys=await DB.list(prefix); return (await Promise.all(keys.map(function(k){return DB.get(k);}))).filter(Boolean); }
+  var tasks = (await load('task:')).filter(function(t){ return t.projectId===projId; });
+  var logs = (await load('sitelog:')).filter(function(l){ return l.projectId===projId; });
+  var inspections = (await load('inspection:')).filter(function(i){ return i.projectId===projId; });
+  var changeOrders = (await load('changeorder:')).filter(function(c){ return c.projectId===projId; });
+  function fmt(ts){ try{ return new Date(ts).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }catch(e){ return ''; } }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  var addresses = (proj.houses||[]).map(function(h){ return esc(h.address) + (h.units&&h.units.length?(' (Units: '+esc(h.units.join(', '))+')'):''); }).join('<br>');
+  var w = window.open('', '_blank');
+  if (!w) { alert('Allow pop-ups to generate the report.'); return; }
+  var doc = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + esc(proj.name||'Project Report') + '</title>' +
+    '<style>body{font-family:Georgia,serif;color:#1a1a1a;max-width:760px;margin:0 auto;padding:36px 28px;}' +
+    'h1{font-size:26px;border-bottom:3px solid #0D1F3C;padding-bottom:8px;margin-bottom:4px;color:#0D1F3C;}' +
+    'h2{font-size:16px;color:#0D1F3C;margin:24px 0 8px;border-bottom:1px solid #ccc;padding-bottom:4px;}' +
+    '.muted{color:#666;font-size:13px;}table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px;}' +
+    'th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #eee;}th{background:#f4f1ea;}' +
+    '.tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11px;background:#eee;}' +
+    '@media print{body{padding:0;}}</style></head><body>';
+  doc += '<h1>' + esc(proj.name||'Project Report') + '</h1>';
+  doc += '<div class="muted">Diligent Developers &middot; Generated ' + fmt(Date.now()) + '</div>';
+  if (addresses) doc += '<h2>Addresses</h2><div style="font-size:13px;">' + addresses + '</div>';
+  // Tasks
+  doc += '<h2>Tasks (' + tasks.length + ')</h2>';
+  if (tasks.length) {
+    doc += '<table><tr><th>Task</th><th>Status</th><th>Due</th></tr>';
+    tasks.forEach(function(t){ doc += '<tr><td>'+esc(t.title)+'</td><td><span class="tag">'+esc(t.status||'')+'</span></td><td>'+(t.dueDate?fmt(t.dueDate):'')+'</td></tr>'; });
+    doc += '</table>';
+  } else { doc += '<div class="muted">None</div>'; }
+  // Inspections
+  doc += '<h2>Inspections (' + inspections.length + ')</h2>';
+  if (inspections.length) {
+    doc += '<table><tr><th>Type</th><th>Date</th><th>Status</th></tr>';
+    inspections.forEach(function(i){ doc += '<tr><td>'+esc(i.type)+'</td><td>'+fmt(i.date)+'</td><td><span class="tag">'+esc(i.status||'')+'</span></td></tr>'; });
+    doc += '</table>';
+  } else { doc += '<div class="muted">None</div>'; }
+  // Change orders
+  doc += '<h2>Change Orders (' + changeOrders.length + ')</h2>';
+  if (changeOrders.length) {
+    doc += '<table><tr><th>Title</th><th>Cost</th><th>Status</th></tr>';
+    changeOrders.forEach(function(c){ var cost=c.cost?(parseFloat(String(c.cost).replace(/[^0-9.\-]/g,''))||0):0; doc += '<tr><td>'+esc(c.title)+'</td><td>'+(cost?((cost<0?'-':'+')+'$'+Math.abs(cost).toLocaleString()):'')+'</td><td><span class="tag">'+esc(c.status||'')+'</span></td></tr>'; });
+    doc += '</table>';
+  } else { doc += '<div class="muted">None</div>'; }
+  // Site logs
+  doc += '<h2>Site Log Entries (' + logs.length + ')</h2>';
+  if (logs.length) {
+    logs.sort(function(a,b){ return (b.date||0)-(a.date||0); });
+    logs.slice(0,20).forEach(function(l){ doc += '<div style="margin:8px 0;font-size:13px;"><b>'+fmt(l.date)+'</b>'+(l.weather?(' &middot; '+esc(l.weather)):'')+'<br>'+esc(l.notes||'')+'</div>'; });
+  } else { doc += '<div class="muted">None</div>'; }
+  doc += '<div style="margin-top:30px;text-align:center;" class="no-print"><button onclick="window.print()" style="background:#0D1F3C;color:#fff;border:none;border-radius:8px;padding:12px 28px;font-size:14px;cursor:pointer;">Print / Save as PDF</button></div>';
+  doc += '</body></html>';
+  w.document.write(doc); w.document.close();
+  closeReportExport();
+}
+
+// ===================== WEEKLY DIGEST =====================
+async function renderWeeklyDigest() {
+  var host = document.getElementById('weeklyDigestContent');
+  if (!host) return;
+  host.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;">Building digest…</div>';
+  var weekAgo = Date.now() - 7*24*60*60*1000;
+  async function load(prefix){ var keys=await DB.list(prefix); return (await Promise.all(keys.map(function(k){return DB.get(k);}))).filter(Boolean); }
+  var logs = (await load('sitelog:')).filter(function(l){ return (l._createdAt||l.date||0) >= weekAgo; });
+  var tasks = await load('task:');
+  var doneTasks = tasks.filter(function(t){ return t.status==='done'; });
+  var newIssues = 0; (await load('custpunch:')).forEach(function(r){ (r.items||[]).forEach(function(it){ if((it.at||0)>=weekAgo) newIssues++; }); });
+  var inspections = (await load('inspection:')).filter(function(i){ return (i._createdAt||0) >= weekAgo; });
+  var deliveries = (await load('delivery:')).filter(function(d){ return (d._createdAt||0) >= weekAgo; });
+  var arrived = deliveries.filter(function(d){ return d.status==='arrived'; });
+  var walks = (await load('walkreq:')).filter(function(w){ return (w.at||0) >= weekAgo; });
+
+  function row(num, label) {
+    return '<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0ece2;"><span style="font-size:14px;color:#16233d;">'+label+'</span><span style="font-size:18px;font-weight:700;font-family:\'Bebas Neue\',sans-serif;color:var(--navy);">'+num+'</span></div>';
+  }
+  var html = '<div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px;">' +
+    '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:20px;letter-spacing:1px;color:var(--navy);margin-bottom:4px;">This Week at Diligent Developers</div>' +
+    '<div style="font-size:12px;color:var(--muted);margin-bottom:12px;">' + new Date(weekAgo).toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' \u2013 ' + new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}) + '</div>' +
+    row(logs.length, '📓 Site log entries') +
+    row(inspections.length, '🔍 Inspections logged') +
+    row(arrived.length + '/' + deliveries.length, '📦 Deliveries arrived') +
+    row(walks.length, '🚶 Walkthrough requests') +
+    row(newIssues, '\u26A0\uFE0F New customer issues') +
+    row(doneTasks.length, '\u2705 Tasks completed (all-time)') +
+  '</div>';
+  // recent activity highlights
+  if (logs.length) {
+    logs.sort(function(a,b){ return (b.date||0)-(a.date||0); });
+    html += '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:16px;letter-spacing:1px;color:var(--navy);margin:16px 0 8px;">Recent Site Notes</div>';
+    html += logs.slice(0,5).map(function(l){
+      return '<div style="background:#fff;border:1px solid var(--border);border-radius:9px;padding:10px 13px;margin-bottom:7px;"><div style="font-size:11px;color:var(--gold);font-weight:700;">'+(l.date?new Date(l.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'')+'</div><div style="font-size:13px;color:#3a3730;">'+_esc(l.notes||'')+'</div></div>';
+    }).join('');
+  }
+  host.innerHTML = html;
 }
 
 // ===================== TASK TEMPLATES =====================
@@ -18320,6 +18593,18 @@ if (document.readyState === 'loading') {
   <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:#fff;">DILIGENT DEVELOPERS</div>
   <div id="bioLockMsg" style="font-size:13px;color:rgba(255,255,255,0.7);margin:8px 0 22px;">Unlock to continue</div>
   <button onclick="window._bioUnlock && window._bioUnlock()" style="background:var(--gold);color:#0D1F3C;border:none;border-radius:10px;padding:13px 28px;font-size:15px;font-weight:700;cursor:pointer;">👆 Unlock</button>
+</div>
+
+<!-- EXPORT REPORT MODAL -->
+<div class="modal-overlay" id="modal-exportreport">
+  <div class="modal-box" style="max-width:400px;">
+    <div class="modal-header"><div class="modal-title">📄 Export Project Report</div><button class="modal-close" onclick="closeReportExport()">✕</button></div>
+    <div class="modal-body">
+      <div style="font-size:13px;color:rgba(243,239,230,0.75);margin-bottom:12px;">Generates a printable report (tasks, inspections, change orders, site logs) you can save as PDF.</div>
+      <div class="form-group"><label class="form-label">Project</label><select class="form-input" id="exportProjectSelect"></select></div>
+      <button onclick="generateProjectReport()" style="width:100%;padding:13px;border-radius:9px;border:none;background:var(--gold);color:#0D1F3C;font-size:14px;font-weight:700;cursor:pointer;">Generate Report</button>
+    </div>
+  </div>
 </div>
 
 <!-- PROGRESS EDITOR MODAL -->
