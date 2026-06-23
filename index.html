@@ -4300,7 +4300,8 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
             <div class="form-group"><label class="form-label">Name / Company</label>
               <input class="form-input" id="sub-name" type="text" placeholder="e.g. Mike's Electric"></div>
             <div class="form-group"><label class="form-label">Trade</label>
-              <select class="form-input" id="sub-trade"></select></div>
+              <input class="form-input" id="sub-trade" type="text" list="sub-trade-list" placeholder="e.g. Electrical, Trimmer, Cabinet Installer">
+              <datalist id="sub-trade-list"></datalist></div>
             <div class="form-group"><label class="form-label">Phone <span style="font-weight:400;opacity:.6;">(optional)</span></label>
               <input class="form-input" id="sub-phone" type="tel" placeholder="845-000-0000"></div>
             <div class="form-group"><label class="form-label">4-digit access code</label>
@@ -5745,7 +5746,9 @@ async function _loadProfileActivity() {
   if (!host || !currentUser) return;
   host.innerHTML = '<div style="font-size:12px;color:rgba(243,239,230,0.5);">Loading...</div>';
   try {
-    var keys = await DB.list('activity:' + currentUser.id + ':');
+    var owner = _activityOwnerKey();
+  if (!owner) { host.innerHTML = ''; return; }
+  var keys = await DB.list('activity:' + owner + ':');
     var items = (await Promise.all(keys.map(function(k){return DB.get(k);}))).filter(Boolean);
     items.sort(function(a,b){ return (b.at||0)-(a.at||0); });
     items = items.slice(0, 30);
@@ -8345,11 +8348,17 @@ function _tabStateFor(user, tabId) {
 // ===================== PROFILE: activity, quiet hours, density, sessions =====================
 
 // --- Activity log (per user, keyed by their id) ---
+function _activityOwnerKey() {
+  // Stable per-account key. Prefer id; fall back to email so entries are never shared.
+  if (!currentUser) return null;
+  return currentUser.id || ('email_' + (currentUser.email || 'unknown'));
+}
 async function logActivity(text) {
-  if (!currentUser) return;
+  var owner = _activityOwnerKey();
+  if (!owner) return;
   try {
     var id = 'act_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
-    await DB.set('activity:' + currentUser.id + ':' + id, { id: id, text: text, at: Date.now() });
+    await DB.set('activity:' + owner + ':' + id, { id: id, text: text, at: Date.now() });
   } catch(e) {}
 }
 
@@ -9381,8 +9390,9 @@ async function renderSubs() {
 function openSubForm(id) {
   _subEditId = id || null;
   document.getElementById('subModalTitle').textContent = id ? 'Edit Subcontractor' : 'Add Subcontractor';
-  var tsel = document.getElementById('sub-trade');
-  tsel.innerHTML = TRADE_OPTIONS.map(function(t){ return '<option value="'+t+'">'+t+'</option>'; }).join('');
+  var tlist = document.getElementById('sub-trade-list');
+  if (tlist) tlist.innerHTML = TRADE_OPTIONS.map(function(t){ return '<option value="'+t+'">'; }).join('');
+  document.getElementById('sub-trade').value = '';
   document.getElementById('sub-name').value = '';
   document.getElementById('sub-phone').value = '';
   document.getElementById('sub-note').value = '';
