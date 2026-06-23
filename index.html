@@ -3724,19 +3724,21 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 <!-- CUSTOMER GALLERY PAGE                      -->
 <!-- ══════════════════════════════════════════ -->
 <div class="page" id="customerDashboardPage">
-  <div style="background:var(--navy);padding:18px 20px;position:sticky;top:0;z-index:100;border-bottom:2px solid var(--gold);">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
-      <div style="min-width:0;">
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1.5px;color:#fff;line-height:1.1;">Diligent Developers</div>
-        <div id="cdUnitInfo" style="font-size:12px;color:rgba(255,255,255,0.65);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+  <div style="background:linear-gradient(160deg,#0D1F3C 0%,#1a2b4a 100%);padding:16px 20px 22px;position:sticky;top:0;z-index:100;border-bottom:2px solid var(--gold);">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;">
+      <img src="./icon-192.png" alt="Diligent Developers" style="width:38px;height:38px;border-radius:9px;background:#fff;padding:3px;flex-shrink:0;" onerror="this.style.display='none'">
+      <div style="flex:1;text-align:center;min-width:0;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:2px;color:#fff;line-height:1;">DILIGENT DEVELOPERS</div>
+        <div style="font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:1px;">Where Quality Meets Home</div>
       </div>
-      <button onclick="showPage('customerAuthPage')" style="background:rgba(255,255,255,0.1);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;flex-shrink:0;">Exit</button>
+      <button onclick="showPage('customerAuthPage')" style="background:rgba(255,255,255,0.12);color:#fff;border:none;border-radius:8px;padding:8px 13px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;">Exit</button>
     </div>
+    <div id="cdGreeting" style="font-family:'Bebas Neue',sans-serif;font-size:27px;letter-spacing:1px;color:#fff;line-height:1.05;"></div>
+    <div id="cdUnitInfo" style="font-size:12px;color:var(--gold);margin-top:3px;"></div>
   </div>
 
   <div style="max-width:720px;margin:0 auto;padding:18px 16px 40px;">
-    <div id="cdGreeting" style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;color:var(--navy);margin-bottom:4px;"></div>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:18px;">Welcome to your home portal. Here's everything in one place.</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:18px;">Everything about your home, all in one place.</div>
 
     <!-- Primary actions -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px;">
@@ -3772,27 +3774,16 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 <div class="page" id="customerGalleryPage">
-<div style="background:var(--navy);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:2px solid var(--gold);">
-  <span style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:white;">Available Upgrades</span>
-  <button onclick="startForm()" style="background:var(--gold);color:var(--navy);border:none;border-radius:8px;padding:9px 20px;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;cursor:pointer;font-weight:700;">Make My Selections →</button>
+<div style="background:var(--navy);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;z-index:100;border-bottom:2px solid var(--gold);">
+  <button onclick="cdBackToDashboard()" style="background:rgba(255,255,255,0.1);color:#fff;border:none;border-radius:8px;padding:9px 14px;font-size:13px;font-weight:600;cursor:pointer;flex-shrink:0;">← Back</button>
+  <span style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:white;flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Available Upgrades</span>
+  <button onclick="startForm()" style="background:var(--gold);color:var(--navy);border:none;border-radius:8px;padding:9px 16px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;cursor:pointer;font-weight:700;flex-shrink:0;">Selections →</button>
 </div>
-
-<div id="galleryUpdate" class="portal-update" style="max-width:760px;margin:0 auto;padding:0 16px;"></div>
 
 <div id="customerFiles" style="max-width:760px;margin:0 auto;padding:0 16px;"></div>
 
 <div id="customerProgress" style="max-width:760px;margin:0 auto;padding:0 16px;"></div>
 
-<div id="customerPunchSection" style="max-width:760px;margin:14px auto;padding:0 16px;">
-  <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1px;color:var(--navy);">📝 My Issue List</div>
-      <button onclick="_cpAddItem()" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;">+ Report an Issue</button>
-    </div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Found something that needs attention? Add it here with a photo and we'll see it.</div>
-    <div id="cpItemList"></div>
-  </div>
-</div>
 
 <div class="upg-gallery">
   <h2 class="upg-gallery__title">AVAILABLE UPGRADES GALLERY</h2>
@@ -3984,6 +3975,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
         <button class="office-nav-btn nav-sub" onclick="switchTab('customers');closeSidebar();" id="navbtn-customers"><span class="nav-icon">👥</span> Customers</button>
         <button class="office-nav-btn nav-sub" onclick="switchTab('upgrades');closeSidebar();" id="navbtn-upgrades"><span class="nav-icon">📋</span> Upgrades</button>
         <button class="office-nav-btn nav-sub" onclick="switchTab('custUpdates');closeSidebar();" id="navbtn-custUpdates"><span class="nav-icon">📣</span> Customer Updates</button>
+        <button class="office-nav-btn nav-sub" onclick="switchTab('custReports');closeSidebar();" id="navbtn-custReports"><span class="nav-icon">📝</span> Customer Reports <span id="custReportsBadge" style="display:none;background:#e07a6a;color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;margin-left:4px;"></span></button>
         <button class="office-nav-btn nav-sub admin-only" style="display:none;" onclick="switchTab('upgradeEditor');closeSidebar();" id="navbtn-upgradeEditor"><span class="nav-icon">✏️</span> Upgrade Editor</button>
       </li>
 
@@ -4141,6 +4133,16 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
           </div>
         </div>
       </div>
+    </div>
+
+    
+    <!-- CUSTOMER REPORTS TAB -->
+    <div id="tab-custReports" class="office-tab" style="display:none;">
+      <div style="margin-bottom:18px;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;color:var(--navy);">Customer Reports</div>
+        <div style="font-size:13px;color:var(--muted);">Issues your customers reported from their portal.</div>
+      </div>
+      <div id="officeCustomerIssues"></div>
     </div>
 
     <!-- CUSTOMERS TAB -->
@@ -4512,8 +4514,6 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     <!-- PUNCH LIST TAB -->
     <div id="tab-punchlist" class="office-tab" style="display:none;">
 
-      <div id="officeCustomerIssues" style="margin-bottom:18px;"></div>
-
       <!-- Top bar: phase toggle + actions -->
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px;">
         <div style="display:flex;background:white;border:1.5px solid var(--border);border-radius:10px;padding:3px;gap:3px;">
@@ -4763,7 +4763,7 @@ async function checkSyncStatus() {
 
 // Key sanitization: Firestore doesn't allow '/' or certain chars in doc IDs
 // Customer-facing prefixes go in the OPEN 'pub' collection; everything else is office-only in 'dd'.
-var _PUBLIC_PREFIXES = ['upgrades:', 'submission:', 'upgrade_sections', 'custupdate:', 'subcontractor:', 'subpunch:', 'pubaddr:', 'pubpunch:', 'pubfiles:', 'custpunch:', 'pubprogress:'];
+var _PUBLIC_PREFIXES = ['upgrades:', 'submission:', 'upgrade_sections', 'custupdate:', 'subcontractor:', 'subpunch:', 'pubaddr:', 'pubpunch:', 'pubfiles:', 'custpunch:', 'pubprogress:', 'pubnotif:'];
 function _fsCol(key) {
   for (var i = 0; i < _PUBLIC_PREFIXES.length; i++) {
     if (String(key).indexOf(_PUBLIC_PREFIXES[i]) === 0) return 'pub';
@@ -5586,13 +5586,75 @@ async function _cpRender(targetId) {
     '</div>';
   }).join('');
 }
-async function _cpAddItem() {
-  var text = prompt('Describe the issue (e.g. "Crack in living room ceiling"):');
-  if (!text || !text.trim()) return;
+var _cpDraftPhotos = [];
+function _cpAddItem() {
+  // open the nice report modal
+  _cpDraftPhotos = [];
+  var ta = document.getElementById('cpReportText'); if (ta) ta.value = '';
+  var pv = document.getElementById('cpReportPhotos'); if (pv) pv.innerHTML = '';
+  var modal = document.getElementById('modal-cpreport');
+  if (modal) modal.classList.add('open');
+  setTimeout(function(){ if (ta) ta.focus(); }, 100);
+}
+function closeCpReport() {
+  var modal = document.getElementById('modal-cpreport');
+  if (modal) modal.classList.remove('open');
+  _cpDraftPhotos = [];
+}
+function _cpReportAddPhoto(useCamera) {
+  var input = document.createElement('input');
+  input.type = 'file'; input.accept = 'image/*';
+  if (useCamera) input.capture = 'environment';
+  input.onchange = function() {
+    var file = input.files && input.files[0];
+    if (!file) return;
+    _plCompressImage(file, function(dataUrl){
+      _cpDraftPhotos.push(dataUrl);
+      _cpRenderDraftPhotos();
+    });
+  };
+  input.click();
+}
+function _cpRenderDraftPhotos() {
+  var pv = document.getElementById('cpReportPhotos');
+  if (!pv) return;
+  pv.innerHTML = _cpDraftPhotos.map(function(ph, i){
+    return '<div style="position:relative;display:inline-block;">' +
+      '<img src="' + ph + '" style="width:62px;height:62px;border-radius:8px;object-fit:cover;">' +
+      '<button onclick="_cpRemoveDraftPhoto(' + i + ')" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#e07a6a;color:#fff;border:2px solid #fff;font-size:11px;line-height:1;cursor:pointer;padding:0;">\u2715</button>' +
+    '</div>';
+  }).join('');
+}
+function _cpRemoveDraftPhoto(i) { _cpDraftPhotos.splice(i, 1); _cpRenderDraftPhotos(); }
+async function _cpSubmitReport() {
+  var ta = document.getElementById('cpReportText');
+  var text = ta ? ta.value.trim() : '';
+  if (!text) { if (ta) { ta.style.borderColor = '#e07a6a'; ta.focus(); } return; }
   var rec = await _cpGet();
-  rec.items.push({ id: 'ci_' + Date.now(), text: text.trim(), photos: [], at: Date.now(), status: 'submitted' });
+  rec.items.push({ id: 'ci_' + Date.now(), text: text, photos: _cpDraftPhotos.slice(), at: Date.now(), status: 'submitted' });
   await _cpSave(rec);
+  closeCpReport();
   await _cpRender();
+  try { await _notifyOfficeOfIssue(text); } catch(e) {}
+}
+// Writes a PUBLIC notification the office inbox will pick up (customers can't write office-only keys).
+async function _notifyOfficeOfIssue(issueText) {
+  var owner = 'shmily@diligentdevelopersny.com';
+  var id = 'cn_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+  var who = (window._custName || 'A customer');
+  var where = (window._custAddress || '') + (window._custUnit && window._custUnit !== 'Main' ? (' \u00b7 Unit ' + window._custUnit) : '');
+  var n = {
+    id: id,
+    forEmail: owner.toLowerCase(),
+    type: 'issue',
+    text: who + ' reported an issue at ' + where + ': "' + issueText + '"',
+    address: window._custAddress || '',
+    unit: window._custUnit || '',
+    actor: who,
+    at: Date.now(),
+    read: false
+  };
+  try { await DB.set('pubnotif:' + owner.toLowerCase() + ':' + id, n); } catch(e) {}
 }
 async function _cpDelItem(i) {
   if (!confirm('Remove this issue?')) return;
@@ -5716,6 +5778,17 @@ async function _loadCustomerUpdatesInto(address, unit, targetId) {
   } catch(e) { host.innerHTML = ''; }
 }
 
+
+function cdBackToDashboard() {
+  try {
+    if (window._custName && window._custAddress) {
+      openCustomerDashboard(window._custName, window._custAddress, window._custUnit, _custSaveKey, _pendingAccess ? _pendingAccess.existing : {});
+      return;
+    }
+  } catch(e) {}
+  showPage('customerDashboardPage');
+}
+
 async function openCustomerDashboard(name, address, unit, saveKey, existing) {
   window._custName = name; window._custAddress = address; window._custUnit = unit; _custSaveKey = saveKey;
   var first = (name || '').split(' ')[0] || 'there';
@@ -5769,7 +5842,6 @@ async function openCustomerPortal(name, address, unit, saveKey, selections) {
   var pName = document.getElementById('portalCustomerName');
   var pUnit = document.getElementById('portalUnitInfo');
   if (pName) pName.textContent = name;
-  try { var _sp = (_selectedProject && _selectedProject.id) || ''; _renderCustomerUpdate(_sp, address, unit); } catch(e) {}
   if (pUnit) pUnit.textContent = '📍 ' + address + '  ·  Unit ' + unit;
 
   // Restore saved selections (the param is the whole saved submission object)
@@ -5871,24 +5943,64 @@ async function openCustomerPortal(name, address, unit, saveKey, selections) {
 
   if (typeof updateProgress === 'function') updateProgress();
 
-  // Build gallery from the latest Upgrade Editor data
-  try {
-    if (typeof ue_load === 'function') {
-      window._upgradeSections = await ue_load();
-    }
-    if (typeof buildGallery === 'function' && window._upgradeSections) {
-      buildGallery(window._upgradeSections);
-    }
-    var gui = document.getElementById('galleryUnitInfo');
-    if (gui) gui.textContent = '📍 ' + address + '  ·  Unit ' + unit;
-    try { _loadCustomerFiles(address, unit); } catch(e) {}
-    try { _loadCustomerProgress(address, unit); } catch(e) {}
-    try { _cpRender(); } catch(e) {}
-    showPage('customerGalleryPage');
-  } catch(e) {
-    // Fall back to showing the portal directly
-    showPage('customerPortalPage');
+  // Show the selections FORM page (this is "My Selections").
+  showPage('customerPortalPage');
+  window.scrollTo(0,0);
   setTimeout(initSignatureCanvas, 200);
+
+  // Apply the locked, read-only state if the 5-hour edit window has passed.
+  try { _applySelectionLockState(_saved); } catch(e) {}
+}
+
+// Lock the selections form (read-only) once the 5-hour window passes; otherwise keep it editable.
+function _applySelectionLockState(savedSel) {
+  var banner = document.getElementById('selectionLockBanner');
+  var sheet = document.getElementById('upgradeSheetContent');
+  var btn = document.getElementById('submitUpgradesBtn');
+  var submitted = savedSel && (savedSel._submittedAt || (savedSel.selections && savedSel.selections._submittedAt));
+  // normalize: work off a single timestamp
+  var subAt = submitted;
+  var locked = false;
+  if (submitted) {
+    var elapsed = Date.now() - new Date(subAt).getTime();
+    locked = elapsed > (5 * 60 * 60 * 1000);
+  }
+  // Create the banner if it isn't there yet.
+  if (!banner) {
+    var page = document.getElementById('customerPortalPage');
+    var firstCard = page ? page.querySelector('.portal-section, .upg-section, form, #upgradeSheetContent') : null;
+    banner = document.createElement('div');
+    banner.id = 'selectionLockBanner';
+    banner.style.cssText = 'display:none;max-width:760px;margin:14px auto;padding:14px 16px;border-radius:10px;font-size:13px;line-height:1.5;';
+    if (firstCard && firstCard.parentNode) firstCard.parentNode.insertBefore(banner, firstCard);
+  }
+  if (locked) {
+    // read-only: disable all inputs in the sheet
+    if (sheet) sheet.querySelectorAll('input, select, textarea, button').forEach(function(el){ el.disabled = true; });
+    if (btn) { btn.disabled = true; btn.textContent = 'Submission Locked \ud83d\udd12'; btn.style.background = '#9CA3AF'; }
+    if (banner) {
+      banner.style.background = '#fdeaea';
+      banner.style.border = '1px solid #f0b8b8';
+      banner.style.color = '#9a3a3a';
+      banner.innerHTML = '<b>\ud83d\udd12 No changes can be made.</b> Your 5-hour edit window has passed and your upgrade selections are now final. The choices below are what you submitted. If you need any changes, please call the office at <a href="tel:8452881036" style="color:#9a3a3a;font-weight:700;">845-288-1036 #5</a>.';
+      banner.style.display = 'block';
+    }
+    // also disable the signature pad if present
+    var sigClear = document.getElementById('clearSignature'); if (sigClear) sigClear.disabled = true;
+  } else {
+    if (sheet) sheet.querySelectorAll('input, select, textarea, button').forEach(function(el){ el.disabled = false; });
+    if (submitted && banner) {
+      // within window: gentle reminder they can still edit
+      var leftMs = (5 * 60 * 60 * 1000) - (Date.now() - new Date(subAt).getTime());
+      var hrs = Math.floor(leftMs / 3600000); var mins = Math.floor((leftMs % 3600000) / 60000);
+      banner.style.background = '#fff7e6';
+      banner.style.border = '1px solid #f0d9a8';
+      banner.style.color = '#8a6a1a';
+      banner.innerHTML = '<b>\u270f\ufe0f You can still edit your selections.</b> You have about ' + hrs + 'h ' + mins + 'm left to make changes. After that, your selections will be final.';
+      banner.style.display = 'block';
+    } else if (banner) {
+      banner.style.display = 'none';
+    }
   }
 }
 
@@ -8967,6 +9079,15 @@ async function _loadMyNotifications() {
   try {
     var keys = await DB.list('notif:' + currentUser.id + ':');
     var list = (await Promise.all(keys.map(function(k) { return DB.get(k); }))).filter(Boolean);
+    // Also pull PUBLIC notifications addressed to my email (e.g. customer-reported issues).
+    try {
+      var myEmail = (currentUser.email || '').toLowerCase();
+      if (myEmail) {
+        var pubKeys = await DB.list('pubnotif:' + myEmail + ':');
+        var pubList = (await Promise.all(pubKeys.map(function(k) { return DB.get(k); }))).filter(Boolean);
+        list = list.concat(pubList);
+      }
+    } catch(e) {}
     list.sort(function(a, b) { return b.at - a.at; });
     return list;
   } catch (e) { return []; }
@@ -9000,7 +9121,7 @@ async function openInbox() {
   var list = await _loadMyNotifications();
   var body = document.getElementById('inboxBody');
 
-  var iconFor = { mention: '\ud83d\udcac', assign: '\ud83d\udccb', comment: '\ud83d\udcad', status: '\ud83d\udea6', due: '\ud83d\udcc5', info: '\ud83d\udd14' };
+  var iconFor = { mention: '\ud83d\udcac', assign: '\ud83d\udccb', comment: '\ud83d\udcad', status: '\ud83d\udea6', due: '\ud83d\udcc5', info: '\ud83d\udd14', issue: '\ud83d\udcdd' };
   if (list.length === 0) {
     body.innerHTML = '<div class="inbox-empty"><div class="inbox-empty-icon">\ud83d\udd14</div><div class="inbox-empty-title">All caught up</div><div class="inbox-empty-desc">No notifications yet.</div></div>';
   } else {
@@ -9346,7 +9467,8 @@ async function switchTab(tab) {
   if (tab === 'tasks') { _toggleTabChrome('tab-tasks', true); _populateTaskProjectFilter(); renderTasks(); }
   if (tab === 'scheduling') { _toggleTabChrome('tab-scheduling', true); renderScheduling(); }
   if (tab === 'specs') renderSpecs();
-  try { _openNavGroupForTab(tabId); } catch(e) {}
+  try { _openNavGroupForTab(tab); } catch(e) {}
+  try { if (tab === 'custReports') { _renderOfficeCustomerIssues(); } } catch(e) {}
 }
 
 // ════════════════════════════════════════════
@@ -9542,6 +9664,7 @@ async function refreshDashboard() {
     }).join('') +
   '</div>';
   try { await _renderDashToday(); } catch(e) {}
+  try { _updateCustReportsBadge(); } catch(e) {}
 }
 
 // ════════════════════════════════════════════
@@ -13552,6 +13675,15 @@ function switchUpgradeView(view) {
     if (custBtn) { custBtn.classList.add('active'); }
     if (upgBtn) { upgBtn.classList.remove('active'); }
     renderCustomerTab();
+    // Safety: if the local store wasn't ready yet, refresh from DB then re-render.
+    (async function(){
+      try {
+        var before = getStoredSubmissions().length;
+        await _refreshSubmissions();
+        var after = getStoredSubmissions().length;
+        if (after !== before || before === 0) renderCustomerTab();
+      } catch(e) {}
+    })();
   } else {
     if (custPanel) custPanel.style.display = 'none';
     if (upgPanel) upgPanel.style.display = 'block';
@@ -13932,6 +14064,21 @@ function setPunchPhase(phase) {
 
 
 // Office: view of issues customers reported (from custpunch: public records)
+
+async function _updateCustReportsBadge() {
+  try {
+    var keys = await DB.list('custpunch:');
+    var recs = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+    var open = 0;
+    recs.forEach(function(r){ (r.items||[]).forEach(function(it){ if (it.status !== 'resolved') open++; }); });
+    var badge = document.getElementById('custReportsBadge');
+    if (badge) {
+      if (open > 0) { badge.textContent = open; badge.style.display = 'inline-block'; }
+      else { badge.style.display = 'none'; }
+    }
+  } catch(e) {}
+}
+
 async function _renderOfficeCustomerIssues() {
   var host = document.getElementById('officeCustomerIssues');
   if (!host) return;
@@ -13974,6 +14121,7 @@ async function _officeResolveIssue(address, unit, idx) {
       rec.items[idx].status = 'resolved';
       await DB.set(key, rec);
       await _renderOfficeCustomerIssues();
+      try { _updateCustReportsBadge(); } catch(e) {}
     }
   } catch(e) {}
 }
@@ -16569,6 +16717,29 @@ if (document.readyState === 'loading') {
   });
 })();
 </script>
+
+<!-- CUSTOMER REPORT MODAL -->
+<div class="modal-overlay" id="modal-cpreport">
+  <div class="modal-box" style="max-width:440px;">
+    <div class="modal-header">
+      <div class="modal-title">📝 Report an Issue</div>
+      <button class="modal-close" onclick="closeCpReport()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:13px;color:rgba(243,239,230,0.75);margin-bottom:10px;">Describe what you noticed. You can add photos to help us understand.</div>
+      <textarea id="cpReportText" rows="4" placeholder="e.g. There's a crack in the living room ceiling near the window..." style="width:100%;padding:11px;border:1px solid rgba(255,255,255,0.25);border-radius:9px;font-size:14px;font-family:Inter,sans-serif;background:rgba(255,255,255,0.95);color:#16233d;box-sizing:border-box;resize:vertical;"></textarea>
+      <div id="cpReportPhotos" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;"></div>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button onclick="_cpReportAddPhoto(true)" style="flex:1;padding:11px;border-radius:9px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.08);color:#f3efe6;font-size:13px;font-weight:600;cursor:pointer;">📷 Camera</button>
+        <button onclick="_cpReportAddPhoto(false)" style="flex:1;padding:11px;border-radius:9px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.08);color:#f3efe6;font-size:13px;font-weight:600;cursor:pointer;">🖼️ Gallery</button>
+      </div>
+      <button onclick="_cpSubmitReport()" style="width:100%;padding:13px;border-radius:9px;border:none;background:var(--gold);color:#0D1F3C;font-size:14px;font-weight:700;cursor:pointer;margin-top:14px;">Submit Report</button>
+      <div style="background:#fdf3e3;border-radius:8px;padding:9px 11px;margin-top:10px;">
+        <div style="font-size:11px;color:#8a6a1a;line-height:1.4;"><b>⚠️ For non-emergencies only.</b> For anything urgent, call the office at <a href="tel:8452881036" style="color:#8a6a1a;font-weight:700;">845-288-1036 #5</a>.</div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- PROGRESS EDITOR MODAL -->
 <div class="modal-overlay" id="modal-progress">
