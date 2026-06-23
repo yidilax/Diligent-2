@@ -3251,6 +3251,38 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 :root[data-density="compact"] .office-nav-btn { padding-top: 9px; padding-bottom: 9px; }
 :root[data-density="compact"] .modal-body { padding-top: 10px; padding-bottom: 10px; }
 
+
+/* ===== Subcontractor portal: clean, thin, grouped ===== */
+.sp-section-title { font-family:'Bebas Neue',sans-serif; font-size:15px; letter-spacing:1.5px; color:var(--muted); margin:0 0 8px; text-transform:uppercase; }
+.sp-list { background:#fff; border:1px solid #ece6d8; border-radius:10px; overflow:hidden; margin-bottom:6px; }
+.sp-row { display:flex; align-items:center; gap:12px; padding:11px 14px; border-bottom:1px solid #f0ece2; cursor:pointer; }
+.sp-row:last-child { border-bottom:none; }
+.sp-row-text { flex:1; font-size:14px; color:#16233d; }
+.sp-check { width:20px; height:20px; accent-color:var(--gold); flex-shrink:0; cursor:pointer; }
+.sp-done { text-decoration:line-through; opacity:.5; }
+
+.sp-group { background:#fff; border:1px solid #ece6d8; border-radius:10px; margin-bottom:10px; overflow:hidden; }
+.sp-group-head { width:100%; display:flex; align-items:center; gap:10px; padding:13px 14px; background:#fbf9f4; border:none; border-bottom:1px solid #f0ece2; cursor:pointer; text-align:left; }
+.sp-group-addr { flex:1; font-family:'Inter',sans-serif; font-weight:700; font-size:14px; color:var(--navy); }
+.sp-group-meta { font-size:12px; font-weight:700; color:var(--gold); background:rgba(201,162,39,0.12); border-radius:20px; padding:2px 9px; }
+.sp-group-caret { color:var(--muted); font-size:12px; width:14px; text-align:center; }
+
+.sp-item { padding:11px 14px; border-bottom:1px solid #f3efe7; }
+.sp-item:last-child { border-bottom:none; }
+.sp-item-done { opacity:.6; }
+.sp-item-main { display:flex; align-items:flex-start; gap:12px; cursor:pointer; }
+.sp-item-body { display:flex; flex-direction:column; gap:2px; min-width:0; flex:1; }
+.sp-item-text { font-size:14px; font-weight:600; color:#16233d; line-height:1.35; }
+.sp-item-room { font-size:12px; color:var(--muted); }
+.sp-item-office { font-size:12px; color:var(--muted); font-style:italic; }
+.sp-item-note { font-size:13px; color:#16233d; background:#f7f4ec; border-radius:6px; padding:5px 9px; margin-top:3px; }
+.sp-thumbs { display:flex; flex-wrap:wrap; gap:6px; margin:8px 0 0 32px; }
+.sp-thumb { width:52px; height:52px; border-radius:7px; overflow:hidden; border:1px solid var(--border); cursor:pointer; }
+.sp-thumb img { width:100%; height:100%; object-fit:cover; }
+.sp-item-actions { display:flex; gap:14px; margin:8px 0 0 32px; }
+.sp-act { background:none; border:none; color:var(--navy); font-family:'Inter',sans-serif; font-size:12px; font-weight:700; cursor:pointer; padding:0; opacity:.75; }
+.sp-act:active { opacity:1; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -5289,10 +5321,11 @@ async function openCustomerPortal(name, address, unit, saveKey, selections) {
   var savedSel = (_saved && _saved.selections) ? _saved.selections : _saved;
   if (Object.keys(savedSel).length > 0) {
     Object.keys(savedSel).forEach(function(radioName) {
-      if (radioName === '_submittedAt') return;
+      if (radioName === '_submittedAt' || radioName === '_updatedAt') return;
       var val = savedSel[radioName];
+      // 1) Radio button (yes/no questions)
       var el = document.querySelector('#upgradeSheetContent input[name="' + radioName + '"][value="' + val + '"]');
-      if (el) {
+      if (el && el.type === 'radio') {
         el.checked = true;
         var row = el.closest('tr');
         if (row) {
@@ -5302,9 +5335,26 @@ async function openCustomerPortal(name, address, unit, saveKey, selections) {
           }
         }
         if (radioName === 'doors_1' || radioName === 'doors_2') toggleGlass(radioName, val);
-        // Restore sub-option box visibility
         var sBox = document.getElementById('subopt-' + radioName);
         if (sBox && val === 'yes') sBox.style.display = 'block';
+        return;
+      }
+      // 2) Dropdown / sub-option <select>
+      var sel = document.querySelector('#upgradeSheetContent select[name="' + radioName + '"]');
+      if (sel) {
+        sel.value = val;
+        // if it lives inside a sub-option box, make sure the box is visible
+        var box = sel.closest('.suboption-box');
+        if (box && val) box.style.display = '';
+        // trigger any change handler so dependent UI updates
+        try { sel.dispatchEvent(new Event('change', { bubbles: true })); } catch(e) {}
+        return;
+      }
+      // 3) Checkbox (agreements)
+      var cb = document.querySelector('#upgradeSheetContent input[type="checkbox"][name="' + radioName + '"]');
+      if (cb) {
+        cb.checked = (val === 'agreed' || val === true || val === 'true' || val === 'on');
+        return;
       }
     });
     // Restore saved sub-option selections
@@ -9556,11 +9606,9 @@ async function renderSubPortal() {
   var host = document.getElementById('subPortalContent');
   if (!host || !_currentSub) return;
   host.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;">Loading your work...</div>';
-  // refresh sub record (tasks/notes may have changed)
   var fresh = await DB.get('subcontractor:' + _currentSub.id);
   if (fresh) _currentSub = fresh;
   var items = await _collectSubPunchItems(_currentSub);
-  // apply any saved sub-side progress overlay (done/notes/photos)
   var overlay = await DB.get('subpunch:' + _currentSub.id) || {};
   items.forEach(function(it){
     var k = it._unitId + '|' + it._roomIdx + '|' + it._itemIdx;
@@ -9568,49 +9616,85 @@ async function renderSubPortal() {
   });
 
   var html = '';
-  // office note
+  // office note (slim)
   if (_currentSub.officeNote) {
-    html += '<div class="pu-card" style="border-left-color:var(--gold);margin-bottom:16px;"><div class="pu-label">\ud83d\udcdd Note from the office</div><div class="pu-text">' + _esc(_currentSub.officeNote) + '</div></div>';
+    html += '<div style="background:#fff;border-left:3px solid var(--gold);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:13px;color:#3a3730;line-height:1.45;"><b style="color:var(--navy);">Note from office:</b> ' + _esc(_currentSub.officeNote) + '</div>';
   }
-  // tasks
+
+  // tasks (slim rows)
   var tasks = _currentSub.tasks || [];
   if (tasks.length) {
-    html += '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:18px;letter-spacing:1px;color:var(--navy);margin:6px 0 10px;">Your Tasks</div>';
-    html += tasks.map(function(t,i){
-      return '<div style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;">' +
-        '<input type="checkbox" ' + (t.done?'checked':'') + ' onchange="subToggleTask(' + i + ',this.checked)" style="width:22px;height:22px;accent-color:var(--gold);flex-shrink:0;">' +
-        '<span style="flex:1;font-size:14px;color:#16233d;' + (t.done?'text-decoration:line-through;opacity:.55;':'') + '">' + _esc(t.text) + '</span>' +
-      '</div>';
-    }).join('');
+    html += '<div class="sp-section-title">Your Tasks</div>';
+    html += '<div class="sp-list">' + tasks.map(function(t,i){
+      return '<label class="sp-row">' +
+        '<input type="checkbox" ' + (t.done?'checked':'') + ' onchange="subToggleTask(' + i + ',this.checked)" class="sp-check">' +
+        '<span class="sp-row-text' + (t.done?' sp-done':'') + '">' + _esc(t.text) + '</span>' +
+      '</label>';
+    }).join('') + '</div>';
   }
-  // punch items
-  html += '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:18px;letter-spacing:1px;color:var(--navy);margin:16px 0 10px;">Punch List \u00b7 ' + (_currentSub.trade||'') + '</div>';
+
+  // Group punch items BY ADDRESS
   if (!items.length) {
-    html += '<div class="tab-empty"><div class="tab-empty-icon">\u2705</div><div class="tab-empty-title">Nothing assigned yet</div><div class="tab-empty-desc">When the office tags punch items for your trade, they\'ll show here.</div></div>';
+    html += '<div class="tab-empty" style="margin-top:20px;"><div class="tab-empty-icon">\u2705</div><div class="tab-empty-title">Nothing assigned yet</div><div class="tab-empty-desc">When the office tags punch items for you, they\'ll show here.</div></div>';
   } else {
-    html += items.map(function(it, idx){
-      var done = it._subDone || it.done;
-      var thumbs = (it._subPhotos||[]).map(function(ph){ return '<div class="cu-thumb" onclick="_plLightbox(\'' + encodeURIComponent(ph) + '\')"><img src="' + ph + '"></div>'; }).join('');
-      var k = it._unitId + '|' + it._roomIdx + '|' + it._itemIdx;
-      return '<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;' + (done?'opacity:.7;':'') + '">' +
-        '<div style="display:flex;align-items:flex-start;gap:12px;">' +
-          '<input type="checkbox" ' + (done?'checked':'') + ' onchange="subToggleItem(\'' + k + '\',this.checked)" style="width:22px;height:22px;accent-color:var(--gold);flex-shrink:0;margin-top:2px;">' +
-          '<div style="flex:1;min-width:0;">' +
-            '<div style="font-size:14px;font-weight:600;color:#16233d;' + (done?'text-decoration:line-through;':'') + '">' + _esc(it.text) + '</div>' +
-            '<div style="font-size:12px;color:var(--muted);margin-top:2px;">' + _esc(it._where) + '</div>' +
-            (it.note ? '<div style="font-size:12px;color:var(--muted);margin-top:4px;font-style:italic;">Office: ' + _esc(it.note) + '</div>' : '') +
-            (it._subNote ? '<div style="font-size:13px;color:#16233d;margin-top:6px;background:#f7f4ec;border-radius:7px;padding:6px 10px;">' + _esc(it._subNote) + '</div>' : '') +
-            (thumbs ? '<div class="cu-photo-row" style="margin-top:8px;">' + thumbs + '</div>' : '') +
-            '<div style="display:flex;gap:8px;margin-top:8px;">' +
-              '<button onclick="subAddNote(\'' + k + '\')" class="cu-mini-btn">\u270e Note</button>' +
-              '<button onclick="subAddPhoto(\'' + k + '\')" class="cu-mini-btn">\ud83d\udcf7 Photo</button>' +
-            '</div>' +
+    var groups = {};
+    var order = [];
+    items.forEach(function(it){
+      var addr = (it._where || 'Other').split(',').slice(-1)[0].trim() || 'Other';
+      // use the full address part after the room name
+      var parts = (it._where||'').split(',');
+      var addrKey = parts.length > 1 ? parts.slice(1).join(',').trim() : (it._where||'Other');
+      if (!groups[addrKey]) { groups[addrKey] = []; order.push(addrKey); }
+      groups[addrKey].push(it);
+    });
+
+    html += '<div class="sp-section-title" style="margin-top:18px;">Punch List</div>';
+    order.forEach(function(addr, gi){
+      var list = groups[addr];
+      var doneCount = list.filter(function(x){ return x._subDone || x.done; }).length;
+      var gid = 'spg_' + gi;
+      html += '<div class="sp-group">' +
+        '<button class="sp-group-head" onclick="_spToggle(\'' + gid + '\')">' +
+          '<span class="sp-group-addr">\ud83d\udccd ' + _esc(addr) + '</span>' +
+          '<span class="sp-group-meta">' + doneCount + '/' + list.length + '</span>' +
+          '<span class="sp-group-caret" id="' + gid + '_caret">\u25be</span>' +
+        '</button>' +
+        '<div class="sp-group-body" id="' + gid + '">';
+      list.forEach(function(it, idx){
+        var done = it._subDone || it.done;
+        var k = it._unitId + '|' + it._roomIdx + '|' + it._itemIdx;
+        var room = (it._where||'').split(',')[0].trim();
+        var thumbs = (it._subPhotos||[]).map(function(ph){ return '<div class="sp-thumb" onclick="event.stopPropagation();_plLightbox(\'' + encodeURIComponent(ph) + '\')"><img src="' + ph + '"></div>'; }).join('');
+        html += '<div class="sp-item' + (done?' sp-item-done':'') + '">' +
+          '<label class="sp-item-main">' +
+            '<input type="checkbox" ' + (done?'checked':'') + ' onchange="subToggleItem(\'' + k + '\',this.checked)" class="sp-check">' +
+            '<span class="sp-item-body">' +
+              '<span class="sp-item-text' + (done?' sp-done':'') + '">' + _esc(it.text) + '</span>' +
+              (room ? '<span class="sp-item-room">' + _esc(room) + '</span>' : '') +
+              (it.note ? '<span class="sp-item-office">Office: ' + _esc(it.note) + '</span>' : '') +
+              (it._subNote ? '<span class="sp-item-note">' + _esc(it._subNote) + '</span>' : '') +
+            '</span>' +
+          '</label>' +
+          (thumbs ? '<div class="sp-thumbs">' + thumbs + '</div>' : '') +
+          '<div class="sp-item-actions">' +
+            '<button onclick="subAddNote(\'' + k + '\')" class="sp-act">\u270e Note</button>' +
+            '<button onclick="subAddPhoto(\'' + k + '\')" class="sp-act">\ud83d\udcf7 Photo</button>' +
           '</div>' +
-        '</div>' +
-      '</div>';
-    }).join('');
+        '</div>';
+      });
+      html += '</div></div>';
+    });
   }
   host.innerHTML = html;
+}
+
+function _spToggle(gid) {
+  var body = document.getElementById(gid);
+  var caret = document.getElementById(gid + '_caret');
+  if (!body) return;
+  var hidden = body.style.display === 'none';
+  body.style.display = hidden ? '' : 'none';
+  if (caret) caret.textContent = hidden ? '\u25be' : '\u25b8';
 }
 
 async function _subSaveOverlay(k, patch) {
