@@ -3244,12 +3244,19 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 
 
 /* ===== Layout density ===== */
+:root[data-density="compact"] .office-content { padding: 10px !important; }
 :root[data-density="compact"] .tab-header { margin-bottom: 10px; }
-:root[data-density="compact"] .cu-card,
-:root[data-density="compact"] .tab-empty { padding: 10px 12px; }
-:root[data-density="compact"] .form-group { margin-bottom: 10px; }
-:root[data-density="compact"] .office-nav-btn { padding-top: 9px; padding-bottom: 9px; }
-:root[data-density="compact"] .modal-body { padding-top: 10px; padding-bottom: 10px; }
+:root[data-density="compact"] .cu-card { padding: 9px 11px !important; margin-bottom: 7px !important; }
+:root[data-density="compact"] .tab-empty { padding: 14px 12px; }
+:root[data-density="compact"] .form-group { margin-bottom: 9px !important; }
+:root[data-density="compact"] .office-nav-btn { padding-top: 9px !important; padding-bottom: 9px !important; }
+:root[data-density="compact"] .modal-body { padding-top: 10px !important; padding-bottom: 10px !important; }
+:root[data-density="compact"] .dash-card { padding: 12px !important; }
+:root[data-density="compact"] .dash-action { padding: 10px !important; }
+:root[data-density="compact"] .proj-card { padding: 12px !important; margin-bottom: 8px !important; }
+:root[data-density="compact"] .sub-row-main { padding: 8px 12px !important; }
+:root[data-density="compact"] .form-input { padding: 7px 10px !important; }
+:root[data-density="compact"] .pu-card { padding: 9px 11px !important; margin-bottom: 7px !important; }
 
 
 /* ===== Subcontractor portal: clean, thin, grouped ===== */
@@ -3320,6 +3327,12 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .sp-detail-office { font-size:12px; color:var(--muted); font-style:italic; margin-bottom:5px; }
 .sp-detail-note { font-size:13px; color:#16233d; background:#fff; border:1px solid #ece6d8; border-radius:7px; padding:6px 10px; margin-bottom:8px; cursor:pointer; }
 .sp-detail-actions { display:flex; gap:14px; flex-wrap:wrap; }
+
+
+/* Coming-soon nav button */
+.nav-soon { font-size:9px; font-weight:700; letter-spacing:0.5px; background:rgba(255,255,255,0.15); color:rgba(255,255,255,0.7); border-radius:10px; padding:1px 7px; margin-left:auto; text-transform:uppercase; }
+.office-nav-btn.nav-btn-soon { opacity:0.6; }
+.nav-inbox-badge { background:var(--gold); color:var(--navy); font-size:11px; font-weight:800; border-radius:10px; padding:1px 7px; margin-left:auto; }
 
 </style>
   <!-- Firebase -->
@@ -3613,7 +3626,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="color:rgba(255,255,255,0.5);font-size:14px;">Enter your 4-digit access code</div>
     </div>
     <div style="padding:24px 0;">
-      <input id="subCodeInput" type="text" maxlength="4" inputmode="numeric" placeholder="0000" style="width:100%;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:14px;padding:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;" onkeydown="if(event.key==='Enter')subLogin()">
+      <input id="subCodeInput" type="text" maxlength="4" inputmode="numeric" placeholder="0000" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4)" style="width:100%;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:14px;padding:16px;border-radius:12px;border:2px solid var(--navy);background:#f7f4ec;color:#0D1F3C;" onkeydown="if(event.key==='Enter')subLogin()">
       <div id="subAuthError" style="display:none;color:#F3A39A;font-size:13px;margin-top:10px;text-align:center;"></div>
       <button class="btn-primary" style="width:100%;margin-top:16px;padding:14px;" onclick="subLogin()">Log In</button>
     </div>
@@ -3643,7 +3656,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       </div>
       <div class="form-group">
         <label class="form-label">Street Address</label>
-        <input class="form-input" type="text" id="custAddress" placeholder="e.g. 36 Dr Frank Road" oninput="onCustAddressInput()">
+        <input class="form-input" type="text" id="custAddress" placeholder="e.g. your street address" oninput="onCustAddressInput()">
         <div id="custAddressSuggestions" style="display:none;border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;background:white;box-shadow:var(--shadow);max-height:180px;overflow-y:auto;"></div>
       </div>
       <div class="form-group" id="custUnitGroup" style="display:none;">
@@ -3831,6 +3844,11 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
           <span class="nav-icon">📊</span> Dashboard
         </button>
       </li>
+      <li class="office-nav-item">
+        <button class="office-nav-btn" onclick="openInbox();closeSidebar();" id="navbtn-notifications">
+          <span class="nav-icon">🔔</span> Notifications <span class="nav-inbox-badge" id="sidebarNotifBadge" style="display:none;"></span>
+        </button>
+      </li>
 
       <li class="office-nav-section">WORK</li>
       <li class="office-nav-item">
@@ -3855,7 +3873,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       </li>
       <li class="office-nav-item">
         <button class="office-nav-btn" onclick="switchTab('scheduling');closeSidebar();" id="navbtn-scheduling">
-          <span class="nav-icon">📅</span> Scheduling <span class="nav-soon">SOON</span>
+          <span class="nav-icon">📅</span> Scheduling
         </button>
       </li>
 
@@ -3875,14 +3893,16 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
           <span class="nav-icon">📣</span> Customer Updates
         </button>
       </li>
-      <li class="office-nav-item">
-        <button class="office-nav-btn" onclick="switchTab('subs');closeSidebar();" id="navbtn-subs">
-          <span class="nav-icon">🔧</span> Subcontractors
-        </button>
-      </li>
       <li class="office-nav-item admin-only" style="display:none;">
         <button class="office-nav-btn" onclick="switchTab('upgradeEditor');closeSidebar();" id="navbtn-upgradeEditor">
           <span class="nav-icon">✏️</span> Upgrade Editor
+        </button>
+      </li>
+
+      <li class="office-nav-section">SUBCONTRACTORS</li>
+      <li class="office-nav-item">
+        <button class="office-nav-btn" onclick="switchTab('subs');closeSidebar();" id="navbtn-subs">
+          <span class="nav-icon">🔧</span> Subcontractors
         </button>
       </li>
 
@@ -3894,7 +3914,6 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       </li>
     </ul>
     <div class="office-sidebar-footer">
-      <button class="btn-logout" onclick="closeSidebar();openProfileModal()" style="margin-bottom:8px;background:rgba(201,162,39,0.15);color:var(--gold);border-color:rgba(201,162,39,0.4);">⚙️ Manage Profile</button>
       <button class="btn-logout" onclick="doLogout()">Logout</button>
     </div>
   </div>
@@ -4196,7 +4215,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
           <div id="profileAvatar" onclick="_profPickPhoto()" title="Tap to upload a photo" style="width:72px;height:72px;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:32px;color:#fff;cursor:pointer;background-size:cover;background-position:center;overflow:hidden;"></div>
           <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;align-items:center;" id="avatarColors"></div>
           <div style="margin-top:8px;display:flex;gap:8px;justify-content:center;">
-            <button type="button" onclick="_profPickPhoto()" style="font-size:12px;font-weight:700;color:var(--gold);background:rgba(201,162,39,0.15);border:1px solid rgba(201,162,39,0.4);border-radius:7px;padding:6px 12px;cursor:pointer;">������ Upload photo</button>
+            <button type="button" onclick="_profPickPhoto()" style="font-size:12px;font-weight:700;color:var(--gold);background:rgba(201,162,39,0.15);border:1px solid rgba(201,162,39,0.4);border-radius:7px;padding:6px 12px;cursor:pointer;">📷 Upload photo</button>
             <button type="button" id="prof-removephoto" onclick="_profRemovePhoto()" style="display:none;font-size:12px;font-weight:700;color:#f3efe6;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.25);border-radius:7px;padding:6px 12px;cursor:pointer;">Remove</button>
           </div>
         </div>
@@ -4216,7 +4235,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
         <div class="form-group"><label class="form-label">Appearance</label>
           <div style="display:flex;gap:8px;">
             <button type="button" id="prof-theme-light" onclick="_profSetTheme('light')" style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.06);color:#f3efe6;font-family:Inter,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">☀️ Light</button>
-            <button type="button" id="prof-theme-dark" onclick="_profSetTheme('dark')" style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.06);color:#f3efe6;font-family:Inter,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">������ Dark</button>
+            <button type="button" id="prof-theme-dark" onclick="_profSetTheme('dark')" style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.06);color:#f3efe6;font-family:Inter,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">🌙 Dark</button>
           </div></div>
         <div class="form-group"><label class="form-label">Text size</label>
           <select class="form-input" id="prof-textsize">
@@ -4232,6 +4251,12 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
             <input class="form-input" id="prof-work-from" type="time" style="flex:1;">
             <span style="color:rgba(243,239,230,0.6);">to</span>
             <input class="form-input" id="prof-work-to" type="time" style="flex:1;">
+          </div>
+          <div style="font-size:11px;color:rgba(243,239,230,0.55);margin:8px 0 4px;">Friday hours (if different):</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input class="form-input" id="prof-work-fri-from" type="time" style="flex:1;">
+            <span style="color:rgba(243,239,230,0.6);">to</span>
+            <input class="form-input" id="prof-work-fri-to" type="time" style="flex:1;">
           </div></div>
         <div class="form-group"><label class="form-label" style="display:flex;align-items:center;justify-content:space-between;">Quiet hours (mute notifications) <input type="checkbox" id="prof-quiet-on" style="width:20px;height:20px;accent-color:var(--gold);"></label>
           <div id="prof-quiet-times" style="display:none;gap:8px;align-items:center;margin-top:8px;">
@@ -4344,7 +4369,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
             </div>
             <div class="form-group"><label class="form-label">Photos <span style="font-weight:400;opacity:.6;">(optional)</span></label>
               <div id="cu-photos" class="cu-photo-row"></div>
-              <button type="button" class="cu-add-photo" onclick="cuAddPhoto()">������ Add photo</button>
+              <button type="button" class="cu-add-photo" onclick="cuAddPhoto()">📷 Add photo</button>
             </div>
           </div>
           <div class="modal-footer cust-form-footer">
@@ -5693,6 +5718,8 @@ function openProfileModal() {
   }
   if (document.getElementById('prof-work-from')) document.getElementById('prof-work-from').value = wh.from || '';
   if (document.getElementById('prof-work-to')) document.getElementById('prof-work-to').value = wh.to || '';
+  if (document.getElementById('prof-work-fri-from')) document.getElementById('prof-work-fri-from').value = wh.friFrom || '';
+  if (document.getElementById('prof-work-fri-to')) document.getElementById('prof-work-fri-to').value = wh.friTo || '';
   // Quiet hours
   var qh = currentUser.quietHours || {};
   var qon = document.getElementById('prof-quiet-on');
@@ -5765,11 +5792,13 @@ function _openCropper(dataUrl) {
   var img = new Image();
   img.onload = function() {
     _cropImg = img;
-    // base scale so the image covers the circle
-    _cropMinScale = Math.max(_CROP_SIZE / img.width, _CROP_SIZE / img.height);
-    _cropScale = _cropMinScale;
+    // 'fit' = whole image visible in circle; 'cover' = image fills circle.
+    var fitScale = Math.min(_CROP_SIZE / img.width, _CROP_SIZE / img.height);
+    var coverScale = Math.max(_CROP_SIZE / img.width, _CROP_SIZE / img.height);
+    _cropMinScale = fitScale; // allow zooming out to fit the whole photo
+    _cropScale = coverScale;  // start covering the circle (typical avatar)
     var z = document.getElementById('cropZoom');
-    z.min = _cropMinScale; z.max = _cropMinScale * 3; z.step = (_cropMinScale*2)/100; z.value = _cropMinScale;
+    z.min = fitScale; z.max = coverScale * 4; z.step = (coverScale*3)/100; z.value = coverScale;
     // center
     _cropX = (_CROP_SIZE - img.width * _cropScale) / 2;
     _cropY = (_CROP_SIZE - img.height * _cropScale) / 2;
@@ -5788,10 +5817,21 @@ function _drawCrop() {
 }
 function _clampCrop() {
   var w = _cropImg.width*_cropScale, h = _cropImg.height*_cropScale;
-  if (_cropX > 0) _cropX = 0;
-  if (_cropY > 0) _cropY = 0;
-  if (_cropX < _CROP_SIZE - w) _cropX = _CROP_SIZE - w;
-  if (_cropY < _CROP_SIZE - h) _cropY = _CROP_SIZE - h;
+  if (w >= _CROP_SIZE) {
+    if (_cropX > 0) _cropX = 0;
+    if (_cropX < _CROP_SIZE - w) _cropX = _CROP_SIZE - w;
+  } else {
+    // image narrower than circle: keep it within bounds, allow centering
+    if (_cropX < 0) _cropX = 0;
+    if (_cropX > _CROP_SIZE - w) _cropX = _CROP_SIZE - w;
+  }
+  if (h >= _CROP_SIZE) {
+    if (_cropY > 0) _cropY = 0;
+    if (_cropY < _CROP_SIZE - h) _cropY = _CROP_SIZE - h;
+  } else {
+    if (_cropY < 0) _cropY = 0;
+    if (_cropY > _CROP_SIZE - h) _cropY = _CROP_SIZE - h;
+  }
 }
 var _cropWired = false;
 function _wireCropEvents() {
@@ -5955,7 +5995,7 @@ async function saveProfile() {
     var notifPrefs = {};
     document.querySelectorAll('#prof-notifs input[data-notif]').forEach(function(cb){ notifPrefs[cb.getAttribute('data-notif')] = cb.checked; });
     var density = document.getElementById('prof-density') ? document.getElementById('prof-density').value : 'comfortable';
-    var workHours = { days: (window._profWorkDays||[]).slice(), from: (document.getElementById('prof-work-from')||{}).value || '', to: (document.getElementById('prof-work-to')||{}).value || '' };
+    var workHours = { days: (window._profWorkDays||[]).slice(), from: (document.getElementById('prof-work-from')||{}).value || '', to: (document.getElementById('prof-work-to')||{}).value || '', friFrom: (document.getElementById('prof-work-fri-from')||{}).value || '', friTo: (document.getElementById('prof-work-fri-to')||{}).value || '' };
     var quietHours = { on: !!(document.getElementById('prof-quiet-on')||{}).checked, from: (document.getElementById('prof-quiet-from')||{}).value || '22:00', to: (document.getElementById('prof-quiet-to')||{}).value || '07:00' };
     var recoveryEmail = (document.getElementById('prof-recovery-email')||{}).value || '';
     var recoveryPhone = (document.getElementById('prof-recovery-phone')||{}).value || '';
@@ -5984,9 +6024,10 @@ async function saveProfile() {
       var av = document.getElementById('dashAvatar');
       if (av) { if (currentUser.photo) { av.style.backgroundImage='url('+currentUser.photo+')'; av.textContent=''; } else { av.style.backgroundImage='none'; av.style.background=currentUser.avatarColor||'#1a2b4a'; av.textContent=_profInitials(currentUser.name,currentUser.email); } }
       var tagEl = document.getElementById('dashTag');
-      if (tagEl) { var rw = currentIsOwner()?'Owner':(currentUser.role==='admin'?'Admin':'Employee'); tagEl.textContent = currentUser.title?(currentUser.title+' \u00b7 '+rw):rw; tagEl.style.display=''; }
+      if (tagEl) { if (currentUser.title) { tagEl.textContent = currentUser.title; tagEl.style.display=''; } else { tagEl.style.display='none'; } }
     })();
     var tn = document.getElementById('topbarUserName'); if (tn) tn.textContent = name;
+    var trb = document.getElementById('topbarRoleBadge'); if (trb) trb.textContent = currentUser.title || '';
 
     _profMsg('Profile saved.', true);
     btn.disabled = false; btn.textContent = 'Save Profile';
@@ -6057,9 +6098,8 @@ function _renderSidebarIdentity() {
   if (sn) sn.textContent = currentUser.name || '';
   var sr = document.getElementById('sidebarUserRole');
   if (sr) {
-    // Show the custom title if set; otherwise the role label.
-    var roleWord = currentIsOwner() ? 'Owner' : (currentUser.role === 'admin' ? 'Admin' : 'Employee');
-    sr.textContent = currentUser.title ? (currentUser.title + ' \u00b7 ' + roleWord) : roleWord;
+    // Show ONLY the custom title/tag the user set (no admin/employee label).
+    sr.textContent = currentUser.title || '';
   }
   // Topbar avatar (clickable -> profile)
   var ta = document.getElementById('topbarAvatar');
@@ -8592,6 +8632,15 @@ async function refreshNotifBadge() {
   var c = await _unreadCount();
   if (c > 0) { badge.textContent = c > 99 ? '99+' : c; badge.style.display = 'flex'; }
   else { badge.style.display = 'none'; }
+  // mirror to sidebar badge
+  try {
+    var sb = document.getElementById('sidebarNotifBadge');
+    var tb = document.getElementById('notifBadge');
+    if (sb && tb) {
+      if (tb.style.display !== 'none' && tb.textContent) { sb.textContent = tb.textContent; sb.style.display = ''; }
+      else { sb.style.display = 'none'; }
+    }
+  } catch(e) {}
 }
 
 async function openInbox() {
@@ -8843,9 +8892,23 @@ function applyTabPermissions() {
     var btn = document.getElementById('navbtn-' + t.id);
     if (!btn) return;
     var li = btn.closest('.office-nav-item') || btn;
-    li.style.display = (_tabState(t.id) !== 'hidden') ? '' : 'none';
+    var state = _tabState(t.id);
+    li.style.display = (state !== 'hidden') ? '' : 'none';
+    // Reflect "Coming Soon" in the sidebar button itself
+    var existing = btn.querySelector('.nav-soon');
+    if (state === 'soon') {
+      btn.classList.add('nav-btn-soon');
+      if (!existing) {
+        var badge = document.createElement('span');
+        badge.className = 'nav-soon';
+        badge.textContent = 'Soon';
+        btn.appendChild(badge);
+      }
+    } else {
+      btn.classList.remove('nav-btn-soon');
+      if (existing) existing.remove();
+    }
   });
-  // employees nav stays admin-only (it already has admin-only class handling)
   var empBtn = document.getElementById('navbtn-employees');
   if (empBtn) {
     var empLi = empBtn.closest('.office-nav-item') || empBtn;
@@ -8980,10 +9043,8 @@ async function refreshDashboard() {
     }
     var tagEl = document.getElementById('dashTag');
     if (tagEl) {
-      var roleWord = currentIsOwner() ? 'Owner' : (currentUser.role === 'admin' ? 'Admin' : 'Employee');
-      var label = currentUser.title ? (currentUser.title + ' \u00b7 ' + roleWord) : roleWord;
-      tagEl.textContent = label;
-      tagEl.style.display = '';
+      if (currentUser.title) { tagEl.textContent = currentUser.title; tagEl.style.display = ''; }
+      else { tagEl.style.display = 'none'; }
     }
   })();
   // Welcome message
@@ -9002,6 +9063,19 @@ async function refreshDashboard() {
   var projKeys = await DB.list('project:');
   var custKeys = await DB.list('customer:');
   var pendKeys = await DB.list('pending:');
+  // Filter out stale pending records (user already active/approved or deleted)
+  try {
+    var _pendChecked = [];
+    for (var _pi = 0; _pi < pendKeys.length; _pi++) {
+      var _pr = await DB.get(pendKeys[_pi]);
+      if (_pr && _pr.email) {
+        var _pu = await DB.get('user:' + _pr.email);
+        if (_pu && _pu.status === 'pending') { _pendChecked.push(pendKeys[_pi]); }
+        else { try { await DB.delete(pendKeys[_pi]); } catch(e) {} }
+      }
+    }
+    pendKeys = _pendChecked;
+  } catch(e) {}
   var subs = getStoredSubmissions ? getStoredSubmissions() : [];
 
   // Count only records this user can see
@@ -11125,11 +11199,11 @@ function ue_buildItemRow(item) {
     inp.type = 'text';
     inp.value = val || '';
     inp.placeholder = 'e.g. White';
-    inp.style.cssText = 'flex:1;padding:7px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;font-family:Inter,sans-serif;';
+    inp.style.cssText = 'flex:1;padding:4px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px;font-family:Inter,sans-serif;';
     var rm = document.createElement('button');
     rm.textContent = '✕';
     rm.title = 'Remove choice';
-    rm.style.cssText = 'background:#FEE2E2;color:#B03A2E;border:none;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:12px;flex-shrink:0;';
+    rm.style.cssText = 'background:#FEE2E2;color:#B03A2E;border:none;border-radius:5px;width:24px;height:24px;cursor:pointer;font-size:11px;flex-shrink:0;line-height:1;';
     rm.onclick = function() { optRow.remove(); };
     optRow.appendChild(inp);
     optRow.appendChild(rm);
@@ -11153,26 +11227,26 @@ function ue_buildItemRow(item) {
   // ── Sub-options builder (for Yes/No items — "if yes, choose type") ──
   var subBox = document.createElement('div');
   subBox.className = 'ue-suboption-builder';
-  subBox.style.cssText = 'display:' + (((item.type || 'radio') === 'radio') ? 'block' : 'none') + ';background:#EEF4FB;border:1.5px solid #6B8FC7;border-radius:8px;padding:10px;';
-  subBox.innerHTML = '<div style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">If "Yes" — types to choose from (optional):</div>' +
-    '<div style="font-size:10px;color:var(--muted);margin-bottom:8px;">Leave empty for a simple Yes/No. Add types (e.g. door styles) and the customer picks one after choosing Yes.</div>';
+  subBox.style.cssText = 'display:' + (((item.type || 'radio') === 'radio') ? 'block' : 'none') + ';background:#EEF4FB;border:1px solid #6B8FC7;border-radius:7px;padding:7px 8px;';
+  subBox.innerHTML = '<div style="font-size:10.5px;font-weight:700;color:var(--navy);margin-bottom:3px;text-transform:uppercase;letter-spacing:0.5px;">If "Yes" — types (optional):</div>' +
+    '<div style="font-size:9.5px;color:var(--muted);margin-bottom:6px;line-height:1.3;">Leave empty for simple Yes/No, or add types the customer picks after Yes.</div>';
 
   var subList = document.createElement('div');
   subList.className = 'ue-sub-list';
-  subList.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-bottom:8px;';
+  subList.style.cssText = 'display:flex;flex-direction:column;gap:4px;margin-bottom:6px;';
 
   function makeSubInput(val) {
     var sr = document.createElement('div');
-    sr.style.cssText = 'display:flex;gap:6px;align-items:center;';
+    sr.style.cssText = 'display:flex;gap:5px;align-items:center;';
     var inp = document.createElement('input');
     inp.className = 'ue-sub-value';
     inp.type = 'text';
     inp.value = val || '';
     inp.placeholder = 'e.g. French Door';
-    inp.style.cssText = 'flex:1;padding:7px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;font-family:Inter,sans-serif;';
+    inp.style.cssText = 'flex:1;padding:4px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px;font-family:Inter,sans-serif;';
     var rm = document.createElement('button');
     rm.textContent = '✕';
-    rm.style.cssText = 'background:#FEE2E2;color:#B03A2E;border:none;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:12px;flex-shrink:0;';
+    rm.style.cssText = 'background:#FEE2E2;color:#B03A2E;border:none;border-radius:5px;width:24px;height:24px;cursor:pointer;font-size:11px;flex-shrink:0;line-height:1;';
     rm.onclick = function() { sr.remove(); };
     sr.appendChild(inp); sr.appendChild(rm);
     return sr;
@@ -11183,7 +11257,7 @@ function ue_buildItemRow(item) {
 
   var addSubBtn = document.createElement('button');
   addSubBtn.textContent = '+ Add a type';
-  addSubBtn.style.cssText = 'background:#6B8FC7;color:white;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;';
+  addSubBtn.style.cssText = 'background:#6B8FC7;color:white;border:none;border-radius:5px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;';
   addSubBtn.onclick = function() { subList.appendChild(makeSubInput('')); };
   subBox.appendChild(addSubBtn);
   rightWrap.appendChild(subBox);
@@ -13391,7 +13465,7 @@ async function openAddPunchUnit() {
     '<div id="punch-vis-toggle"></div>' +
     '<div class="form-group"><label class="form-label">Import from Customer</label>' +
       '<select class="form-input" id="pl_cust_select" onchange="plFillFromCustomer(this.value)">' + custOptions + '</select></div>' +
-    '<div class="form-group"><label class="form-label">Address</label><input class="form-input" id="pl_addr" placeholder="36 Dr Frank Road"></div>' +
+    '<div class="form-group"><label class="form-label">Address</label><input class="form-input" id="pl_addr" placeholder="Street address"></div>' +
     '<div class="form-group"><label class="form-label">Unit</label><input class="form-input" id="pl_unit" placeholder="2A"></div>' +
     '<div class="form-group"><label class="form-label">Customer Name</label><input class="form-input" id="pl_cust_name" placeholder="Full name"></div>' +
     '<div style="display:flex;gap:10px;margin-top:4px;">' +
