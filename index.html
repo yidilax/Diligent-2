@@ -3380,6 +3380,20 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .office-nav-group { background:rgba(0,0,0,0.15); }
 .office-nav-btn.nav-sub { padding-left:46px; font-size:13.5px; }
 
+
+/* ===== Yiddish / RTL layout ===== */
+body.rtl-lang { direction: rtl; }
+body.rtl-lang .office-sidebar { left: auto; right: 0; transform: translateX(100%); }
+body.rtl-lang .office-sidebar.open { transform: translateX(0); }
+body.rtl-lang .office-nav-btn,
+body.rtl-lang .office-nav-group-btn { text-align: right; }
+body.rtl-lang .office-nav-btn.active { border-right: none; border-left: 3px solid var(--gold); }
+body.rtl-lang .nav-icon { margin-left: 0; }
+body.rtl-lang .form-input,
+body.rtl-lang input,
+body.rtl-lang textarea { text-align: right; }
+body.rtl-lang .auth-back { left: auto; right: 16px; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -4250,6 +4264,11 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
             <button type="button" id="prof-theme-light" onclick="_profSetTheme('light')" style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.06);color:#f3efe6;font-family:Inter,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">☀️ Light</button>
             <button type="button" id="prof-theme-dark" onclick="_profSetTheme('dark')" style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.06);color:#f3efe6;font-family:Inter,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">🌙 Dark</button>
           </div></div>
+        <div class="form-group"><label class="form-label">Language / שפראך</label>
+          <div style="display:flex;gap:8px;">
+            <button type="button" id="prof-lang-en" onclick="_profSetLang('en')" style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.06);color:#f3efe6;font-family:Inter,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">English</button>
+            <button type="button" id="prof-lang-yi" onclick="_profSetLang('yi')" style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.06);color:#f3efe6;font-family:Inter,sans-serif;font-size:15px;font-weight:700;cursor:pointer;">יידיש</button>
+          </div></div>
         <div class="form-group"><label class="form-label">Text size</label>
           <select class="form-input" id="prof-textsize">
             <option value="small">Small</option><option value="normal">Normal</option><option value="large">Large</option>
@@ -5093,6 +5112,7 @@ function showPage(id) {
     _selectedHouse = null;
     _selectedProject = null;
   }
+  try { if (_curLang === 'yi') { applyLanguage(); } } catch(e) {}
 }
 
 // ════════════════════════════════════════════
@@ -5558,6 +5578,7 @@ async function openCustomerPortal(name, address, unit, saveKey, selections) {
     showPage('customerPortalPage');
   setTimeout(initSignatureCanvas, 200);
   }
+  try { if (_curLang === 'yi') { setTimeout(function(){ _translateDOM(document.body); }, 50); } } catch(e) {}
 }
 
 
@@ -5685,6 +5706,8 @@ function openProfileModal() {
   }).join('');
   _profPhoto = currentUser.photo || null;
   _profTheme = currentUser.theme || localStorage.getItem('dd_theme') || 'light';
+  _profLang = currentUser.lang || localStorage.getItem('dd_lang') || 'en';
+  if (typeof _profSetLang === 'function') setTimeout(function(){ _profSetLang(_profLang); }, 0);
   _renderProfileAvatar(_profPickedColor);
 
   // Default landing tab options (only tabs the user can access)
@@ -5910,6 +5933,19 @@ function _profRemovePhoto() {
   _renderProfileAvatar(_profPickedColor);
   var rm = document.getElementById('prof-removephoto'); if (rm) rm.style.display = 'none';
 }
+
+var _profLang = 'en';
+function _profSetLang(l) {
+  _profLang = l;
+  var en = document.getElementById('prof-lang-en'), yi = document.getElementById('prof-lang-yi');
+  if (en && yi) {
+    en.style.background = (l==='en') ? 'var(--gold)' : 'rgba(255,255,255,0.06)';
+    en.style.color = (l==='en') ? '#0D1F3C' : '#f3efe6';
+    yi.style.background = (l==='yi') ? 'var(--gold)' : 'rgba(255,255,255,0.06)';
+    yi.style.color = (l==='yi') ? '#0D1F3C' : '#f3efe6';
+  }
+}
+
 function _profSetTheme(theme, silent) {
   _profTheme = theme;
   var lb = document.getElementById('prof-theme-light');
@@ -6023,9 +6059,11 @@ async function saveProfile() {
     await DB.set(key, rec);
     currentUser.name = name; currentUser.title = title; currentUser.phone = phone; currentUser.avatarColor = _profPickedColor;
     currentUser.photo = _profPhoto || null;
-    currentUser.landingTab = landing; currentUser.theme = _profTheme; currentUser.textSize = textSize; currentUser.notifPrefs = notifPrefs;
+    currentUser.landingTab = landing; currentUser.theme = _profTheme; currentUser.lang = _profLang; currentUser.textSize = textSize; currentUser.notifPrefs = notifPrefs;
     currentUser.density = density; currentUser.workHours = workHours; currentUser.quietHours = quietHours; currentUser.recoveryEmail = recoveryEmail; currentUser.recoveryPhone = recoveryPhone;
     if (typeof applyTheme === 'function') applyTheme();
+    if (typeof applyLanguage === 'function') applyLanguage();
+  if (typeof applyLanguage === 'function') applyLanguage();
     if (typeof applyDensity === 'function') applyDensity();
     if (typeof logActivity === 'function') logActivity('Updated their profile');
     if (typeof _renderSidebarIdentity === 'function') _renderSidebarIdentity();
@@ -6146,6 +6184,7 @@ async function openOfficeDashboard() {
 
   if (typeof applyTabPermissions === 'function') applyTabPermissions();
   if (typeof applyTheme === 'function') applyTheme();
+  if (typeof applyLanguage === 'function') applyLanguage();
   var _land = (currentUser && currentUser.landingTab) || 'dashboard';
   if (!_canAccessTab(_land)) _land = 'dashboard';
   switchTab(_land);
@@ -8499,6 +8538,142 @@ async function _findUserById(id) {
 }
 
 // Apply the saved theme + text size (called at startup and after profile save).
+
+// ====================== YIDDISH TRANSLATION ENGINE ======================
+var I18N = {
+  // Landing / app shell
+  'Where Quality Meets Home': '\u05d5\u05d5\u05d5 \u05e7\u05d5\u05d5\u05d0\u05dc\u05d9\u05d8\u05e2\u05d8 \u05d1\u05d0\u05d2\u05e2\u05d2\u05e0\u05d8 \u05d6\u05d9\u05da \u05de\u05d9\u05d8\u0027\u05df \u05d4\u05d9\u05d9\u05dd',
+  'Make My Selections': '\u05de\u05d0\u05da \u05de\u05d9\u05d9\u05e0\u05e2 \u05d0\u05d5\u05d9\u05e1\u05e7\u05dc\u05d9\u05d9\u05d1\u05d5\u05e0\u05d2\u05e2\u05df',
+  'Maybe later': '\u05d8\u05d0\u05de\u05e2\u05e8 \u05e9\u05e4\u05e2\u05d8\u05e2\u05e8',
+  'Download': '\u05d0\u05e8\u05d0\u05e4\u05dc\u05d0\u05d3\u05df',
+  'Later': '\u05e9\u05e4\u05e2\u05d8\u05e2\u05e8',
+  'Update Now': '\u05d3\u05e2\u05e8\u05d4\u05d9\u05d9\u05e0\u05d8\u05d9\u05e7\u05df \u05d0\u05e6\u05d5\u05e0\u05d8',
+  'Not now': '\u05e0\u05d9\u05e9\u05d8 \u05d0\u05e6\u05d5\u05e0\u05d8',
+  'Install': '\u05d0\u05d9\u05e0\u05e1\u05d8\u05d0\u05dc\u05d9\u05e8\u05df',
+  // Login / roles
+  'Office Login': '\u05d0\u05e4\u05d9\u05e1 \u05dc\u05d0\u05d2\u05d9\u05df',
+  'Subcontractor': '\u05e1\u05d0\u05d1\u05e7\u05d0\u05e0\u05d8\u05e8\u05d0\u05e7\u05d8\u05d0\u05e8',
+  'Customer': '\u05e7\u05d5\u05e0\u05d4',
+  'Log In': '\u05dc\u05d0\u05d2 \u05d0\u05d9\u05d9\u05df',
+  'Logout': '\u05dc\u05d0\u05d2 \u05d0\u05d5\u05d9\u05e1',
+  'Back': '\u05e6\u05d5\u05e8\u05d9\u05e7',
+  'Enter your 4-digit access code': '\u05dc\u05d9\u05d9\u05d2\u05d8 \u05d0\u05e8\u05d9\u05d9\u05df \u05d0\u05d9\u05d9\u05e2\u05e8 4-\u05e6\u05d9\u05e4\u05e2\u05e8 \u05e7\u05d0\u05d3',
+  // Sidebar / nav
+  'Dashboard': '\u05d3\u05d0\u05e9\u05d1\u05d0\u05e8\u05d3',
+  'Notifications': '\u05d3\u05e2\u05e8\u05de\u05d0\u05e0\u05d5\u05e0\u05d2\u05e2\u05df',
+  'Work': '\u05d0\u05e8\u05d1\u05e2\u05d8',
+  'Customers': '\u05e7\u05d5\u05e0\u05d4\u0027\u05d9\u05dd',
+  'Subcontractors': '\u05e1\u05d0\u05d1\u05e7\u05d0\u05e0\u05d8\u05e8\u05d0\u05e7\u05d8\u05d0\u05e8\u05df',
+  'Projects': '\u05e4\u05e8\u05d0\u05d9\u05e2\u05e7\u05d8\u05df',
+  'Punch Lists': '\u05e4\u05d0\u05e0\u05e9 \u05e8\u05e9\u05d9\u05de\u05d5\u05ea',
+  'House Specs': '\u05d4\u05d9\u05d9\u05d6 \u05e1\u05e4\u05e2\u05e7\u05e1',
+  'Tasks': '\u05d0\u05d5\u05d9\u05e4\u05d2\u05d0\u05d1\u05df',
+  'Scheduling': '\u05e6\u05d9\u05d9\u05d8\u05e4\u05dc\u05d0\u05e0\u05d9\u05e8\u05d5\u05e0\u05d2',
+  'Upgrades': '\u05d0\u05e4\u05d2\u05e8\u05d9\u05d9\u05d3\u05e1',
+  'Customer Updates': '\u05e7\u05d5\u05e0\u05d4 \u05d3\u05e2\u05e8\u05d4\u05d9\u05d9\u05e0\u05d8\u05d9\u05e7\u05d5\u05e0\u05d2\u05e2\u05df',
+  'Upgrade Editor': '\u05d0\u05e4\u05d2\u05e8\u05d9\u05d9\u05d3 \u05e2\u05d3\u05d9\u05d8\u05d0\u05e8',
+  'Employees': '\u05d0\u05e0\u05d2\u05e2\u05e9\u05d8\u05e2\u05dc\u05d8\u05e2',
+  'Menu': '\u05de\u05e2\u05e0\u05d9\u05d5',
+  // Dashboard
+  'Good morning': '\u05d0 \u05d2\u05d5\u05d8\u05df \u05de\u05d0\u05e8\u05d2\u05df',
+  'Good afternoon': '\u05d0 \u05d2\u05d5\u05d8\u05df \u05e0\u05d0\u05db\u05de\u05d9\u05d8\u05d0\u05d2',
+  'Good evening': '\u05d0 \u05d2\u05d5\u05d8\u05df \u05d5\u05d5\u05d0\u05d1\u05d6\u05dc',
+  'Quick Actions': '\u05d2\u05d9\u05da \u05e4\u05e2\u05d5\u05dc\u05d5\u05ea',
+  'Recent Activity': '\u05dc\u05e2\u05e6\u05d8\u05e2 \u05d0\u05e7\u05d8\u05d9\u05d5\u05d5\u05d9\u05d8\u05e2\u05d8',
+  'No recent activity': '\u05e7\u05d9\u05d9\u05df \u05dc\u05e2\u05e6\u05d8\u05e2 \u05d0\u05e7\u05d8\u05d9\u05d5\u05d5\u05d9\u05d8\u05e2\u05d8 \u05e0\u05d9\u05d8\u05d0',
+  'New Project': '\u05e0\u05d9\u05d9\u05e2\u05e8 \u05e4\u05e8\u05d0\u05d9\u05e2\u05e7\u05d8',
+  'Add Customer': '\u05e6\u05d5\u05d2\u05d9\u05d1\u05df \u05e7\u05d5\u05e0\u05d4',
+  'View Upgrades': '\u05d6\u05e2\u05df \u05d0\u05e4\u05d2\u05e8\u05d9\u05d9\u05d3\u05e1',
+  'Projects': '\u05e4\u05e8\u05d0\u05d9\u05e2\u05e7\u05d8\u05df',
+  'Submissions': '\u05d0\u05e8\u05d9\u05d9\u05e0\u05d2\u05d0\u05d1\u05df',
+  'Open Tasks': '\u05d0\u05e4\u05e2\u05e0\u05e2 \u05d0\u05d5\u05d9\u05e4\u05d2\u05d0\u05d1\u05df',
+  // Common buttons
+  'Save': '\u05e9\u05e4\u05d9\u05d9\u05db\u05e2\u05e8\u05df',
+  'Cancel': '\u05d0\u05e4\u05d6\u05d0\u05d2\u05df',
+  'Delete': '\u05d0\u05d5\u05d9\u05e1\u05de\u05e2\u05e7\u05df',
+  'Edit': '\u05e8\u05e2\u05d3\u05d0\u05e7\u05d8\u05d9\u05e8\u05df',
+  'Add': '\u05e6\u05d5\u05d2\u05d9\u05d1\u05df',
+  'Close': '\u05e4\u05d0\u05e8\u05de\u05d0\u05db\u05df',
+  'Manage Profile': '\u05e4\u05e8\u05d0\u05e4\u05d9\u05dc \u05e4\u05d0\u05e8\u05d5\u05d5\u05d0\u05dc\u05d8\u05d5\u05e0\u05d2',
+  'Inbox': '\u05d0\u05d9\u05d9\u05e0\u05d1\u05d0\u05e7\u05e1',
+  // ---- Round 2: customer portal ----
+  'Customer Portal': '\u05e7\u05d5\u05e0\u05d4 \u05e4\u05d0\u05e8\u05d8\u05d0\u05dc',
+  'Enter your address and unit to access your upgrades': '\u05dc\u05d9\u05d9\u05d2\u05d8 \u05d0\u05e8\u05d9\u05d9\u05df \u05d0\u05d9\u05d9\u05e2\u05e8 \u05d0\u05d3\u05e8\u05e2\u05e1 \u05d0\u05d5\u05df \u05d9\u05d5\u05e0\u05d9\u05d8 \u05e6\u05d5 \u05d6\u05e2\u05df \u05d0\u05d9\u05d9\u05e2\u05e8\u05e2 \u05d0\u05e4\u05d2\u05e8\u05d9\u05d9\u05d3\u05e1',
+  'Your Name': '\u05d0\u05d9\u05d9\u05e2\u05e8 \u05e0\u05d0\u05de\u05e2\u05df',
+  'Street Address': '\u05e1\u05d8\u05e8\u05d9\u05d8 \u05d0\u05d3\u05e8\u05e2\u05e1',
+  'Unit Number': '\u05d9\u05d5\u05e0\u05d9\u05d8 \u05e0\u05d5\u05de\u05e2\u05e8',
+  '\u2014 Select your unit \u2014': '\u2014 \u05e7\u05dc\u05d9\u05d9\u05d1\u05d8 \u05d0\u05d9\u05d9\u05e2\u05e8 \u05d9\u05d5\u05e0\u05d9\u05d8 \u2014',
+  'Available Upgrades': '\u05e4\u05d0\u05e8\u05d0\u05df \u05d0\u05e4\u05d2\u05e8\u05d9\u05d9\u05d3\u05e1',
+  'Make My Selections': '\u05de\u05d0\u05da \u05de\u05d9\u05d9\u05e0\u05e2 \u05d0\u05d5\u05d9\u05e1\u05e7\u05dc\u05d9\u05d9\u05d1\u05d5\u05e0\u05d2\u05e2\u05df',
+  'Click any image to see a larger view': '\u05e7\u05dc\u05d9\u05e7\u05d8 \u05d0\u05d5\u05d9\u05e3 \u05d0 \u05d1\u05d9\u05dc\u05d3 \u05e6\u05d5 \u05d6\u05e2\u05df \u05d2\u05e8\u05e2\u05e1\u05e2\u05e8',
+  'Exit': '\u05d0\u05e8\u05d5\u05d9\u05e1',
+  'Submit My Selections': '\u05d0\u05e8\u05d9\u05d9\u05e0\u05e9\u05d9\u05e7\u05df \u05de\u05d9\u05d9\u05e0\u05e2 \u05d0\u05d5\u05d9\u05e1\u05e7\u05dc\u05d9\u05d9\u05d1\u05d5\u05e0\u05d2\u05e2\u05df',
+  // ---- Round 2: subcontractor portal ----
+  'Your Tasks': '\u05d0\u05d9\u05d9\u05e2\u05e8\u05e2 \u05d0\u05d5\u05d9\u05e4\u05d2\u05d0\u05d1\u05df',
+  'Punch List': '\u05e4\u05d0\u05e0\u05e9 \u05e8\u05e9\u05d9\u05de\u05d4',
+  'Nothing assigned yet': '\u05e0\u05d0\u05da \u05e0\u05d9\u05e9\u05d8\u05d0 \u05e6\u05d5\u05d2\u05e2\u05d8\u05d9\u05d9\u05dc\u05d8',
+  'Add note': '\u05e6\u05d5\u05d2\u05d9\u05d1\u05df \u05e0\u05d0\u05d8\u05d9\u05e5',
+  'Edit note': '\u05e8\u05e2\u05d3\u05d0\u05e7\u05d8\u05d9\u05e8\u05df \u05e0\u05d0\u05d8\u05d9\u05e5',
+  'Delete note': '\u05d0\u05d5\u05d9\u05e1\u05de\u05e2\u05e7\u05df \u05e0\u05d0\u05d8\u05d9\u05e5',
+  'Add photo': '\u05e6\u05d5\u05d2\u05d9\u05d1\u05df \u05d1\u05d9\u05dc\u05d3',
+  'Add Photo': '\u05e6\u05d5\u05d2\u05d9\u05d1\u05df \u05d1\u05d9\u05dc\u05d3',
+  // ---- Round 2: common forms ----
+  'Name': '\u05e0\u05d0\u05de\u05e2\u05df',
+  'Phone': '\u05d8\u05e2\u05dc\u05e2\u05e4\u05d0\u05df',
+  'Email': '\u05d0\u05d9\u05de\u05d9\u05d9\u05dc',
+  'Address': '\u05d0\u05d3\u05e8\u05e2\u05e1',
+  'Unit': '\u05d9\u05d5\u05e0\u05d9\u05d8',
+  'Status': '\u05e1\u05d8\u05d0\u05d8\u05d5\u05e1',
+  'Notes': '\u05e0\u05d0\u05d8\u05d9\u05e6\u05df',
+  'Trade': '\u05e4\u05d0\u05da',
+  'Active': '\u05d0\u05e7\u05d8\u05d9\u05d5\u05d5',
+  'Inactive': '\u05d0\u05d9\u05e0\u05d0\u05e7\u05d8\u05d9\u05d5\u05d5',
+  'Approve': '\u05d0\u05e4\u05e8\u05d5\u05d5',
+  'Search': '\u05d6\u05d5\u05db\u05df',
+  'Loading...': '\u05dc\u05d0\u05d3\u05d8 ...',
+  'Save Changes': '\u05e9\u05e4\u05d9\u05d9\u05db\u05e2\u05e8\u05df \u05e2\u05e0\u05d3\u05e2\u05e8\u05d5\u05e0\u05d2\u05e2\u05df'
+};
+
+var _curLang = (localStorage.getItem('dd_lang') || 'en');
+
+function t(s) {
+  if (_curLang !== 'yi' || !s) return s;
+  var key = String(s).trim();
+  return I18N[key] || s;
+}
+
+// Walk the DOM and translate text nodes + common attributes.
+function _translateDOM(root) {
+  if (_curLang !== 'yi') return;
+  root = root || document.body;
+  try {
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+    var nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(function(n){
+      var txt = n.nodeValue;
+      if (!txt) return;
+      var trimmed = txt.trim();
+      if (!trimmed) return;
+      if (I18N[trimmed]) { n.nodeValue = txt.replace(trimmed, I18N[trimmed]); }
+    });
+    // placeholders + button values
+    root.querySelectorAll('[placeholder]').forEach(function(el){
+      var p = el.getAttribute('placeholder'); if (p && I18N[p.trim()]) el.setAttribute('placeholder', I18N[p.trim()]);
+    });
+  } catch(e) {}
+}
+
+function applyLanguage() {
+  _curLang = (currentUser && currentUser.lang) || localStorage.getItem('dd_lang') || 'en';
+  try { localStorage.setItem('dd_lang', _curLang); } catch(e) {}
+  var rtl = (_curLang === 'yi');
+  document.documentElement.setAttribute('lang', rtl ? 'yi' : 'en');
+  document.documentElement.setAttribute('dir', rtl ? 'rtl' : 'ltr');
+  if (rtl) { document.body.classList.add('rtl-lang'); _translateDOM(document.body); }
+  else { document.body.classList.remove('rtl-lang'); }
+}
+
 function applyTheme() {
   var theme = (currentUser && currentUser.theme) || localStorage.getItem('dd_theme') || 'light';
   var textSize = (currentUser && currentUser.textSize) || localStorage.getItem('dd_textsize') || 'normal';
@@ -9009,6 +9184,7 @@ async function switchTab(tab) {
   if (tab === 'scheduling') { _toggleTabChrome('tab-scheduling', true); renderScheduling(); }
   if (tab === 'specs') renderSpecs();
   try { _openNavGroupForTab(tabId); } catch(e) {}
+  try { if (_curLang === 'yi') { setTimeout(function(){ _translateDOM(document.body); }, 60); } } catch(e) {}
 }
 
 // ════════════════════════════════════════════
@@ -10019,6 +10195,7 @@ async function renderSubPortal() {
     html += '</div></div>';
   });
   host.innerHTML = html;
+  try { if (_curLang === 'yi') { setTimeout(function(){ _translateDOM(document.body); }, 50); } } catch(e) {}
 }
 
 function _spExpand(iid) {
@@ -12232,6 +12409,7 @@ function buildUpgradeSheet(sections) {
   setTimeout(initSignatureCanvas, 100);
   if (typeof _wireUpgradeProgress === 'function') _wireUpgradeProgress();
   if (typeof updateProgress === 'function') updateProgress();
+  try { if (_curLang === 'yi') { setTimeout(function(){ _translateDOM(document.body); }, 50); } } catch(e) {}
 }
 
 // ue_photoChanged — called by ue_buildItemRow file input
