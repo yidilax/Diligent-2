@@ -6009,8 +6009,11 @@ async function cdGoGallery() {
   window.scrollTo(0,0);
 }
 async function cdGoForm() {
-  // open the upgrade form directly
-  await openCustomerPortal(window._custName, window._custAddress, window._custUnit, _custSaveKey, _pendingAccess ? _pendingAccess.existing : {});
+  // Always pull the LATEST saved submission so the form shows their saved answers.
+  var saved = {};
+  try { saved = (await DB.get(_custSaveKey)) || {}; } catch(e) {}
+  if (_pendingAccess) _pendingAccess.existing = saved;
+  await openCustomerPortal(window._custName, window._custAddress, window._custUnit, _custSaveKey, saved);
 }
 
 async function openCustomerPortal(name, address, unit, saveKey, selections) {
