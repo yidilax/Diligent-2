@@ -3690,10 +3690,13 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 
 <div class="page" id="customerAuthPage">
   <div class="auth-box" style="max-width:480px;">
-    <div class="auth-header">
-      <button class="auth-back" onclick="showPage('landingPage')">← Back</button>
-      <div class="auth-title">Customer Portal</div>
-      <div class="auth-subtitle">Enter your address and unit to access your upgrades</div>
+    <div class="auth-header" style="text-align:center;position:relative;padding-top:18px;">
+      <button class="auth-back" onclick="showPage('landingPage')" style="position:absolute;left:0;top:0;">← Back</button>
+      <img src="./icon-192.png" alt="Diligent Developers" style="width:62px;height:62px;border-radius:14px;background:#fff;padding:4px;margin:6px auto 12px;display:block;box-shadow:0 4px 14px rgba(13,31,60,0.18);" onerror="this.style.display='none'">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2.5px;color:var(--navy);line-height:1;">DILIGENT DEVELOPERS</div>
+      <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
+      <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
+      <div class="auth-subtitle">Enter your address and unit to get started</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -3740,6 +3743,8 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
   <div style="max-width:720px;margin:0 auto;padding:18px 16px 40px;">
     <div style="font-size:13px;color:var(--muted);margin-bottom:18px;">Everything about your home, all in one place.</div>
 
+    <div id="cdWelcomeBanner"></div>
+
     <!-- Primary actions -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px;">
       <button onclick="cdGoGallery()" style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px 14px;cursor:pointer;text-align:left;box-shadow:0 2px 10px rgba(13,31,60,0.06);">
@@ -3754,9 +3759,12 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       </button>
     </div>
 
-    <!-- Dynamic sections (progress, updates, files) injected here -->
+    <!-- Dynamic sections injected here -->
+    <div id="cdDates"></div>
     <div id="cdProgress"></div>
+    <div id="cdPhotos"></div>
     <div id="cdUpdates"></div>
+    <div id="cdContact"></div>
     <div id="cdFiles"></div>
 
     <!-- Issue / punch list -->
@@ -4763,7 +4771,7 @@ async function checkSyncStatus() {
 
 // Key sanitization: Firestore doesn't allow '/' or certain chars in doc IDs
 // Customer-facing prefixes go in the OPEN 'pub' collection; everything else is office-only in 'dd'.
-var _PUBLIC_PREFIXES = ['upgrades:', 'submission:', 'upgrade_sections', 'custupdate:', 'subcontractor:', 'subpunch:', 'pubaddr:', 'pubpunch:', 'pubfiles:', 'custpunch:', 'pubprogress:', 'pubnotif:'];
+var _PUBLIC_PREFIXES = ['upgrades:', 'submission:', 'upgrade_sections', 'custupdate:', 'subcontractor:', 'subpunch:', 'pubaddr:', 'pubpunch:', 'pubfiles:', 'custpunch:', 'pubprogress:', 'pubnotif:', 'pubportalcfg:'];
 function _fsCol(key) {
   for (var i = 0; i < _PUBLIC_PREFIXES.length; i++) {
     if (String(key).indexOf(_PUBLIC_PREFIXES[i]) === 0) return 'pub';
@@ -5055,6 +5063,29 @@ let currentUser = null;
 // ════════════════════════════════════════════
 async function init() {
   if (typeof applyTheme === 'function') { try { applyTheme(); } catch(e){} }
+  // ── Restore a customer's portal session on refresh (so they stay where they were) ──
+  try {
+    var _lastPage = localStorage.getItem('dd_lastPage');
+    var _custPages = ['customerDashboardPage','customerGalleryPage','customerPortalPage'];
+    if (_lastPage && _custPages.indexOf(_lastPage) !== -1) {
+      var sess = JSON.parse(localStorage.getItem('dd_custSession') || '{}');
+      if (sess && sess.address) {
+        var l = document.getElementById('bootLoader'); if (l) l.style.display = 'none';
+        var saveKey = sess.saveKey || ('upgrades:' + btoa(unescape(encodeURIComponent(sess.address + '|' + (sess.unit||'Main')))).replace(/=/g,''));
+        var existing = await DB.get(saveKey) || {};
+        _pendingAccess = { name: sess.name, address: sess.address, unit: sess.unit, saveKey: saveKey, existing: existing };
+        if (_lastPage === 'customerPortalPage') {
+          await openCustomerPortal(sess.name, sess.address, sess.unit, saveKey, existing);
+        } else if (_lastPage === 'customerGalleryPage') {
+          window._custName = sess.name; window._custAddress = sess.address; window._custUnit = sess.unit; _custSaveKey = saveKey;
+          await cdGoGallery();
+        } else {
+          await openCustomerDashboard(sess.name, sess.address, sess.unit, saveKey, existing);
+        }
+        return; // stay on the customer page; skip office boot
+      }
+    }
+  } catch(e) { console.warn('session restore failed', e); }
   // ── Deep link: send /upgrades (or ?upgrades / #upgrades) straight to the customer portal ──
   try {
     var _path = (window.location.pathname || '').toLowerCase();
@@ -5146,6 +5177,19 @@ function showPage(id) {
   const target = document.getElementById(id);
   target.classList.add('active');
   target.style.display = '';
+  // Remember where the user is, so a refresh keeps them on this page.
+  try {
+    localStorage.setItem('dd_lastPage', id);
+    if (id === 'customerDashboardPage' || id === 'customerGalleryPage' || id === 'customerPortalPage') {
+      localStorage.setItem('dd_custSession', JSON.stringify({
+        name: window._custName || '', address: window._custAddress || '', unit: window._custUnit || '', saveKey: (typeof _custSaveKey !== 'undefined' ? _custSaveKey : '')
+      }));
+    }
+    // also remember the active office tab
+    if (id === 'officePage') {
+      var activeTab = document.querySelector('.office-tab:not([style*="display: none"])');
+    }
+  } catch(e) {}
   // Pre-load projects when customer auth opens
   if (id === 'customerAuthPage') {
     loadProjectsForCustomer();
@@ -5681,6 +5725,82 @@ function _cpAddPhoto(i) {
 }
 
 
+
+// ===================== CUSTOMER PORTAL SETTINGS (office) =====================
+// Per address/unit: welcome message, contact card, important dates, progress photos.
+// Stored office-side at  portalcfg:<key>  and mirrored to  pubportalcfg:<key>  for customers.
+var _psTarget = null;
+var _psPhotos = [];
+function _psKey(address, unit) {
+  return btoa(unescape(encodeURIComponent((address||'') + '|' + (unit||'Main')))).replace(/=/g,'');
+}
+async function _psGet(address, unit) {
+  var rec = await DB.get('portalcfg:' + _psKey(address, unit));
+  return rec || { welcome:'', contactName:'', contactRole:'', contactPhone:'', contactEmail:'', dateCompletion:'', dateNext:'', dateNextLabel:'', photos:[] };
+}
+async function openPortalSettings(address, unit) {
+  _psTarget = { address: address, unit: unit };
+  var rec = await _psGet(address, unit);
+  _psPhotos = (rec.photos || []).slice();
+  document.getElementById('ps-title').textContent = address + (unit ? (' \u00b7 Unit ' + unit) : '');
+  document.getElementById('ps-welcome').value = rec.welcome || '';
+  document.getElementById('ps-contactName').value = rec.contactName || '';
+  document.getElementById('ps-contactRole').value = rec.contactRole || '';
+  document.getElementById('ps-contactPhone').value = rec.contactPhone || '';
+  document.getElementById('ps-contactEmail').value = rec.contactEmail || '';
+  document.getElementById('ps-dateCompletion').value = rec.dateCompletion || '';
+  document.getElementById('ps-dateNextLabel').value = rec.dateNextLabel || '';
+  document.getElementById('ps-dateNext').value = rec.dateNext || '';
+  _psRenderPhotos();
+  document.getElementById('modal-portalsettings').classList.add('open');
+}
+function closePortalSettings() { document.getElementById('modal-portalsettings').classList.remove('open'); _psTarget = null; _psPhotos = []; }
+function _psRenderPhotos() {
+  var host = document.getElementById('ps-photos');
+  if (!host) return;
+  host.innerHTML = _psPhotos.map(function(ph, i){
+    return '<div style="position:relative;display:inline-block;">' +
+      '<img src="' + ph.data + '" style="width:64px;height:64px;border-radius:8px;object-fit:cover;">' +
+      '<button onclick="_psRemovePhoto(' + i + ')" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#e07a6a;color:#fff;border:2px solid #fff;font-size:11px;line-height:1;cursor:pointer;padding:0;">\u2715</button>' +
+    '</div>';
+  }).join('');
+}
+function _psRemovePhoto(i) { _psPhotos.splice(i, 1); _psRenderPhotos(); }
+function _psAddPhoto() {
+  var input = document.createElement('input');
+  input.type = 'file'; input.accept = 'image/*';
+  input.onchange = function() {
+    var file = input.files && input.files[0];
+    if (!file) return;
+    _plCompressImage(file, function(dataUrl){
+      _psPhotos.push({ data: dataUrl, at: Date.now() });
+      _psRenderPhotos();
+    });
+  };
+  input.click();
+}
+async function savePortalSettings() {
+  if (!_psTarget) return;
+  var rec = {
+    address: _psTarget.address, unit: _psTarget.unit,
+    welcome: document.getElementById('ps-welcome').value.trim(),
+    contactName: document.getElementById('ps-contactName').value.trim(),
+    contactRole: document.getElementById('ps-contactRole').value.trim(),
+    contactPhone: document.getElementById('ps-contactPhone').value.trim(),
+    contactEmail: document.getElementById('ps-contactEmail').value.trim(),
+    dateCompletion: document.getElementById('ps-dateCompletion').value,
+    dateNextLabel: document.getElementById('ps-dateNextLabel').value.trim(),
+    dateNext: document.getElementById('ps-dateNext').value,
+    photos: _psPhotos.slice(),
+    _updatedAt: Date.now()
+  };
+  var k = _psKey(_psTarget.address, _psTarget.unit);
+  await DB.set('portalcfg:' + k, rec);
+  await DB.set('pubportalcfg:' + k, rec); // public mirror for the customer
+  closePortalSettings();
+  if (typeof renderProjects === 'function') renderProjects();
+}
+
 // ===================== CUSTOMER PROGRESS TRACKER =====================
 var CUSTOMER_STAGES = ['Planning','Foundation','Framing','Roofing','Rough-Ins','Insulation & Drywall','Interior Finishes','Final Touches','Completed'];
 function _progKey(address, unit) {
@@ -5789,6 +5909,75 @@ function cdBackToDashboard() {
   showPage('customerDashboardPage');
 }
 
+
+async function _loadPortalConfig(address, unit) {
+  var k = btoa(unescape(encodeURIComponent((address||'') + '|' + (unit||'Main')))).replace(/=/g,'');
+  var cfg = null;
+  try { cfg = await DB.get('pubportalcfg:' + k); } catch(e) {}
+  // Welcome banner
+  var wb = document.getElementById('cdWelcomeBanner');
+  if (wb) {
+    if (cfg && cfg.welcome) {
+      wb.innerHTML = '<div style="background:linear-gradient(135deg,#0D1F3C,#1a2b4a);border-radius:14px;padding:16px 18px;margin-bottom:16px;border-left:3px solid var(--gold);">' +
+        '<div style="font-size:14px;color:#fff;line-height:1.5;">' + _esc(cfg.welcome) + '</div>' +
+        '<div style="font-size:11px;color:var(--gold);margin-top:8px;font-weight:600;">\u2014 The Diligent Developers Team</div>' +
+      '</div>';
+    } else { wb.innerHTML = ''; }
+  }
+  // Important dates
+  var dd = document.getElementById('cdDates');
+  if (dd) {
+    var cards = [];
+    if (cfg && cfg.dateCompletion) {
+      cards.push('<div style="flex:1;min-width:130px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:13px;">' +
+        '<div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">🏁 Est. Completion</div>' +
+        '<div style="font-size:15px;font-weight:700;color:var(--navy);margin-top:3px;">' + _fmtDate(cfg.dateCompletion) + '</div></div>');
+    }
+    if (cfg && cfg.dateNext) {
+      cards.push('<div style="flex:1;min-width:130px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:13px;">' +
+        '<div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">📅 ' + _esc(cfg.dateNextLabel || 'Next Milestone') + '</div>' +
+        '<div style="font-size:15px;font-weight:700;color:var(--navy);margin-top:3px;">' + _fmtDate(cfg.dateNext) + '</div></div>');
+    }
+    dd.innerHTML = cards.length ? '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">' + cards.join('') + '</div>' : '';
+  }
+  // Progress photos gallery
+  var pg = document.getElementById('cdPhotos');
+  if (pg) {
+    if (cfg && cfg.photos && cfg.photos.length) {
+      var imgs = cfg.photos.slice().sort(function(a,b){ return (b.at||0)-(a.at||0); }).map(function(ph){
+        return '<img src="' + ph.data + '" style="width:100%;height:120px;border-radius:10px;object-fit:cover;cursor:pointer;" onclick="_plLightbox(\'' + encodeURIComponent(ph.data) + '\')">';
+      }).join('');
+      pg.innerHTML = '<div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px;">' +
+        '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:17px;letter-spacing:0.5px;color:var(--navy);margin-bottom:10px;">📸 Progress Photos</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">' + imgs + '</div>' +
+      '</div>';
+    } else { pg.innerHTML = ''; }
+  }
+  // Contact card
+  var cc = document.getElementById('cdContact');
+  if (cc) {
+    if (cfg && (cfg.contactName || cfg.contactPhone || cfg.contactEmail)) {
+      var initial = (cfg.contactName || 'D')[0].toUpperCase();
+      var actions = '';
+      if (cfg.contactPhone) actions += '<a href="tel:' + cfg.contactPhone.replace(/[^0-9]/g,'') + '" style="flex:1;text-align:center;background:var(--navy);color:#fff;border-radius:8px;padding:9px;font-size:13px;font-weight:700;text-decoration:none;">📞 Call</a>';
+      if (cfg.contactEmail) actions += '<a href="mailto:' + _esc(cfg.contactEmail) + '" style="flex:1;text-align:center;background:rgba(13,31,60,0.08);color:var(--navy);border-radius:8px;padding:9px;font-size:13px;font-weight:700;text-decoration:none;">\u2709 Email</a>';
+      cc.innerHTML = '<div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px;">' +
+        '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:17px;letter-spacing:0.5px;color:var(--navy);margin-bottom:10px;">👤 Your Point of Contact</div>' +
+        '<div style="display:flex;align-items:center;gap:12px;margin-bottom:' + (actions?'12px':'0') + ';">' +
+          '<div style="width:46px;height:46px;border-radius:50%;background:var(--gold);color:var(--navy);display:flex;align-items:center;justify-content:center;font-family:\'Bebas Neue\',sans-serif;font-size:20px;flex-shrink:0;">' + initial + '</div>' +
+          '<div style="min-width:0;"><div style="font-size:15px;font-weight:700;color:var(--navy);">' + _esc(cfg.contactName||'') + '</div>' +
+          (cfg.contactRole ? '<div style="font-size:12px;color:var(--muted);">' + _esc(cfg.contactRole) + '</div>' : '') + '</div>' +
+        '</div>' +
+        (actions ? '<div style="display:flex;gap:8px;">' + actions + '</div>' : '') +
+      '</div>';
+    } else { cc.innerHTML = ''; }
+  }
+}
+function _fmtDate(d) {
+  try { return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' }); }
+  catch(e) { return d; }
+}
+
 async function openCustomerDashboard(name, address, unit, saveKey, existing) {
   window._custName = name; window._custAddress = address; window._custUnit = unit; _custSaveKey = saveKey;
   var first = (name || '').split(' ')[0] || 'there';
@@ -5803,6 +5992,7 @@ async function openCustomerDashboard(name, address, unit, saveKey, existing) {
   showPage('customerDashboardPage');
   window.scrollTo(0,0);
   // load the dynamic pieces into the dashboard slots
+  try { await _loadPortalConfig(address, unit); } catch(e) {}
   try { await _loadCustomerProgress(address, unit, 'cdProgress'); } catch(e) {}
   try { await _loadCustomerUpdatesInto(address, unit, 'cdUpdates'); } catch(e) {}
   try { await _loadCustomerFiles(address, unit, 'cdFiles'); } catch(e) {}
@@ -9469,6 +9659,7 @@ async function switchTab(tab) {
   if (tab === 'specs') renderSpecs();
   try { _openNavGroupForTab(tab); } catch(e) {}
   try { if (tab === 'custReports') { _renderOfficeCustomerIssues(); } } catch(e) {}
+  try { localStorage.setItem('dd_lastTab', tab); } catch(e) {}
 }
 
 // ════════════════════════════════════════════
@@ -9844,10 +10035,12 @@ async function renderProjects() {
       if (h.units && h.units.length) {
         progBtns = h.units.map(function(u){
           var uEsc = String(u).replace(/'/g, "\\'");
-          return '<button onclick="openProgressEditor(\'' + addrEsc + '\',\'' + uEsc + '\')" style="background:rgba(201,168,76,0.15);color:var(--gold);border:none;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;cursor:pointer;margin:2px 3px 0 0;">📊 Unit ' + u + '</button>';
+          return '<button onclick="openProgressEditor(\'' + addrEsc + '\',\'' + uEsc + '\')" style="background:rgba(201,168,76,0.15);color:var(--gold);border:none;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;cursor:pointer;margin:2px 3px 0 0;">📊 Unit ' + u + '</button>' +
+                 '<button onclick="openPortalSettings(\'' + addrEsc + '\',\'' + uEsc + '\')" style="background:rgba(13,31,60,0.08);color:var(--navy);border:none;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;cursor:pointer;margin:2px 3px 0 0;">🏠 Portal ' + u + '</button>';
         }).join('');
       } else {
-        progBtns = '<button onclick="openProgressEditor(\'' + addrEsc + '\',\'\')" style="background:rgba(201,168,76,0.15);color:var(--gold);border:none;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;cursor:pointer;margin-top:2px;">📊 Set Progress</button>';
+        progBtns = '<button onclick="openProgressEditor(\'' + addrEsc + '\',\'\')" style="background:rgba(201,168,76,0.15);color:var(--gold);border:none;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;cursor:pointer;margin:2px 3px 0 0;">📊 Set Progress</button>' +
+                  '<button onclick="openPortalSettings(\'' + addrEsc + '\',\'\')" style="background:rgba(13,31,60,0.08);color:var(--navy);border:none;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;cursor:pointer;margin:2px 3px 0 0;">🏠 Portal Setup</button>';
       }
       return '<div class="proj-address-row">📍 ' + h.address + '<span class="proj-address-units">' + (h.units&&h.units.length?'Units: '+h.units.join(', '):'No units') + '</span><div style="margin-top:4px;">' + progBtns + '</div></div>';
     }).join('');
@@ -16234,6 +16427,13 @@ async function handleAuthedUser(fbUser) {
     _showAuthErr('Login error: ' + (err.message || 'please try again'));
   }
   var l = document.getElementById('bootLoader'); if (l) l.style.display = 'none';
+  // Restore the last office tab the user was on (if any).
+  try {
+    var _lastTab = localStorage.getItem('dd_lastTab');
+    if (_lastTab && _lastTab !== 'dashboard' && document.getElementById('navbtn-' + _lastTab)) {
+      setTimeout(function(){ try { switchTab(_lastTab); } catch(e) {} }, 300);
+    }
+  } catch(e) {}
 }
 
 // Google sign-in
@@ -16737,6 +16937,40 @@ if (document.readyState === 'loading') {
       <div style="background:#fdf3e3;border-radius:8px;padding:9px 11px;margin-top:10px;">
         <div style="font-size:11px;color:#8a6a1a;line-height:1.4;"><b>⚠️ For non-emergencies only.</b> For anything urgent, call the office at <a href="tel:8452881036" style="color:#8a6a1a;font-weight:700;">845-288-1036 #5</a>.</div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- PORTAL SETTINGS MODAL (office) -->
+<div class="modal-overlay" id="modal-portalsettings">
+  <div class="modal-box" style="max-width:480px;">
+    <div class="modal-header">
+      <div class="modal-title" id="ps-title">Portal Setup</div>
+      <button class="modal-close" onclick="closePortalSettings()">✕</button>
+    </div>
+    <div class="modal-body" style="max-height:72vh;overflow-y:auto;">
+      <div class="form-group"><label class="form-label">Welcome message to customer</label>
+        <textarea class="form-input" id="ps-welcome" rows="3" placeholder="e.g. Welcome to the Maple Estates family!"></textarea></div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;color:var(--gold);margin:16px 0 8px;">Your Point of Contact</div>
+      <div class="form-group"><label class="form-label">Name</label>
+        <input class="form-input" id="ps-contactName" type="text" placeholder="e.g. Shmily Lax"></div>
+      <div class="form-group"><label class="form-label">Role / Title</label>
+        <input class="form-input" id="ps-contactRole" type="text" placeholder="e.g. Project Manager"></div>
+      <div class="form-group"><label class="form-label">Phone</label>
+        <input class="form-input" id="ps-contactPhone" type="tel" placeholder="845-288-1036 #5"></div>
+      <div class="form-group"><label class="form-label">Email</label>
+        <input class="form-input" id="ps-contactEmail" type="email" placeholder="shmily@diligentdevelopersny.com"></div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;color:var(--gold);margin:16px 0 8px;">Important Dates</div>
+      <div class="form-group"><label class="form-label">Estimated completion date</label>
+        <input class="form-input" id="ps-dateCompletion" type="date"></div>
+      <div class="form-group"><label class="form-label">Next milestone label</label>
+        <input class="form-input" id="ps-dateNextLabel" type="text" placeholder="e.g. Framing inspection"></div>
+      <div class="form-group"><label class="form-label">Next milestone date</label>
+        <input class="form-input" id="ps-dateNext" type="date"></div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;color:var(--gold);margin:16px 0 8px;">Progress Photos</div>
+      <div id="ps-photos" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;"></div>
+      <button onclick="_psAddPhoto()" style="width:100%;padding:10px;border-radius:8px;border:1px dashed rgba(255,255,255,0.3);background:rgba(255,255,255,0.06);color:#f3efe6;font-size:13px;font-weight:600;cursor:pointer;">📷 Add Progress Photo</button>
+      <button onclick="savePortalSettings()" style="width:100%;padding:13px;border-radius:9px;border:none;background:var(--gold);color:#0D1F3C;font-size:14px;font-weight:700;cursor:pointer;margin-top:16px;">Save Portal Settings</button>
     </div>
   </div>
 </div>
