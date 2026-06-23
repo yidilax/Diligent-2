@@ -3697,6 +3697,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v98</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4000,6 +4001,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v98</div>
     </div>
   </div>
 
@@ -4682,7 +4684,8 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>
+<script>var APP_VERSION = 'v98';
+
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
 // Reliable across all environments
@@ -5063,6 +5066,8 @@ let currentUser = null;
 // ════════════════════════════════════════════
 async function init() {
   if (typeof applyTheme === 'function') { try { applyTheme(); } catch(e){} }
+  try { var _vl = document.getElementById('appVersionLabel'); if (_vl) _vl.textContent = APP_VERSION; } catch(e) {}
+  try { var _cv = document.getElementById('custAuthVersion'); if (_cv) _cv.textContent = APP_VERSION; } catch(e) {}
   // ── Restore a customer's portal session on refresh (so they stay where they were) ──
   try {
     var _lastPage = localStorage.getItem('dd_lastPage');
