@@ -3225,22 +3225,59 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 
 
 /* ===== Dark theme ===== */
+/* ===== OFFICE-ONLY DARK MODE ===== */
+/* Variables flip only affects elements; we scope surfaces to #officePage so
+   the customer & subcontractor portals always stay light. */
 :root[data-theme="dark"] {
-  --offwhite: #15202e;
-  --cream: #1b2735;
+  --offwhite: #141c28;
+  --cream: #1b2531;
   --border: #2c3a4d;
   --text: #e8eaed;
   --muted: #9aa4b2;
   --shadow: 0 4px 24px rgba(0,0,0,0.4);
   --shadow-lg: 0 12px 48px rgba(0,0,0,0.55);
 }
-:root[data-theme="dark"] body { background: #0a1422; }
-:root[data-theme="dark"] .tab-empty, 
-:root[data-theme="dark"] .cu-card,
-:root[data-theme="dark"] .sync-status-card { background: #1b2735; color: var(--text); }
-:root[data-theme="dark"] input, 
-:root[data-theme="dark"] textarea, 
-:root[data-theme="dark"] select { background: #1b2735; color: var(--text); border-color: #2c3a4d; }
+/* Office page surfaces */
+:root[data-theme="dark"] #officePage { background: #0c1420; }
+:root[data-theme="dark"] #officePage .office-content { background: #0c1420; color: #e8eaed; }
+:root[data-theme="dark"] #officePage [style*="background:white"],
+:root[data-theme="dark"] #officePage [style*="background: white"],
+:root[data-theme="dark"] #officePage [style*="background:#fff"],
+:root[data-theme="dark"] #officePage [style*="background: #fff"],
+:root[data-theme="dark"] #officePage .cu-card,
+:root[data-theme="dark"] #officePage .dash-card,
+:root[data-theme="dark"] #officePage .dash-stat,
+:root[data-theme="dark"] #officePage .dash-action,
+:root[data-theme="dark"] #officePage .proj-card,
+:root[data-theme="dark"] #officePage .pu-card,
+:root[data-theme="dark"] #officePage .tab-empty,
+:root[data-theme="dark"] #officePage .sub-rows,
+:root[data-theme="dark"] #officePage .activity-item,
+:root[data-theme="dark"] #officePage .sync-status-card { background: #1b2531 !important; color: #e8eaed !important; border-color: #2c3a4d !important; }
+/* Text colors that were dark navy/black on white */
+:root[data-theme="dark"] #officePage [style*="color:var(--navy)"],
+:root[data-theme="dark"] #officePage [style*="color:#0D1F3C"],
+:root[data-theme="dark"] #officePage [style*="color:#16233d"],
+:root[data-theme="dark"] #officePage [style*="color:#1A1A1A"],
+:root[data-theme="dark"] #officePage .activity-name,
+:root[data-theme="dark"] #officePage .dash-stat-num,
+:root[data-theme="dark"] #officePage .dash-card-value { color: #e8eaed !important; }
+:root[data-theme="dark"] #officePage .activity-meta,
+:root[data-theme="dark"] #officePage .dash-stat-label,
+:root[data-theme="dark"] #officePage .dash-card-label { color: #9aa4b2 !important; }
+/* Inputs */
+:root[data-theme="dark"] #officePage input,
+:root[data-theme="dark"] #officePage textarea,
+:root[data-theme="dark"] #officePage select { background: #232f3d !important; color: #e8eaed !important; border-color: #3a4a5e !important; }
+:root[data-theme="dark"] #officePage input::placeholder,
+:root[data-theme="dark"] #officePage textarea::placeholder { color: #6f7b8a !important; }
+/* Tables / rows */
+:root[data-theme="dark"] #officePage .sub-row,
+:root[data-theme="dark"] #officePage .sub-row-main { border-color: #2c3a4d !important; }
+/* Keep modals readable (their own dark navy styling already works) */
+:root[data-theme="dark"] #officePage [style*="background:#f7f4ec"],
+:root[data-theme="dark"] #officePage [style*="background:#fbf9f4"],
+:root[data-theme="dark"] #officePage [style*="background:#f4f1ea"] { background: #232f3d !important; }
 
 
 /* ===== Layout density ===== */
@@ -3333,6 +3370,15 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .nav-soon { font-size:9px; font-weight:700; letter-spacing:0.5px; background:rgba(255,255,255,0.15); color:rgba(255,255,255,0.7); border-radius:10px; padding:1px 7px; margin-left:auto; text-transform:uppercase; }
 .office-nav-btn.nav-btn-soon { opacity:0.6; }
 .nav-inbox-badge { background:var(--gold); color:var(--navy); font-size:11px; font-weight:800; border-radius:10px; padding:1px 7px; margin-left:auto; }
+
+
+/* Collapsible sidebar groups */
+.office-nav-group-btn { width:100%; background:none; border:none; text-align:left; padding:14px 24px; font-family:'Inter',sans-serif; font-size:14px; font-weight:700; color:white; cursor:pointer; display:flex; align-items:center; gap:12px; letter-spacing:0.3px; }
+.office-nav-group-btn:hover { background:rgba(255,255,255,0.06); }
+.office-nav-group-btn .nav-icon { font-size:17px; flex-shrink:0; }
+.nav-group-caret { margin-left:auto; font-size:11px; color:rgba(255,255,255,0.5); transition:transform 0.15s; }
+.office-nav-group { background:rgba(0,0,0,0.15); }
+.office-nav-btn.nav-sub { padding-left:46px; font-size:13.5px; }
 
 </style>
   <!-- Firebase -->
@@ -3850,67 +3896,42 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
         </button>
       </li>
 
-      <li class="office-nav-section">WORK</li>
+      <!-- WORK group -->
       <li class="office-nav-item">
-        <button class="office-nav-btn" onclick="switchTab('projects');closeSidebar();" id="navbtn-projects">
-          <span class="nav-icon">🏗️</span> Projects
+        <button class="office-nav-group-btn" onclick="_toggleNavGroup('grp-work')" id="grpbtn-work">
+          <span class="nav-icon">🏗️</span> Work <span class="nav-group-caret" id="grp-work-caret">▾</span>
         </button>
       </li>
-      <li class="office-nav-item">
-        <button class="office-nav-btn" onclick="switchTab('punchlist');closeSidebar();" id="navbtn-punchlist">
-          <span class="nav-icon">✅</span> Punch Lists
-        </button>
-      </li>
-      <li class="office-nav-item">
-        <button class="office-nav-btn" onclick="switchTab('specs');closeSidebar();" id="navbtn-specs">
-          <span class="nav-icon">🏠</span> House Specs
-        </button>
-      </li>
-      <li class="office-nav-item">
-        <button class="office-nav-btn" onclick="switchTab('tasks');closeSidebar();" id="navbtn-tasks">
-          <span class="nav-icon">📝</span> Tasks
-        </button>
-      </li>
-      <li class="office-nav-item">
-        <button class="office-nav-btn" onclick="switchTab('scheduling');closeSidebar();" id="navbtn-scheduling">
-          <span class="nav-icon">📅</span> Scheduling
-        </button>
+      <li class="office-nav-group" id="grp-work" style="display:none;">
+        <button class="office-nav-btn nav-sub" onclick="switchTab('projects');closeSidebar();" id="navbtn-projects"><span class="nav-icon">🏗️</span> Projects</button>
+        <button class="office-nav-btn nav-sub" onclick="switchTab('punchlist');closeSidebar();" id="navbtn-punchlist"><span class="nav-icon">✅</span> Punch Lists</button>
+        <button class="office-nav-btn nav-sub" onclick="switchTab('specs');closeSidebar();" id="navbtn-specs"><span class="nav-icon">🏠</span> House Specs</button>
+        <button class="office-nav-btn nav-sub" onclick="switchTab('tasks');closeSidebar();" id="navbtn-tasks"><span class="nav-icon">📝</span> Tasks</button>
+        <button class="office-nav-btn nav-sub" onclick="switchTab('scheduling');closeSidebar();" id="navbtn-scheduling"><span class="nav-icon">📅</span> Scheduling</button>
       </li>
 
-      <li class="office-nav-section">CUSTOMERS</li>
+      <!-- CUSTOMERS group -->
       <li class="office-nav-item">
-        <button class="office-nav-btn" onclick="switchTab('customers');closeSidebar();" id="navbtn-customers">
-          <span class="nav-icon">👥</span> Customers
+        <button class="office-nav-group-btn" onclick="_toggleNavGroup('grp-cust')" id="grpbtn-cust">
+          <span class="nav-icon">👥</span> Customers <span class="nav-group-caret" id="grp-cust-caret">▾</span>
         </button>
       </li>
-      <li class="office-nav-item">
-        <button class="office-nav-btn" onclick="switchTab('upgrades');closeSidebar();" id="navbtn-upgrades">
-          <span class="nav-icon">📋</span> Upgrades
-        </button>
-      </li>
-      <li class="office-nav-item">
-        <button class="office-nav-btn" onclick="switchTab('custUpdates');closeSidebar();" id="navbtn-custUpdates">
-          <span class="nav-icon">📣</span> Customer Updates
-        </button>
-      </li>
-      <li class="office-nav-item admin-only" style="display:none;">
-        <button class="office-nav-btn" onclick="switchTab('upgradeEditor');closeSidebar();" id="navbtn-upgradeEditor">
-          <span class="nav-icon">✏️</span> Upgrade Editor
-        </button>
+      <li class="office-nav-group" id="grp-cust" style="display:none;">
+        <button class="office-nav-btn nav-sub" onclick="switchTab('customers');closeSidebar();" id="navbtn-customers"><span class="nav-icon">👥</span> Customers</button>
+        <button class="office-nav-btn nav-sub" onclick="switchTab('upgrades');closeSidebar();" id="navbtn-upgrades"><span class="nav-icon">📋</span> Upgrades</button>
+        <button class="office-nav-btn nav-sub" onclick="switchTab('custUpdates');closeSidebar();" id="navbtn-custUpdates"><span class="nav-icon">📣</span> Customer Updates</button>
+        <button class="office-nav-btn nav-sub admin-only" style="display:none;" onclick="switchTab('upgradeEditor');closeSidebar();" id="navbtn-upgradeEditor"><span class="nav-icon">✏️</span> Upgrade Editor</button>
       </li>
 
-      <li class="office-nav-section">SUBCONTRACTORS</li>
+      <!-- SUBCONTRACTORS group -->
       <li class="office-nav-item">
-        <button class="office-nav-btn" onclick="switchTab('subs');closeSidebar();" id="navbtn-subs">
-          <span class="nav-icon">🔧</span> Subcontractors
+        <button class="office-nav-group-btn" onclick="_toggleNavGroup('grp-sub')" id="grpbtn-sub">
+          <span class="nav-icon">🔧</span> Subcontractors <span class="nav-group-caret" id="grp-sub-caret">▾</span>
         </button>
       </li>
-
-      <li class="office-nav-section admin-only" style="display:none;">ADMIN</li>
-      <li class="office-nav-item admin-only" style="display:none;">
-        <button class="office-nav-btn" onclick="switchTab('employees');closeSidebar();" id="navbtn-employees">
-          <span class="nav-icon">👤</span> Employees
-        </button>
+      <li class="office-nav-group" id="grp-sub" style="display:none;">
+        <button class="office-nav-btn nav-sub" onclick="switchTab('subs');closeSidebar();" id="navbtn-subs"><span class="nav-icon">🔧</span> Subcontractors</button>
+        <button class="office-nav-btn nav-sub admin-only" style="display:none;" onclick="switchTab('employees');closeSidebar();" id="navbtn-employees"><span class="nav-icon">👤</span> Employees</button>
       </li>
     </ul>
     <div class="office-sidebar-footer">
@@ -3924,15 +3945,11 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <span></span><span></span><span></span>
     </button>
     <div class="office-logo">Diligent Developers</div>
-    <button class="notif-bell" onclick="openInbox()" aria-label="Notifications">
-      &#128276;
-      <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+    <span id="topbarGreeting" style="margin-left:auto;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:rgba(255,255,255,0.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></span>
+    <button class="office-user" onclick="openProfileModal()" aria-label="My profile" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:0;flex-shrink:0;">
+      <span id="topbarAvatar" style="width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:16px;color:#fff;background-size:cover;background-position:center;"></span>
     </button>
-    <button class="office-user" onclick="openProfileModal()" aria-label="My profile" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:0;">
-      <span class="office-user-name" id="topbarUserName"></span>
-      <span class="office-role-badge" id="topbarRoleBadge"></span>
-      <span id="topbarAvatar" style="width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:15px;color:#fff;background-size:cover;background-position:center;"></span>
-    </button>
+    <span id="topbarUserName" style="display:none;"></span><span id="topbarRoleBadge" style="display:none;"></span><span id="notifBadge" style="display:none;"></span>
   </div>
 
 
@@ -3946,16 +3963,12 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     <!-- DASHBOARD TAB -->
     <div id="tab-dashboard" class="office-tab">
 
-      <!-- Welcome bar -->
-      <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;">
-        <div id="dashAvatar" style="width:54px;height:54px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:22px;color:#fff;background-size:cover;background-position:center;box-shadow:0 2px 8px rgba(13,31,60,0.15);"></div>
-        <div style="min-width:0;flex:1;">
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(22px,5vw,30px);letter-spacing:2px;color:var(--navy);line-height:1.1;" id="dashWelcome">Welcome back</div>
-          <div style="display:flex;align-items:center;gap:8px;margin-top:3px;flex-wrap:wrap;">
-            <span id="dashTag" style="display:none;font-family:'Inter',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--gold);background:rgba(201,162,39,0.13);border:1px solid rgba(201,162,39,0.3);border-radius:20px;padding:3px 10px;"></span>
-            <span style="font-size:12px;color:var(--muted);" id="dashDate"></span>
-          </div>
-        </div>
+      <!-- Dashboard date (greeting moved to top bar) -->
+      <div style="margin-bottom:18px;">
+        <span id="dashDate" style="font-size:13px;color:var(--muted);"></span>
+        <span id="dashWelcome" style="display:none;"></span>
+        <span id="dashTag" style="display:none;"></span>
+        <span id="dashAvatar" style="display:none;"></span>
       </div>
 
       <!-- Today panel -->
@@ -4191,8 +4204,8 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div class="modal-header"><span>Adjust Photo</span><button onclick="_cropCancel()" class="modal-close">✕</button></div>
       <div class="modal-body" style="text-align:center;">
         <div style="font-size:12px;color:rgba(243,239,230,0.7);margin-bottom:10px;">Drag to move · use the slider to zoom</div>
-        <div id="cropFrame" style="width:260px;height:260px;border-radius:50%;overflow:hidden;margin:0 auto 14px;position:relative;background:#0a1422;border:2px solid var(--gold);touch-action:none;">
-          <canvas id="cropCanvas" width="260" height="260" style="position:absolute;top:0;left:0;"></canvas>
+        <div id="cropFrame" style="width:260px;height:260px;max-width:78vw;max-height:78vw;aspect-ratio:1/1;border-radius:50%;overflow:hidden;margin:0 auto 14px;position:relative;background:#0a1422;border:2px solid var(--gold);touch-action:none;">
+          <canvas id="cropCanvas" width="260" height="260" style="position:absolute;top:0;left:0;width:100%;height:100%;"></canvas>
         </div>
         <input type="range" id="cropZoom" min="1" max="3" step="0.01" value="1" style="width:100%;accent-color:var(--gold);">
       </div>
@@ -8886,12 +8899,39 @@ function _canAccessTab(tabId) {
 }
 
 // Hide nav buttons the user can't access; called after login / dashboard open.
+
+function _toggleNavGroup(gid) {
+  var g = document.getElementById(gid);
+  var caret = document.getElementById(gid + '_caret') || document.getElementById(gid + '-caret');
+  if (!g) return;
+  var open = g.style.display !== 'none';
+  // collapse all groups first (accordion: one open at a time keeps it tidy)
+  ['grp-work','grp-cust','grp-sub'].forEach(function(id){
+    var el = document.getElementById(id); if (el) el.style.display = 'none';
+    var c = document.getElementById(id + '-caret'); if (c) c.textContent = '\u25be';
+  });
+  if (!open) {
+    g.style.display = '';
+    if (caret) caret.textContent = '\u25b4';
+  }
+}
+function _openNavGroupForTab(tabId) {
+  // expand the group that holds the active tab so the user sees where they are
+  var map = {
+    projects:'grp-work', punchlist:'grp-work', specs:'grp-work', tasks:'grp-work', scheduling:'grp-work',
+    customers:'grp-cust', upgrades:'grp-cust', custUpdates:'grp-cust', upgradeEditor:'grp-cust',
+    subs:'grp-sub', employees:'grp-sub'
+  };
+  var gid = map[tabId];
+  if (gid) { var g = document.getElementById(gid); if (g && g.style.display === 'none') _toggleNavGroup(gid); }
+}
+
 function applyTabPermissions() {
   if (!currentUser) return;
   ALL_OFFICE_TABS.forEach(function(t) {
     var btn = document.getElementById('navbtn-' + t.id);
     if (!btn) return;
-    var li = btn.closest('.office-nav-item') || btn;
+    var li = btn.closest('.office-nav-item') || btn; // group sub-buttons have no li, fall back to btn
     var state = _tabState(t.id);
     li.style.display = (state !== 'hidden') ? '' : 'none';
     // Reflect "Coming Soon" in the sidebar button itself
@@ -8914,6 +8954,11 @@ function applyTabPermissions() {
     var empLi = empBtn.closest('.office-nav-item') || empBtn;
     empLi.style.display = (currentUser.role === 'admin') ? '' : 'none';
   }
+  // admin-only sub buttons (upgrade editor, employees) follow admin role
+  ['navbtn-upgradeEditor','navbtn-employees'].forEach(function(id){
+    var b = document.getElementById(id);
+    if (b && !b.closest('.office-nav-item')) { b.style.display = (currentUser.role === 'admin') ? '' : 'none'; }
+  });
 }
 
 
@@ -8963,6 +9008,7 @@ async function switchTab(tab) {
   if (tab === 'tasks') { _toggleTabChrome('tab-tasks', true); _populateTaskProjectFilter(); renderTasks(); }
   if (tab === 'scheduling') { _toggleTabChrome('tab-scheduling', true); renderScheduling(); }
   if (tab === 'specs') renderSpecs();
+  try { _openNavGroupForTab(tabId); } catch(e) {}
 }
 
 // ════════════════════════════════════════════
@@ -9042,10 +9088,7 @@ async function refreshDashboard() {
       else { av.style.backgroundImage = 'none'; av.style.background = currentUser.avatarColor || '#1a2b4a'; av.textContent = (typeof _profInitials==='function') ? _profInitials(currentUser.name, currentUser.email) : ''; }
     }
     var tagEl = document.getElementById('dashTag');
-    if (tagEl) {
-      if (currentUser.title) { tagEl.textContent = currentUser.title; tagEl.style.display = ''; }
-      else { tagEl.style.display = 'none'; }
-    }
+    if (tagEl) { tagEl.style.display = 'none'; } // tag shown only in the sidebar
   })();
   // Welcome message
   var welcomeEl = document.getElementById('dashWelcome');
@@ -9055,6 +9098,12 @@ async function refreshDashboard() {
     var hour = new Date().getHours();
     var greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
     welcomeEl.textContent = _viewAsUserId ? (_dashName + "'s dashboard") : (greeting + ', ' + _dashName);
+  }
+  // Topbar greeting (greeting + name, shown next to avatar)
+  var tg = document.getElementById('topbarGreeting');
+  if (tg) {
+    var firstName = (_dashName || '').split(' ')[0];
+    tg.textContent = greeting + ', ' + firstName;
   }
   if (dateEl) {
     dateEl.textContent = new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
@@ -9108,31 +9157,26 @@ async function refreshDashboard() {
   var actEl = document.getElementById('recentActivity');
   var activity = [];
 
-  for (var k of projKeys.slice(-5)) {
-    var p = await DB.get(k);
-    if (p) activity.push({ type: 'project', icon: '🏗️', dot: 'activity-dot-project',
-      name: p.name, meta: (p.status || 'active') + ' · ' + (p.houses ? p.houses.length + ' address' + (p.houses.length !== 1 ? 'es' : '') : ''),
-      time: p.createdAt || p.updatedAt });
-  }
-  for (var k of custKeys.slice(-5)) {
-    var c = await DB.get(k);
-    if (c) activity.push({ type: 'customer', icon: '👤', dot: 'activity-dot-customer',
-      name: c.name, meta: 'Unit ' + (c.unit || '—') + ' · ' + (c.projectName || 'No project'),
-      time: c.createdAt || c.updatedAt });
-  }
-  subs.slice(0, 5).forEach(function(s) {
-    activity.push({ type: 'submission', icon: '📋', dot: 'activity-dot-submission',
-      name: s.name || 'Unknown', meta: 'Submitted upgrade selections · Unit ' + (s.unit || '—'),
-      time: s.submittedAt });
-  });
+  // Show ONLY the current user's own activity (same private log as the profile).
+  try {
+    var _owner = (typeof _activityOwnerKey === 'function') ? _activityOwnerKey() : (currentUser ? currentUser.id : null);
+    if (_owner) {
+      var _aKeys = await DB.list('activity:' + _owner + ':');
+      var _aItems = (await Promise.all(_aKeys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+      _aItems.forEach(function(it){
+        activity.push({ type: 'mine', icon: '\u2713', dot: 'activity-dot-project',
+          name: it.text || '', meta: '', time: (it.at ? new Date(it.at).toISOString() : '') });
+      });
+    }
+  } catch(e) {}
 
   activity.sort(function(a, b) { return new Date(b.time) - new Date(a.time); });
 
   if (activity.length === 0) {
     actEl.innerHTML = '<div style="text-align:center;padding:32px 20px;color:var(--muted);">' +
       '<div style="font-size:32px;margin-bottom:8px;">📋</div>' +
-      '<div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:4px;">Nothing yet</div>' +
-      '<div style="font-size:12px;">Add a project or customer to get started.</div></div>';
+      '<div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:4px;">No recent activity</div>' +
+      '<div style="font-size:12px;">Your actions will show up here.</div></div>';
     return;
   }
 
@@ -9153,7 +9197,7 @@ async function refreshDashboard() {
         '<div class="activity-dot ' + a.dot + '">' + a.icon + '</div>' +
         '<div style="flex:1;min-width:0;">' +
           '<div class="activity-name">' + a.name + '</div>' +
-          '<div class="activity-meta">' + a.meta + '</div>' +
+          (a.meta ? '<div class="activity-meta">' + a.meta + '</div>' : '') +
         '</div>' +
         '<div style="font-size:11px;color:var(--muted);white-space:nowrap;margin-top:2px;">' + timeAgo(a.time) + '</div>' +
       '</div>';
