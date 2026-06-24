@@ -3706,7 +3706,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v117</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v119</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4058,7 +4058,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     <div class="office-sidebar-footer">
       <div id="bioToggleRow" style="margin-bottom:10px;"></div>
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v117</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v119</div>
     </div>
   </div>
 
@@ -4256,7 +4256,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       </div>
       <div id="teamChatMessages" style="background:var(--bg, #f4f1ea);border:1px solid var(--border);border-radius:14px;padding:16px;height:52vh;overflow-y:auto;margin-bottom:12px;"></div>
       <div style="display:flex;gap:8px;align-items:flex-end;">
-        <textarea id="teamChatInput" rows="1" onkeydown="_chatKeydown(event)" placeholder="Type a message..." style="flex:1;padding:11px 14px;border:1px solid var(--border);border-radius:22px;font-size:14px;font-family:Inter,sans-serif;resize:none;max-height:100px;"></textarea>
+        <div style="flex:1;position:relative;"><div id="chatMentionMenu" style="display:none;position:absolute;bottom:100%;left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 -4px 16px rgba(0,0,0,0.12);margin-bottom:6px;max-height:200px;overflow-y:auto;z-index:50;"></div><textarea id="teamChatInput" rows="1" onkeydown="_chatKeydown(event)" onkeyup="_chatInputKey(event)" placeholder="Type a message... (@ to tag)" style="width:100%;box-sizing:border-box;padding:11px 14px;border:1px solid var(--border);border-radius:22px;font-size:14px;font-family:Inter,sans-serif;resize:none;max-height:100px;"></textarea></div>
         <button onclick="sendTeamChat()" style="background:var(--navy);color:#fff;border:none;border-radius:50%;width:44px;height:44px;font-size:18px;cursor:pointer;flex-shrink:0;">↑</button>
       </div>
     </div>
@@ -4879,7 +4879,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v117';
+<script>var APP_VERSION = 'v119';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -9831,6 +9831,7 @@ async function _loadMyNotifications() {
       if (myEmail) {
         var pubKeys = await DB.list('pubnotif:' + myEmail + ':');
         var pubList = (await Promise.all(pubKeys.map(function(k) { return DB.get(k); }))).filter(Boolean);
+        pubList.forEach(function(n){ if(n) n._pub = true; });
         list = list.concat(pubList);
       }
     } catch(e) {}
@@ -9841,7 +9842,7 @@ async function _loadMyNotifications() {
 
 async function _unreadCount() {
   var list = await _loadMyNotifications();
-  return list.filter(function(n) { return !n.read; }).length;
+  return list.filter(function(n) { return !n.read && !n.archived; }).length;
 }
 
 async function refreshNotifBadge() {
@@ -9864,34 +9865,59 @@ async function refreshNotifBadge() {
 async function openInbox() {
   var panel = document.getElementById('inboxPanel');
   if (!panel) return;
-  var list = await _loadMyNotifications();
-  var body = document.getElementById('inboxBody');
-
-  var iconFor = { mention: '\ud83d\udcac', assign: '\ud83d\udccb', comment: '\ud83d\udcad', status: '\ud83d\udea6', due: '\ud83d\udcc5', info: '\ud83d\udd14', issue: '\ud83d\udcdd' };
-  if (list.length === 0) {
-    body.innerHTML = '<div class="inbox-empty"><div class="inbox-empty-icon">\ud83d\udd14</div><div class="inbox-empty-title">All caught up</div><div class="inbox-empty-desc">No notifications yet.</div></div>';
-  } else {
-    body.innerHTML = list.map(function(n) {
-      return '<div class="inbox-item' + (n.read ? '' : ' unread') + '"' + (n.taskId ? ' onclick="_inboxOpenTask(\'' + n.taskId + '\')"' : '') + '>' +
-        '<div class="inbox-icon">' + (iconFor[n.type] || '\ud83d\udd14') + '</div>' +
-        '<div class="inbox-main">' +
-          '<div class="inbox-text"><strong>' + _esc(n.actor) + '</strong> ' + _esc(n.text) + '</div>' +
-          '<div class="inbox-time">' + _fmtCmtTime(n.at) + '</div>' +
-        '</div>' +
-        (n.read ? '' : '<span class="inbox-dot"></span>') +
-      '</div>';
-    }).join('');
-  }
+  window._inboxView = window._inboxView || 'active';
   panel.style.display = 'flex';
-
-  // Mark all read after opening
-  var hadUnread = list.some(function(n) { return !n.read; });
-  if (hadUnread) {
-    for (var i = 0; i < list.length; i++) {
-      if (!list[i].read) { list[i].read = true; await DB.set('notif:' + currentUser.id + ':' + list[i].id, list[i]); }
-    }
-    refreshNotifBadge();
+  await _renderInbox();
+}
+async function _renderInbox() {
+  var body = document.getElementById('inboxBody');
+  if (!body) return;
+  var all = await _loadMyNotifications();
+  var view = window._inboxView || 'active';
+  var list = all.filter(function(n){ return view === 'archived' ? n.archived : !n.archived; });
+  var iconFor = { mention: '\ud83d\udcac', assign: '\ud83d\udccb', comment: '\ud83d\udcad', status: '\ud83d\udea6', due: '\ud83d\udcc5', info: '\ud83d\udd14', issue: '\ud83d\udcdd', walk: '\ud83d\udeb6', change: '\ud83d\udcdd' };
+  // tabs
+  var tabs = '<div style="display:flex;gap:6px;padding:8px 14px;border-bottom:1px solid var(--border);">' +
+    '<button onclick="_inboxSwitch(\'active\')" style="flex:1;padding:7px;border-radius:7px;border:none;cursor:pointer;font-size:12px;font-weight:700;background:' + (view==='active'?'var(--navy)':'rgba(0,0,0,0.05)') + ';color:' + (view==='active'?'#fff':'#666') + ';">Inbox</button>' +
+    '<button onclick="_inboxSwitch(\'archived\')" style="flex:1;padding:7px;border-radius:7px;border:none;cursor:pointer;font-size:12px;font-weight:700;background:' + (view==='archived'?'var(--navy)':'rgba(0,0,0,0.05)') + ';color:' + (view==='archived'?'#fff':'#666') + ';">Archived</button>' +
+  '</div>';
+  if (list.length === 0) {
+    body.innerHTML = tabs + '<div class="inbox-empty"><div class="inbox-empty-icon">\ud83d\udd14</div><div class="inbox-empty-title">' + (view==='archived'?'No archived items':'All caught up') + '</div><div class="inbox-empty-desc">' + (view==='archived'?'Notifications you archive show up here.':'No new notifications.') + '</div></div>';
+    return;
   }
+  body.innerHTML = tabs + list.map(function(n) {
+    return '<div class="inbox-item' + (n.read ? '' : ' unread') + '" style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-bottom:1px solid #f0ece2;">' +
+      '<div class="inbox-icon">' + (iconFor[n.type] || '\ud83d\udd14') + '</div>' +
+      '<div class="inbox-main" style="flex:1;min-width:0;"' + (n.taskId ? ' onclick="_inboxOpenTask(\'' + n.taskId + '\')" style="cursor:pointer;"' : '') + '>' +
+        '<div class="inbox-text"' + (n.read?'':' style="font-weight:600;"') + '><strong>' + _esc(n.actor||'') + '</strong> ' + _esc(n.text||'') + '</div>' +
+        '<div class="inbox-time">' + _fmtCmtTime(n.at) + '</div>' +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">' +
+        (n.read ? '' : '<button onclick="_notifMarkRead(\'' + n.id + '\',\'' + (n._pub?'1':'0') + '\')" title="Mark read" style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--gold);">\u2713</button>') +
+        (n.archived
+          ? '<button onclick="_notifArchive(\'' + n.id + '\',\'' + (n._pub?'1':'0') + '\',false)" title="Unarchive" style="background:none;border:none;cursor:pointer;font-size:12px;color:#888;">\u21a9</button>'
+          : '<button onclick="_notifArchive(\'' + n.id + '\',\'' + (n._pub?'1':'0') + '\',true)" title="Archive" style="background:none;border:none;cursor:pointer;font-size:13px;color:#888;">\ud83d\udce6</button>') +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+function _inboxSwitch(view) { window._inboxView = view; _renderInbox(); }
+function _notifKey(id, isPub) {
+  return isPub === '1' ? ('pubnotif:' + (currentUser.email||'').toLowerCase() + ':' + id) : ('notif:' + currentUser.id + ':' + id);
+}
+async function _notifMarkRead(id, isPub) {
+  var key = _notifKey(id, isPub);
+  var n = await DB.get(key);
+  if (n) { n.read = true; await DB.set(key, n); }
+  refreshNotifBadge();
+  _renderInbox();
+}
+async function _notifArchive(id, isPub, archive) {
+  var key = _notifKey(id, isPub);
+  var n = await DB.get(key);
+  if (n) { n.archived = !!archive; if (archive) n.read = true; await DB.set(key, n); }
+  refreshNotifBadge();
+  _renderInbox();
 }
 function closeInbox() { var p = document.getElementById('inboxPanel'); if (p) p.style.display = 'none'; }
 
@@ -10111,7 +10137,7 @@ function _toggleNavGroup(gid) {
   if (!g) return;
   var open = g.style.display !== 'none';
   // collapse all groups first (accordion: one open at a time keeps it tidy)
-  ['grp-work','grp-cust','grp-sub'].forEach(function(id){
+  ['grp-work','grp-logbook','grp-cust','grp-sub'].forEach(function(id){
     var el = document.getElementById(id); if (el) el.style.display = 'none';
     var c = document.getElementById(id + '-caret'); if (c) c.textContent = '\u25be';
   });
@@ -10223,7 +10249,7 @@ async function switchTab(tab) {
     if (tab === 'deliveries') renderDeliveries();
     if (tab === 'changeOrders') renderChangeOrders();
   } catch(e) {}
-  try { if (tab === 'teamChat') { renderTeamChat(); startChatPolling(); } else { stopChatPolling(); } } catch(e) {}
+  try { if (tab === 'teamChat') { _loadChatUsers(); renderTeamChat(); startChatPolling(); } else { stopChatPolling(); } } catch(e) {}
   try { if (tab === 'walkthroughs') renderWalkthroughs(); } catch(e) {}
   try { if (tab === 'vendors') renderVendors(); if (tab === 'subCalendar') renderSubCalendar(); } catch(e) {}
   try { if (tab === 'taskTemplates') renderTaskTemplates(); } catch(e) {}
@@ -10631,6 +10657,77 @@ async function renderCustPortals() {
 
 
 
+
+// ===================== TEAM CHAT @MENTIONS =====================
+var _chatUsers = [];
+async function _loadChatUsers() {
+  try {
+    var keys = await DB.list('user:');
+    _chatUsers = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+  } catch(e) { _chatUsers = []; }
+  return _chatUsers;
+}
+function _chatInputKey(e) {
+  // Show mention dropdown when typing @
+  var inp = document.getElementById('teamChatInput');
+  if (!inp) return;
+  var val = inp.value;
+  var pos = inp.selectionStart;
+  var before = val.slice(0, pos);
+  var m = before.match(/@(\w*)$/);
+  if (m) {
+    _chatShowMenu(m[1]);
+  } else {
+    _chatHideMenu();
+  }
+}
+function _chatShowMenu(query) {
+  var menu = document.getElementById('chatMentionMenu');
+  if (!menu) return;
+  var q = (query||'').toLowerCase();
+  var matches = _chatUsers.filter(function(u){
+    return u && u.name && (!q || u.name.toLowerCase().indexOf(q) > -1);
+  }).slice(0, 6);
+  if (!matches.length) { _chatHideMenu(); return; }
+  menu.innerHTML = matches.map(function(u){
+    return '<div onclick=\"_chatPickMention(\'' + _esc(u.name) + '\')" style="padding:9px 13px;cursor:pointer;font-size:13px;color:#16233d;border-bottom:1px solid #f0ece2;display:flex;align-items:center;gap:8px;">' +
+      '<span style="width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">' + _esc((u.name||'?').charAt(0).toUpperCase()) + '</span>' +
+      _esc(u.name) + '</div>';
+  }).join('');
+  menu.style.display = 'block';
+}
+function _chatHideMenu() { var m = document.getElementById('chatMentionMenu'); if (m) m.style.display = 'none'; }
+function _chatPickMention(name) {
+  var inp = document.getElementById('teamChatInput');
+  if (!inp) return;
+  var val = inp.value;
+  var pos = inp.selectionStart;
+  var before = val.slice(0, pos).replace(/@(\w*)$/, '@' + name + ' ');
+  inp.value = before + val.slice(pos);
+  _chatHideMenu();
+  inp.focus();
+}
+// Find @mentions in text and return matched user records.
+function _parseMentions(text) {
+  var found = [];
+  _chatUsers.forEach(function(u){
+    if (!u || !u.name) return;
+    // match @Name (allowing the name to contain spaces up to its full length)
+    var re = new RegExp('@' + u.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+    if (re.test(text)) found.push(u);
+  });
+  return found;
+}
+// Render text with @mentions highlighted.
+function _renderChatText(text, mentionNames) {
+  var safe = _esc(text);
+  (mentionNames||[]).forEach(function(nm){
+    var re = new RegExp('@' + nm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    safe = safe.replace(re, '<span style="background:rgba(201,168,76,0.25);color:#0D1F3C;font-weight:700;border-radius:4px;padding:0 3px;">@' + _esc(nm) + '</span>');
+  });
+  return safe;
+}
+
 // ===================== TEAM CHAT (internal) =====================
 var _chatTimer = null;
 async function renderTeamChat() {
@@ -10649,7 +10746,7 @@ async function renderTeamChat() {
       try { time = new Date(m.at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); } catch(e){}
       return '<div style="display:flex;flex-direction:column;align-items:' + (mine?'flex-end':'flex-start') + ';margin-bottom:12px;">' +
         '<div style="font-size:10px;color:var(--muted);margin-bottom:2px;padding:0 4px;">' + (mine?'You':_esc(m.author||'Someone')) + ' \u00b7 ' + time + '</div>' +
-        '<div style="max-width:78%;background:' + (mine?'var(--navy)':'#fff') + ';color:' + (mine?'#fff':'#16233d') + ';border:1px solid ' + (mine?'var(--navy)':'var(--border)') + ';border-radius:14px;border-' + (mine?'bottom-right':'bottom-left') + '-radius:4px;padding:9px 13px;font-size:13px;line-height:1.45;word-break:break-word;">' + _esc(m.text||'') + '</div>' +
+        '<div style="max-width:78%;background:' + (mine?'var(--navy)':'#fff') + ';color:' + (mine?'#fff':'#16233d') + ';border:1px solid ' + (mine?'var(--navy)':'var(--border)') + ';border-radius:14px;border-' + (mine?'bottom-right':'bottom-left') + '-radius:4px;padding:9px 13px;font-size:13px;line-height:1.45;word-break:break-word;">' + _renderChatText(m.text||'', m.mentions||[]) + '</div>' +
       '</div>';
     }).join('');
   }
@@ -10660,10 +10757,23 @@ async function sendTeamChat() {
   if (!inp) return;
   var text = inp.value.trim();
   if (!text) return;
+  if (!_chatUsers.length) await _loadChatUsers();
+  var mentioned = _parseMentions(text);
   var id = 'tc_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
-  var msg = { id: id, text: text, author: (currentUser&&currentUser.name)?currentUser.name:'Office', authorId: currentUser?currentUser.id:'', at: Date.now() };
+  var msg = { id: id, text: text, author: (currentUser&&currentUser.name)?currentUser.name:'Office', authorId: currentUser?currentUser.id:'',
+    mentions: mentioned.map(function(u){ return u.name; }), at: Date.now() };
   inp.value = '';
+  _chatHideMenu();
   await DB.set('teamchat:' + id, msg);
+  // Notify mentioned users.
+  for (var i=0;i<mentioned.length;i++) {
+    var u = mentioned[i];
+    if (!u.id || u.id === (currentUser&&currentUser.id)) continue;
+    var nid = 'mn_' + Date.now() + '_' + i;
+    try {
+      await DB.set('notif:' + u.id + ':' + nid, { id:nid, type:'mention', actor:(currentUser&&currentUser.name)||'Someone', text:'mentioned you in Team Chat', at:Date.now(), read:false, archived:false });
+    } catch(e) {}
+  }
   await renderTeamChat();
 }
 function _chatKeydown(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendTeamChat(); } }
