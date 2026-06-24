@@ -3707,7 +3707,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v131</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v132</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4064,7 +4064,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     <div class="office-sidebar-footer">
       <div id="bioToggleRow" style="margin-bottom:10px;"></div>
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v131</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v132</div>
     </div>
   </div>
 
@@ -4885,7 +4885,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v131';
+<script>var APP_VERSION = 'v132';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -6174,17 +6174,20 @@ async function renderWalkthroughs() {
     return;
   }
   host.innerHTML = reqs.map(function(r){
-    var col = r.status==='confirmed' ? '#3a7d5d' : (r.status==='declined' ? '#c0392b' : '#b8860b');
+    var col = r.status==='confirmed' ? '#3a7d5d' : (r.status==='declined' ? '#c0392b' : (r.status==='proposed' ? '#2c5d8a' : '#b8860b'));
+    var statusLabel = r.status==='proposed' ? 'time proposed' : (r.status||'');
     return '<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:13px 15px;margin-bottom:10px;">' +
       '<div style="display:flex;justify-content:space-between;align-items:start;gap:10px;">' +
         '<div><div style="font-size:14px;font-weight:700;color:var(--navy);">' + _esc(r.name||'Customer') + '</div>' +
         '<div style="font-size:11px;color:var(--muted);">' + _esc(r.address||'') + (r.unit&&r.unit!=='Main'?(' \u00b7 Unit '+_esc(r.unit)):'') + '</div></div>' +
-        '<span style="background:'+col+';color:#fff;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;text-transform:capitalize;flex-shrink:0;">'+_esc(r.status||'')+'</span>' +
+        '<span style="background:'+col+';color:#fff;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;text-transform:capitalize;flex-shrink:0;">'+_esc(statusLabel)+'</span>' +
       '</div>' +
       '<div style="font-size:13px;color:#16233d;margin-top:6px;font-weight:600;">📅 ' + _fmtDate(r.date) + (r.time?(' at '+_esc(r.time)):'') + '</div>' +
       (r.note?'<div style="font-size:12px;color:#3a3730;margin-top:4px;line-height:1.45;">'+_esc(r.note)+'</div>':'') +
+      (r.proposedDate?'<div style="font-size:12px;color:#2c5d8a;margin-top:6px;font-weight:700;background:rgba(44,93,138,0.08);border-radius:6px;padding:6px 9px;">\u21aa Your proposed time: '+_fmtDate(r.proposedDate)+(r.proposedTime?(' at '+_esc(r.proposedTime)):'')+(r.status==='confirmed'?' \u2705 accepted by customer':' \u2014 waiting for customer')+'</div>':'') +
       '<div style="display:flex;gap:8px;margin-top:10px;">' +
         '<button onclick="_walkSetStatus(\''+r.id+'\',\'confirmed\')" style="font-size:12px;padding:6px 12px;border-radius:7px;border:none;background:rgba(58,125,93,0.15);color:#3a7d5d;font-weight:700;cursor:pointer;">Confirm</button>' +
+        '<button onclick="_walkProposeTime(\''+r.id+'\')" style="font-size:12px;padding:6px 12px;border-radius:7px;border:none;background:rgba(44,93,138,0.12);color:#2c5d8a;font-weight:700;cursor:pointer;">Propose Time</button>' +
         '<button onclick="_walkSetStatus(\''+r.id+'\',\'declined\')" style="font-size:12px;padding:6px 12px;border-radius:7px;border:none;background:rgba(192,57,43,0.12);color:#c0392b;font-weight:700;cursor:pointer;">Decline</button>' +
         '<button onclick="_lbDelete(\'walkreq:'+r.id+'\',renderWalkthroughs)" style="font-size:12px;padding:6px 12px;border-radius:7px;border:none;background:rgba(0,0,0,0.05);color:#888;cursor:pointer;margin-left:auto;">Delete</button>' +
       '</div>' +
@@ -6197,6 +6200,35 @@ async function _walkSetStatus(id, status) {
   if (!r) return;
   r.status = status; r._updatedAt = Date.now();
   await DB.set('walkreq:' + id, r);
+  renderWalkthroughs();
+}
+var _walkProposeId = null;
+function _walkProposeTime(id) {
+  _walkProposeId = id;
+  var m = document.getElementById('modal-walkpropose');
+  if (m) {
+    document.getElementById('wp-date').value = '';
+    document.getElementById('wp-time').value = '';
+    document.getElementById('wp-note').value = '';
+    m.classList.add('open');
+  }
+}
+function closeWalkPropose() { var m = document.getElementById('modal-walkpropose'); if (m) m.classList.remove('open'); _walkProposeId = null; }
+async function submitWalkPropose() {
+  if (!_walkProposeId) return;
+  var date = document.getElementById('wp-date').value;
+  var time = document.getElementById('wp-time').value;
+  var note = document.getElementById('wp-note').value.trim();
+  if (!date) { alert('Please pick a date for your proposed time.'); return; }
+  var r = await DB.get('walkreq:' + _walkProposeId);
+  if (!r) return;
+  r.status = 'proposed';
+  r.proposedDate = date;
+  r.proposedTime = time;
+  r.proposedNote = note;
+  r._updatedAt = Date.now();
+  await DB.set('walkreq:' + _walkProposeId, r);
+  closeWalkPropose();
   renderWalkthroughs();
 }
 async function _updateWalkBadge() {
@@ -6330,6 +6362,34 @@ async function submitWalkRequest() {
   closeWalkRequest();
   await _loadWalkStatus(window._custAddress, window._custUnit);
 }
+
+// Customer accepts the office's proposed walkthrough time.
+async function _custAcceptProposedWalk(id) {
+  var r = await DB.get('walkreq:' + id);
+  if (!r) return;
+  // The proposed time becomes the confirmed time.
+  r.date = r.proposedDate || r.date;
+  r.time = r.proposedTime || r.time;
+  r.status = 'confirmed';
+  r._customerAccepted = true;
+  r._updatedAt = Date.now();
+  await DB.set('walkreq:' + id, r);
+  try { if (typeof _cdReloadWalk === 'function') _cdReloadWalk(); } catch(e) {}
+  try { _loadWalkStatus(r.address, r.unit); } catch(e) {}
+  alert('Great \u2014 your walkthrough is confirmed for ' + _fmtDate(r.date) + (r.time?(' at '+r.time):'') + '.');
+}
+// Customer declines the office's proposed time (sends it back to the office).
+async function _custDeclineProposedWalk(id) {
+  var r = await DB.get('walkreq:' + id);
+  if (!r) return;
+  r.status = 'requested';
+  r._customerDeclinedProposal = true;
+  r._updatedAt = Date.now();
+  await DB.set('walkreq:' + id, r);
+  try { _loadWalkStatus(r.address, r.unit); } catch(e) {}
+  alert('No problem \u2014 we\u2019ve let the office know that time doesn\u2019t work. They\u2019ll suggest another.');
+}
+
 async function _loadWalkStatus(address, unit) {
   var host = document.getElementById('cdWalkStatus');
   if (!host) return;
@@ -6342,12 +6402,27 @@ async function _loadWalkStatus(address, unit) {
     }).sort(function(a,b){ return b.at - a.at; });
     if (!mine.length) { host.innerHTML = ''; return; }
     host.innerHTML = mine.slice(0,3).map(function(r){
-      var col = r.status==='confirmed' ? '#3a7d5d' : (r.status==='declined' ? '#c0392b' : '#b8860b');
-      var label = r.status==='confirmed' ? 'Confirmed' : (r.status==='declined' ? 'Not available' : 'Requested');
-      return '<div style="background:#faf8f3;border:1px solid var(--border);border-radius:9px;padding:9px 11px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px;">' +
-        '<div style="font-size:12px;color:#3a3730;">' + _fmtDate(r.date) + (r.time?(' at '+_esc(r.time)):'') + '</div>' +
-        '<span style="background:'+col+';color:#fff;border-radius:20px;padding:2px 9px;font-size:10px;font-weight:700;">'+label+'</span>' +
-      '</div>';
+      var col = r.status==='confirmed' ? '#3a7d5d' : (r.status==='declined' ? '#c0392b' : (r.status==='proposed' ? '#2c5d8a' : '#b8860b'));
+      var label = r.status==='confirmed' ? 'Confirmed' : (r.status==='declined' ? 'Not available' : (r.status==='proposed' ? 'New time offered' : 'Requested'));
+      var html = '<div style="background:#faf8f3;border:1px solid var(--border);border-radius:9px;padding:9px 11px;margin-bottom:8px;">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">' +
+          '<div style="font-size:12px;color:#3a3730;">' + _fmtDate(r.date) + (r.time?(' at '+_esc(r.time)):'') + '</div>' +
+          '<span style="background:'+col+';color:#fff;border-radius:20px;padding:2px 9px;font-size:10px;font-weight:700;flex-shrink:0;">'+label+'</span>' +
+        '</div>';
+      // If the office proposed a different time, show it with Accept / Decline.
+      if (r.status==='proposed' && r.proposedDate) {
+        html += '<div style="margin-top:9px;background:rgba(44,93,138,0.08);border:1px solid rgba(44,93,138,0.25);border-radius:8px;padding:9px 11px;">' +
+          '<div style="font-size:11px;color:#2c5d8a;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">Office suggests</div>' +
+          '<div style="font-size:13px;color:#16233d;font-weight:700;">' + _fmtDate(r.proposedDate) + (r.proposedTime?(' at '+_esc(r.proposedTime)):'') + '</div>' +
+          (r.proposedNote?'<div style="font-size:11px;color:#3a3730;margin-top:3px;">'+_esc(r.proposedNote)+'</div>':'') +
+          '<div style="display:flex;gap:8px;margin-top:9px;">' +
+            '<button onclick="_custAcceptProposedWalk(\''+r.id+'\')" style="flex:1;background:#3a7d5d;color:#fff;border:none;border-radius:7px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;">Accept this time</button>' +
+            '<button onclick="_custDeclineProposedWalk(\''+r.id+'\')" style="flex:1;background:rgba(192,57,43,0.1);color:#c0392b;border:none;border-radius:7px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;">Doesn\u2019t work</button>' +
+          '</div>' +
+        '</div>';
+      }
+      html += '</div>';
+      return html;
     }).join('');
   } catch(e) { host.innerHTML = ''; }
 }
@@ -19117,6 +19192,26 @@ if (document.readyState === 'loading') {
       <div class="form-group"><label class="form-label">Preferred time</label><input class="form-input" id="wr-time" type="text" placeholder="e.g. Morning, or 2:00 PM"></div>
       <div class="form-group"><label class="form-label">Anything to note?</label><textarea class="form-input" id="wr-note" rows="3" placeholder="Optional"></textarea></div>
       <button onclick="submitWalkRequest()" style="width:100%;padding:13px;border-radius:9px;border:none;background:var(--gold);color:#0D1F3C;font-size:14px;font-weight:700;cursor:pointer;">Send Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- OFFICE: PROPOSE WALKTHROUGH TIME -->
+<div class="modal-overlay" id="modal-walkpropose">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-header">
+      <div class="modal-title">Propose a Time</div>
+      <button class="modal-close" onclick="closeWalkPropose()">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.5;">Suggest a time that works for you. The customer will be asked to approve it.</div>
+      <div class="form-group"><label class="form-label">Proposed Date</label>
+        <input type="date" class="form-input" id="wp-date"></div>
+      <div class="form-group"><label class="form-label">Proposed Time</label>
+        <input type="time" class="form-input" id="wp-time"></div>
+      <div class="form-group"><label class="form-label">Note (optional)</label>
+        <textarea class="form-input" id="wp-note" rows="2" placeholder="e.g. Morning works better for our crew"></textarea></div>
+      <button onclick="submitWalkPropose()" style="width:100%;background:var(--navy);color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;">Send Proposed Time</button>
     </div>
   </div>
 </div>
