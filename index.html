@@ -3382,6 +3382,15 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 
 
 /* Collapsible sidebar groups */
+
+/* Sidebar pin stars — subtle by default, gold when pinned */
+.nav-item-flex { display:flex; align-items:center; }
+.nav-item-flex > .office-nav-btn { flex:1; }
+.nav-pin-star { background:none; border:none; cursor:pointer; font-size:13px; padding:0 14px 0 4px; flex-shrink:0; color:rgba(255,255,255,0.12); transition:color .15s; line-height:1; }
+.office-nav-item:hover .nav-pin-star { color:rgba(255,255,255,0.35); }
+.nav-pin-star:hover { color:var(--gold) !important; }
+.nav-pin-star.pinned { color:var(--gold); }
+
 .office-nav-group-btn { width:100%; background:none; border:none; text-align:left; padding:14px 24px; font-family:'Inter',sans-serif; font-size:14px; font-weight:700; color:white; cursor:pointer; display:flex; align-items:center; gap:12px; letter-spacing:0.3px; }
 .office-nav-group-btn:hover { background:rgba(255,255,255,0.06); }
 .office-nav-group-btn .nav-icon { font-size:17px; flex-shrink:0; }
@@ -3706,7 +3715,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v126</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v128</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4063,7 +4072,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     <div class="office-sidebar-footer">
       <div id="bioToggleRow" style="margin-bottom:10px;"></div>
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v126</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v128</div>
     </div>
   </div>
 
@@ -4880,7 +4889,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v126';
+<script>var APP_VERSION = 'v128';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -5262,11 +5271,10 @@ let currentUser = null;
 // ════════════════════════════════════════════
 async function init() {
   if (typeof applyTheme === 'function') { try { applyTheme(); } catch(e){} }
-  // Biometric app lock: if enabled, require fingerprint/Face ID before restoring any session.
+  // Biometric app lock: if enabled, require fingerprint/Face ID on every app open.
   try {
     if (typeof biometricEnabled === 'function' && biometricEnabled() && _isInstalledPhoneApp()) {
-      var _lp = localStorage.getItem('dd_lastPage');
-      if (_lp) { await _showBioLock(); }
+      await _showBioLock();
     }
   } catch(e) {}
   try { var _vl = document.getElementById('appVersionLabel'); if (_vl) _vl.textContent = APP_VERSION; } catch(e) {}
@@ -10263,18 +10271,16 @@ function _refreshPinStars() {
       star = document.createElement('button');
       star.id = 'pinstar-' + t;
       star.title = 'Pin to top';
-      star.style.cssText = 'background:none;border:none;cursor:pointer;font-size:12px;padding:0 8px;flex-shrink:0;';
+      star.className = 'nav-pin-star';
       star.setAttribute('onclick', "togglePin('" + t + "',event)");
-      // place the star inside the nav item, after the button
       if (btn.parentNode) {
-        btn.parentNode.style.display = 'flex';
-        btn.parentNode.style.alignItems = 'center';
-        btn.style.flex = '1';
+        btn.parentNode.classList.add('nav-item-flex');
         btn.parentNode.appendChild(star);
       }
     }
-    star.textContent = isPinned(t) ? '\u2605' : '\u2606';
-    star.style.color = isPinned(t) ? 'var(--gold)' : 'rgba(255,255,255,0.3)';
+    var pinned = isPinned(t);
+    star.textContent = pinned ? '\u2605' : '\u2606';
+    star.classList.toggle('pinned', pinned);
   });
 }
 function initPinning() {
@@ -10948,10 +10954,36 @@ function stopChatPolling() { if (_chatTimer) { clearInterval(_chatTimer); _chatT
 
 
 
+
+// Tells the user exactly why biometric may be unavailable (for troubleshooting).
+function biometricDiagnostic() {
+  var standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || (window.navigator.standalone === true);
+  var isPhone = /Android|iPhone|iPod|Windows Phone/i.test(navigator.userAgent || '');
+  var hasAPI = !!(window.PublicKeyCredential && navigator.credentials && navigator.credentials.create);
+  var secure = (location.protocol === 'https:') || location.hostname === 'localhost';
+  var lines = [];
+  lines.push((standalone?'\u2705':'\u274c') + ' Installed app (added to home screen)');
+  lines.push((isPhone?'\u2705':'\u274c') + ' On a phone');
+  lines.push((hasAPI?'\u2705':'\u274c') + ' Browser supports WebAuthn');
+  lines.push((secure?'\u2705':'\u274c') + ' Secure https connection');
+  var msg = 'Fingerprint / Face ID checklist:\n\n' + lines.join('\n');
+  if (!standalone) msg += '\n\nMost likely fix: open the app from your home-screen icon (the installed app), not in a browser tab. If you haven\u2019t installed it, use your browser\u2019s \u201cAdd to Home Screen\u201d first.';
+  alert(msg);
+}
+
 function _renderBioToggle() {
   var host = document.getElementById('bioToggleRow');
   if (!host) return;
-  if (typeof _biometricSupported === 'function' && !_biometricSupported()) { host.innerHTML = ''; return; }
+  if (typeof _biometricSupported === 'function' && !_biometricSupported()) {
+    // On a phone but not in the installed app? Offer a tiny troubleshooting link.
+    var isPhone = /Android|iPhone|iPod|Windows Phone/i.test(navigator.userAgent || '');
+    if (isPhone) {
+      host.innerHTML = '<button onclick="biometricDiagnostic()" style="width:100%;background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;font-size:11px;cursor:pointer;">👆 Set up Fingerprint / Face ID</button>';
+    } else {
+      host.innerHTML = '';
+    }
+    return;
+  }
   var on = (typeof biometricEnabled === 'function') && biometricEnabled();
   host.innerHTML = '<button onclick="' + (on ? 'disableBiometric()' : 'enableBiometric()') + '" style="width:100%;background:' + (on?'rgba(201,168,76,0.18)':'rgba(255,255,255,0.06)') + ';color:' + (on?'var(--gold)':'#fff') + ';border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:9px;font-size:12px;font-weight:600;cursor:pointer;">👆 Fingerprint / Face ID: ' + (on ? 'On' : 'Off') + '</button>';
 }
@@ -10974,23 +11006,40 @@ function _b64ToBuf(b64) { var bin = atob(b64.replace(/-/g,'+').replace(/_/g,'/')
 function _bufToB64(buf) { var bytes = new Uint8Array(buf); var s=''; for (var i=0;i<bytes.length;i++) s+=String.fromCharCode(bytes[i]); return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,''); }
 function biometricEnabled() { try { return !!localStorage.getItem('dd_bioCredId'); } catch(e){ return false; } }
 async function enableBiometric() {
-  if (!_biometricSupported()) { alert('Your device or browser doesn\u2019t support fingerprint/Face ID here. Try the installed app over HTTPS.'); return false; }
+  if (!_biometricSupported()) { alert('Fingerprint / Face ID is only available in the installed app on your phone (added to your home screen), over a secure https connection. Open the installed app and try again.'); return false; }
+  // Make sure the phone actually has a fingerprint/Face ID sensor enrolled.
+  try {
+    if (window.PublicKeyCredential && PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable) {
+      var avail = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+      if (!avail) { alert('No fingerprint or Face ID is set up on this device. Add one in your phone\u2019s settings, then try again.'); return false; }
+    }
+  } catch(e) {}
   try {
     var challenge = new Uint8Array(32); crypto.getRandomValues(challenge);
     var userId = new Uint8Array(16); crypto.getRandomValues(userId);
-    var cred = await navigator.credentials.create({ publicKey: {
+    var pk = {
       challenge: challenge,
-      rp: { name: 'Diligent Developers' },
+      rp: { name: 'Diligent Developers', id: location.hostname },
       user: { id: userId, name: (currentUser&&currentUser.email)||'user', displayName: (currentUser&&currentUser.name)||'User' },
       pubKeyCredParams: [{ type:'public-key', alg:-7 }, { type:'public-key', alg:-257 }],
-      authenticatorSelection: { authenticatorAttachment:'platform', userVerification:'required' },
+      authenticatorSelection: { authenticatorAttachment:'platform', userVerification:'required', residentKey:'preferred' },
       timeout: 60000, attestation: 'none'
-    }});
+    };
+    var cred = await navigator.credentials.create({ publicKey: pk });
+    if (!cred) { alert('Setup was cancelled.'); return false; }
     localStorage.setItem('dd_bioCredId', _bufToB64(cred.rawId));
     alert('Fingerprint / Face ID unlock is now on.');
     if (typeof _renderBioToggle === 'function') _renderBioToggle();
     return true;
-  } catch(e) { alert('Could not set up biometric unlock.'); return false; }
+  } catch(e) {
+    var msg = 'Could not set up biometric unlock.';
+    if (e && e.name === 'NotAllowedError') msg = 'Setup was cancelled or timed out. Try again and approve the fingerprint / Face ID prompt.';
+    else if (e && e.name === 'SecurityError') msg = 'Security error \u2014 this needs to run on the installed app over https (not a plain browser tab).';
+    else if (e && e.name === 'NotSupportedError') msg = 'This device doesn\u2019t support the kind of biometric unlock the app uses.';
+    else if (e && e.message) msg += ' (' + e.message + ')';
+    alert(msg);
+    return false;
+  }
 }
 function disableBiometric() {
   try { localStorage.removeItem('dd_bioCredId'); } catch(e){}
@@ -11005,6 +11054,7 @@ async function _biometricVerify() {
     var challenge = new Uint8Array(32); crypto.getRandomValues(challenge);
     await navigator.credentials.get({ publicKey: {
       challenge: challenge,
+      rpId: location.hostname,
       allowCredentials: [{ type:'public-key', id: _b64ToBuf(credId) }],
       userVerification: 'required', timeout: 60000
     }});
