@@ -3383,14 +3383,6 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 
 /* Collapsible sidebar groups */
 
-/* Sidebar pin stars — subtle by default, gold when pinned */
-.nav-item-flex { display:flex; align-items:center; }
-.nav-item-flex > .office-nav-btn { flex:1; }
-.nav-pin-star { background:none; border:none; cursor:pointer; font-size:13px; padding:0 14px 0 4px; flex-shrink:0; color:rgba(255,255,255,0.12); transition:color .15s; line-height:1; }
-.office-nav-item:hover .nav-pin-star { color:rgba(255,255,255,0.35); }
-.nav-pin-star:hover { color:var(--gold) !important; }
-.nav-pin-star.pinned { color:var(--gold); }
-
 .office-nav-group-btn { width:100%; background:none; border:none; text-align:left; padding:14px 24px; font-family:'Inter',sans-serif; font-size:14px; font-weight:700; color:white; cursor:pointer; display:flex; align-items:center; gap:12px; letter-spacing:0.3px; }
 .office-nav-group-btn:hover { background:rgba(255,255,255,0.06); }
 .office-nav-group-btn .nav-icon { font-size:17px; flex-shrink:0; }
@@ -3715,7 +3707,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v128</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v131</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4028,7 +4020,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
         <button class="office-nav-btn nav-sub" onclick="switchTab('photoTimeline');closeSidebar();" id="navbtn-photoTimeline"><span class="nav-icon">📸</span> Photo Timeline</button>
       </li>
       <!-- LOGBOOK group -->
-      <li class="office-nav-item">
+      <li class="office-nav-item" id="grphdr-logbook">
         <button class="office-nav-group-btn" onclick="_toggleNavGroup('grp-logbook')" id="grpbtn-logbook">
           <span class="nav-icon">📘</span> Logbook <span class="nav-group-caret" id="grp-logbook-caret">▾</span>
         </button>
@@ -4072,7 +4064,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     <div class="office-sidebar-footer">
       <div id="bioToggleRow" style="margin-bottom:10px;"></div>
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v128</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v131</div>
     </div>
   </div>
 
@@ -4151,6 +4143,10 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
           <button class="dash-action" onclick="switchTab('customers');setTimeout(showCustomerForm,100);">
             <span style="font-size:20px;">👤</span>
             <span>Add Customer</span>
+          </button>
+          <button class="dash-action" onclick="_openLogbook();">
+            <span style="font-size:20px;">📘</span>
+            <span>Logbook</span>
           </button>
           <button class="dash-action" onclick="switchTab('upgrades');">
             <span style="font-size:20px;">📊</span>
@@ -4889,7 +4885,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v128';
+<script>var APP_VERSION = 'v131';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -6429,6 +6425,25 @@ function cdBackToDashboard() {
 
 
 
+
+// On desktop, "Call" reveals the number (tel: links do nothing useful there). On mobile, it dials.
+function _contactCallClick(ev, phone) {
+  var isMobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent || '')
+                 || (('ontouchstart' in window) && window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+  if (isMobile) return true; // let the tel: link dial as normal
+  // Desktop: reveal the number inline instead of doing nothing.
+  if (ev) { ev.preventDefault(); ev.stopPropagation(); }
+  try {
+    var link = ev && ev.currentTarget ? ev.currentTarget : null;
+    if (link) {
+      link.outerHTML = '<div style="flex:1;text-align:center;background:var(--navy);color:#fff;border-radius:8px;padding:9px;font-size:14px;font-weight:700;letter-spacing:0.5px;">\ud83d\udcde ' + _esc(phone) + '</div>';
+    } else {
+      alert('Call ' + phone);
+    }
+  } catch(e) { alert('Call ' + phone); }
+  return false;
+}
+
 // Build a dial-safe tel: value. Keeps the main number's digits, and turns an
 // extension (after #, x, or "ext") into a pause + digits so phones can dial it.
 function _telHref(phone) {
@@ -6493,7 +6508,7 @@ async function _loadPortalConfig(address, unit) {
     if (cfg && (cfg.contactName || cfg.contactPhone || cfg.contactEmail)) {
       var initial = (cfg.contactName || 'D')[0].toUpperCase();
       var actions = '';
-      if (cfg.contactPhone) actions += '<a href="tel:' + _telHref(cfg.contactPhone) + '" style="flex:1;text-align:center;background:var(--navy);color:#fff;border-radius:8px;padding:9px;font-size:13px;font-weight:700;text-decoration:none;">📞 Call</a>';
+      if (cfg.contactPhone) actions += '<a href="tel:' + _telHref(cfg.contactPhone) + '" onclick="return _contactCallClick(event, \'' + _esc(cfg.contactPhone).replace(/'/g, "\\'") + '\')" style="flex:1;text-align:center;background:var(--navy);color:#fff;border-radius:8px;padding:9px;font-size:13px;font-weight:700;text-decoration:none;">📞 Call</a>';
       if (cfg.contactEmail) actions += '<a href="mailto:' + _esc(cfg.contactEmail) + '" style="flex:1;text-align:center;background:rgba(13,31,60,0.08);color:var(--navy);border-radius:8px;padding:9px;font-size:13px;font-weight:700;text-decoration:none;">\u2709 Email</a>';
       cc.innerHTML = '<div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;margin-top:14px;margin-bottom:14px;">' +
         '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:17px;letter-spacing:0.5px;color:var(--navy);margin-bottom:10px;">👤 Your Point of Contact</div>' +
@@ -10248,43 +10263,46 @@ function togglePin(tab, ev) {
 }
 function renderPinned() {
   var section = document.getElementById('pinnedSection');
-  var list = document.getElementById('pinnedList');
-  if (!section || !list) return;
-  var pins = _getPins().filter(function(t){ return _DD_TABS[t]; });
-  if (!pins.length) { section.style.display = 'none'; list.innerHTML = ''; return; }
-  section.style.display = '';
-  list.innerHTML = pins.map(function(t){
-    var d = _DD_TABS[t];
-    return '<div class="office-nav-item" style="display:flex;align-items:center;">' +
-      '<button class="office-nav-btn" style="flex:1;" onclick="' + d.act + ';closeSidebar();" id="pinbtn-' + t + '"><span class="nav-icon">' + d.icon + '</span> ' + _esc(d.label) + '</button>' +
-      '<button onclick="togglePin(\'' + t + '\',event)" title="Unpin" style="background:none;border:none;color:var(--gold);cursor:pointer;font-size:14px;padding:0 16px 0 4px;flex-shrink:0;">\u2605</button>' +
-    '</div>';
-  }).join('');
+  if (section) section.style.display = 'none';
 }
 // Add a small pin star to every nav button (so any tab can be pinned).
 function _refreshPinStars() {
+  // Stars removed by request — clean sidebar. Remove any leftover star buttons.
   Object.keys(_DD_TABS).forEach(function(t){
-    var btn = document.getElementById('navbtn-' + t);
-    if (!btn) return;
     var star = document.getElementById('pinstar-' + t);
-    if (!star) {
-      star = document.createElement('button');
-      star.id = 'pinstar-' + t;
-      star.title = 'Pin to top';
-      star.className = 'nav-pin-star';
-      star.setAttribute('onclick', "togglePin('" + t + "',event)");
-      if (btn.parentNode) {
-        btn.parentNode.classList.add('nav-item-flex');
-        btn.parentNode.appendChild(star);
-      }
-    }
-    var pinned = isPinned(t);
-    star.textContent = pinned ? '\u2605' : '\u2606';
-    star.classList.toggle('pinned', pinned);
+    if (star && star.parentNode) star.parentNode.removeChild(star);
   });
 }
 function initPinning() {
   try { renderPinned(); _refreshPinStars(); } catch(e) {}
+}
+
+
+// Hide the Logbook group entirely if there's nothing logged yet.
+
+// Open the Logbook (reveals the group even if it was hidden because it was empty).
+function _openLogbook() {
+  try {
+    var hdr = document.getElementById('grphdr-logbook'); if (hdr) hdr.style.display = '';
+    _toggleNavGroup('grp-logbook');
+  } catch(e) {}
+  switchTab('dailyLog');
+}
+
+async function _updateLogbookVisibility() {
+  try {
+    var hdr = document.getElementById('grphdr-logbook');
+    var grp = document.getElementById('grp-logbook');
+    if (!hdr) return;
+    var prefixes = ['sitelog:', 'inspection:', 'delivery:', 'changeorder:'];
+    var hasData = false;
+    for (var i = 0; i < prefixes.length; i++) {
+      var keys = await DB.list(prefixes[i]);
+      if (keys && keys.length) { hasData = true; break; }
+    }
+    hdr.style.display = hasData ? '' : 'none';
+    if (grp && !hasData) grp.style.display = 'none';
+  } catch(e) {}
 }
 
 function _toggleNavGroup(gid) {
@@ -10985,7 +11003,15 @@ function _renderBioToggle() {
     return;
   }
   var on = (typeof biometricEnabled === 'function') && biometricEnabled();
-  host.innerHTML = '<button onclick="' + (on ? 'disableBiometric()' : 'enableBiometric()') + '" style="width:100%;background:' + (on?'rgba(201,168,76,0.18)':'rgba(255,255,255,0.06)') + ';color:' + (on?'var(--gold)':'#fff') + ';border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:9px;font-size:12px;font-weight:600;cursor:pointer;">👆 Fingerprint / Face ID: ' + (on ? 'On' : 'Off') + '</button>';
+  var toggleBtn = '<button onclick="' + (on ? 'disableBiometric()' : 'enableBiometric()') + '" style="width:100%;background:' + (on?'rgba(201,168,76,0.18)':'rgba(255,255,255,0.06)') + ';color:' + (on?'var(--gold)':'#fff') + ';border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:9px;font-size:12px;font-weight:600;cursor:pointer;">👆 Fingerprint / Face ID: ' + (on ? 'On' : 'Off') + '</button>';
+  var testBtn = on ? '<button onclick="testBiometricNow()" style="width:100%;margin-top:6px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px;font-size:11px;cursor:pointer;">Test unlock now</button>' : '';
+  host.innerHTML = toggleBtn + testBtn;
+}
+// Trigger the fingerprint/Face ID prompt on demand so the user can confirm it works.
+async function testBiometricNow() {
+  if (!biometricEnabled()) { alert('Turn on Fingerprint / Face ID first.'); return; }
+  var ok = await _biometricVerify();
+  alert(ok ? '✅ Fingerprint / Face ID worked! Your unlock is set up correctly.' : '❌ It didn\u2019t verify. Make sure you approved the prompt, and that a fingerprint or Face ID is enrolled on this phone.');
 }
 
 // ===================== BIOMETRIC APP LOCK (fingerprint / Face ID) =====================
@@ -11668,6 +11694,7 @@ async function saveDailyLog(){
   await DB.set('sitelog:'+id, rec);
   try{ logActivity('Added a daily site log'); }catch(e){}
   closeDailyLogModal(); renderDailyLog();
+  try { _updateLogbookVisibility(); } catch(e) {}
 }
 
 // ---------- INSPECTIONS ----------
@@ -11721,6 +11748,7 @@ async function saveInspection(){
   await DB.set('inspection:'+id,rec);
   try{ logActivity('Added an inspection'); }catch(e){}
   closeInspectionModal(); renderInspections();
+  try { _updateLogbookVisibility(); } catch(e) {}
 }
 
 // ---------- DELIVERIES ----------
@@ -11774,6 +11802,7 @@ async function saveDelivery(){
   await DB.set('delivery:'+id,rec);
   try{ logActivity('Added a delivery'); }catch(e){}
   closeDeliveryModal(); renderDeliveries();
+  try { _updateLogbookVisibility(); } catch(e) {}
 }
 
 // ---------- CHANGE ORDERS (internal) ----------
@@ -11844,6 +11873,7 @@ async function saveChangeOrder(){
   }
   try{ logActivity('Added a change order'); }catch(e){}
   closeChangeOrderModal(); renderChangeOrders();
+  try { _updateLogbookVisibility(); } catch(e) {}
 }
 
 // Shared delete
@@ -11851,6 +11881,7 @@ async function _lbDelete(key, rerender){
   if(!confirm('Delete this entry?')) return;
   await DB.delete(key);
   if(typeof rerender==='function') rerender();
+  try { _updateLogbookVisibility(); } catch(e) {}
 }
 
 async function renderProjects() {
@@ -15909,22 +15940,44 @@ function renderCustomerTab(filter) {
   window._filteredSubs = filtered;
 }
 
+
+// Thorough delete: removes a key from BOTH Firebase collections (pub + legacy dd),
+// window.storage, and local cache. Prevents deleted items from reappearing on refresh.
+async function _hardDeleteKey(key) {
+  try { delete _store[key]; _saveToLS(); } catch(e) {}
+  try {
+    var fs = _getFirestore();
+    if (fs) {
+      try { await fs.collection('pub').doc(_fsKey(key)).delete(); } catch(e) {}
+      try { await fs.collection('dd').doc(_fsKey(key)).delete(); } catch(e) {}
+    }
+  } catch(e) {}
+  try { if (window.storage) { await window.storage.delete(key, true); } } catch(e) {}
+  try { if (window.storage) { await window.storage.delete(key, false); } } catch(e) {}
+  return true;
+}
+
 async function deleteSubmissionByIdx(btn) {
   var i = parseInt(btn.dataset.delIdx);
   var subs = window._filteredSubs || [];
   var s = subs[i];
   if (!s) return;
   ddConfirm('Delete this submission? This cannot be undone.', async function() {
-    var deleted = false;
-    // 1. Customer-portal submissions carry their exact storage key in _key (most common case).
-    if (s._key) {
-      try { await DB.delete(s._key); deleted = true; } catch(e) {}
-      // also remove the public mirror if present
-      try { await DB.delete(s._key.replace('upgrades:', 'submission:')); } catch(e) {}
-    }
-    // 2. Fallback: scan BOTH key spaces and match on key fields (id, or address+unit).
-    if (!deleted) {
-      var keys = Object.keys(_store).filter(function(k) { return k.startsWith('submission:') || k.startsWith('upgrades:'); });
+    // Collect EVERY key that could hold this submission, then hard-delete each from
+    // both Firebase collections so a background refresh can't bring it back.
+    var toDelete = {};
+    if (s._key) toDelete[s._key] = 1;
+    // Also derive the canonical key from address|unit (how the customer portal saves it).
+    try {
+      if (s.address) {
+        var raw = s.address + '|' + (s.unit || '');
+        var b64 = btoa(unescape(encodeURIComponent(raw))).replace(/=/g, '');
+        toDelete['upgrades:' + b64] = 1;
+      }
+    } catch(e) {}
+    // Scan both key spaces in the local cache for any id/address match.
+    try {
+      var keys = Object.keys(_store).filter(function(k) { return k.indexOf('submission:') === 0 || k.indexOf('upgrades:') === 0; });
       for (var ki = 0; ki < keys.length; ki++) {
         try {
           var stored = JSON.parse(_store[keys[ki]]);
@@ -15932,14 +15985,15 @@ async function deleteSubmissionByIdx(btn) {
           var idMatch = s.id && stored.id === s.id;
           var addrMatch = s.address && (stored.address||'').toLowerCase().trim() === (s.address||'').toLowerCase().trim()
                           && String(stored.unit||'').toLowerCase().trim() === String(s.unit||'').toLowerCase().trim();
-          if (idMatch || addrMatch) { await DB.delete(keys[ki]); deleted = true; }
+          if (idMatch || addrMatch) toDelete[keys[ki]] = 1;
         } catch(e) {}
       }
-    }
-    // 3. Clean the local cache too so it disappears immediately.
-    try {
-      if (s._key && _store[s._key]) delete _store[s._key];
     } catch(e) {}
+    // Hard-delete each collected key.
+    var allKeys = Object.keys(toDelete);
+    for (var di = 0; di < allKeys.length; di++) {
+      await _hardDeleteKey(allKeys[di]);
+    }
     _cachedSubmissions = null;
     var searchEl = document.getElementById('customerSearch');
     renderCustomerTab(searchEl ? searchEl.value : '');
