@@ -3706,7 +3706,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v119</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v126</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -3967,6 +3967,11 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       </div>
     </div>
     <ul class="office-nav-list">
+      <li class="office-nav-item" id="pinnedSection" style="display:none;">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.4);font-weight:700;padding:8px 24px 4px;">Pinned</div>
+        <div id="pinnedList"></div>
+        <div style="height:1px;background:rgba(255,255,255,0.1);margin:8px 16px;"></div>
+      </li>
       <li class="office-nav-item">
         <button class="office-nav-btn active" onclick="switchTab('dashboard');closeSidebar();" id="navbtn-dashboard">
           <span class="nav-icon">📊</span> Dashboard
@@ -4058,7 +4063,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     <div class="office-sidebar-footer">
       <div id="bioToggleRow" style="margin-bottom:10px;"></div>
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v119</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v126</div>
     </div>
   </div>
 
@@ -4141,10 +4146,6 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
           <button class="dash-action" onclick="switchTab('upgrades');">
             <span style="font-size:20px;">📊</span>
             <span>View Upgrades</span>
-          </button>
-          <button class="dash-action" onclick="publishPublicData()" id="dashPublishBtn">
-            <span style="font-size:20px;">🔄</span>
-            <span>Publish for Customers &amp; Subs</span>
           </button>
           <button class="dash-action admin-only" onclick="switchTab('upgradeEditor');" style="display:none;">
             <span style="font-size:20px;">✏️</span>
@@ -4879,7 +4880,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v119';
+<script>var APP_VERSION = 'v126';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -5970,6 +5971,7 @@ async function openPortalSettings(address, unit) {
   document.getElementById('ps-dateNextLabel').value = rec.dateNextLabel || '';
   document.getElementById('ps-dateNext').value = rec.dateNext || '';
   _psRenderPhotos();
+  var aa = document.getElementById('ps-applyAll'); if (aa) aa.checked = false;
   await _psRenderMultiUnits(address, unit);
   document.getElementById('modal-portalsettings').classList.add('open');
 }
@@ -6050,8 +6052,43 @@ async function savePortalSettings() {
     await DB.set('portalcfg:' + k2, rec2);
     await DB.set('pubportalcfg:' + k2, rec2);
   }
+  // Apply welcome + contact to ALL customers across every project (dates/photos stay per-home).
+  var applyAll = (document.getElementById('ps-applyAll')||{}).checked;
+  var allCount = 0;
+  if (applyAll) {
+    try {
+      var pkeys = await DB.list('project:');
+      var projects = (await Promise.all(pkeys.map(function(kk){ return DB.get(kk); }))).filter(Boolean);
+      for (var pi=0; pi<projects.length; pi++) {
+        var hs = projects[pi].houses || [];
+        for (var hi=0; hi<hs.length; hi++) {
+          var addr = hs[hi].address || '';
+          var unitsArr = (hs[hi].units && hs[hi].units.length) ? hs[hi].units : [''];
+          for (var ui=0; ui<unitsArr.length; ui++) {
+            var ukey = _psKey(addr, unitsArr[ui]);
+            // For the unit currently open, use the form's dates/photos (in rec). For all others,
+            // preserve whatever dates/photos they already had.
+            var isCurrent = (addr === _psTarget.address && String(unitsArr[ui]) === String(_psTarget.unit));
+            var src = isCurrent ? rec : ((await DB.get('pubportalcfg:' + ukey)) || {});
+            var merged = {
+              address: addr, unit: unitsArr[ui],
+              welcome: rec.welcome, contactName: rec.contactName, contactRole: rec.contactRole,
+              contactPhone: rec.contactPhone, contactEmail: rec.contactEmail,
+              dateCompletion: src.dateCompletion || '', dateNextLabel: src.dateNextLabel || '',
+              dateNext: src.dateNext || '', photos: src.photos || [],
+              _updatedAt: Date.now()
+            };
+            await DB.set('portalcfg:' + ukey, merged);
+            await DB.set('pubportalcfg:' + ukey, merged);
+            allCount++;
+          }
+        }
+      }
+    } catch(e) {}
+  }
   closePortalSettings();
-  if (extra.length) { try { alert('Applied to ' + (extra.length+1) + ' units.'); } catch(e){} }
+  if (applyAll) { try { alert('Welcome & contact applied to ' + allCount + ' customers.'); } catch(e){} }
+  else if (extra.length) { try { alert('Applied to ' + (extra.length+1) + ' units.'); } catch(e){} }
   if (typeof renderProjects === 'function') renderProjects();
   if (typeof renderCustPortals === 'function') renderCustPortals();
 }
@@ -6322,12 +6359,34 @@ async function _loadCustomerUpdatesInto(address, unit, targetId) {
     var ups = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
     var myAddr = (address||'').toLowerCase().trim();
     var myUnit = String(unit||'').toLowerCase().trim();
-    // Office saves these as: houseAddress, unit, text, photos, createdAt, projectName
+    // Figure out which PROJECT this customer's address belongs to.
+    var myProjectId = '';
+    try {
+      var pkeys = await DB.list('project:');
+      var projects = (await Promise.all(pkeys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+      projects.forEach(function(p){
+        (p.houses||[]).forEach(function(h){
+          if ((h.address||'').toLowerCase().trim() === myAddr) myProjectId = p.id;
+        });
+      });
+    } catch(e) {}
+    // Office saves: projectId, houseAddress, unit, text, photos, createdAt, projectName
     var mine = ups.filter(function(u){
       var uAddr = (u.houseAddress || u.address || '').toLowerCase().trim();
-      if (uAddr && uAddr !== myAddr) return false;        // must match this home (blank = all homes)
+      // PROJECT-SCOPED updates: if the update has a projectId, it must match THIS customer's project.
+      if (u.projectId) {
+        if (!myProjectId || u.projectId !== myProjectId) return false;
+      } else if (uAddr) {
+        // Legacy updates with no projectId: fall back to address match.
+        if (uAddr !== myAddr) return false;
+      } else {
+        // No projectId AND no address = truly global announcement. Keep.
+      }
+      // If a specific address is set on the update, it must match this home.
+      if (uAddr && uAddr !== myAddr) return false;
+      // If a specific unit is set, it must match this unit.
       var uUnit = String(u.unit||'').toLowerCase().trim();
-      if (uUnit && uUnit !== myUnit) return false;        // unit-specific (blank = all units)
+      if (uUnit && uUnit !== myUnit) return false;
       return true;
     });
     mine.sort(function(a,b){ return new Date(b.createdAt||b._updatedAt||0) - new Date(a.createdAt||a._updatedAt||0); });
@@ -10131,6 +10190,97 @@ function _canAccessTab(tabId) {
 
 // Hide nav buttons the user can't access; called after login / dashboard open.
 
+
+// ===================== TAB PINNING =====================
+var _DD_TABS = {
+  dashboard:{label:'Dashboard',icon:'\ud83d\udcca',act:"switchTab('dashboard')"},
+  notifications:{label:'Notifications',icon:'\ud83d\udd14',act:"openInbox()"},
+  globalSearch:{label:'Search Everything',icon:'\ud83d\udd0d',act:"openGlobalSearch()"},
+  reporting:{label:'Reports',icon:'\ud83d\udcc8',act:"switchTab('reporting')"},
+  weeklyDigest:{label:'Weekly Digest',icon:'\ud83d\uddd3\ufe0f',act:"switchTab('weeklyDigest')"},
+  teamChat:{label:'Team Chat',icon:'\ud83d\udcac',act:"switchTab('teamChat')"},
+  projects:{label:'Projects',icon:'\ud83c\udfd7\ufe0f',act:"switchTab('projects')"},
+  punchlist:{label:'Punch Lists',icon:'\u2705',act:"switchTab('punchlist')"},
+  specs:{label:'House Specs',icon:'\ud83c\udfe0',act:"switchTab('specs')"},
+  tasks:{label:'Tasks',icon:'\ud83d\udcdd',act:"switchTab('tasks')"},
+  taskTemplates:{label:'Task Templates',icon:'\ud83d\udccb',act:"switchTab('taskTemplates')"},
+  scheduling:{label:'Scheduling',icon:'\ud83d\udcc5',act:"switchTab('scheduling')"},
+  photoTimeline:{label:'Photo Timeline',icon:'\ud83d\udcf8',act:"switchTab('photoTimeline')"},
+  dailyLog:{label:'Daily Site Log',icon:'\ud83d\udcd3',act:"switchTab('dailyLog')"},
+  inspections:{label:'Inspections',icon:'\ud83d\udd0d',act:"switchTab('inspections')"},
+  deliveries:{label:'Deliveries',icon:'\ud83d\udce6',act:"switchTab('deliveries')"},
+  changeOrders:{label:'Change Orders',icon:'\ud83d\udcdd',act:"switchTab('changeOrders')"},
+  customers:{label:'Customers',icon:'\ud83d\udc65',act:"switchTab('customers')"},
+  upgrades:{label:'Upgrades',icon:'\u2b50',act:"switchTab('upgrades')"},
+  custUpdates:{label:'Customer Updates',icon:'\ud83d\udce2',act:"switchTab('custUpdates')"},
+  custReports:{label:'Customer Reports',icon:'\ud83d\udcdd',act:"switchTab('custReports')"},
+  custPortals:{label:'Customer Portals',icon:'\ud83c\udfe0',act:"switchTab('custPortals')"},
+  walkthroughs:{label:'Walkthroughs',icon:'\ud83d\udeb6',act:"switchTab('walkthroughs')"},
+  upgradeEditor:{label:'Upgrade Editor',icon:'\u270f\ufe0f',act:"switchTab('upgradeEditor')"},
+  subs:{label:'Subcontractors',icon:'\ud83d\udd27',act:"switchTab('subs')"},
+  subCalendar:{label:'Sub Calendar',icon:'\ud83d\udcc5',act:"switchTab('subCalendar')"},
+  vendors:{label:'Vendors',icon:'\ud83d\udcc7',act:"switchTab('vendors')"},
+  employees:{label:'Employees',icon:'\ud83d\udc64',act:"switchTab('employees')"}
+};
+function _getPins() {
+  try { return JSON.parse(localStorage.getItem('dd_pinnedTabs') || '[]'); } catch(e) { return []; }
+}
+function _setPins(pins) {
+  try { localStorage.setItem('dd_pinnedTabs', JSON.stringify(pins)); } catch(e) {}
+}
+function isPinned(tab) { return _getPins().indexOf(tab) > -1; }
+function togglePin(tab, ev) {
+  if (ev) { ev.stopPropagation(); ev.preventDefault(); }
+  var pins = _getPins();
+  var i = pins.indexOf(tab);
+  if (i > -1) pins.splice(i, 1); else pins.push(tab);
+  _setPins(pins);
+  renderPinned();
+  _refreshPinStars();
+}
+function renderPinned() {
+  var section = document.getElementById('pinnedSection');
+  var list = document.getElementById('pinnedList');
+  if (!section || !list) return;
+  var pins = _getPins().filter(function(t){ return _DD_TABS[t]; });
+  if (!pins.length) { section.style.display = 'none'; list.innerHTML = ''; return; }
+  section.style.display = '';
+  list.innerHTML = pins.map(function(t){
+    var d = _DD_TABS[t];
+    return '<div class="office-nav-item" style="display:flex;align-items:center;">' +
+      '<button class="office-nav-btn" style="flex:1;" onclick="' + d.act + ';closeSidebar();" id="pinbtn-' + t + '"><span class="nav-icon">' + d.icon + '</span> ' + _esc(d.label) + '</button>' +
+      '<button onclick="togglePin(\'' + t + '\',event)" title="Unpin" style="background:none;border:none;color:var(--gold);cursor:pointer;font-size:14px;padding:0 16px 0 4px;flex-shrink:0;">\u2605</button>' +
+    '</div>';
+  }).join('');
+}
+// Add a small pin star to every nav button (so any tab can be pinned).
+function _refreshPinStars() {
+  Object.keys(_DD_TABS).forEach(function(t){
+    var btn = document.getElementById('navbtn-' + t);
+    if (!btn) return;
+    var star = document.getElementById('pinstar-' + t);
+    if (!star) {
+      star = document.createElement('button');
+      star.id = 'pinstar-' + t;
+      star.title = 'Pin to top';
+      star.style.cssText = 'background:none;border:none;cursor:pointer;font-size:12px;padding:0 8px;flex-shrink:0;';
+      star.setAttribute('onclick', "togglePin('" + t + "',event)");
+      // place the star inside the nav item, after the button
+      if (btn.parentNode) {
+        btn.parentNode.style.display = 'flex';
+        btn.parentNode.style.alignItems = 'center';
+        btn.style.flex = '1';
+        btn.parentNode.appendChild(star);
+      }
+    }
+    star.textContent = isPinned(t) ? '\u2605' : '\u2606';
+    star.style.color = isPinned(t) ? 'var(--gold)' : 'rgba(255,255,255,0.3)';
+  });
+}
+function initPinning() {
+  try { renderPinned(); _refreshPinStars(); } catch(e) {}
+}
+
 function _toggleNavGroup(gid) {
   var g = document.getElementById(gid);
   var caret = document.getElementById(gid + '_caret') || document.getElementById(gid + '-caret');
@@ -10458,8 +10608,10 @@ async function refreshDashboard() {
 // ════════════════════════════════════════════
 let houseRows = [];
 
+var _houseRowSeq = (typeof _houseRowSeq !== 'undefined') ? _houseRowSeq : 0;
 function addHouseRow() {
-  const id = 'house_' + Date.now();
+  _houseRowSeq = (window._houseRowSeq || 0) + 1; window._houseRowSeq = _houseRowSeq;
+  const id = 'house_' + Date.now() + '_' + _houseRowSeq + '_' + Math.random().toString(36).slice(2,7);
   houseRows.push(id);
   const container = document.getElementById('housesContainer');
   const div = document.createElement('div');
@@ -10614,6 +10766,7 @@ async function saveProject() {
     houseRows = [];
     await renderProjects();
     await refreshDashboard();
+    _autoPublish();
   } catch(err) {
     alert('Could not save project: ' + (err.message || err));
   }
@@ -10745,7 +10898,7 @@ async function renderTeamChat() {
       var time = '';
       try { time = new Date(m.at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); } catch(e){}
       return '<div style="display:flex;flex-direction:column;align-items:' + (mine?'flex-end':'flex-start') + ';margin-bottom:12px;">' +
-        '<div style="font-size:10px;color:var(--muted);margin-bottom:2px;padding:0 4px;">' + (mine?'You':_esc(m.author||'Someone')) + ' \u00b7 ' + time + '</div>' +
+        '<div style="font-size:10px;color:var(--muted);margin-bottom:2px;padding:0 4px;">' + (mine?'You':_esc(m.author||'Someone')) + ' \u00b7 ' + time + (mine?(' \u00b7 <span onclick="deleteTeamChat(\'' + m.id + '\')" style="color:#e07a6a;cursor:pointer;">Delete</span>'):'') + '</div>' +
         '<div style="max-width:78%;background:' + (mine?'var(--navy)':'#fff') + ';color:' + (mine?'#fff':'#16233d') + ';border:1px solid ' + (mine?'var(--navy)':'var(--border)') + ';border-radius:14px;border-' + (mine?'bottom-right':'bottom-left') + '-radius:4px;padding:9px 13px;font-size:13px;line-height:1.45;word-break:break-word;">' + _renderChatText(m.text||'', m.mentions||[]) + '</div>' +
       '</div>';
     }).join('');
@@ -10775,6 +10928,14 @@ async function sendTeamChat() {
     } catch(e) {}
   }
   await renderTeamChat();
+}
+async function deleteTeamChat(id) {
+  if (!confirm('Delete this message?')) return;
+  var m = await DB.get('teamchat:' + id);
+  if (m && m.authorId === (currentUser && currentUser.id)) {
+    await DB.delete('teamchat:' + id);
+    await renderTeamChat();
+  }
 }
 function _chatKeydown(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendTeamChat(); } }
 function startChatPolling() {
@@ -12243,6 +12404,18 @@ async function _syncPublicPunch() {
 
 // Manually publish the public mirrors (addresses for customers, punch items for subs).
 // Reports what was published so the office can confirm it worked.
+
+// ===================== AUTO-PUBLISH (no manual publish needed) =====================
+var _autoSyncTimer = null;
+function _autoPublish() {
+  // Debounce so rapid edits don't fire many syncs.
+  if (_autoSyncTimer) clearTimeout(_autoSyncTimer);
+  _autoSyncTimer = setTimeout(async function() {
+    try { if (typeof _syncAllPublicAddresses === 'function') await _syncAllPublicAddresses(); } catch(e) {}
+    try { if (typeof _syncPublicPunch === 'function') await _syncPublicPunch(); } catch(e) {}
+  }, 600);
+}
+
 async function publishPublicData() {
   var btn = document.getElementById('dashPublishBtn');
   if (btn) { btn.disabled = true; }
@@ -12263,7 +12436,7 @@ async function publishPublicData() {
       punchUnits = pd.length;
       pd.forEach(function(u){ (u.rooms||[]).forEach(function(r){ punchItems += (r.items||[]).length; }); });
     } catch(e) {}
-    alert('Published!\n\nCustomer addresses: ' + addrHouses + ' (across ' + addrCount + ' project' + (addrCount!==1?'s':'') + ')\nSub punch units: ' + punchUnits + ' (' + punchItems + ' items)\n\nCustomers and subcontractors can now load on any device. If a number is 0, add/open that data first, then publish again.');
+    alert('Synced!\n\nCustomer addresses: ' + addrHouses + ' (across ' + addrCount + ' project' + (addrCount!==1?'s':'') + ')\nSub punch units: ' + punchUnits + ' (' + punchItems + ' items)\n\nThis happens automatically when you save — this button just forces an immediate re-sync.');
   } catch(e) {
     alert('Could not publish: ' + (e.message || e) + '\n\nMake sure you are online and signed in, then try again.');
   }
@@ -15692,13 +15865,31 @@ async function deleteSubmissionByIdx(btn) {
   var s = subs[i];
   if (!s) return;
   ddConfirm('Delete this submission? This cannot be undone.', async function() {
-    var keys = Object.keys(_store).filter(function(k) { return k.startsWith('submission:'); });
-    for (var ki = 0; ki < keys.length; ki++) {
-      try {
-        var stored = JSON.parse(_store[keys[ki]]);
-        if (stored && stored.id === s.id) { await DB.delete(keys[ki]); break; }
-      } catch(e) {}
+    var deleted = false;
+    // 1. Customer-portal submissions carry their exact storage key in _key (most common case).
+    if (s._key) {
+      try { await DB.delete(s._key); deleted = true; } catch(e) {}
+      // also remove the public mirror if present
+      try { await DB.delete(s._key.replace('upgrades:', 'submission:')); } catch(e) {}
     }
+    // 2. Fallback: scan BOTH key spaces and match on key fields (id, or address+unit).
+    if (!deleted) {
+      var keys = Object.keys(_store).filter(function(k) { return k.startsWith('submission:') || k.startsWith('upgrades:'); });
+      for (var ki = 0; ki < keys.length; ki++) {
+        try {
+          var stored = JSON.parse(_store[keys[ki]]);
+          if (!stored) continue;
+          var idMatch = s.id && stored.id === s.id;
+          var addrMatch = s.address && (stored.address||'').toLowerCase().trim() === (s.address||'').toLowerCase().trim()
+                          && String(stored.unit||'').toLowerCase().trim() === String(s.unit||'').toLowerCase().trim();
+          if (idMatch || addrMatch) { await DB.delete(keys[ki]); deleted = true; }
+        } catch(e) {}
+      }
+    }
+    // 3. Clean the local cache too so it disappears immediately.
+    try {
+      if (s._key && _store[s._key]) delete _store[s._key];
+    } catch(e) {}
     _cachedSubmissions = null;
     var searchEl = document.getElementById('customerSearch');
     renderCustomerTab(searchEl ? searchEl.value : '');
@@ -16237,6 +16428,7 @@ async function savePunchUnit() {
   var popup = document.getElementById('pl_add_unit_popup');
   if (popup) popup.remove();
   renderPunchList();
+  _autoPublish();
 }
 
 // ── Unit Detail View ──
@@ -16420,6 +16612,7 @@ async function saveRoom() {
   var rp = document.getElementById('pl_add_room_popup');
   if (rp) rp.remove();
   openUnit(_plCurrentUnit.id);
+  _autoPublish();
 }
 
 async function renameRoom(unitId, ri) {
@@ -16466,6 +16659,7 @@ async function saveRoomName(unitId, ri, popup) {
   await DB.set('punch:' + _plPhase + ':' + unitId, _plCurrentUnit);
   if (popup) popup.remove();
   openUnit(unitId);
+  _autoPublish();
 }
 
 async function deleteRoom(unitId, ri) {
@@ -16473,6 +16667,7 @@ async function deleteRoom(unitId, ri) {
   _plCurrentUnit.rooms.splice(ri, 1);
   await DB.set('punch:' + _plPhase + ':' + unitId, _plCurrentUnit);
   openUnit(unitId);
+  _autoPublish();
 }
 
 function openAddItem(unitId, roomIdx) {
@@ -16552,6 +16747,7 @@ async function saveEditItem(unitId, roomIdx, itemIdx) {
   var popup = document.getElementById('pl_edit_item_popup');
   if (popup) popup.remove();
   openUnit(unitId);
+  _autoPublish();
 }
 
 
@@ -16656,6 +16852,7 @@ async function saveItem(unitId, roomIdx) {
   var popup = document.getElementById('pl_add_item_popup');
   if (popup) popup.remove();
   openUnit(unitId);
+  _autoPublish();
 }
 
 async function toggleItem(unitId, roomIdx, itemIdx, checked) {
@@ -16668,6 +16865,7 @@ async function toggleItem(unitId, roomIdx, itemIdx, checked) {
   var allItems = [];
   (_plCurrentUnit.rooms || []).forEach(function(r) { (r.items || []).forEach(function(it) { allItems.push(it); }); });
   var done = allItems.filter(function(it) { return it.done; }).length;
+  _autoPublish();
 }
 
 async function deleteItem(unitId, roomIdx, itemIdx) {
@@ -16676,6 +16874,7 @@ async function deleteItem(unitId, roomIdx, itemIdx) {
   await DB.set('punch:' + _plPhase + ':' + unitId, _plCurrentUnit);
   if (typeof _syncPublicPunch === 'function') { _syncPublicPunch(); }
   openUnit(unitId);
+  _autoPublish();
 }
 
 async function deleteUnit(unitId) {
@@ -18185,6 +18384,8 @@ async function handleAuthedUser(fbUser) {
     }
   } catch(e) {}
   try { _renderBioToggle(); } catch(e) {}
+  try { initPinning(); } catch(e) {}
+  try { _autoPublish(); } catch(e) {}
 }
 
 // Google sign-in
@@ -18721,6 +18922,10 @@ if (document.readyState === 'loading') {
       <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;color:var(--gold);margin:16px 0 8px;">Progress Photos</div>
       <div id="ps-photos" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;"></div>
       <button onclick="_psAddPhoto()" style="width:100%;padding:10px;border-radius:8px;border:1px dashed rgba(255,255,255,0.3);background:rgba(255,255,255,0.06);color:#f3efe6;font-size:13px;font-weight:600;cursor:pointer;">📷 Add Progress Photo</button>
+      <div style="background:rgba(201,168,76,0.1);border:1px solid var(--gold);border-radius:10px;padding:12px;margin-bottom:12px;">
+        <label style="display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--navy);cursor:pointer;font-weight:600;"><input type="checkbox" id="ps-applyAll" style="margin-top:2px;"> Apply welcome &amp; contact to ALL customers</label>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.4;">Sends this welcome message and point-of-contact to every unit in every project. Each home keeps its own dates and photos.</div>
+      </div>
       <div id="ps-multiUnitWrap" style="background:#faf8f3;border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px;display:none;">
         <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:8px;">Also apply this to other units</div>
         <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Check any units that should get the same welcome info.</div>
