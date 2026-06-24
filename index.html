@@ -690,19 +690,23 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
   .ue-save-btn { padding:12px 28px; border:none; border-radius:10px; background:linear-gradient(135deg,#059669,#047857); color:white; font-family:'Bebas Neue',sans-serif; font-size:17px; letter-spacing:1px; cursor:pointer; box-shadow:0 2px 12px rgba(5,150,105,0.3); }
   .ue-add-section-btn { padding:12px 24px; border:2px dashed rgba(13,31,60,0.2); border-radius:10px; background:white; color:var(--navy); font-family:'Inter',sans-serif; font-size:13px; font-weight:700; cursor:pointer; }
   .ue-add-section-btn:hover { border-color:var(--navy); background:#F7F5F0; }
-  .ue-photo-btn { width:44px; height:44px; border-radius:10px; border:1.5px solid var(--border); background:#F7F5F0; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; overflow:hidden; position:relative; }
-  .ue-item-name { flex:1; border:1.5px solid var(--border); border-radius:8px; padding:8px 12px; font-size:13px; font-family:'Inter',sans-serif; outline:none; min-width:0; }
+  .ue-photo-btn { width:46px; height:46px; border-radius:11px; border:1.5px solid #E3DDD3; background:#F4F1EB; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; overflow:hidden; position:relative; transition:border-color .15s; }
+.ue-photo-btn:hover { border-color:var(--gold); }
+  .ue-item-name { flex:1; border:1.5px solid #E3DDD3; border-radius:8px; padding:9px 12px; font-size:13.5px; font-weight:500; font-family:'Inter',sans-serif; outline:none; min-width:0; background:#fff; transition:border-color .15s; }
+.ue-item-name:focus { border-color:var(--gold); }
   .ue-item-name:focus { border-color:var(--navy); }
   .ue-del-btn { width:32px; height:32px; border-radius:8px; border:none; background:#FEF0EE; color:#DC2626; cursor:pointer; font-size:14px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
   .ue-section-num-input { width:36px; background:rgba(255,255,255,0.12); border:none; border-bottom:1.5px solid rgba(255,255,255,0.3); color:var(--gold); font-family:'Bebas Neue',sans-serif; font-size:18px; padding:3px 4px; outline:none; text-align:center; }
   .ue-section-title-input { flex:1; background:rgba(255,255,255,0.1); border:none; border-bottom:1.5px solid rgba(255,255,255,0.3); color:white; font-family:'Inter',sans-serif; font-size:14px; font-weight:700; padding:4px 8px; outline:none; }
   .ue-drag-handle { color:rgba(255,255,255,0.35); font-size:16px; cursor:grab; }
-  .ue-add-item-btn { font-size:12px; color:var(--navy); background:none; border:1.5px dashed rgba(13,31,60,0.25); border-radius:8px; padding:7px 14px; cursor:pointer; font-family:'Inter',sans-serif; font-weight:600; }
+  .ue-add-item-btn { font-size:12.5px; color:var(--navy); background:rgba(13,31,60,0.04); border:1.5px dashed rgba(13,31,60,0.22); border-radius:8px; padding:8px 16px; cursor:pointer; font-family:'Inter',sans-serif; font-weight:700; transition:background .15s; }
+.ue-add-item-btn:hover { background:rgba(13,31,60,0.08); }
   .ue-del-section-btn { font-size:12px; color:#DC2626; background:none; border:1.5px solid #FECACA; border-radius:8px; padding:7px 14px; cursor:pointer; font-family:'Inter',sans-serif; font-weight:600; margin-left:auto; }
   .ue-section-card { background:white; border-radius:14px; border:1px solid var(--border); margin-bottom:16px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.05); }
   .ue-section-header { background:var(--navy); padding:14px 18px; display:flex; align-items:center; gap:10px; }
-  .ue-section-body { padding:4px 0; }
-  .ue-item-row { display:flex; align-items:center; gap:10px; padding:10px 18px; border-bottom:1px solid #F9F7F4; }
+  .ue-section-body { padding:6px 0 2px; }
+  .ue-item-row { display:flex; align-items:flex-start; gap:12px; padding:14px 16px; margin:8px 12px; background:#FCFBF9; border:1px solid #EFEBE4; border-radius:11px; transition:border-color .15s, box-shadow .15s; }
+.ue-item-row:hover { border-color:#E0D8CC; box-shadow:0 1px 6px rgba(0,0,0,0.04); }
 .ue-item-row { flex-wrap: wrap; }
 .ue-item-row .ue-item-name, .ue-item-row .ue-item-options { max-width: 100%; box-sizing: border-box; }
 .ue-suboption-builder input, .ue-dropdown-builder input { font-size: 12px; padding: 5px 7px; box-sizing: border-box; max-width: 100%; }
@@ -3702,7 +3706,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v116</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v117</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4054,7 +4058,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     <div class="office-sidebar-footer">
       <div id="bioToggleRow" style="margin-bottom:10px;"></div>
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v116</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v117</div>
     </div>
   </div>
 
@@ -4875,7 +4879,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v116';
+<script>var APP_VERSION = 'v117';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -5467,7 +5471,7 @@ async function _syncPublicAddress(project) {
       return;
     }
     var houses = (project.houses || []).map(function(h){
-      return { address: h.address || '', units: h.units || [] };
+      return { address: h.address || '', units: h.units || [], basementUnits: h.basementUnits || [] };
     }).filter(function(h){ return h.address; });
     await DB.set('pubaddr:' + project.id, { id: project.id, name: project.name || '', houses: houses, _updatedAt: Date.now() });
   } catch(e) {}
@@ -10472,9 +10476,20 @@ function addHouseRow() {
   unitsInput.id = 'hunits_' + id;
   unitsInput.placeholder = '001, 101, 002, 102';
 
+  const bsmtLabel = document.createElement('label');
+  bsmtLabel.className = 'form-label';
+  bsmtLabel.style.cssText = 'margin-top:10px;';
+  bsmtLabel.innerHTML = 'Basement Units <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);">(which of the above are basements? e.g. 001, 002)</span>';
+  const bsmtInput = document.createElement('input');
+  bsmtInput.className = 'form-input';
+  bsmtInput.id = 'hbsmt_' + id;
+  bsmtInput.placeholder = '001, 002';
+
   div.appendChild(row);
   div.appendChild(unitsLabel);
   div.appendChild(unitsInput);
+  div.appendChild(bsmtLabel);
+  div.appendChild(bsmtInput);
   container.appendChild(div);
 }
 function removeHouseRow(id) {
@@ -10507,6 +10522,8 @@ async function editProject(id) {
       const unitsEl = document.getElementById('hunits_' + lastId);
       if (addrEl) addrEl.value = house.address || '';
       if (unitsEl) unitsEl.value = (house.units || []).join(', ');
+      const bsmtEl = document.getElementById('hbsmt_' + lastId);
+      if (bsmtEl) bsmtEl.value = (house.basementUnits || []).join(', ');
     });
   }
 
@@ -10526,7 +10543,10 @@ async function saveProject() {
     const addr = addrEl ? addrEl.value.trim() : '';
     const unitsRaw = unitsEl ? unitsEl.value : '';
     const units = unitsRaw.split(',').map(function(u) { return u.trim(); }).filter(Boolean);
-    return { address: addr, units: units };
+    const bsmtEl = document.getElementById('hbsmt_' + id);
+    const bsmtRaw = bsmtEl ? bsmtEl.value : '';
+    const basementUnits = bsmtRaw.split(',').map(function(u) { return u.trim(); }).filter(Boolean);
+    return { address: addr, units: units, basementUnits: basementUnits };
   }).filter(function(h) { return h.address; });
 
   try {
@@ -14439,15 +14459,28 @@ function _filterSectionsByUnitType(sections, unitType) {
     return copy;
   }).filter(function(sec){ return (sec.items&&sec.items.length) || (sec.fields&&sec.fields.length); });
 }
+// Decide a unit's type using the project's explicit Basement Units list first; fall back to the name.
+function _unitTypeFromHouse(house, unit) {
+  if (house && house.basementUnits && house.basementUnits.length) {
+    var u = String(unit||'').toLowerCase().trim();
+    var isB = house.basementUnits.some(function(b){ return String(b).toLowerCase().trim() === u; });
+    return isB ? 'basement' : 'upper';
+  }
+  return _unitTypeOf(unit); // fallback to name-based detection
+}
 // Load the right sheet for a customer: project-specific override if one exists, else the global default.
 async function _loadSheetForCustomer(address, unit) {
   var sections = null;
-  // Look for a project-specific override keyed by the project that owns this address.
+  var owningHouse = null;
+  // Find the project + house that owns this address.
   try {
     var projKeys = await DB.list('project:');
     var projects = (await Promise.all(projKeys.map(function(k){ return DB.get(k); }))).filter(Boolean);
-    var owning = projects.find(function(p){
-      return (p.houses||[]).some(function(h){ return (h.address||'').toLowerCase().trim() === (address||'').toLowerCase().trim(); });
+    var owning = null;
+    projects.forEach(function(p){
+      (p.houses||[]).forEach(function(h){
+        if ((h.address||'').toLowerCase().trim() === (address||'').toLowerCase().trim()) { owning = p; owningHouse = h; }
+      });
     });
     if (owning) {
       var override = await DB.get('upgrade_sections_proj:' + owning.id);
@@ -14455,7 +14488,7 @@ async function _loadSheetForCustomer(address, unit) {
     }
   } catch(e) {}
   if (!sections) { sections = await ue_load(); }
-  var unitType = _unitTypeOf(unit);
+  var unitType = _unitTypeFromHouse(owningHouse, unit);
   return _filterSectionsByUnitType(sections, unitType);
 }
 
