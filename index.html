@@ -3648,6 +3648,45 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .ifx-txt { flex:1; font-size:12.5px; color:#3a3730; line-height:1.35; }
 .ifx-who { font-size:10.5px; color:#8a8472; background:#F4F1EB; border-radius:5px; padding:1px 7px; white-space:nowrap; flex-shrink:0; }
 
+
+/* Redesigned inspection list cards */
+.insp-card { display:flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--border); border-radius:11px; padding:14px 15px; margin-bottom:10px; cursor:pointer; transition:box-shadow .12s, transform .05s; }
+.insp-card:active { transform:scale(0.995); }
+.insp-card:hover { box-shadow:0 3px 12px rgba(13,31,60,0.06); }
+.insp-card-main { flex:1; min-width:0; }
+.insp-card-name { font-size:15px; font-weight:700; color:var(--navy); }
+.insp-card-sub { font-size:12px; color:var(--muted); margin-top:3px; }
+.insp-card-badge { font-size:11px; font-weight:700; color:#c0392b; background:rgba(192,57,43,0.1); border-radius:20px; padding:3px 9px; white-space:nowrap; flex-shrink:0; }
+.insp-card-status { font-size:11px; font-weight:700; color:#fff; border-radius:20px; padding:3px 10px; white-space:nowrap; flex-shrink:0; }
+.insp-card-arrow { color:#c2bbab; font-size:20px; flex-shrink:0; }
+.insp-status-row { display:flex; gap:8px; }
+.insp-stbtn { flex:1; padding:11px; border-radius:9px; border:1.5px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.65); font-size:13px; font-weight:700; cursor:pointer; }
+
+
+/* New shared schedule */
+.sch-modebar { display:flex; gap:8px; margin-bottom:12px; }
+.sch-modebtn { flex:1; padding:11px; border-radius:10px; border:1.5px solid var(--border); background:#fff; color:#6a6453; font-size:13.5px; font-weight:700; cursor:pointer; }
+.sch-modebtn.on { background:var(--navy); color:#fff; border-color:var(--navy); }
+.sch-subbar { display:flex; align-items:center; gap:6px; margin-bottom:14px; flex-wrap:wrap; }
+.sch-subbar-lbl { font-size:11px; font-weight:700; color:#9a9484; text-transform:uppercase; letter-spacing:0.5px; }
+.sch-subbtn { padding:6px 11px; border-radius:7px; border:1px solid var(--border); background:#fff; color:#6a6453; font-size:12.5px; font-weight:600; cursor:pointer; }
+.sch-subbtn.on { background:var(--gold); color:var(--navy); border-color:var(--gold); }
+.sch-group { margin-bottom:14px; }
+.sch-group-hd { display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:800; color:var(--navy); padding:8px 4px; border-bottom:2px solid #EAE5DC; margin-bottom:4px; }
+.sch-group-ct { font-size:11px; font-weight:700; color:#b5ae9c; background:#F4F1EB; border-radius:20px; padding:2px 9px; }
+.sch-group-body { }
+.sch-row { display:flex; align-items:center; gap:11px; padding:11px 6px; border-bottom:1px solid #F4F1EB; }
+.sch-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+.sch-row-main { flex:1; min-width:0; }
+.sch-row-name { font-size:14px; font-weight:600; color:#1d2940; }
+.sch-row-sub { font-size:11.5px; color:var(--muted); margin-top:2px; }
+.sch-gcal { background:none; border:none; font-size:17px; cursor:pointer; flex-shrink:0; padding:4px; border-radius:6px; }
+.sch-gcal:active { background:#F0ECE2; }
+.sched-editor-toggle { width:100%; margin:8px 0 16px; padding:11px; border-radius:9px; border:1px dashed var(--border); background:#FAF8F3; color:var(--navy); font-size:13px; font-weight:700; cursor:pointer; }
+
+
+.sch-gcal-info { font-size:12px; color:#7a7466; background:rgba(201,168,76,0.1); border:1px solid rgba(201,168,76,0.25); border-radius:9px; padding:9px 12px; margin-bottom:14px; line-height:1.4; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -3964,7 +4003,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v161</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v163</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4326,7 +4365,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v161</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v163</div>
     </div>
   </div>
 
@@ -5165,11 +5204,17 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
   <div class="office-tab" id="tab-scheduling" style="display:none;">
     <div class="tab-header">
       <div>
-        <h2 class="tab-title">Construction Schedule</h2>
-        <div class="tab-count">Day-to-day build phases</div>
+        <h2 class="tab-title">Schedule</h2>
+        <div class="tab-count">Everyone&#39;s projects, all in one place</div>
       </div>
-      <button class="tab-add-btn" onclick="resetSchedulePhases()">&#8635; Reset Phases</button>
     </div>
+
+    <!-- NEW shared schedule view -->
+    <div id="schedNewContent"></div>
+
+    <!-- Collapsible editor for setting phase dates -->
+    <button onclick="_schedToggleEditor()" id="schedEditorToggle" class="sched-editor-toggle">✎ Edit phases &amp; dates</button>
+    <div id="schedEditorWrap" style="display:none;">
 
     <div class="task-scope-row">
       <button class="sched-scope-btn task-scope-btn active" data-scope="mine" onclick="setSchedScope('mine')">My Schedules</button>
@@ -5192,6 +5237,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 
     <div id="gcalSettingsBox" class="gcal-box"></div>
     <div id="schedContent"></div>
+    </div><!-- /schedEditorWrap -->
   </div>
 
 
@@ -5199,7 +5245,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v161';
+<script>var APP_VERSION = 'v163';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -8727,6 +8773,24 @@ function _qaClosePopover() {
 
 /* ===== TAP QUICK-ACTIONS (action sheet on tapping a task) ===== */
 var _qaCurrentTask = null;
+
+function _tasGcal() {
+  var t = _qaCurrentTask;
+  if (!t || !t.dueDate) return;
+  try {
+    var d = t.dueDate.replace(/-/g,'');
+    var endD = new Date(t.dueDate + 'T00:00:00'); endD.setDate(endD.getDate()+1);
+    var end = endD.toISOString().slice(0,10).replace(/-/g,'');
+    var details = (t.projectName ? ('Project: ' + t.projectName) : '') + (t.description ? ('\n' + t.description) : '');
+    var url = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+      '&text=' + encodeURIComponent('Task: ' + (t.title||'')) +
+      '&details=' + encodeURIComponent(details) +
+      '&dates=' + d + '/' + end;
+    window.open(url, '_blank');
+  } catch(e) {}
+  try { closeTaskQuickActions(); } catch(e) {}
+}
+
 async function openTaskQuickActions(id) {
   var t = await DB.get('task:' + id);
   if (!t) return;
@@ -8745,6 +8809,7 @@ async function openTaskQuickActions(id) {
         '<button class="tas-act tas-open" onclick="_tasOpen()"><span class="tas-ic">&#9776;</span>Open task &middot; subtasks &amp; notes</button>' +
         '<button class="tas-act" onclick="_tasDone()"><span class="tas-ic">' + (done?'\u21ba':'\u2713') + '</span>' + (done?'Reopen':'Mark done') + '</button>' +
         '<button class="tas-act" onclick="_tasDate()"><span class="tas-ic">&#128197;</span>Set date</button>' +
+        (t.dueDate ? '<button class="tas-act" onclick="_tasGcal()"><span class="tas-ic">&#128467;</span>Add to Google Calendar</button>' : '') +
         '<button class="tas-act" onclick="_tasAssign()"><span class="tas-ic">&#128100;</span>Assign</button>' +
         '<button class="tas-act" onclick="_tasEdit()"><span class="tas-ic">&#9998;</span>Edit details</button>' +
         '<button class="tas-act tas-danger" onclick="_tasDelete()"><span class="tas-ic">&#128465;</span>Delete</button>' +
@@ -10227,6 +10292,172 @@ async function _renderScheduleLookahead() {
 }
 
 
+
+// ===== REBUILT SCHEDULE: shared full schedule + my schedule =====
+window._schedMode = window._schedMode || 'full';   // 'full' | 'mine'
+window._schedGroupBy = window._schedGroupBy || 'project'; // project | timeline | date
+window._schedRange = window._schedRange || 'all';  // all | today | week | month  (used in 'mine')
+
+// Gather every phase from every project's schedules into a flat list of dated items.
+async function _schedGatherAll() {
+  var projKeys = await DB.list('project:');
+  var projs = (await Promise.all(projKeys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+  var schedKeys = await DB.list('schedule:');
+  var scheds = (await Promise.all(schedKeys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+  var schedMap = {};
+  scheds.forEach(function(s){ if (s && s.key) schedMap[s.key] = s; });
+
+  var items = [];
+  projs.forEach(function(p){
+    (p.houses || []).forEach(function(h){
+      var hKey = _schedKey(p.id, h.address);
+      var sch = schedMap[hKey];
+      if (!sch || !sch.phases) return;
+      sch.phases.forEach(function(ph){
+        if (!ph.start && !ph.end) return; // only dated phases
+        items.push({
+          projId: p.id, projName: p.name || 'Untitled',
+          address: h.address || '', name: ph.name || 'Phase',
+          start: ph.start || ph.end, end: ph.end || ph.start,
+          status: ph.status || '', sched: sch, phId: ph.id
+        });
+      });
+    });
+  });
+  return items;
+}
+
+function _schedInRange(it, range) {
+  if (range === 'all') return true;
+  var today = new Date(); today.setHours(0,0,0,0);
+  var s = it.start ? new Date(it.start + 'T00:00:00') : null;
+  var e = it.end ? new Date(it.end + 'T00:00:00') : s;
+  if (!s) return false;
+  if (range === 'today') { return s <= today && e >= today; }
+  if (range === 'week') {
+    var weekEnd = new Date(today); weekEnd.setDate(weekEnd.getDate() + 7);
+    return s <= weekEnd && e >= today;
+  }
+  if (range === 'month') {
+    var monthEnd = new Date(today); monthEnd.setMonth(monthEnd.getMonth() + 1);
+    return s <= monthEnd && e >= today;
+  }
+  return true;
+}
+
+function _schedItemRow(it) {
+  var stColors = { 'not-started':'#aaa', 'in-progress':'#b8860b', 'complete':'#3a7d5d', 'delayed':'#c0392b' };
+  var col = stColors[it.status] || '#c2bbab';
+  var dateLabel = it.start ? _lbFmt(new Date(it.start+'T00:00:00').getTime()) : '';
+  if (it.end && it.end !== it.start) dateLabel += ' \u2013 ' + _lbFmt(new Date(it.end+'T00:00:00').getTime());
+  return '<div class="sch-row">' +
+    '<span class="sch-dot" style="background:' + col + '"></span>' +
+    '<div class="sch-row-main">' +
+      '<div class="sch-row-name">' + _esc(it.name) + '</div>' +
+      '<div class="sch-row-sub">' + _esc(it.projName) + (it.address?(' \u00b7 ' + _esc(it.address)):'') + (dateLabel?(' \u00b7 ' + dateLabel):'') + '</div>' +
+    '</div>' +
+    (it.start ? '<button class="sch-gcal" onclick="_schedAddToGcal(\'' + encodeURIComponent(JSON.stringify({t:it.name,d:it.projName+' '+it.address,s:it.start,e:it.end})) + '\')" title="Add to Google Calendar">\ud83d\udcc5</button>' : '') +
+  '</div>';
+}
+
+function _schedGroupRender(items) {
+  var gb = window._schedGroupBy;
+  if (!items.length) {
+    return '<div class="tab-empty"><div class="tab-empty-icon">\ud83d\udcc5</div><div class="tab-empty-title">Nothing scheduled</div><div class="tab-empty-desc">Add dates to project phases to see them here.</div></div>';
+  }
+  if (gb === 'timeline') {
+    var sorted = items.slice().sort(function(a,b){ return (a.start||'9999').localeCompare(b.start||'9999'); });
+    return '<div class="sch-group-body">' + sorted.map(_schedItemRow).join('') + '</div>';
+  }
+  if (gb === 'date') {
+    var byDate = {};
+    items.forEach(function(it){ var d = it.start || 'No date'; (byDate[d] = byDate[d] || []).push(it); });
+    var dates = Object.keys(byDate).sort();
+    return dates.map(function(d){
+      var lbl = d === 'No date' ? 'No date' : _lbFmt(new Date(d+'T00:00:00').getTime());
+      return '<div class="sch-group"><div class="sch-group-hd">' + _esc(lbl) + '<span class="sch-group-ct">' + byDate[d].length + '</span></div>' +
+        '<div class="sch-group-body">' + byDate[d].map(_schedItemRow).join('') + '</div></div>';
+    }).join('');
+  }
+  // by project (default)
+  var byProj = {};
+  items.forEach(function(it){ (byProj[it.projName] = byProj[it.projName] || []).push(it); });
+  return Object.keys(byProj).sort().map(function(pn){
+    var list = byProj[pn].slice().sort(function(a,b){ return (a.start||'9999').localeCompare(b.start||'9999'); });
+    return '<div class="sch-group"><div class="sch-group-hd">' + _esc(pn) + '<span class="sch-group-ct">' + list.length + '</span></div>' +
+      '<div class="sch-group-body">' + list.map(_schedItemRow).join('') + '</div></div>';
+  }).join('');
+}
+
+
+function _schedToggleEditor() {
+  var w = document.getElementById('schedEditorWrap');
+  var btn = document.getElementById('schedEditorToggle');
+  if (!w) return;
+  window._schedEditorOpen = !window._schedEditorOpen;
+  w.style.display = window._schedEditorOpen ? 'block' : 'none';
+  if (btn) btn.innerHTML = window._schedEditorOpen ? '\u2715 Close editor' : '\u270e Edit phases &amp; dates';
+  if (window._schedEditorOpen) { try { renderScheduling(); } catch(e) {} }
+}
+
+async function renderScheduleNew() {
+  var host = document.getElementById('schedNewContent');
+  if (!host) return;
+  try { if (!window._schedEditorOpen) { var _ew = document.getElementById('schedEditorWrap'); if (_ew) _ew.style.display = 'none'; } } catch(e) {}
+  host.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;">Loading\u2026</div>';
+  var all = await _schedGatherAll();
+  var uid = _effectiveUserId();
+
+  var items = all;
+  if (window._schedMode === 'mine') {
+    // mine = schedules I own or follow
+    items = all.filter(function(it){ return it.sched && (_isSchedOwner(it.sched, uid) || _isSchedFollower(it.sched, uid)); });
+    items = items.filter(function(it){ return _schedInRange(it, window._schedRange); });
+  }
+
+  // controls
+  var modeBar = '<div class="sch-modebar">' +
+    '<button class="sch-modebtn' + (window._schedMode==='full'?' on':'') + '" onclick="_schedSetMode(\'full\')">Full Schedule</button>' +
+    '<button class="sch-modebtn' + (window._schedMode==='mine'?' on':'') + '" onclick="_schedSetMode(\'mine\')">My Schedule</button>' +
+  '</div>';
+
+  var subBar = '';
+  if (window._schedMode === 'full') {
+    subBar = '<div class="sch-subbar"><span class="sch-subbar-lbl">Group by</span>' +
+      ['project','timeline','date'].map(function(g){
+        var lbl = g==='project'?'Project':g==='timeline'?'Timeline':'Date';
+        return '<button class="sch-subbtn' + (window._schedGroupBy===g?' on':'') + '" onclick="_schedSetGroup(\'' + g + '\')">' + lbl + '</button>';
+      }).join('') + '</div>';
+  } else {
+    subBar = '<div class="sch-subbar"><span class="sch-subbar-lbl">Show</span>' +
+      [['all','All'],['today','Today'],['week','This Week'],['month','Month']].map(function(r){
+        return '<button class="sch-subbtn' + (window._schedRange===r[0]?' on':'') + '" onclick="_schedSetRange(\'' + r[0] + '\')">' + r[1] + '</button>';
+      }).join('') + '</div>';
+  }
+
+  var gcalInfo = '<div class="sch-gcal-info">\ud83d\udcc5 Tap the calendar icon on any item to add it to your Google Calendar.</div>';
+  host.innerHTML = modeBar + subBar + gcalInfo + _schedGroupRender(items);
+}
+function _schedSetMode(m){ window._schedMode=m; renderScheduleNew(); }
+function _schedSetGroup(g){ window._schedGroupBy=g; renderScheduleNew(); }
+function _schedSetRange(r){ window._schedRange=r; renderScheduleNew(); }
+
+// Push a schedule item to Google Calendar via a prefilled link (one-way, no setup needed).
+function _schedAddToGcal(enc) {
+  try {
+    var o = JSON.parse(decodeURIComponent(enc));
+    var fmt = function(d){ return d ? d.replace(/-/g,'') : ''; };
+    var start = fmt(o.s);
+    var endD = new Date((o.e||o.s) + 'T00:00:00'); endD.setDate(endD.getDate()+1);
+    var end = endD.toISOString().slice(0,10).replace(/-/g,'');
+    var url = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+      '&text=' + encodeURIComponent(o.t) +
+      '&details=' + encodeURIComponent(o.d||'') +
+      '&dates=' + start + '/' + end;
+    window.open(url, '_blank');
+  } catch(e) {}
+}
+
 async function renderScheduling() {
   var sel = document.getElementById('sched-house-sel');
   if (!sel) return;
@@ -11460,7 +11691,7 @@ async function switchTab(tab) {
   if (tab === 'upgradeEditor') initUpgradeEditor();
   if (tab === 'punchlist') renderPunchList();
   if (tab === 'tasks') { _toggleTabChrome('tab-tasks', true); _populateTaskProjectFilter(); renderTasks(); }
-  if (tab === 'scheduling') { _toggleTabChrome('tab-scheduling', true); renderScheduling(); }
+  if (tab === 'scheduling') { _toggleTabChrome('tab-scheduling', true); renderScheduleNew(); }
   if (tab === 'specs') renderSpecs();
   try { _openNavGroupForTab(tab); } catch(e) {}
   try { if (tab === 'custReports') { _renderOfficeCustomerIssues(); } } catch(e) {}
@@ -12971,33 +13202,71 @@ function _ifxBtnLabel(id, open) {
 
 async function renderInspections(){
   var host=document.getElementById('inspectionsList'); if(!host)return;
-  host.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;">Loading…</div>';
+  host.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;">Loading\u2026</div>';
   window._lbProjCache=await _lbProjects();
   var keys=await DB.list('inspection:');
   var items=(await Promise.all(keys.map(function(k){return DB.get(k);}))).filter(Boolean);
   items.sort(function(a,b){ return (b.date||0)-(a.date||0); });
-  var statusColor={ scheduled:'#b8860b', passed:'#3a7d5d', failed:'#c0392b' };
+  var statusMeta={ scheduled:{c:'#b8860b',l:'Scheduled'}, passed:{c:'#3a7d5d',l:'Passed'}, failed:{c:'#c0392b',l:'Failed'} };
   var rows=items.map(function(it){
     var proj=(window._lbProjCache||[]).find(function(p){return p.id===it.projectId;});
-    var col=statusColor[it.status]||'#888';
-    return '<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:13px 15px;margin-bottom:10px;">' +
-      '<div style="display:flex;justify-content:space-between;align-items:start;gap:10px;">' +
-        '<div><div style="font-size:14px;font-weight:700;color:var(--navy);">' + _esc(it.type||'Inspection') + '</div>' +
-        '<div style="font-size:11px;color:var(--muted);">' + _lbFmt(it.date) + (proj?(' \u00b7 '+_esc(proj.name)):'') + (it.inspector?(' \u00b7 '+_esc(it.inspector)):'') + '</div></div>' +
-        '<span style="background:'+col+';color:#fff;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;text-transform:capitalize;flex-shrink:0;">'+_esc(it.status||'')+'</span>' +
+    var loc=proj?proj.name:'';
+    var sm=statusMeta[it.status]||{c:'#aaa',l:''};
+    var openCount=(it.fixItems||[]).filter(function(f){return !f.fixed;}).length;
+    return '<div class="insp-card" onclick="openInspectionDetail(\'' + it.id + '\')">' +
+      '<div class="insp-card-main">' +
+        '<div class="insp-card-name">' + _esc(it.type||'Inspection') + '</div>' +
+        '<div class="insp-card-sub">' + _lbFmt(it.date) + (loc?(' \u00b7 ' + _esc(loc)):'') + (it.inspector?(' \u00b7 ' + _esc(it.inspector)):'') + '</div>' +
       '</div>' +
-      (it.notes?'<div style="font-size:12px;color:#3a3730;margin-top:6px;line-height:1.45;">'+_esc(it.notes)+'</div>':'') +
-      '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center;">' +
-        '<button onclick="openFixList(\''+it.id+'\')" style="font-size:11px;padding:5px 11px;border-radius:6px;border:1px solid rgba(201,168,76,0.4);background:rgba(201,168,76,0.12);color:#b8860b;font-weight:700;cursor:pointer;">🔧 Items to Fix' + ((function(){ var o=(it.fixItems||[]).filter(function(f){return !f.fixed;}).length; return o?(' \u00b7 '+o):''; })()) + '</button>' +
-        ((it.fixItems||[]).length ? '<button id="ifxbtn-'+it.id+'" onclick="_inspToggleSummary(\''+it.id+'\')" style="font-size:11px;padding:5px 11px;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--navy);font-weight:700;cursor:pointer;">\u25be View items by unit</button>' : '') +
-        '<button onclick="_inspSetStatus(\''+it.id+'\',\'passed\')" style="font-size:11px;padding:4px 10px;border-radius:6px;border:none;background:rgba(58,125,93,0.15);color:#3a7d5d;font-weight:700;cursor:pointer;">Passed</button>' +
-        '<button onclick="_inspSetStatus(\''+it.id+'\',\'failed\')" style="font-size:11px;padding:4px 10px;border-radius:6px;border:none;background:rgba(192,57,43,0.12);color:#c0392b;font-weight:700;cursor:pointer;">Failed</button>' +
-        '<button onclick="_lbDelete(\'inspection:'+it.id+'\',renderInspections)" style="font-size:11px;padding:4px 10px;border-radius:6px;border:none;background:rgba(0,0,0,0.05);color:#888;cursor:pointer;margin-left:auto;">Delete</button>' +
-      '</div>' +
-      _inspFixSummary(it) +
+      (openCount?('<span class="insp-card-badge">' + openCount + ' to fix</span>'):'') +
+      '<span class="insp-card-status" style="background:' + sm.c + '">' + sm.l + '</span>' +
+      '<span class="insp-card-arrow">\u203a</span>' +
     '</div>';
   }).join('');
   host.innerHTML=rows||'<div class="tab-empty"><div class="tab-empty-icon">\ud83d\udd0d</div><div class="tab-empty-title">No Inspections</div><div class="tab-empty-desc">Schedule your first inspection above.</div></div>';
+}
+
+// Open the inspection detail modal (status controls + fix list).
+async function openInspectionDetail(inspId) {
+  var insp = await DB.get('inspection:' + inspId);
+  if (!insp) return;
+  window._inspDetailId = inspId;
+  var proj = (window._lbProjCache||[]).find(function(p){return p.id===insp.projectId;});
+  document.getElementById('inspDetailTitle').textContent = insp.type || 'Inspection';
+  document.getElementById('inspDetailSub').textContent = _lbFmt(insp.date) + (proj?(' \u00b7 ' + (proj.name||'')):'') + (insp.inspector?(' \u00b7 ' + insp.inspector):'');
+  _inspRenderStatusBtns(insp.status);
+  // embed the fix list into the detail body
+  _fixInspId = inspId;
+  if (!insp.fixItems) insp.fixItems = [];
+  await _fixLoadUnits(insp.projectId);
+  window._fixEmps = await _loadEmployeesForAssign();
+  window._fixEditMode = false;
+  _fixScope = 'house';
+  _fixSetScope('house');
+  _fixUpdateModeUI();
+  document.getElementById('modal-inspDetail').classList.add('open');
+}
+function closeInspectionDetail() {
+  document.getElementById('modal-inspDetail').classList.remove('open');
+  window._inspDetailId = null;
+  try { renderInspections(); } catch(e) {}
+}
+function _inspRenderStatusBtns(status) {
+  var wrap = document.getElementById('inspDetailStatus');
+  if (!wrap) return;
+  var opts = [['scheduled','Scheduled','#b8860b'],['passed','Passed','#3a7d5d'],['failed','Failed','#c0392b']];
+  wrap.innerHTML = opts.map(function(o){
+    var on = status === o[0];
+    return '<button onclick="_inspDetailSetStatus(\'' + o[0] + '\')" class="insp-stbtn' + (on?' on':'') + '" style="' + (on?('background:' + o[2] + ';border-color:' + o[2] + ';color:#fff;'):'') + '">' + o[1] + '</button>';
+  }).join('');
+}
+async function _inspDetailSetStatus(status) {
+  if (!window._inspDetailId) return;
+  var r = await DB.get('inspection:' + window._inspDetailId);
+  if (!r) return;
+  r.status = status; r._updatedAt = Date.now();
+  await DB.set('inspection:' + window._inspDetailId, r);
+  _inspRenderStatusBtns(status);
 }
 async function _inspSetStatus(id,status){ var r=await DB.get('inspection:'+id); if(!r)return; r.status=status; r._updatedAt=Date.now(); await DB.set('inspection:'+id,r); renderInspections(); }
 function openInspectionModal(){
@@ -20785,15 +21054,23 @@ if (document.readyState === 'loading') {
 
 <!-- INSPECTION MODAL -->
 <!-- INSPECTION FIX LIST MODAL -->
-<div class="modal-overlay" id="modal-fixlist">
-  <div class="modal-box" style="max-width:480px;">
-    <div class="modal-header"><div class="modal-title">🔧 Items to Fix</div><button class="modal-close" onclick="closeFixList()">✕</button></div>
-    <div class="modal-body" style="max-height:78vh;overflow-y:auto;">
-      <div id="fixListSub" style="font-size:12.5px;color:rgba(255,255,255,0.6);margin-bottom:12px;line-height:1.4;"></div>
+<div class="modal-overlay" id="modal-inspDetail">
+  <div class="modal-box" style="max-width:500px;">
+    <div class="modal-header">
+      <div><div class="modal-title" id="inspDetailTitle">Inspection</div>
+      <div id="inspDetailSub" style="font-size:12px;color:rgba(255,255,255,0.55);margin-top:3px;"></div></div>
+      <button class="modal-close" onclick="closeInspectionDetail()">✕</button>
+    </div>
+    <div class="modal-body" style="max-height:74vh;overflow-y:auto;">
+      <label class="form-label">Result</label>
+      <div id="inspDetailStatus" class="insp-status-row"></div>
+
+      <div style="height:1px;background:rgba(255,255,255,0.1);margin:16px 0;"></div>
+
+      <label class="form-label" style="margin-bottom:10px;">🔧 Items to Fix</label>
 
       <!-- Scope toggle -->
       <div class="form-group">
-        <label class="form-label">This list is for</label>
         <div style="display:flex;gap:8px;">
           <button type="button" id="fixScopeHouse" onclick="_fixSetScope('house')" class="fix-scope-btn on" style="flex:1;">🏠 Whole house</button>
           <button type="button" id="fixScopeUnit" onclick="_fixSetScope('unit')" class="fix-scope-btn" style="flex:1;">🚪 By unit</button>
@@ -20809,8 +21086,8 @@ if (document.readyState === 'loading') {
       <button id="fixAddBtn" onclick="_fixAddItem()" class="fix-add-btn" style="display:none;">+ Add item</button>
     </div>
     <div class="fix-modal-footer">
-      <button id="fixEditBtn" onclick="_fixToggleEdit()" class="fix-edit-btn">\u270e Edit list</button>
-      <button onclick="closeFixList()" class="fix-done-btn">Done</button>
+      <button id="fixEditBtn" onclick="_fixToggleEdit()" class="fix-edit-btn">✎ Edit list</button>
+      <button onclick="closeInspectionDetail()" class="fix-done-btn">Done</button>
     </div>
   </div>
 </div>
