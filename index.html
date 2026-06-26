@@ -3589,6 +3589,23 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .ak-empty-title { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:1px; color:var(--navy); margin-bottom:4px; }
 .ak-empty-sub { font-size:13px; color:#9a9484; }
 
+
+.fix-scope-btn { padding:10px; border:1.5px solid #E3DDD3; border-radius:9px; background:#fff; color:#6a6453; font-size:13px; font-weight:700; cursor:pointer; }
+.fix-scope-btn.on { background:var(--navy); color:#fff; border-color:var(--navy); }
+.fix-item { border:1px solid #EAE5DC; border-radius:11px; padding:11px; margin-bottom:10px; background:#FAF8F3; }
+.fix-item.fixed { opacity:0.65; }
+.fix-item.fixed .fix-item-text { text-decoration:line-through; color:#9a9484; }
+.fix-item-top { display:flex; align-items:flex-start; gap:9px; }
+.fix-check { width:22px; height:22px; border-radius:6px; border:1.5px solid #cfc8b8; background:#fff; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; color:#fff; font-size:13px; padding:0; }
+.fix-check.on { background:#3a7d5d; border-color:#3a7d5d; }
+.fix-item-text { flex:1; font-size:14px; color:#16233d; border:none; background:none; resize:none; font-family:inherit; outline:none; line-height:1.4; min-height:20px; padding:2px 0; }
+.fix-del { background:none; border:none; color:#c2bbab; font-size:14px; cursor:pointer; flex-shrink:0; }
+.fix-item-row { display:flex; gap:8px; align-items:center; margin-top:9px; flex-wrap:wrap; }
+.fix-assign { flex:1; min-width:120px; font-size:12.5px; padding:7px 9px; border:1px solid #E3DDD3; border-radius:7px; background:#fff; }
+.fix-photo-btn { font-size:12px; font-weight:700; color:var(--navy); background:#fff; border:1px solid #E3DDD3; border-radius:7px; padding:7px 11px; cursor:pointer; white-space:nowrap; }
+.fix-thumbs { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+.fix-thumb { width:46px; height:46px; border-radius:6px; object-fit:cover; cursor:pointer; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -3905,7 +3922,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v156</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v157</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4267,7 +4284,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v156</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v157</div>
     </div>
   </div>
 
@@ -5140,7 +5157,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v156';
+<script>var APP_VERSION = 'v157';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -12878,7 +12895,8 @@ async function renderInspections(){
         '<span style="background:'+col+';color:#fff;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;text-transform:capitalize;flex-shrink:0;">'+_esc(it.status||'')+'</span>' +
       '</div>' +
       (it.notes?'<div style="font-size:12px;color:#3a3730;margin-top:6px;line-height:1.45;">'+_esc(it.notes)+'</div>':'') +
-      '<div style="display:flex;gap:8px;margin-top:8px;">' +
+      '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center;">' +
+        '<button onclick="openFixList(\''+it.id+'\')" style="font-size:11px;padding:5px 11px;border-radius:6px;border:1px solid rgba(201,168,76,0.4);background:rgba(201,168,76,0.12);color:#b8860b;font-weight:700;cursor:pointer;">🔧 Items to Fix' + ((function(){ var o=(it.fixItems||[]).filter(function(f){return !f.fixed;}).length; return o?(' \u00b7 '+o):''; })()) + '</button>' +
         '<button onclick="_inspSetStatus(\''+it.id+'\',\'passed\')" style="font-size:11px;padding:4px 10px;border-radius:6px;border:none;background:rgba(58,125,93,0.15);color:#3a7d5d;font-weight:700;cursor:pointer;">Passed</button>' +
         '<button onclick="_inspSetStatus(\''+it.id+'\',\'failed\')" style="font-size:11px;padding:4px 10px;border-radius:6px;border:none;background:rgba(192,57,43,0.12);color:#c0392b;font-weight:700;cursor:pointer;">Failed</button>' +
         '<button onclick="_lbDelete(\'inspection:'+it.id+'\',renderInspections)" style="font-size:11px;padding:4px 10px;border-radius:6px;border:none;background:rgba(0,0,0,0.05);color:#888;cursor:pointer;margin-left:auto;">Delete</button>' +
@@ -12898,6 +12916,157 @@ function openInspectionModal(){
   document.getElementById('modal-inspection').classList.add('open');
 }
 function closeInspectionModal(){ document.getElementById('modal-inspection').classList.remove('open'); }
+
+// ===== INSPECTION FIX LIST (items the inspector told us to fix) =====
+// Model: inspection.fixItems = [{ id, text, scope:'house'|'unit', unit, assigneeId, assigneeName, photos:[], fixed:bool }]
+var _fixInspId = null;
+var _fixScope = 'house';
+
+async function openFixList(inspId) {
+  _fixInspId = inspId;
+  var insp = await DB.get('inspection:' + inspId);
+  if (!insp) return;
+  if (!insp.fixItems) insp.fixItems = [];
+  // subtitle: which house/project
+  var projName = '';
+  try {
+    var proj = insp.projectId ? await DB.get('project:' + insp.projectId) : null;
+    projName = proj ? (proj.name || '') : '';
+  } catch(e) {}
+  document.getElementById('fixListSub').textContent = (insp.type || 'Inspection') + (projName ? ' \u00b7 ' + projName : '') + '. Add what the inspector told you to fix.';
+  // populate unit picker from the project's houses
+  await _fixLoadUnits(insp.projectId);
+  // load employees for assignment
+  window._fixEmps = await _loadEmployeesForAssign();
+  // default scope from existing items (if any item is unit-scoped, show unit mode)
+  _fixScope = 'house';
+  _fixSetScope('house');
+  document.getElementById('modal-fixlist').classList.add('open');
+}
+function closeFixList() { document.getElementById('modal-fixlist').classList.remove('open'); _fixInspId = null; }
+
+async function _fixLoadUnits(projectId) {
+  var sel = document.getElementById('fixUnitPicker');
+  if (!sel) return;
+  var units = [];
+  try {
+    var proj = projectId ? await DB.get('project:' + projectId) : null;
+    if (proj && proj.houses) {
+      proj.houses.forEach(function(h){
+        (h.units || []).forEach(function(u){ units.push(u); });
+      });
+    }
+  } catch(e) {}
+  window._fixUnits = units;
+  sel.innerHTML = units.length ? units.map(function(u){ return '<option value="' + _esc(u) + '">Unit ' + _esc(u) + '</option>'; }).join('')
+    : '<option value="">No units on this project</option>';
+}
+
+function _fixSetScope(scope) {
+  _fixScope = scope;
+  document.getElementById('fixScopeHouse').classList.toggle('on', scope === 'house');
+  document.getElementById('fixScopeUnit').classList.toggle('on', scope === 'unit');
+  document.getElementById('fixUnitPickerWrap').style.display = (scope === 'unit') ? 'block' : 'none';
+  _fixRenderItems();
+}
+
+async function _fixRenderItems() {
+  var host = document.getElementById('fixItemsList');
+  if (!host || !_fixInspId) return;
+  var insp = await DB.get('inspection:' + _fixInspId);
+  if (!insp) return;
+  var items = insp.fixItems || [];
+  var unit = (_fixScope === 'unit') ? (document.getElementById('fixUnitPicker').value || '') : '';
+  // filter by scope
+  var shown = items.filter(function(it){
+    if (_fixScope === 'house') return it.scope === 'house';
+    return it.scope === 'unit' && String(it.unit) === String(unit);
+  });
+  if (!shown.length) {
+    host.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:18px 8px;">No items yet for ' + (_fixScope === 'house' ? 'the whole house' : ('Unit ' + _esc(unit || '\u2014'))) + '. Add the first one below.</div>';
+    return;
+  }
+  var emps = window._fixEmps || [];
+  host.innerHTML = shown.map(function(it){
+    var realIdx = items.indexOf(it);
+    var thumbs = (it.photos||[]).map(function(ph){ return '<img src="' + ph + '" class="fix-thumb" onclick="_plLightbox && _plLightbox(\'' + encodeURIComponent(ph) + '\')">'; }).join('');
+    var opts = '<option value="">Assign to\u2026</option>' + emps.map(function(e){
+      return '<option value="' + e.id + '"' + (it.assigneeId === e.id ? ' selected' : '') + '>' + _esc(e.name||'') + '</option>';
+    }).join('');
+    return '<div class="fix-item' + (it.fixed?' fixed':'') + '">' +
+      '<div class="fix-item-top">' +
+        '<button class="fix-check' + (it.fixed?' on':'') + '" onclick="_fixToggle(' + realIdx + ')">' + (it.fixed?'\u2713':'') + '</button>' +
+        '<textarea class="fix-item-text" rows="1" onblur="_fixSetText(' + realIdx + ',this.value)" placeholder="What needs fixing?">' + _esc(it.text||'') + '</textarea>' +
+        '<button class="fix-del" onclick="_fixDelItem(' + realIdx + ')">\u2715</button>' +
+      '</div>' +
+      '<div class="fix-item-row">' +
+        '<select class="fix-assign" onchange="_fixSetAssignee(' + realIdx + ',this)">' + opts + '</select>' +
+        '<button class="fix-photo-btn" onclick="_fixAddPhoto(' + realIdx + ')">\ud83d\udcf7 Photo</button>' +
+      '</div>' +
+      (thumbs ? '<div class="fix-thumbs">' + thumbs + '</div>' : '') +
+    '</div>';
+  }).join('');
+}
+
+async function _fixAddItem() {
+  var insp = await DB.get('inspection:' + _fixInspId);
+  if (!insp) return;
+  if (!insp.fixItems) insp.fixItems = [];
+  var unit = (_fixScope === 'unit') ? (document.getElementById('fixUnitPicker').value || '') : '';
+  if (_fixScope === 'unit' && !unit) { alert('Pick a unit first (or switch to Whole house).'); return; }
+  insp.fixItems.push({ id: 'fix_' + Date.now() + '_' + Math.random().toString(36).slice(2,6), text: '', scope: _fixScope, unit: unit, assigneeId: '', assigneeName: '', photos: [], fixed: false });
+  await DB.set('inspection:' + _fixInspId, insp);
+  await _fixRenderItems();
+  // focus the new textarea
+  setTimeout(function(){ var tas = document.querySelectorAll('#fixItemsList .fix-item-text'); if (tas.length) tas[tas.length-1].focus(); }, 50);
+}
+async function _fixSetText(idx, val) {
+  var insp = await DB.get('inspection:' + _fixInspId); if (!insp || !insp.fixItems[idx]) return;
+  insp.fixItems[idx].text = val.trim();
+  await DB.set('inspection:' + _fixInspId, insp);
+}
+async function _fixToggle(idx) {
+  var insp = await DB.get('inspection:' + _fixInspId); if (!insp || !insp.fixItems[idx]) return;
+  insp.fixItems[idx].fixed = !insp.fixItems[idx].fixed;
+  await DB.set('inspection:' + _fixInspId, insp);
+  await _fixRenderItems();
+  try { renderInspections(); } catch(e) {}
+}
+async function _fixDelItem(idx) {
+  ddConfirm('Delete this fix item?', async function() {
+    var insp = await DB.get('inspection:' + _fixInspId); if (!insp || !insp.fixItems[idx]) return;
+    insp.fixItems.splice(idx, 1);
+    await DB.set('inspection:' + _fixInspId, insp);
+    await _fixRenderItems();
+    try { renderInspections(); } catch(e) {}
+  });
+}
+async function _fixSetAssignee(idx, sel) {
+  var insp = await DB.get('inspection:' + _fixInspId); if (!insp || !insp.fixItems[idx]) return;
+  var emps = window._fixEmps || [];
+  var emp = emps.find(function(e){ return e.id === sel.value; });
+  insp.fixItems[idx].assigneeId = sel.value;
+  insp.fixItems[idx].assigneeName = emp ? (emp.name||'') : '';
+  await DB.set('inspection:' + _fixInspId, insp);
+}
+async function _fixAddPhoto(idx) {
+  var input = document.createElement('input');
+  input.type = 'file'; input.accept = 'image/*';
+  input.onchange = async function() {
+    var file = input.files[0]; if (!file) return;
+    var reader = new FileReader();
+    reader.onload = async function() {
+      var insp = await DB.get('inspection:' + _fixInspId); if (!insp || !insp.fixItems[idx]) return;
+      if (!insp.fixItems[idx].photos) insp.fixItems[idx].photos = [];
+      insp.fixItems[idx].photos.push(reader.result);
+      await DB.set('inspection:' + _fixInspId, insp);
+      await _fixRenderItems();
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
 async function saveInspection(){
   var type=document.getElementById('insp-type').value.trim();
   if(!type){ alert('Enter the inspection type.'); return; }
@@ -20479,6 +20648,33 @@ if (document.readyState === 'loading') {
 </div>
 
 <!-- INSPECTION MODAL -->
+<!-- INSPECTION FIX LIST MODAL -->
+<div class="modal-overlay" id="modal-fixlist">
+  <div class="modal-box" style="max-width:480px;">
+    <div class="modal-header"><div class="modal-title">🔧 Items to Fix</div><button class="modal-close" onclick="closeFixList()">✕</button></div>
+    <div class="modal-body" style="max-height:78vh;overflow-y:auto;">
+      <div id="fixListSub" style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.4;"></div>
+
+      <!-- Scope toggle -->
+      <div class="form-group">
+        <label class="form-label">This list is for</label>
+        <div style="display:flex;gap:8px;">
+          <button type="button" id="fixScopeHouse" onclick="_fixSetScope('house')" class="fix-scope-btn on" style="flex:1;">🏠 Whole house</button>
+          <button type="button" id="fixScopeUnit" onclick="_fixSetScope('unit')" class="fix-scope-btn" style="flex:1;">🚪 By unit</button>
+        </div>
+      </div>
+      <div class="form-group" id="fixUnitPickerWrap" style="display:none;">
+        <label class="form-label">Unit</label>
+        <select class="form-input" id="fixUnitPicker" onchange="_fixRenderItems()"></select>
+      </div>
+
+      <div id="fixItemsList"></div>
+
+      <button onclick="_fixAddItem()" class="ue-add-item-btn" style="width:100%;margin-top:10px;">+ Add item to fix</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-inspection">
   <div class="modal-box" style="max-width:440px;">
     <div class="modal-header"><div class="modal-title">🔍 Inspection</div><button class="modal-close" onclick="closeInspectionModal()">✕</button></div>
