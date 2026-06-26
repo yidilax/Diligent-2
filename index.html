@@ -3550,6 +3550,10 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .wcal-empty { text-align:center; color:#9a9484; font-size:13px; padding:24px 10px; }
 
 @media (max-width: 600px) { .topbar-greeting { display: none !important; } }
+
+.office-back { background:none; border:none; color:#fff; font-size:28px; line-height:1; cursor:pointer; padding:2px 6px 6px; flex-shrink:0; margin-right:-4px; font-family:Georgia,serif; }
+.office-back:active { opacity:0.6; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -3866,7 +3870,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v154</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v155</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4228,12 +4232,13 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v154</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v155</div>
     </div>
   </div>
 
   <!-- Top bar -->
   <div class="office-topbar">
+    <button id="topbarBack" class="office-back" onclick="goBackTab()" aria-label="Back" style="display:none;">&#8249;</button>
     <button class="office-hamburger" onclick="openSidebar()" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
@@ -5100,7 +5105,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v154';
+<script>var APP_VERSION = 'v155';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -11166,9 +11171,44 @@ function _showTabComingSoon(tab) {
     '</div>';
 }
 
+
+// Show the back button when we're not on the dashboard (and have somewhere to go back to).
+function _updateBackBtn(tab) {
+  var btn = document.getElementById('topbarBack');
+  if (!btn) return;
+  // Show back whenever we're off the dashboard. Back will return to previous tab or dashboard.
+  btn.style.display = (tab && tab !== 'dashboard') ? 'block' : 'none';
+}
+// Go back to the previous tab (or dashboard if no history).
+function goBackTab() {
+  var hist = window._tabHistory || [];
+  // Don't let "back" land on the current tab.
+  var target = null;
+  while (hist.length) {
+    var t = hist.pop();
+    if (t && t !== window._currentTab) { target = t; break; }
+  }
+  if (!target) target = 'dashboard';
+  // Going back shouldn't re-push onto history, so temporarily clear the prev marker.
+  var prevCurrent = window._currentTab;
+  window._currentTab = null; // prevents switchTab from pushing prevCurrent again
+  switchTab(target);
+}
+
 async function switchTab(tab) {
   var _ts = _tabState(tab);
   if (_ts === 'hidden') { if (tab !== 'dashboard') { switchTab('dashboard'); } return; }
+  // Track tab history for the back button (must run before any later early-returns).
+  try {
+    window._tabHistory = window._tabHistory || [];
+    var _prev = window._currentTab;
+    if (_prev && _prev !== tab) {
+      if (window._tabHistory[window._tabHistory.length-1] !== _prev) window._tabHistory.push(_prev);
+      if (window._tabHistory.length > 20) window._tabHistory.shift();
+    }
+    window._currentTab = tab;
+  } catch(e) {}
+  try { _updateBackBtn(tab); } catch(e) {}
   if (typeof refreshNotifBadge === 'function') refreshNotifBadge();
   if (typeof _renderViewAsBanner === 'function') _renderViewAsBanner();
   // Hide all office tabs
