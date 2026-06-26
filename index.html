@@ -3554,6 +3554,41 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .office-back { background:none; border:none; color:#fff; font-size:28px; line-height:1; cursor:pointer; padding:2px 6px 6px; flex-shrink:0; margin-right:-4px; font-family:Georgia,serif; }
 .office-back:active { opacity:0.6; }
 
+
+/* ===== ASANA-STYLE TASKS ===== */
+.ak-toolbar { display:flex; align-items:center; gap:10px; padding:4px 2px 14px; flex-wrap:wrap; }
+.ak-toolbar-lbl { font-size:12px; font-weight:700; color:#9a9484; text-transform:uppercase; letter-spacing:0.5px; }
+.ak-gbtns { display:flex; gap:5px; flex-wrap:wrap; }
+.ak-gbtn { background:#fff; border:1px solid #E3DDD3; border-radius:7px; padding:6px 11px; font-size:12.5px; font-weight:600; color:#6a6453; cursor:pointer; transition:all .12s; }
+.ak-gbtn.on { background:var(--navy); color:#fff; border-color:var(--navy); }
+.ak-section { margin-bottom:8px; }
+.ak-section-hd { display:flex; align-items:center; gap:8px; padding:9px 4px; cursor:pointer; user-select:none; border-bottom:1px solid #EAE5DC; }
+.ak-caret { font-size:11px; color:#b5ae9c; transition:transform .15s; width:12px; }
+.ak-caret.collapsed { transform:rotate(-90deg); }
+.ak-section-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.ak-section-name { font-size:14px; font-weight:800; color:var(--navy); letter-spacing:0.2px; }
+.ak-section-count { font-size:12px; font-weight:700; color:#b5ae9c; background:#F4F1EB; border-radius:20px; padding:1px 9px; }
+.ak-section-body { padding:2px 0; }
+.ak-row { display:flex; align-items:center; gap:11px; padding:11px 6px; border-bottom:1px solid #F4F1EB; cursor:pointer; transition:background .1s; }
+.ak-row:hover { background:#FAF8F3; }
+.ak-row.done .ak-title { text-decoration:line-through; color:#b5ae9c; }
+.ak-check { width:21px; height:21px; border-radius:50%; border:1.5px solid #cfc8b8; background:#fff; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:12px; color:#fff; transition:all .12s; padding:0; }
+.ak-check:hover { border-color:#3a7d5d; }
+.ak-check.on { background:#3a7d5d; border-color:#3a7d5d; }
+.ak-main { flex:1; min-width:0; }
+.ak-title { font-size:14.5px; color:#1d2940; font-weight:500; line-height:1.3; }
+.ak-ms { color:var(--gold); }
+.ak-meta { display:flex; flex-wrap:wrap; gap:6px; margin-top:4px; }
+.ak-chip { font-size:11px; color:#8a8472; background:#F4F1EB; border-radius:5px; padding:2px 7px; white-space:nowrap; }
+.ak-chip.over { background:rgba(192,57,43,0.1); color:#c0392b; font-weight:700; }
+.ak-prio { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.ak-avatar { width:27px; height:27px; border-radius:50%; background:var(--navy); color:#fff; font-size:10.5px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.ak-avatar-empty { background:#F0ECE2; color:#c2bbab; border:1px dashed #d5cdbd; }
+.ak-empty { text-align:center; padding:48px 20px; }
+.ak-empty-icon { width:54px; height:54px; border-radius:50%; background:rgba(58,125,93,0.12); color:#3a7d5d; font-size:26px; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; }
+.ak-empty-title { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:1px; color:var(--navy); margin-bottom:4px; }
+.ak-empty-sub { font-size:13px; color:#9a9484; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -3870,7 +3905,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v155</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v156</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4232,7 +4267,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v155</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v156</div>
     </div>
   </div>
 
@@ -5105,7 +5140,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v155';
+<script>var APP_VERSION = 'v156';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -8761,6 +8796,136 @@ function _taskHouseLabel(t) {
 }
 
 // THE worksheet renderer (replaces smart list)
+
+// ===== ASANA-STYLE LIST VIEW =====
+var _taskGroupBy = window._taskGroupBy || (function(){ try { return localStorage.getItem('dd_taskGroupBy') || 'section'; } catch(e){ return 'section'; } })(); // section | due | priority | project
+window._taskGroupCollapsed = window._taskGroupCollapsed || {};
+
+function _setTaskGroupBy(g) {
+  window._taskGroupBy = g; _taskGroupBy = g;
+  try { localStorage.setItem('dd_taskGroupBy', g); } catch(e) {}
+  renderTasks();
+}
+
+// Build the group buckets based on the current Group by setting.
+function _taskGroups(tasks) {
+  var g = window._taskGroupBy || 'section';
+  var groups = []; // [{key,label,accent,items}]
+  function bucket(key, label, accent) {
+    var found = groups.find(function(x){ return x.key === key; });
+    if (!found) { found = { key:key, label:label, accent:accent, items:[] }; groups.push(found); }
+    return found;
+  }
+  if (g === 'section') {
+    // Time-based, like Asana's default My Tasks sections.
+    var order = [['overdue','Overdue','#c0392b'],['today','Today','#1a2b4a'],['week','This Week','#b8860b'],['later','Later','#8a8472'],['done','Completed','#3a7d5d']];
+    order.forEach(function(o){ bucket(o[0],o[1],o[2]); });
+    tasks.forEach(function(t){
+      var b = _taskBucket(t);
+      if (b === 'overdue') bucket('overdue').items.push(t);
+      else if (b === 'today') bucket('today').items.push(t);
+      else if (b === 'week') bucket('week').items.push(t);
+      else if (b === 'done') bucket('done').items.push(t);
+      else bucket('later').items.push(t);
+    });
+  } else if (g === 'due') {
+    tasks.forEach(function(t){
+      var key = t.dueDate || 'none';
+      var label = t.dueDate ? _fmtTaskDate(t.dueDate) : 'No due date';
+      bucket(key, label, '#1a2b4a').items.push(t);
+    });
+    groups.sort(function(a,b){ if(a.key==='none')return 1; if(b.key==='none')return -1; return a.key.localeCompare(b.key); });
+  } else if (g === 'priority') {
+    var pord = [['urgent','Urgent','#c0392b'],['high','High','#e07a4a'],['medium','Medium','#b8860b'],['low','Low','#8a8472'],['none','No priority','#aaa']];
+    pord.forEach(function(o){ bucket(o[0],o[1],o[2]); });
+    tasks.forEach(function(t){ bucket(t.priority||'none').items.push(t); });
+  } else if (g === 'project') {
+    tasks.forEach(function(t){
+      var key = t.projectId || 'none';
+      var label = t.projectName || 'No project';
+      bucket(key, label, '#2c5d8a').items.push(t);
+    });
+    groups.sort(function(a,b){ if(a.key==='none')return 1; if(b.key==='none')return -1; return (a.label||'').localeCompare(b.label||''); });
+  }
+  // sort items within each group by priority then due
+  var prioRank = { urgent:0, high:1, medium:2, low:3 };
+  groups.forEach(function(gr){
+    gr.items.sort(function(a,b){
+      var pr=(prioRank[a.priority]||9)-(prioRank[b.priority]||9);
+      if (pr!==0) return pr;
+      return (a.dueDate||'9999').localeCompare(b.dueDate||'9999');
+    });
+  });
+  // drop empty groups (except keep nothing special)
+  return groups.filter(function(gr){ return gr.items.length > 0; });
+}
+
+// A single clean Asana-style task row.
+function _asanaRow(t) {
+  var pm = _taskPriorityMeta(t.priority);
+  var done = (t.status||'todo') === 'done';
+  var due = t.dueDate ? _fmtTaskDate(t.dueDate) : '';
+  var overdue = t.dueDate && !done && new Date(t.dueDate+'T00:00:00') < new Date(new Date().toDateString());
+  var house = _taskHouseLabel(t);
+  var who = (t.assigneeName||'').trim();
+  var initials = who ? who.split(' ').map(function(p){return p[0];}).slice(0,2).join('').toUpperCase() : '';
+  var subCount = (t.subtasks||[]).length;
+  var subDone = (t.subtasks||[]).filter(function(s){return s.done;}).length;
+  return '<div class="ak-row' + (done?' done':'') + '" onclick="openTaskQuickActions(\'' + t.id + '\')">' +
+    '<button class="ak-check' + (done?' on':'') + '" onclick="event.stopPropagation();toggleTaskDone(\'' + t.id + '\')" aria-label="Complete task">' + (done?'\u2713':'') + '</button>' +
+    '<div class="ak-main">' +
+      '<div class="ak-title">' + (t.isMilestone?'<span class="ak-ms">\u2691</span> ':'') + _esc(t.title||'Untitled') + '</div>' +
+      ((house||due||subCount) ? '<div class="ak-meta">' +
+        (house ? '<span class="ak-chip">\u2302 ' + _esc(house) + '</span>' : '') +
+        (due ? '<span class="ak-chip' + (overdue?' over':'') + '">\ud83d\udcc5 ' + due + '</span>' : '') +
+        (subCount ? '<span class="ak-chip">\u2713 ' + subDone + '/' + subCount + '</span>' : '') +
+      '</div>' : '') +
+    '</div>' +
+    (t.priority ? '<span class="ak-prio" style="background:' + pm.color + '" title="' + pm.label + '"></span>' : '') +
+    (who ? '<span class="ak-avatar" title="' + _esc(who) + '">' + initials + '</span>' : '<span class="ak-avatar ak-avatar-empty">+</span>') +
+  '</div>';
+}
+
+// Render the full Asana-style list with group-by sections.
+function _renderTaskAsana(tasks) {
+  var groups = _taskGroups(tasks);
+  var gb = window._taskGroupBy || 'section';
+  var gbLabels = { section: 'Section', due: 'Due date', priority: 'Priority', project: 'Project' };
+
+  // Group-by switcher
+  var html = '<div class="ak-toolbar">' +
+    '<span class="ak-toolbar-lbl">Group by</span>' +
+    '<div class="ak-gbtns">' +
+      ['section','due','priority','project'].map(function(g){
+        return '<button class="ak-gbtn' + (gb===g?' on':'') + '" onclick="_setTaskGroupBy(\'' + g + '\')">' + gbLabels[g] + '</button>';
+      }).join('') +
+    '</div>' +
+  '</div>';
+
+  if (!groups.length) {
+    html += '<div class="ak-empty"><div class="ak-empty-icon">\u2713</div><div class="ak-empty-title">All clear</div><div class="ak-empty-sub">No tasks here. Add one above to get started.</div></div>';
+    return html;
+  }
+
+  groups.forEach(function(gr){
+    var collapsed = !!window._taskGroupCollapsed[gr.key];
+    html += '<div class="ak-section">' +
+      '<div class="ak-section-hd" onclick="_toggleTaskGroup(\'' + gr.key + '\')">' +
+        '<span class="ak-caret' + (collapsed?' collapsed':'') + '">\u25be</span>' +
+        '<span class="ak-section-dot" style="background:' + gr.accent + '"></span>' +
+        '<span class="ak-section-name">' + _esc(gr.label) + '</span>' +
+        '<span class="ak-section-count">' + gr.items.length + '</span>' +
+      '</div>' +
+      (collapsed ? '' : '<div class="ak-section-body">' + gr.items.map(_asanaRow).join('') + '</div>') +
+    '</div>';
+  });
+  return html;
+}
+function _toggleTaskGroup(key) {
+  window._taskGroupCollapsed[key] = !window._taskGroupCollapsed[key];
+  renderTasks();
+}
+
 function _renderTaskSmart(tasks) {
   var wd = _workOrderDateLabel();
 
@@ -8966,7 +9131,7 @@ async function renderTasks() {
   var countEl = document.getElementById('tasks-count');
   if (countEl) countEl.textContent = openCount + ' open task' + (openCount !== 1 ? 's' : '');
 
-  if (_taskView === 'list')      { host.innerHTML = _renderTaskSmart(filtered); setTimeout(_wireTaskSwipe, 30); }
+  if (_taskView === 'list')      { host.innerHTML = _renderTaskAsana(filtered); setTimeout(_wireTaskSwipe, 30); }
   else if (_taskView === 'board') host.innerHTML = _renderTaskBoardNew(filtered);
   else if (_taskView === 'calendar') host.innerHTML = _renderTaskCalendar(filtered);
   else if (_taskView === 'timeline') host.innerHTML = _renderTaskTimeline(filtered);
