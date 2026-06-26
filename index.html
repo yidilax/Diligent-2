@@ -3520,6 +3520,35 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .pm-btn-out { color:#c0392b; border-color:rgba(192,57,43,0.25); }
 .pm-settings { margin-top:8px; border-top:1px solid #F0ECE2; padding-top:14px; }
 
+
+/* ===== WALKTHROUGH CALENDAR PICKER ===== */
+#walkCalOverlay { display:none; position:fixed; inset:0; background:rgba(13,31,60,0.5); z-index:5200; align-items:flex-end; justify-content:center; }
+.wcal-sheet { background:#fff; width:100%; max-width:480px; border-radius:18px 18px 0 0; padding:18px 18px 26px; max-height:88vh; overflow-y:auto; box-shadow:0 -6px 30px rgba(0,0,0,0.25); }
+.wcal-handle { width:40px; height:4px; background:#E3DDD3; border-radius:3px; margin:0 auto 14px; }
+.wcal-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+.wcal-title { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:0.5px; color:var(--navy); }
+.wcal-x { background:none; border:none; font-size:18px; color:#9a9484; cursor:pointer; }
+.wcal-sub { font-size:12px; color:#9a9484; margin-bottom:16px; }
+.wcal-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.wcal-navbtn { background:#FAF8F3; border:1px solid #E3DDD3; border-radius:9px; width:38px; height:38px; font-size:16px; color:var(--navy); cursor:pointer; }
+.wcal-navbtn:disabled { opacity:0.3; cursor:default; }
+.wcal-month { font-size:15px; font-weight:800; color:var(--navy); }
+.wcal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin-bottom:8px; }
+.wcal-dow { text-align:center; font-size:10px; font-weight:800; color:#b5ae9c; text-transform:uppercase; padding:4px 0; }
+.wcal-day { aspect-ratio:1; border:none; border-radius:10px; background:#F4F1EB; color:#c2bbab; font-size:14px; font-weight:700; cursor:default; display:flex; align-items:center; justify-content:center; position:relative; }
+.wcal-day.has-slots { background:#fff; border:1.5px solid var(--navy); color:var(--navy); cursor:pointer; }
+.wcal-day.has-slots:hover { background:var(--navy); color:#fff; }
+.wcal-day.selected { background:var(--navy); color:#fff; }
+.wcal-day.empty { background:none; }
+.wcal-day .dot { position:absolute; bottom:5px; width:4px; height:4px; border-radius:50%; background:var(--gold); }
+.wcal-day.selected .dot { background:#fff; }
+.wcal-times { margin-top:6px; }
+.wcal-times-label { font-size:12px; font-weight:800; color:var(--navy); margin-bottom:9px; }
+.wcal-times-grid { display:flex; flex-wrap:wrap; gap:7px; }
+.wcal-time { background:#fff; border:1.5px solid var(--border); border-radius:9px; padding:10px 14px; font-size:13px; font-weight:700; color:var(--navy); cursor:pointer; }
+.wcal-time:hover { border-color:var(--navy); background:#FAF8F3; }
+.wcal-empty { text-align:center; color:#9a9484; font-size:13px; padding:24px 10px; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -3836,7 +3865,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v147</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v149</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -3925,9 +3954,9 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     <!-- Request a Walkthrough -->
     <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;margin-top:14px;">
       <div style="font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:0.5px;color:var(--navy);margin-bottom:6px;">🚶 Request a Walkthrough</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.45;">Pick a time that works for you from our available slots below, and it's booked — we'll see you then.</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.45;">Want to visit the site or do a final walkthrough? Pick a time that works — we'll confirm it.</div>
       <div id="cdWalkStatus"></div>
-      <div id="cdWalkSlots"></div>
+      <div id="cdWalkCta"></div>
     </div>
   </div>
 </div>
@@ -4198,7 +4227,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v147</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v149</div>
     </div>
   </div>
 
@@ -5066,7 +5095,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v147';
+<script>var APP_VERSION = 'v149';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -6792,100 +6821,133 @@ function _toggleFaq(i) {
 
 // Show the office's available walkthrough slots for the customer to book (one tap).
 async function _loadWalkSlots(address, unit) {
-  var host = document.getElementById('cdWalkSlots');
+  // Renders just the CTA button (calendar opens on tap). Hidden if an active walkthrough exists.
+  var host = document.getElementById('cdWalkCta');
   if (!host) return;
   try {
     var keys = await DB.list('walkreq:');
     var reqs = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
-    // If this customer already has an active walkthrough, hide the picker.
     var hasActive = reqs.some(function(r){
       return (r.address||'').toLowerCase().trim() === (address||'').toLowerCase().trim() &&
              String(r.unit||'').toLowerCase().trim() === String(unit||'').toLowerCase().trim() &&
              (r.status === 'requested' || r.status === 'proposed' || r.status === 'confirmed');
     });
     if (hasActive) { host.innerHTML = ''; return; }
-
     var cfg = await DB.get('walkavail:config');
     if (!cfg || !(cfg.days||[]).length) {
-      host.innerHTML = '<div style="font-size:12px;color:var(--muted);text-align:center;padding:8px;">No times available yet \u2014 please call the office to schedule.</div>';
+      host.innerHTML = '<div style="font-size:12px;color:var(--muted);text-align:center;padding:6px;">Call the office to schedule a walkthrough.</div>';
       return;
     }
-
-    // Slot length: 30 min before completion date, 60 min after.
-    var slotMin = 30;
-    try {
-      var k = (typeof _psKey === 'function') ? _psKey(address, unit) : null;
-      var pcfg = k ? (await DB.get('pubportalcfg:' + k)) : null;
-      if (pcfg && pcfg.dateCompletion) {
-        var comp = new Date(pcfg.dateCompletion + 'T00:00:00');
-        if (new Date() >= comp) slotMin = 60;
-      }
-    } catch(e) {}
-
-    // Times already taken (confirmed or pending requests occupy their slot).
-    var taken = {};
-    reqs.forEach(function(r){
-      if ((r.status==='confirmed'||r.status==='requested'||r.status==='proposed') && r.date && r.time) {
-        taken[r.date + 'T' + r.time] = true;
-      }
-    });
-
-    // Busy blocks + blocked days from config.
-    var blockedDays = {}; (cfg.blockedDays||[]).forEach(function(d){ blockedDays[d] = true; });
-    var busy = cfg.busy || [];
-    function inBusy(dateStr, mins) {
-      for (var i=0;i<busy.length;i++){
-        var bb = busy[i];
-        if (bb.date !== dateStr) continue;
-        var bs = _hm2min(bb.start), be = _hm2min(bb.end);
-        if (mins < be && (mins + slotMin) > bs) return true; // overlap
-      }
-      return false;
-    }
-
-    var startMin = _hm2min(cfg.start || '09:00');
-    var endMin = _hm2min(cfg.end || '17:00');
-    var slotsByDate = [];
-    var today = new Date(); today.setHours(0,0,0,0);
-    // Look ahead 21 days.
-    for (var off = 0; off < 21; off++) {
-      var d = new Date(today.getTime() + off*86400000);
-      var dow = d.getDay();
-      if ((cfg.days||[]).indexOf(dow) === -1) continue; // not a working day
-      var ymd = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-      if (blockedDays[ymd]) continue; // whole day off
-      var times = [];
-      for (var m = startMin; m + slotMin <= endMin; m += slotMin) {
-        var hm = _min2hm(m);
-        var slotDate = new Date(ymd + 'T' + hm + ':00');
-        if (slotDate < new Date()) continue; // past
-        if (taken[ymd + 'T' + hm]) continue; // already booked
-        if (inBusy(ymd, m)) continue; // office busy
-        times.push(hm);
-      }
-      if (times.length) slotsByDate.push({ date: ymd, dObj: d, times: times });
-      if (slotsByDate.length >= 7) break; // show up to 7 open days
-    }
-
-    if (!slotsByDate.length) {
-      host.innerHTML = '<div style="font-size:12px;color:var(--muted);text-align:center;padding:8px;">No open times in the next few weeks \u2014 please call the office.</div>';
-      return;
-    }
-
-    host.innerHTML = '<div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Pick a time below \u2014 we\u2019ll confirm it shortly. (' + slotMin + ' min)</div>' +
-      slotsByDate.map(function(g){
-        var dateLabel = g.dObj.toLocaleDateString('en-US', { weekday:'long', month:'short', day:'numeric' });
-        return '<div style="margin-bottom:12px;">' +
-          '<div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:6px;">' + dateLabel + '</div>' +
-          '<div style="display:flex;flex-wrap:wrap;gap:6px;">' +
-            g.times.map(function(t){
-              var label = (typeof _fmt12==='function') ? _fmt12(t) : t;
-              return '<button onclick="_custBookSlot(\'' + g.date + 'T' + t + '\',' + slotMin + ')" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;font-weight:700;color:var(--navy);cursor:pointer;">' + label + '</button>';
-            }).join('') +
-          '</div>' +
-        '</div>';
-      }).join('');
+    host.innerHTML = '<button onclick="openWalkCal()" style="background:var(--navy);color:#fff;border:none;border-radius:10px;padding:13px 16px;font-size:14px;font-weight:700;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;">\ud83d\uddd3\ufe0f Request a Walkthrough</button>';
   } catch(e) { host.innerHTML = ''; }
+}
+
+// ===== CALENDAR PICKER =====
+var _wcalView = null;     // {year, month}
+var _wcalSlotMin = 30;
+var _wcalAvailMap = {};   // 'YYYY-MM-DD' -> [times]
+var _wcalSelected = null; // selected date string
+
+async function openWalkCal() {
+  var ov = document.getElementById('walkCalOverlay');
+  if (!ov) return;
+  _wcalSelected = null;
+  document.getElementById('wcalTimes').innerHTML = '';
+  await _wcalBuildAvailability();
+  var now = new Date();
+  _wcalView = { year: now.getFullYear(), month: now.getMonth() };
+  _wcalRender();
+  ov.style.display = 'flex';
+}
+function closeWalkCal() { var ov = document.getElementById('walkCalOverlay'); if (ov) ov.style.display = 'none'; }
+
+// Compute open times per day for the next ~60 days from the availability config.
+async function _wcalBuildAvailability() {
+  _wcalAvailMap = {};
+  var cfg = await DB.get('walkavail:config') || {};
+  // slot length from completion date
+  _wcalSlotMin = 30;
+  try {
+    var k = (typeof _psKey === 'function') ? _psKey(window._custAddress, window._custUnit) : null;
+    var pcfg = k ? (await DB.get('pubportalcfg:' + k)) : null;
+    if (pcfg && pcfg.dateCompletion && new Date() >= new Date(pcfg.dateCompletion + 'T00:00:00')) _wcalSlotMin = 60;
+  } catch(e) {}
+  var keys = await DB.list('walkreq:');
+  var reqs = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+  var taken = {};
+  reqs.forEach(function(r){ if ((r.status==='confirmed'||r.status==='requested'||r.status==='proposed') && r.date && r.time) taken[r.date+'T'+r.time] = true; });
+  var blockedDays = {}; (cfg.blockedDays||[]).forEach(function(d){ blockedDays[d] = true; });
+  var busy = cfg.busy || [];
+  function inBusy(dateStr, mins){ for (var i=0;i<busy.length;i++){ var bb=busy[i]; if (bb.date!==dateStr) continue; var bs=_hm2min(bb.start), be=_hm2min(bb.end); if (mins<be && (mins+_wcalSlotMin)>bs) return true; } return false; }
+  var startMin = _hm2min(cfg.start||'09:00'), endMin = _hm2min(cfg.end||'17:00');
+  var today = new Date(); today.setHours(0,0,0,0);
+  for (var off=0; off<60; off++){
+    var d = new Date(today.getTime()+off*86400000);
+    if ((cfg.days||[]).indexOf(d.getDay())===-1) continue;
+    var ymd = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    if (blockedDays[ymd]) continue;
+    var times=[];
+    for (var m=startMin; m+_wcalSlotMin<=endMin; m+=_wcalSlotMin){
+      var hm=_min2hm(m);
+      if (new Date(ymd+'T'+hm+':00') < new Date()) continue;
+      if (taken[ymd+'T'+hm]) continue;
+      if (inBusy(ymd,m)) continue;
+      times.push(hm);
+    }
+    if (times.length) _wcalAvailMap[ymd] = times;
+  }
+}
+
+function _wcalMonth(dir) {
+  _wcalView.month += dir;
+  if (_wcalView.month < 0) { _wcalView.month = 11; _wcalView.year--; }
+  if (_wcalView.month > 11) { _wcalView.month = 0; _wcalView.year++; }
+  _wcalSelected = null;
+  document.getElementById('wcalTimes').innerHTML = '';
+  _wcalRender();
+}
+
+function _wcalRender() {
+  var y = _wcalView.year, mo = _wcalView.month;
+  document.getElementById('wcalMonthLabel').textContent = new Date(y, mo, 1).toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  // day-of-week header
+  var dow = document.getElementById('wcalDow');
+  dow.innerHTML = ['S','M','T','W','T','F','S'].map(function(x){ return '<div class="wcal-dow">'+x+'</div>'; }).join('');
+  // disable prev if before current month
+  var now = new Date();
+  var prevBtn = document.getElementById('wcalPrev');
+  prevBtn.disabled = (y < now.getFullYear()) || (y===now.getFullYear() && mo<=now.getMonth());
+  var first = new Date(y, mo, 1);
+  var startDow = first.getDay();
+  var daysInMonth = new Date(y, mo+1, 0).getDate();
+  var cells = '';
+  for (var i=0;i<startDow;i++) cells += '<div class="wcal-day empty"></div>';
+  for (var dnum=1; dnum<=daysInMonth; dnum++){
+    var ymd = y+'-'+String(mo+1).padStart(2,'0')+'-'+String(dnum).padStart(2,'0');
+    var has = _wcalAvailMap[ymd] && _wcalAvailMap[ymd].length;
+    var cls = 'wcal-day' + (has?' has-slots':'') + (_wcalSelected===ymd?' selected':'');
+    cells += '<button class="' + cls + '" ' + (has?('onclick="_wcalPickDay(\''+ymd+'\')"'):'disabled') + '>' + dnum + (has?'<span class="dot"></span>':'') + '</button>';
+  }
+  document.getElementById('wcalDays').innerHTML = cells;
+}
+
+function _wcalPickDay(ymd) {
+  _wcalSelected = ymd;
+  _wcalRender();
+  var times = _wcalAvailMap[ymd] || [];
+  var host = document.getElementById('wcalTimes');
+  var label = new Date(ymd+'T00:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  host.innerHTML = '<div class="wcal-times-label">' + label + ' \u00b7 ' + _wcalSlotMin + ' min</div>' +
+    '<div class="wcal-times-grid">' + times.map(function(t){
+      var lbl = (typeof _fmt12==='function') ? _fmt12(t) : t;
+      return '<button class="wcal-time" onclick="_wcalPickTime(\'' + ymd + '\',\'' + t + '\')">' + lbl + '</button>';
+    }).join('') + '</div>';
+  host.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+async function _wcalPickTime(date, time) {
+  closeWalkCal();
+  await _custBookSlot(date + 'T' + time, _wcalSlotMin);
 }
 // time helpers
 function _hm2min(hm){ var p=(hm||'0:0').split(':'); return parseInt(p[0])*60 + parseInt(p[1]||0); }
@@ -17363,6 +17425,7 @@ async function _renderOfficeCustomerIssues() {
               '<div style="display:flex;align-items:flex-start;gap:8px;">' +
                 '<div style="flex:1;min-width:0;font-size:13px;color:#16233d;">' + _esc(it.text) + '</div>' +
                 '<button onclick="_officeResolveIssue(\'' + g.address.replace(/\'/g,"") + '\',\'' + (g.unit||'').replace(/\'/g,"") + '\',' + origIdx + ')" style="background:#2D7A4F;color:#fff;border:none;border-radius:5px;padding:3px 9px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;">Resolve</button>' +
+                '<button onclick="_officeDeleteIssue(\'' + g.address.replace(/\'/g,"") + '\',\'' + (g.unit||'').replace(/\'/g,"") + '\',' + origIdx + ')" style="background:rgba(192,57,43,0.1);color:#c0392b;border:none;border-radius:5px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;" title="Delete">🗑</button>' +
               '</div>' +
               (thumbs ? '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px;">' + thumbs + '</div>' : '') +
             '</div>';
@@ -17383,6 +17446,22 @@ async function _officeResolveIssue(address, unit, idx) {
       try { _updateCustReportsBadge(); } catch(e) {}
     }
   } catch(e) {}
+}
+async function _officeDeleteIssue(address, unit, idx) {
+  ddConfirm('Delete this reported issue? This cannot be undone.', async function() {
+    try {
+      var key = 'custpunch:' + btoa(unescape(encodeURIComponent((address||'') + '|' + (unit||'Main')))).replace(/=/g,'');
+      var rec = await DB.get(key);
+      if (rec && rec.items && rec.items[idx]) {
+        rec.items.splice(idx, 1);
+        if (rec.items.length) { await DB.set(key, rec); }
+        else { await DB.delete(key); }
+        await _renderOfficeCustomerIssues();
+        try { _updateCustReportsBadge(); } catch(e) {}
+        try { _autoPublish(); } catch(e) {}
+      }
+    } catch(e) {}
+  });
 }
 
 async function renderPunchList() {
@@ -20157,6 +20236,26 @@ if (document.readyState === 'loading') {
 </div>
 
 <!-- WALKTHROUGH REQUEST MODAL -->
+<!-- WALKTHROUGH CALENDAR PICKER -->
+<div id="walkCalOverlay" onclick="if(event.target===this)closeWalkCal()">
+  <div class="wcal-sheet">
+    <div class="wcal-handle"></div>
+    <div class="wcal-head">
+      <span class="wcal-title">Pick a Time</span>
+      <button class="wcal-x" onclick="closeWalkCal()">&#10005;</button>
+    </div>
+    <div class="wcal-sub" id="wcalSub">Choose a day, then a time. We’ll confirm it.</div>
+    <div class="wcal-nav">
+      <button class="wcal-navbtn" id="wcalPrev" onclick="_wcalMonth(-1)">&#8249;</button>
+      <span class="wcal-month" id="wcalMonthLabel"></span>
+      <button class="wcal-navbtn" id="wcalNext" onclick="_wcalMonth(1)">&#8250;</button>
+    </div>
+    <div class="wcal-grid" id="wcalDow"></div>
+    <div class="wcal-grid" id="wcalDays"></div>
+    <div class="wcal-times" id="wcalTimes"></div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-walkrequest">
   <div class="modal-box" style="max-width:420px;">
     <div class="modal-header"><div class="modal-title">🚶 Request a Walkthrough</div><button class="modal-close" onclick="closeWalkRequest()">✕</button></div>
