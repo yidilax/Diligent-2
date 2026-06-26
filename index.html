@@ -3836,7 +3836,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v145</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v147</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -3884,6 +3884,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     <div style="font-size:13px;color:var(--muted);margin-bottom:18px;">Everything about your home, all in one place.</div>
 
     <div id="cdWelcomeBanner"></div>
+    <div id="cdStatusLine"></div>
 
     <!-- Primary actions -->
     <div style="margin-bottom:8px;">
@@ -3906,6 +3907,8 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     <div id="cdFiles"></div>
 
     <!-- Issue / punch list -->
+        <div id="cdFaq"></div>
+
     <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;margin-top:14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;">
         <div style="font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:0.5px;color:var(--navy);">📝 Report an Issue</div>
@@ -4195,7 +4198,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v145</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v147</div>
     </div>
   </div>
 
@@ -4347,6 +4350,25 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
         <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;color:var(--navy);">Customer Portals</div>
         <div style="font-size:13px;color:var(--muted);">Set up each home's welcome portal — message, contact, dates, photos, and progress.</div>
       </div>
+
+      <!-- Global: status line + FAQ (shown to ALL customers) -->
+      <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:16px;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:0.5px;color:var(--navy);margin-bottom:4px;">📢 What's Happening Now</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.45;">One short line shown to every customer. Update it weekly so they stop asking “any updates?”</div>
+        <input id="globalStatusLine" class="form-input" placeholder="e.g. Crews are doing electrical this week — on track for August" maxlength="160">
+        <button onclick="saveGlobalStatus()" style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer;width:100%;margin-top:10px;">Save Status</button>
+      </div>
+
+      <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:0.5px;color:var(--navy);">❓ Common Questions (FAQ)</div>
+          <button onclick="_addFaqRow()" style="background:rgba(201,168,76,0.15);color:#b8860b;border:1px solid rgba(201,168,76,0.4);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">+ Add Q&amp;A</button>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.45;">Answer the questions customers ask most. They’ll read these instead of calling you.</div>
+        <div id="faqEditorList"></div>
+        <button onclick="saveFaq()" style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;width:100%;margin-top:10px;">Save FAQ</button>
+      </div>
+
       <div id="custPortalsList"></div>
     </div>
 
@@ -4406,13 +4428,32 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
         <div style="font-size:13px;color:var(--muted);">Walkthrough and site-visit requests from your customers.</div>
       </div>
       <div id="walkthroughAvail" style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:18px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;">
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:0.5px;color:var(--navy);">Available Walkthrough Times</div>
-          <button onclick="_addWalkSlotRow()" style="background:rgba(201,168,76,0.15);color:var(--gold-dark,#b8860b);border:1px solid rgba(201,168,76,0.4);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">+ Add time</button>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:0.5px;color:var(--navy);margin-bottom:4px;">Walkthrough Availability</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.45;">Set your normal hours. Customers see open slots from these, minus your busy times and days off. Every booking still needs your approval.</div>
+
+        <!-- Working days + hours -->
+        <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:#a39c8a;margin-bottom:8px;">Working Days</div>
+        <div id="availDays" style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px;"></div>
+        <div style="display:flex;gap:10px;margin-bottom:16px;">
+          <div style="flex:1;"><label class="form-label">Start</label><input type="time" id="availStart" class="form-input" value="09:00"></div>
+          <div style="flex:1;"><label class="form-label">End</label><input type="time" id="availEnd" class="form-input" value="17:00"></div>
         </div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.45;">Set the times that work for you. Customers will pick from these when booking a walkthrough — no back-and-forth.</div>
-        <div id="walkSlotsList"></div>
-        <button onclick="saveWalkSlots()" style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;width:100%;margin-top:10px;">Save Available Times</button>
+
+        <!-- Blocked whole days -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;">
+          <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:#a39c8a;">Days Off (whole day blocked)</div>
+          <button onclick="_addBlockedDayRow()" style="background:rgba(192,57,43,0.1);color:#c0392b;border:none;border-radius:7px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer;">+ Day off</button>
+        </div>
+        <div id="blockedDaysList" style="margin-bottom:16px;"></div>
+
+        <!-- Busy time blocks -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;">
+          <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:#a39c8a;">Busy Times (block part of a day)</div>
+          <button onclick="_addBusyRow()" style="background:rgba(192,57,43,0.1);color:#c0392b;border:none;border-radius:7px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer;">+ Busy time</button>
+        </div>
+        <div id="busyTimesList" style="margin-bottom:6px;"></div>
+
+        <button onclick="saveAvailability()" style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:11px 16px;font-size:13px;font-weight:700;cursor:pointer;width:100%;margin-top:12px;">Save Availability</button>
       </div>
       <div id="walkthroughsList"></div>
     </div>
@@ -5025,7 +5066,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v145';
+<script>var APP_VERSION = 'v147';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -6304,46 +6345,139 @@ async function _loadCustomerProgress(address, unit, targetId) {
 
 
 
+
+// ===== GLOBAL STATUS LINE + FAQ (office writes once; all customers see) =====
+async function loadGlobalStatusEditor() {
+  try {
+    var el = document.getElementById('globalStatusLine');
+    if (!el) return;
+    var data = await DB.get('custglobal:status') || {};
+    el.value = data.text || '';
+  } catch(e) {}
+}
+async function saveGlobalStatus() {
+  var el = document.getElementById('globalStatusLine');
+  var text = el ? el.value.trim() : '';
+  await DB.set('custglobal:status', { text: text, _updatedAt: Date.now() });
+  alert(text ? 'Status saved \u2014 all customers will see it.' : 'Status cleared.');
+}
+var _faqSeq = 0;
+async function loadFaqEditor() {
+  var host = document.getElementById('faqEditorList');
+  if (!host) return;
+  host.innerHTML = '';
+  var data = await DB.get('custglobal:faq') || { items: [] };
+  (data.items || []).forEach(function(it){ _addFaqRow(it.q, it.a); });
+  if (!(data.items || []).length) _addFaqRow();
+}
+function _addFaqRow(q, a) {
+  var host = document.getElementById('faqEditorList');
+  if (!host) return;
+  _faqSeq++;
+  var row = document.createElement('div');
+  row.className = 'faq-row';
+  row.style.cssText = 'border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:9px;background:#FAF8F3;';
+  row.innerHTML =
+    '<div style="display:flex;gap:7px;align-items:flex-start;">' +
+      '<div style="flex:1;">' +
+        '<input class="faq-q form-input" placeholder="Question (e.g. Can I still change my upgrades?)" value="' + (q?_esc(q).replace(/"/g,"&quot;"):'') + '" style="margin-bottom:7px;">' +
+        '<textarea class="faq-a form-input" rows="2" placeholder="Your answer">' + (a?_esc(a):'') + '</textarea>' +
+      '</div>' +
+      '<button onclick="this.closest(\'.faq-row\').remove()" style="background:rgba(192,57,43,0.1);color:#c0392b;border:none;border-radius:7px;width:32px;height:32px;font-size:14px;cursor:pointer;flex-shrink:0;">\u2715</button>' +
+    '</div>';
+  host.appendChild(row);
+}
+async function saveFaq() {
+  var rows = document.querySelectorAll('#faqEditorList .faq-row');
+  var items = [];
+  rows.forEach(function(r){
+    var q = r.querySelector('.faq-q').value.trim();
+    var a = r.querySelector('.faq-a').value.trim();
+    if (q && a) items.push({ q: q, a: a });
+  });
+  await DB.set('custglobal:faq', { items: items, _updatedAt: Date.now() });
+  alert('Saved ' + items.length + ' question' + (items.length!==1?'s':'') + '. Customers can read these now.');
+  loadFaqEditor();
+}
+
+
+// ===== WALKTHROUGH AVAILABILITY v2 (work hours + days off + busy blocks; customer picks, office approves) =====
+var _DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+// Render the office availability editor from saved config.
+async function renderAvailabilityEditor() {
+  var cfg = await DB.get('walkavail:config') || {};
+  // Working days (default Mon-Fri).
+  var days = cfg.days || [1,2,3,4,5];
+  var daysHost = document.getElementById('availDays');
+  if (daysHost) {
+    daysHost.innerHTML = _DOW.map(function(d, i){
+      var on = days.indexOf(i) !== -1;
+      return '<button type="button" onclick="_toggleAvailDay(' + i + ',this)" data-day="' + i + '" data-on="' + (on?'1':'0') + '" class="avail-day" style="flex:1;min-width:40px;padding:8px 4px;border-radius:8px;border:1px solid ' + (on?'var(--navy)':'#E3DDD3') + ';background:' + (on?'var(--navy)':'#fff') + ';color:' + (on?'#fff':'#6a6453') + ';font-size:12px;font-weight:700;cursor:pointer;">' + d + '</button>';
+    }).join('');
+  }
+  var s = document.getElementById('availStart'); if (s) s.value = cfg.start || '09:00';
+  var e = document.getElementById('availEnd'); if (e) e.value = cfg.end || '17:00';
+  // Blocked days.
+  var bd = document.getElementById('blockedDaysList');
+  if (bd) { bd.innerHTML = ''; (cfg.blockedDays || []).forEach(function(d){ _addBlockedDayRow(d); }); }
+  // Busy times.
+  var bt = document.getElementById('busyTimesList');
+  if (bt) { bt.innerHTML = ''; (cfg.busy || []).forEach(function(b){ _addBusyRow(b.date, b.start, b.end); }); }
+}
+function _toggleAvailDay(i, btn) {
+  var active = btn.getAttribute('data-on') !== '1';
+  btn.setAttribute('data-on', active ? '1' : '0');
+  btn.style.background = active ? 'var(--navy)' : '#fff';
+  btn.style.color = active ? '#fff' : '#6a6453';
+  btn.style.borderColor = active ? 'var(--navy)' : '#E3DDD3';
+}
+function _addBlockedDayRow(date) {
+  var host = document.getElementById('blockedDaysList'); if (!host) return;
+  var row = document.createElement('div');
+  row.className = 'blockedday-row';
+  row.style.cssText = 'display:flex;gap:7px;align-items:center;margin-bottom:7px;';
+  row.innerHTML = '<input type="date" class="bd-date form-input" style="flex:1;" value="' + (date||'') + '">' +
+    '<button onclick="this.parentNode.remove()" style="background:rgba(192,57,43,0.1);color:#c0392b;border:none;border-radius:7px;width:34px;height:34px;font-size:13px;cursor:pointer;flex-shrink:0;">\u2715</button>';
+  host.appendChild(row);
+}
+function _addBusyRow(date, start, end) {
+  var host = document.getElementById('busyTimesList'); if (!host) return;
+  var row = document.createElement('div');
+  row.className = 'busy-row';
+  row.style.cssText = 'display:flex;gap:6px;align-items:center;margin-bottom:7px;flex-wrap:wrap;';
+  row.innerHTML = '<input type="date" class="busy-date form-input" style="flex:1 1 120px;" value="' + (date||'') + '">' +
+    '<input type="time" class="busy-start form-input" style="flex:1 1 90px;" value="' + (start||'') + '">' +
+    '<input type="time" class="busy-end form-input" style="flex:1 1 90px;" value="' + (end||'') + '">' +
+    '<button onclick="this.parentNode.remove()" style="background:rgba(192,57,43,0.1);color:#c0392b;border:none;border-radius:7px;width:34px;height:34px;font-size:13px;cursor:pointer;flex-shrink:0;">\u2715</button>';
+  host.appendChild(row);
+}
+async function saveAvailability() {
+  var days = [];
+  document.querySelectorAll('#availDays .avail-day').forEach(function(b){
+    if (b.getAttribute('data-on') === '1') days.push(parseInt(b.getAttribute('data-day')));
+  });
+  var start = document.getElementById('availStart').value || '09:00';
+  var end = document.getElementById('availEnd').value || '17:00';
+  var blockedDays = [];
+  document.querySelectorAll('#blockedDaysList .bd-date').forEach(function(i){ if (i.value) blockedDays.push(i.value); });
+  var busy = [];
+  document.querySelectorAll('#busyTimesList .busy-row').forEach(function(r){
+    var d = r.querySelector('.busy-date').value, s = r.querySelector('.busy-start').value, e = r.querySelector('.busy-end').value;
+    if (d && s && e) busy.push({ date: d, start: s, end: e });
+  });
+  await DB.set('walkavail:config', { days: days, start: start, end: end, blockedDays: blockedDays, busy: busy, _updatedAt: Date.now() });
+  alert('Availability saved. Customers will see open times based on these settings.');
+  renderAvailabilityEditor();
+}
+
 // ===== WALKTHROUGH AVAILABILITY (office sets open slots; customers book them) =====
 var _walkSlotSeq = 0;
 // Load saved slots into the office editor.
-async function renderWalkSlots() {
-  var host = document.getElementById('walkSlotsList');
-  if (!host) return;
-  var slots = await DB.get('walkslots:all') || { slots: [] };
-  host.innerHTML = '';
-  (slots.slots || []).forEach(function(s){ _addWalkSlotRow(s.date, s.time); });
-  if (!(slots.slots || []).length) _addWalkSlotRow();
-}
+
 // Add one date+time row to the editor.
-function _addWalkSlotRow(date, time) {
-  var host = document.getElementById('walkSlotsList');
-  if (!host) return;
-  _walkSlotSeq++;
-  var row = document.createElement('div');
-  row.className = 'walkslot-row';
-  row.style.cssText = 'display:flex;gap:7px;align-items:center;margin-bottom:8px;';
-  row.innerHTML =
-    '<input type="date" class="ws-date form-input" style="flex:1;" value="' + (date||'') + '">' +
-    '<input type="time" class="ws-time form-input" style="flex:1;" value="' + (time||'') + '">' +
-    '<button onclick="this.parentNode.remove()" style="background:rgba(192,57,43,0.1);color:#c0392b;border:none;border-radius:7px;width:36px;height:36px;font-size:15px;cursor:pointer;flex-shrink:0;">\u2715</button>';
-  host.appendChild(row);
-}
+
 // Save the slots (shared, all customers see them).
-async function saveWalkSlots() {
-  var rows = document.querySelectorAll('#walkSlotsList .walkslot-row');
-  var slots = [];
-  rows.forEach(function(r){
-    var d = r.querySelector('.ws-date').value;
-    var t = r.querySelector('.ws-time').value;
-    if (d && t) slots.push({ date: d, time: t });
-  });
-  // Sort chronologically.
-  slots.sort(function(a,b){ return (a.date + a.time).localeCompare(b.date + b.time); });
-  await DB.set('walkslots:all', { slots: slots, _updatedAt: Date.now() });
-  alert('Saved ' + slots.length + ' available time' + (slots.length!==1?'s':'') + '. Customers can now book these.');
-  renderWalkSlots();
-}
+
 
 async function renderWalkthroughs() {
   var host = document.getElementById('walkthroughsList');
@@ -6609,49 +6743,155 @@ async function _loadWalkStatus(address, unit) {
     }).join('');
   } catch(e) { host.innerHTML = ''; }
 }
+
+// Customer-side: show the global status line + FAQ.
+async function _loadCustStatusLine() {
+  var host = document.getElementById('cdStatusLine');
+  if (!host) return;
+  try {
+    var data = await DB.get('custglobal:status') || {};
+    if (data.text) {
+      host.innerHTML = '<div style="background:linear-gradient(135deg,rgba(201,168,76,0.16),rgba(201,168,76,0.06));border:1px solid rgba(201,168,76,0.35);border-radius:12px;padding:13px 15px;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px;">' +
+        '<span style="font-size:17px;flex-shrink:0;">\ud83d\udce2</span>' +
+        '<div><div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:#b8860b;margin-bottom:2px;">What\u2019s happening now</div>' +
+        '<div style="font-size:13.5px;color:#16233d;line-height:1.4;">' + _esc(data.text) + '</div></div>' +
+      '</div>';
+    } else { host.innerHTML = ''; }
+  } catch(e) { host.innerHTML = ''; }
+}
+async function _loadCustFaq() {
+  var host = document.getElementById('cdFaq');
+  if (!host) return;
+  try {
+    var data = await DB.get('custglobal:faq') || { items: [] };
+    var items = data.items || [];
+    if (!items.length) { host.innerHTML = ''; return; }
+    host.innerHTML = '<div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;margin-top:14px;">' +
+      '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:17px;letter-spacing:0.5px;color:var(--navy);margin-bottom:4px;">\u2753 Common Questions</div>' +
+      '<div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.45;">Quick answers \u2014 tap a question to see the answer.</div>' +
+      items.map(function(it, i){
+        return '<div style="border-bottom:1px solid #F0ECE2;">' +
+          '<button onclick="_toggleFaq(' + i + ')" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;background:none;border:none;padding:12px 2px;cursor:pointer;text-align:left;">' +
+            '<span style="font-size:14px;font-weight:700;color:#16233d;">' + _esc(it.q) + '</span>' +
+            '<span id="faqCaret' + i + '" style="font-size:13px;color:#b5ae9c;flex-shrink:0;transition:transform .2s;">\u25be</span>' +
+          '</button>' +
+          '<div id="faqAns' + i + '" style="display:none;font-size:13px;color:#4a4537;line-height:1.5;padding:0 2px 13px;">' + _esc(it.a) + '</div>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+  } catch(e) { host.innerHTML = ''; }
+}
+function _toggleFaq(i) {
+  var ans = document.getElementById('faqAns' + i);
+  var car = document.getElementById('faqCaret' + i);
+  if (!ans) return;
+  var open = ans.style.display !== 'none';
+  ans.style.display = open ? 'none' : 'block';
+  if (car) car.style.transform = open ? '' : 'rotate(180deg)';
+}
+
 // Show the office's available walkthrough slots for the customer to book (one tap).
 async function _loadWalkSlots(address, unit) {
   var host = document.getElementById('cdWalkSlots');
   if (!host) return;
   try {
-    // If the customer already has an active (requested/proposed/confirmed) walkthrough, don't show slots.
     var keys = await DB.list('walkreq:');
     var reqs = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+    // If this customer already has an active walkthrough, hide the picker.
     var hasActive = reqs.some(function(r){
       return (r.address||'').toLowerCase().trim() === (address||'').toLowerCase().trim() &&
              String(r.unit||'').toLowerCase().trim() === String(unit||'').toLowerCase().trim() &&
              (r.status === 'requested' || r.status === 'proposed' || r.status === 'confirmed');
     });
     if (hasActive) { host.innerHTML = ''; return; }
-    var data = await DB.get('walkslots:all') || { slots: [] };
-    // Only show future slots that aren't already booked.
-    var booked = {};
-    reqs.forEach(function(r){ if (r._slotKey) booked[r._slotKey] = true; });
-    var now = new Date(); now.setHours(0,0,0,0);
-    var avail = (data.slots || []).filter(function(s){
-      var key = s.date + 'T' + s.time;
-      if (booked[key]) return false;
-      var d = new Date(s.date + 'T' + (s.time||'00:00'));
-      return d >= now;
-    });
-    if (!avail.length) {
-      host.innerHTML = '<div style="font-size:12px;color:var(--muted);text-align:center;padding:8px;">No open times right now \u2014 check back soon, or call the office.</div>';
+
+    var cfg = await DB.get('walkavail:config');
+    if (!cfg || !(cfg.days||[]).length) {
+      host.innerHTML = '<div style="font-size:12px;color:var(--muted);text-align:center;padding:8px;">No times available yet \u2014 please call the office to schedule.</div>';
       return;
     }
-    host.innerHTML = '<div style="display:flex;flex-direction:column;gap:8px;">' + avail.map(function(s){
-      var d = new Date(s.date + 'T' + (s.time||'00:00'));
-      var dateStr = d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
-      var timeStr = (typeof _fmt12 === 'function') ? _fmt12(s.time) : s.time;
-      var key = s.date + 'T' + s.time;
-      return '<button onclick="_custBookSlot(\'' + key + '\')" style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;cursor:pointer;width:100%;text-align:left;">' +
-        '<span style="font-size:14px;font-weight:700;color:var(--navy);">' + dateStr + '</span>' +
-        '<span style="font-size:13px;color:var(--gold-dark,#b8860b);font-weight:700;">' + timeStr + ' \u203a</span>' +
-      '</button>';
-    }).join('') + '</div>';
+
+    // Slot length: 30 min before completion date, 60 min after.
+    var slotMin = 30;
+    try {
+      var k = (typeof _psKey === 'function') ? _psKey(address, unit) : null;
+      var pcfg = k ? (await DB.get('pubportalcfg:' + k)) : null;
+      if (pcfg && pcfg.dateCompletion) {
+        var comp = new Date(pcfg.dateCompletion + 'T00:00:00');
+        if (new Date() >= comp) slotMin = 60;
+      }
+    } catch(e) {}
+
+    // Times already taken (confirmed or pending requests occupy their slot).
+    var taken = {};
+    reqs.forEach(function(r){
+      if ((r.status==='confirmed'||r.status==='requested'||r.status==='proposed') && r.date && r.time) {
+        taken[r.date + 'T' + r.time] = true;
+      }
+    });
+
+    // Busy blocks + blocked days from config.
+    var blockedDays = {}; (cfg.blockedDays||[]).forEach(function(d){ blockedDays[d] = true; });
+    var busy = cfg.busy || [];
+    function inBusy(dateStr, mins) {
+      for (var i=0;i<busy.length;i++){
+        var bb = busy[i];
+        if (bb.date !== dateStr) continue;
+        var bs = _hm2min(bb.start), be = _hm2min(bb.end);
+        if (mins < be && (mins + slotMin) > bs) return true; // overlap
+      }
+      return false;
+    }
+
+    var startMin = _hm2min(cfg.start || '09:00');
+    var endMin = _hm2min(cfg.end || '17:00');
+    var slotsByDate = [];
+    var today = new Date(); today.setHours(0,0,0,0);
+    // Look ahead 21 days.
+    for (var off = 0; off < 21; off++) {
+      var d = new Date(today.getTime() + off*86400000);
+      var dow = d.getDay();
+      if ((cfg.days||[]).indexOf(dow) === -1) continue; // not a working day
+      var ymd = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      if (blockedDays[ymd]) continue; // whole day off
+      var times = [];
+      for (var m = startMin; m + slotMin <= endMin; m += slotMin) {
+        var hm = _min2hm(m);
+        var slotDate = new Date(ymd + 'T' + hm + ':00');
+        if (slotDate < new Date()) continue; // past
+        if (taken[ymd + 'T' + hm]) continue; // already booked
+        if (inBusy(ymd, m)) continue; // office busy
+        times.push(hm);
+      }
+      if (times.length) slotsByDate.push({ date: ymd, dObj: d, times: times });
+      if (slotsByDate.length >= 7) break; // show up to 7 open days
+    }
+
+    if (!slotsByDate.length) {
+      host.innerHTML = '<div style="font-size:12px;color:var(--muted);text-align:center;padding:8px;">No open times in the next few weeks \u2014 please call the office.</div>';
+      return;
+    }
+
+    host.innerHTML = '<div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Pick a time below \u2014 we\u2019ll confirm it shortly. (' + slotMin + ' min)</div>' +
+      slotsByDate.map(function(g){
+        var dateLabel = g.dObj.toLocaleDateString('en-US', { weekday:'long', month:'short', day:'numeric' });
+        return '<div style="margin-bottom:12px;">' +
+          '<div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:6px;">' + dateLabel + '</div>' +
+          '<div style="display:flex;flex-wrap:wrap;gap:6px;">' +
+            g.times.map(function(t){
+              var label = (typeof _fmt12==='function') ? _fmt12(t) : t;
+              return '<button onclick="_custBookSlot(\'' + g.date + 'T' + t + '\',' + slotMin + ')" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;font-weight:700;color:var(--navy);cursor:pointer;">' + label + '</button>';
+            }).join('') +
+          '</div>' +
+        '</div>';
+      }).join('');
   } catch(e) { host.innerHTML = ''; }
 }
+// time helpers
+function _hm2min(hm){ var p=(hm||'0:0').split(':'); return parseInt(p[0])*60 + parseInt(p[1]||0); }
+function _min2hm(m){ var h=Math.floor(m/60), mm=m%60; return String(h).padStart(2,'0') + ':' + String(mm).padStart(2,'0'); }
 // Customer books a slot -> creates a confirmed walkthrough request.
-async function _custBookSlot(slotKey) {
+async function _custBookSlot(slotKey, slotMin) {
   var parts = slotKey.split('T');
   var date = parts[0], time = parts[1] || '';
   var id = 'walk_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
@@ -6661,7 +6901,8 @@ async function _custBookSlot(slotKey) {
     address: window._custAddress || '',
     unit: window._custUnit || '',
     date: date, time: time,
-    status: 'confirmed',
+    durationMin: slotMin || 30,
+    status: 'requested',
     _slotKey: slotKey,
     _customerBooked: true,
     at: Date.now()
@@ -6670,7 +6911,7 @@ async function _custBookSlot(slotKey) {
   try { await _loadWalkStatus(rec.address, rec.unit); } catch(e) {}
   try { await _loadWalkSlots(rec.address, rec.unit); } catch(e) {}
   var t = (typeof _fmt12 === 'function') ? _fmt12(time) : time;
-  alert('Booked! Your walkthrough is set for ' + new Date(date+'T'+(time||'00:00')).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}) + ' at ' + t + '.');
+  alert('Requested! We\u2019ll confirm your walkthrough for ' + new Date(date+'T'+(time||'00:00')).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}) + ' at ' + t + ' shortly.');
 }
 
 
@@ -6883,6 +7124,8 @@ async function openCustomerDashboard(name, address, unit, saveKey, existing) {
   try { await _cpRender('cdIssueList'); } catch(e) {}
   try { await _loadWalkStatus(address, unit); } catch(e) {}
   try { await _loadWalkSlots(address, unit); } catch(e) {}
+  try { await _loadCustStatusLine(); } catch(e) {}
+  try { await _loadCustFaq(); } catch(e) {}
   try { await _loadCustomerChangeOrders(address, unit); } catch(e) {}
 }
 async function cdGoGallery() {
@@ -10682,7 +10925,7 @@ var _DD_TABS = {
   changeOrders:{label:'Change Orders',icon:'\ud83d\udcdd',act:"switchTab('changeOrders')"},
   customers:{label:'Customers',icon:'\ud83d\udc65',act:"switchTab('customers')"},
   upgrades:{label:'Upgrades',icon:'\u2b50',act:"switchTab('upgrades')"},
-  custUpdates:{label:'Customer Updates',icon:'\ud83d\udce2',act:"switchTab('custUpdates')"},
+  custUpdates:{label:'Customer Updates',icon:'📢',act:"switchTab('custUpdates')"},
   custReports:{label:'Customer Reports',icon:'\ud83d\udcdd',act:"switchTab('custReports')"},
   custPortals:{label:'Customer Portals',icon:'\ud83c\udfe0',act:"switchTab('custPortals')"},
   walkthroughs:{label:'Walkthroughs',icon:'\ud83d\udeb6',act:"switchTab('walkthroughs')"},
@@ -10863,7 +11106,8 @@ async function switchTab(tab) {
   try { _openNavGroupForTab(tab); } catch(e) {}
   try { if (tab === 'custReports') { _renderOfficeCustomerIssues(); } } catch(e) {}
   try { localStorage.setItem('dd_lastTab', tab); } catch(e) {}
-  try { if (tab === 'custPortals') { renderCustPortals(); } } catch(e) {}
+  try { if (tab === 'custPortals') { try { loadGlobalStatusEditor(); loadFaqEditor(); } catch(e) {} }
+  if (tab === 'custPortals') { renderCustPortals(); } } catch(e) {}
   try {
     if (tab === 'dailyLog') renderDailyLog();
     if (tab === 'inspections') renderInspections();
@@ -10871,7 +11115,7 @@ async function switchTab(tab) {
     if (tab === 'changeOrders') renderChangeOrders();
   } catch(e) {}
   try { if (tab === 'teamChat') { _loadChatUsers(); renderTeamChat(); startChatPolling(); } else { stopChatPolling(); } } catch(e) {}
-  try { if (tab === 'walkthroughs') { renderWalkthroughs(); renderWalkSlots(); } } catch(e) {}
+  try { if (tab === 'walkthroughs') { renderWalkthroughs(); renderAvailabilityEditor(); } } catch(e) {}
   try { if (tab === 'vendors') renderVendors(); if (tab === 'subCalendar') renderSubCalendar(); } catch(e) {}
   try { if (tab === 'taskTemplates') renderTaskTemplates(); } catch(e) {}
   try { if (tab==='reporting') renderReporting(); if (tab==='photoTimeline') renderPhotoTimeline(); if (tab==='weeklyDigest') renderWeeklyDigest(); } catch(e) {}
