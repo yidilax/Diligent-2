@@ -3391,6 +3391,74 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .office-nav-btn.nav-sub { padding-left:46px; font-size:13.5px; }
 
 
+
+/* ===== SUB PORTAL REDESIGN ===== */
+#subPortalPage { background: #F4F1EB; min-height: 100vh; }
+#subPortalContent { padding: 16px; max-width: 760px; margin: 0 auto; }
+.spx-hero { background: linear-gradient(135deg, #0D1F3C 0%, #16294d 100%); border-radius: 16px; padding: 18px 18px 20px; color: #fff; margin-bottom: 14px; box-shadow: 0 4px 20px rgba(13,31,60,0.18); }
+.spx-hi { font-size: 13px; color: rgba(255,255,255,0.65); font-weight: 500; }
+.spx-name { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 1px; line-height: 1.05; margin-top: 2px; }
+.spx-trade { display:inline-block; margin-top: 7px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gold); background: rgba(201,168,76,0.16); border:1px solid rgba(201,168,76,0.3); padding: 3px 10px; border-radius: 20px; }
+.spx-prog-wrap { margin-top: 16px; }
+.spx-prog-top { display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 7px; }
+.spx-prog-label { font-size: 12px; color: rgba(255,255,255,0.7); font-weight:600; }
+.spx-prog-count { font-size: 13px; font-weight: 800; color: #fff; }
+.spx-prog-bar { height: 9px; background: rgba(255,255,255,0.14); border-radius: 20px; overflow: hidden; }
+.spx-prog-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #e0c068); border-radius: 20px; transition: width .5s ease; }
+.spx-prog-done { color: #6fd19b !important; }
+
+.spx-section { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.7px; color: #8a8472; margin: 18px 4px 9px; }
+
+.spx-scan { background:#fff; border:1px solid #EAE5DC; border-radius:13px; overflow:hidden; margin-bottom:8px; box-shadow:0 1px 4px rgba(0,0,0,0.03); }
+.spx-scan a { display:flex; align-items:center; gap:11px; padding:13px 14px; text-decoration:none; }
+.spx-scan a:not(:last-child) { border-bottom:1px solid #F4F1EB; }
+.spx-scan-ic { width:40px; height:40px; border-radius:10px; background:rgba(201,168,76,0.15); display:flex; align-items:center; justify-content:center; font-size:19px; flex-shrink:0; }
+.spx-scan-addr { font-size:14px; font-weight:700; color:#16233d; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.spx-scan-proj { font-size:11px; color:#9a9484; margin-top:1px; }
+.spx-scan-view { color:var(--gold); font-size:13px; font-weight:800; flex-shrink:0; }
+
+.spx-filters { display:flex; gap:7px; margin: 0 0 12px; }
+.spx-filter { flex:1; padding:9px; border-radius:9px; border:1px solid #E3DDD3; background:#fff; color:#6a6453; font-size:12.5px; font-weight:700; cursor:pointer; transition: all .15s; }
+.spx-filter.active { background:var(--navy); color:#fff; border-color:var(--navy); }
+
+.spx-grp { background:#fff; border:1px solid #EAE5DC; border-radius:14px; overflow:hidden; margin-bottom:11px; box-shadow:0 1px 6px rgba(0,0,0,0.04); }
+.spx-grp-head { width:100%; display:flex; align-items:center; gap:11px; padding:14px 15px; background:none; border:none; cursor:pointer; text-align:left; }
+.spx-ring { position:relative; width:38px; height:38px; flex-shrink:0; }
+.spx-ring svg { transform: rotate(-90deg); }
+.spx-ring-txt { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; color:var(--navy); }
+.spx-grp-addr { flex:1; min-width:0; }
+.spx-grp-addr-main { font-size:15px; font-weight:800; color:#16233d; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.spx-grp-addr-sub { font-size:11px; color:#9a9484; margin-top:1px; }
+.spx-grp-caret { font-size:13px; color:#b5ae9c; transition: transform .2s; flex-shrink:0; }
+.spx-grp.open .spx-grp-caret { transform: rotate(180deg); }
+.spx-grp-body { display:none; padding: 0 4px 6px; }
+.spx-grp.open .spx-grp-body { display:block; }
+
+.spx-unit { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; color:#a39c8a; padding:10px 12px 5px; display:flex; justify-content:space-between; }
+
+.spx-item { display:flex; align-items:flex-start; gap:11px; padding:11px 12px; border-radius:10px; margin:2px 6px; transition: background .12s; }
+.spx-item:active { background:#FAF8F3; }
+.spx-cb { width:26px; height:26px; flex-shrink:0; margin-top:1px; cursor:pointer; accent-color: #3a7d5d; }
+.spx-item-body { flex:1; min-width:0; cursor:pointer; background:none; border:none; text-align:left; padding:0; }
+.spx-item-main { font-size:14.5px; color:#16233d; font-weight:600; line-height:1.35; }
+.spx-item-done .spx-item-main { text-decoration: line-through; color:#aaa39180; font-weight:500; }
+.spx-item-room { font-size:11.5px; color:#9a9484; margin-top:2px; }
+.spx-item-dot { color:var(--gold); font-size:9px; align-self:center; }
+.spx-item-exp { background:none; border:none; color:#c2bbab; font-size:18px; cursor:pointer; flex-shrink:0; padding:0 4px; align-self:center; }
+
+.spx-detail { margin:0 12px 8px 49px; padding:11px 13px; background:#FAF8F3; border-radius:10px; }
+.spx-detail-office { font-size:12px; color:#3a3730; margin-bottom:7px; }
+.spx-detail-office b { color:var(--navy); }
+.spx-detail-note { font-size:13px; color:#16233d; background:#fff; border:1px solid #EAE5DC; border-radius:8px; padding:8px 10px; margin-bottom:8px; cursor:pointer; }
+.spx-thumbs { display:flex; gap:7px; flex-wrap:wrap; margin-bottom:8px; }
+.spx-thumb { position:relative; width:60px; height:60px; border-radius:8px; overflow:hidden; }
+.spx-thumb img { width:100%; height:100%; object-fit:cover; cursor:pointer; }
+.spx-thumb-del { position:absolute; top:2px; right:2px; width:18px; height:18px; border-radius:50%; background:rgba(0,0,0,0.6); color:#fff; border:none; font-size:10px; cursor:pointer; line-height:1; }
+.spx-acts { display:flex; gap:7px; flex-wrap:wrap; }
+.spx-act { background:#fff; border:1px solid #E3DDD3; border-radius:8px; padding:8px 12px; font-size:12px; font-weight:700; color:var(--navy); cursor:pointer; }
+.spx-act-danger { color:#c0392b; border-color:rgba(192,57,43,0.3); }
+.spx-roomdone { background:none; border:none; color:var(--gold); font-size:11px; font-weight:700; cursor:pointer; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -3707,7 +3775,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v136</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v137</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4064,7 +4132,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     <div class="office-sidebar-footer">
       <div id="bioToggleRow" style="margin-bottom:10px;"></div>
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v136</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v137</div>
     </div>
   </div>
 
@@ -4885,7 +4953,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v136';
+<script>var APP_VERSION = 'v137';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -12685,7 +12753,7 @@ function subLogout() { _currentSub = null; document.getElementById('subCodeInput
 async function renderSubPortal() {
   var host = document.getElementById('subPortalContent');
   if (!host || !_currentSub) return;
-  host.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;">Loading your work...</div>';
+  host.innerHTML = '<div style="text-align:center;color:#9a9484;padding:40px;">Loading your work...</div>';
   var fresh = await DB.get('subcontractor:' + _currentSub.id);
   if (fresh) _currentSub = fresh;
   var items = await _collectSubPunchItems(_currentSub);
@@ -12695,82 +12763,85 @@ async function renderSubPortal() {
     if (overlay[k]) { it._subDone = overlay[k].done; it._subNote = overlay[k].note; it._subPhotos = overlay[k].photos || []; }
   });
 
-  var html = '';
-  if (_currentSub.officeNote) {
-    html += '<div style="background:#fff;border-left:3px solid var(--gold);border-radius:8px;padding:9px 11px;margin-bottom:12px;font-size:12.5px;color:#3a3730;line-height:1.4;"><b style="color:var(--navy);">Office:</b> ' + _esc(_currentSub.officeNote) + '</div>';
-  }
-
-  var tasks = _currentSub.tasks || [];
-  if (tasks.length) {
-    html += '<div class="sp-section-title">Your Tasks</div>';
-    html += '<div class="sp-list">' + tasks.map(function(t,i){
-      return '<label class="sp-row">' +
-        '<input type="checkbox" ' + (t.done?'checked':'') + ' onchange="subToggleTask(' + i + ',this.checked)" class="sp-check">' +
-        '<span class="sp-row-text' + (t.done?' sp-done':'') + '">' + _esc(t.text) + '</span>' +
-      '</label>';
-    }).join('') + '</div>';
-  }
-
-  if (!items.length) {
-    // Still show the shared 3D Scans even if this sub has no punch items yet.
-    var _emptyScans = '';
-    try {
-      var _ek = await DB.list('pubaddr:');
-      var _er = (await Promise.all(_ek.map(function(k){ return DB.get(k); }))).filter(Boolean);
-      var _el = [];
-      _er.forEach(function(rec){ (rec.houses||[]).forEach(function(h){ if (h.address && h.scan3d) _el.push({address:h.address, scan:h.scan3d, project:rec.name||''}); }); });
-      if (_el.length) {
-        _emptyScans = '<div class="sp-section-title" style="margin-top:4px;">\ud83c\udfe0 3D Scans</div>' +
-          '<div style="background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:8px;">' +
-          _el.map(function(sc, i){
-            return '<a href="' + _esc(sc.scan) + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;padding:12px 14px;text-decoration:none;border-bottom:' + (i < _el.length-1 ? '1px solid #f0ece2' : 'none') + ';">' +
-              '<span style="width:38px;height:38px;border-radius:9px;background:rgba(201,168,76,0.15);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">\ud83c\udfe0</span>' +
-              '<span style="flex:1;min-width:0;"><span style="display:block;font-size:13.5px;font-weight:700;color:#16233d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + _esc(sc.address) + '</span>' + (sc.project ? '<span style="display:block;font-size:11px;color:var(--muted);">' + _esc(sc.project) + '</span>' : '') + '</span>' +
-              '<span style="color:var(--gold);font-size:13px;font-weight:700;flex-shrink:0;">View \u2192</span>' +
-            '</a>';
-          }).join('') + '</div>';
-      }
-    } catch(e) {}
-    html += _emptyScans;
-    html += '<div class="tab-empty" style="margin-top:20px;"><div class="tab-empty-icon">\u2705</div><div class="tab-empty-title">Nothing assigned yet</div><div class="tab-empty-desc">When the office tags punch items for you, they\'ll show here.</div></div>';
-    host.innerHTML = html;
-    return;
-  }
-
-  // Build address -> 3D scan link map AND a full list of every scan (subs see all scans).
-  var _scanByAddr = {};
+  // Build the full scan list (every sub sees all scans).
   var _allScans = [];
   try {
     var paKeys = await DB.list('pubaddr:');
     var paRecs = (await Promise.all(paKeys.map(function(k){ return DB.get(k); }))).filter(Boolean);
     paRecs.forEach(function(rec){
       (rec.houses||[]).forEach(function(h){
-        if (h.address && h.scan3d) {
-          _scanByAddr[h.address.toLowerCase().trim()] = h.scan3d;
-          _allScans.push({ address: h.address, scan: h.scan3d, project: rec.name || '' });
-        }
+        if (h.address && h.scan3d) _allScans.push({ address: h.address, scan: h.scan3d, project: rec.name || '' });
       });
     });
   } catch(e) {}
-  // Render a "3D Scans" section listing every scan (shared with all subs).
-  var _scanSection = '';
-  if (_allScans.length) {
-    _scanSection = '<div class="sp-section-title" style="margin-top:4px;">🏠 3D Scans</div>' +
-      '<div style="background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:8px;">' +
-      _allScans.map(function(sc, i){
-        return '<a href="' + _esc(sc.scan) + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;padding:12px 14px;text-decoration:none;border-bottom:' + (i < _allScans.length-1 ? '1px solid #f0ece2' : 'none') + ';">' +
-          '<span style="width:38px;height:38px;border-radius:9px;background:rgba(201,168,76,0.15);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🏠</span>' +
-          '<span style="flex:1;min-width:0;">' +
-            '<span style="display:block;font-size:13.5px;font-weight:700;color:#16233d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + _esc(sc.address) + '</span>' +
-            (sc.project ? '<span style="display:block;font-size:11px;color:var(--muted);">' + _esc(sc.project) + '</span>' : '') +
-          '</span>' +
-          '<span style="color:var(--gold);font-size:13px;font-weight:700;flex-shrink:0;">View →</span>' +
-        '</a>';
-      }).join('') +
-      '</div>';
+
+  // ----- HERO HEADER with overall progress -----
+  var totalItems = items.length;
+  var totalDone = items.filter(function(x){ return x._subDone || x.done; }).length;
+  var pct = totalItems ? Math.round((totalDone/totalItems)*100) : 0;
+  var firstName = (_currentSub.name||'there').split(' ')[0];
+  var hour = new Date().getHours();
+  var greet = hour < 12 ? 'Good morning' : (hour < 18 ? 'Good afternoon' : 'Good evening');
+  var html = '<div class="spx-hero">' +
+    '<div class="spx-hi">' + greet + ',</div>' +
+    '<div class="spx-name">' + _esc(_currentSub.name || 'Subcontractor') + '</div>' +
+    (_currentSub.trade ? '<div class="spx-trade">' + _esc(_currentSub.trade) + '</div>' : '');
+  if (totalItems) {
+    html += '<div class="spx-prog-wrap">' +
+      '<div class="spx-prog-top">' +
+        '<span class="spx-prog-label">Your progress</span>' +
+        '<span class="spx-prog-count' + (pct===100?' spx-prog-done':'') + '">' + totalDone + ' of ' + totalItems + (pct===100?' \u2713 all done':'') + '</span>' +
+      '</div>' +
+      '<div class="spx-prog-bar"><div class="spx-prog-fill" style="width:' + pct + '%;"></div></div>' +
+    '</div>';
+  }
+  html += '</div>';
+
+  // ----- Office note -----
+  if (_currentSub.officeNote) {
+    html += '<div style="background:#fff;border-left:3px solid var(--gold);border-radius:10px;padding:11px 13px;margin-bottom:12px;font-size:13px;color:#3a3730;line-height:1.45;box-shadow:0 1px 4px rgba(0,0,0,0.03);"><b style="color:var(--navy);">\ud83d\udce3 Office:</b> ' + _esc(_currentSub.officeNote) + '</div>';
   }
 
-  // Group: address -> unit -> items
+  // ----- Optional simple tasks -----
+  var tasks = _currentSub.tasks || [];
+  if (tasks.length) {
+    html += '<div class="spx-section">Your Tasks</div><div class="spx-grp">';
+    html += tasks.map(function(t,i){
+      return '<div class="spx-item' + (t.done?' spx-item-done':'') + '">' +
+        '<input type="checkbox" ' + (t.done?'checked':'') + ' onchange="subToggleTask(' + i + ',this.checked)" class="spx-cb">' +
+        '<span class="spx-item-body"><span class="spx-item-main">' + _esc(t.text) + '</span></span>' +
+      '</div>';
+    }).join('') + '</div>';
+  }
+
+  // ----- 3D Scans -----
+  if (_allScans.length) {
+    html += '<div class="spx-section">\ud83c\udfe0 3D Scans</div><div class="spx-scan">' +
+      _allScans.map(function(sc){
+        return '<a href="' + _esc(sc.scan) + '" target="_blank" rel="noopener">' +
+          '<span class="spx-scan-ic">\ud83c\udfe0</span>' +
+          '<span style="flex:1;min-width:0;"><span class="spx-scan-addr">' + _esc(sc.address) + '</span>' + (sc.project ? '<span class="spx-scan-proj">' + _esc(sc.project) + '</span>' : '') + '</span>' +
+          '<span class="spx-scan-view">View \u2192</span>' +
+        '</a>';
+      }).join('') + '</div>';
+  }
+
+  if (!items.length) {
+    html += '<div class="tab-empty" style="margin-top:24px;background:#fff;border-radius:14px;padding:32px 20px;"><div class="tab-empty-icon">\u2705</div><div class="tab-empty-title">Nothing assigned yet</div><div class="tab-empty-desc">When the office tags punch items for you, they\u2019ll show here.</div></div>';
+    host.innerHTML = html;
+    return;
+  }
+
+  // ----- Filters -----
+  var filter = window._spFilter || 'todo';
+  html += '<div class="spx-section">Punch List</div>';
+  html += '<div class="spx-filters">' +
+    '<button class="spx-filter' + (filter==='all'?' active':'') + '" onclick="_spSetFilter(\'all\')">All</button>' +
+    '<button class="spx-filter' + (filter==='todo'?' active':'') + '" onclick="_spSetFilter(\'todo\')">To-do</button>' +
+    '<button class="spx-filter' + (filter==='done'?' active':'') + '" onclick="_spSetFilter(\'done\')">Done</button>' +
+  '</div>';
+
+  // ----- Group address -> unit -> items -----
   var byAddr = {}; var addrOrder = [];
   items.forEach(function(it){
     var a = it._addr || 'Other';
@@ -12780,79 +12851,105 @@ async function renderSubPortal() {
     byAddr[a].units[u].push(it);
   });
 
-  html += _scanSection;
-  html += '<div class="sp-section-title" style="margin-top:16px;">Punch List</div>';
-  var gi = 0;
+  function passesFilter(it){
+    var done = it._subDone || it.done;
+    if (filter === 'todo') return !done;
+    if (filter === 'done') return done;
+    return true;
+  }
+
+  var gi = 0; var anyShown = false;
   addrOrder.forEach(function(addr){
     var grp = byAddr[addr];
-    // total done/count across the whole address
     var allItems = []; grp.unitOrder.forEach(function(u){ allItems = allItems.concat(grp.units[u]); });
+    var visibleItems = allItems.filter(passesFilter);
+    if (!visibleItems.length) return; // hide groups with nothing matching the filter
+    anyShown = true;
     var doneCount = allItems.filter(function(x){ return x._subDone || x.done; }).length;
+    var gpct = allItems.length ? Math.round((doneCount/allItems.length)*100) : 0;
     var gid = 'spg_' + gi; gi++;
-    html += '<div class="sp-group">' +
-      '<button class="sp-group-head" onclick="_spToggle(\'' + gid + '\')">' +
-        '<span class="sp-group-addr">\ud83d\udccd ' + _esc(addr) + '</span>' +
-        '<span class="sp-group-meta">' + doneCount + '/' + allItems.length + '</span>' +
-        '<span class="sp-group-caret" id="' + gid + '_caret">\u25be</span>' +
+    var openClass = (gpct < 100) ? ' open' : ''; // auto-open groups with work left
+    // progress ring
+    var circ = 2 * Math.PI * 16;
+    var dash = circ * (gpct/100);
+    var ring = '<div class="spx-ring"><svg width="38" height="38">' +
+      '<circle cx="19" cy="19" r="16" fill="none" stroke="#EAE5DC" stroke-width="4"/>' +
+      '<circle cx="19" cy="19" r="16" fill="none" stroke="' + (gpct===100?'#3a7d5d':'var(--gold)') + '" stroke-width="4" stroke-linecap="round" stroke-dasharray="' + dash + ' ' + circ + '"/>' +
+      '</svg><span class="spx-ring-txt">' + (gpct===100?'\u2713':(doneCount + '/' + allItems.length)) + '</span></div>';
+    html += '<div class="spx-grp' + openClass + '" id="' + gid + '">' +
+      '<button class="spx-grp-head" onclick="_spToggle(\'' + gid + '\')">' +
+        ring +
+        '<span class="spx-grp-addr"><span class="spx-grp-addr-main">' + _esc(addr) + '</span><span class="spx-grp-addr-sub">' + doneCount + ' of ' + allItems.length + ' done</span></span>' +
+        '<span class="spx-grp-caret">\u25be</span>' +
       '</button>' +
-      '<div class="sp-group-body" id="' + gid + '">';
+      '<div class="spx-grp-body">';
     grp.unitOrder.forEach(function(u){
-      var list = grp.units[u];
+      var list = grp.units[u].filter(passesFilter);
+      if (!list.length) return;
       if (u) {
-        var ud = list.filter(function(x){ return x._subDone || x.done; }).length;
-        html += '<div class="sp-unit-head">Unit ' + _esc(u) + ' <span class="sp-unit-meta">' + ud + '/' + list.length + '</span></div>';
+        var ud = grp.units[u].filter(function(x){ return x._subDone || x.done; }).length;
+        var allDone = ud === grp.units[u].length;
+        html += '<div class="spx-unit"><span>Unit ' + _esc(u) + ' \u00b7 ' + ud + '/' + grp.units[u].length + '</span>' +
+          (!allDone ? '<button class="spx-roomdone" onclick="_spMarkAllDone(\'' + _esc(addr).replace(/'/g,"") + '\',\'' + _esc(u).replace(/'/g,"") + '\')">Mark all done</button>' : '') +
+        '</div>';
       }
       list.forEach(function(it){
         var done = it._subDone || it.done;
         var k = it._unitId + '|' + it._roomIdx + '|' + it._itemIdx;
         var iid = 'spi_' + k.replace(/[^a-zA-Z0-9]/g,'_');
         var hasExtra = (it._subNote && it._subNote.length) || (it._subPhotos && it._subPhotos.length);
-        // THIN line: checkbox + text + room + chevron. Everything else hidden until expanded.
-        html += '<div class="sp-line">' +
-          '<input type="checkbox" ' + (done?'checked':'') + ' onchange="subToggleItem(\'' + k + '\',this.checked)" class="sp-check">' +
-          '<button class="sp-line-text' + (done?' sp-done':'') + '" onclick="_spExpand(\'' + iid + '\')">' +
-            '<span class="sp-line-main">' + _esc(it.text) + '</span>' +
-            (it._room ? '<span class="sp-line-room">' + _esc(it._room) + '</span>' : '') +
+        html += '<div class="spx-item' + (done?' spx-item-done':'') + '">' +
+          '<input type="checkbox" ' + (done?'checked':'') + ' onchange="subToggleItem(\'' + k + '\',this.checked)" class="spx-cb">' +
+          '<button class="spx-item-body" onclick="_spExpand(\'' + iid + '\')">' +
+            '<span class="spx-item-main">' + _esc(it.text) + '</span>' +
+            (it._room ? '<span class="spx-item-room">\ud83d\udccd ' + _esc(it._room) + '</span>' : '') +
           '</button>' +
-          (hasExtra ? '<span class="sp-line-dot" title="has note/photo">\u25cf</span>' : '') +
-          '<button class="sp-line-exp" onclick="_spExpand(\'' + iid + '\')" id="' + iid + '_caret">\u22ef</button>' +
+          (hasExtra ? '<span class="spx-item-dot">\u25cf</span>' : '') +
+          '<button class="spx-item-exp" onclick="_spExpand(\'' + iid + '\')">\u22ef</button>' +
         '</div>';
-        // Hidden detail panel (does NOT affect line height until opened)
-        var thumbs = (it._subPhotos||[]).map(function(ph, pidx){ return '<div class="sp-thumb"><img src="' + ph + '" onclick="event.stopPropagation();_plLightbox(\'' + encodeURIComponent(ph) + '\')"><button class="sp-thumb-del" onclick="event.stopPropagation();subDeletePhoto(\'' + k + '\',' + pidx + ')">\u2715</button></div>'; }).join('');
-        html += '<div class="sp-detail" id="' + iid + '" style="display:none;">' +
-          (it.note ? '<div class="sp-detail-office">Office: ' + _esc(it.note) + '</div>' : '') +
-          (it._subNote ? '<div class="sp-detail-note" onclick="subAddNote(\'' + k + '\')">' + _esc(it._subNote) + ' <span class="sp-note-edit">\u270e</span></div>' : '') +
-          (thumbs ? '<div class="sp-thumbs">' + thumbs + '</div>' : '') +
-          '<div class="sp-detail-actions">' +
-            '<button onclick="subAddNote(\'' + k + '\')" class="sp-act">\u270e ' + (it._subNote ? 'Edit note' : 'Add note') + '</button>' +
-            (it._subNote ? '<button onclick="subDeleteNote(\'' + k + '\')" class="sp-act sp-act-danger">Delete note</button>' : '') +
-            '<button onclick="subAddPhoto(\'' + k + '\')" class="sp-act">\ud83d\udcf7 Add photo</button>' +
+        var thumbs = (it._subPhotos||[]).map(function(ph, pidx){ return '<div class="spx-thumb"><img src="' + ph + '" onclick="event.stopPropagation();_plLightbox(\'' + encodeURIComponent(ph) + '\')"><button class="spx-thumb-del" onclick="event.stopPropagation();subDeletePhoto(\'' + k + '\',' + pidx + ')">\u2715</button></div>'; }).join('');
+        html += '<div class="spx-detail" id="' + iid + '" style="display:none;">' +
+          (it.note ? '<div class="spx-detail-office"><b>Office:</b> ' + _esc(it.note) + '</div>' : '') +
+          (it._subNote ? '<div class="spx-detail-note" onclick="subAddNote(\'' + k + '\')">' + _esc(it._subNote) + ' \u270e</div>' : '') +
+          (thumbs ? '<div class="spx-thumbs">' + thumbs + '</div>' : '') +
+          '<div class="spx-acts">' +
+            '<button onclick="subAddNote(\'' + k + '\')" class="spx-act">\u270e ' + (it._subNote ? 'Edit note' : 'Add note') + '</button>' +
+            (it._subNote ? '<button onclick="subDeleteNote(\'' + k + '\')" class="spx-act spx-act-danger">Delete note</button>' : '') +
+            '<button onclick="subAddPhoto(\'' + k + '\')" class="spx-act">\ud83d\udcf7 Add photo</button>' +
           '</div>' +
         '</div>';
       });
     });
     html += '</div></div>';
   });
+  if (!anyShown) {
+    html += '<div class="tab-empty" style="background:#fff;border-radius:14px;padding:28px 20px;"><div class="tab-empty-icon">' + (filter==='done'?'\ud83d\udccb':'\u2705') + '</div><div class="tab-empty-title">' + (filter==='done'?'Nothing completed yet':'All caught up!') + '</div><div class="tab-empty-desc">' + (filter==='done'?'Items you finish will show here.':'No items left to do right now.') + '</div></div>';
+  }
   host.innerHTML = html;
 }
-
+// Filter + group toggle + mark-all helpers for the redesigned sub portal.
+function _spSetFilter(f) { window._spFilter = f; renderSubPortal(); }
+function _spToggle(gid) { var g = document.getElementById(gid); if (g) g.classList.toggle('open'); }
 function _spExpand(iid) {
   var d = document.getElementById(iid);
-  var caret = document.getElementById(iid + '_caret');
-  if (!d) return;
-  var open = d.style.display !== 'none';
-  d.style.display = open ? 'none' : 'block';
-  if (caret) caret.textContent = open ? '\u22ef' : '\u2715';
+  if (d) d.style.display = (d.style.display === 'none' || !d.style.display) ? 'block' : 'none';
+}
+async function _spMarkAllDone(addr, unit) {
+  if (!_currentSub) return;
+  var items = await _collectSubPunchItems(_currentSub);
+  for (var i = 0; i < items.length; i++) {
+    var it = items[i];
+    if ((it._addr||'') === addr && String(it._unit||'') === String(unit)) {
+      var k = it._unitId + '|' + it._roomIdx + '|' + it._itemIdx;
+      await _subSaveOverlay(k, { done: true });
+    }
+  }
+  renderSubPortal();
 }
 
-function _spToggle(gid) {
-  var body = document.getElementById(gid);
-  var caret = document.getElementById(gid + '_caret');
-  if (!body) return;
-  var hidden = body.style.display === 'none';
-  body.style.display = hidden ? '' : 'none';
-  if (caret) caret.textContent = hidden ? '\u25be' : '\u25b8';
-}
+
+
+
 
 async function _subSaveOverlay(k, patch) {
   var overlay = await DB.get('subpunch:' + _currentSub.id) || {};
