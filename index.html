@@ -3592,17 +3592,18 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 
 .fix-scope-btn { padding:10px; border:1.5px solid rgba(255,255,255,0.2); border-radius:9px; background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.6); font-size:13px; font-weight:700; cursor:pointer; }
 .fix-scope-btn.on { background:#fff; color:var(--navy); border-color:#fff; }
-.fix-item { border:1px solid #EAE5DC; border-radius:11px; padding:11px; margin-bottom:10px; background:#FAF8F3; }
+.fix-item { border:1px solid #EAE5DC; border-radius:9px; padding:8px 10px; margin-bottom:7px; background:#FAF8F3; }
 .fix-item.fixed { opacity:0.65; }
 .fix-item.fixed .fix-item-text { text-decoration:line-through; color:#9a9484; }
+.fix-item .fix-item-text { min-height:18px; }
 .fix-item-top { display:flex; align-items:flex-start; gap:9px; }
 .fix-check { width:22px; height:22px; border-radius:6px; border:1.5px solid #cfc8b8; background:#fff; cursor:pointer; flex:0 0 auto; display:flex; align-items:center; justify-content:center; color:#fff; font-size:13px; padding:0; margin-top:0; }
 .fix-check.on { background:#3a7d5d; border-color:#3a7d5d; }
 .fix-item-text { flex:1; font-size:14px; color:#16233d; border:none; background:none; resize:none; font-family:inherit; outline:none; line-height:1.4; min-height:20px; padding:2px 0; }
 .fix-del { background:none; border:none; color:#c2bbab; font-size:14px; cursor:pointer; flex-shrink:0; }
-.fix-item-row { display:flex; gap:8px; align-items:center; margin-top:9px; flex-wrap:wrap; }
-.fix-assign { flex:1; min-width:120px; font-size:12.5px; padding:7px 9px; border:1px solid #E3DDD3; border-radius:7px; background:#fff; }
-.fix-photo-btn { font-size:12px; font-weight:700; color:var(--navy); background:#fff; border:1px solid #E3DDD3; border-radius:7px; padding:7px 11px; cursor:pointer; white-space:nowrap; }
+.fix-item-row { display:flex; gap:6px; align-items:center; margin-top:6px; flex-wrap:wrap; }
+.fix-assign { flex:1; min-width:110px; font-size:12px; padding:5px 8px; border:1px solid #E3DDD3; border-radius:6px; background:#fff; }
+.fix-photo-btn { font-size:11.5px; font-weight:700; color:var(--navy); background:#fff; border:1px solid #E3DDD3; border-radius:6px; padding:5px 9px; cursor:pointer; white-space:nowrap; }
 .fix-thumbs { display:flex; gap:6px; flex-wrap:wrap; margin-top:5px; }
 .fix-thumb { width:40px; height:40px; border-radius:6px; object-fit:cover; cursor:pointer; }
 
@@ -3626,11 +3627,11 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .fix-progress-txt { font-size:12px; font-weight:700; color:rgba(255,255,255,0.7); }
 .fix-progress-bar { height:6px; background:rgba(255,255,255,0.12); border-radius:4px; margin-top:5px; overflow:hidden; }
 .fix-progress-fill { height:100%; background:#3a7d5d; border-radius:4px; transition:width .25s; }
-.fix-vrow { display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border-radius:10px; background:#FAF8F3; margin-bottom:8px; cursor:pointer; transition:opacity .15s; }
+.fix-vrow { display:flex; align-items:flex-start; gap:9px; padding:8px 11px; border-radius:9px; background:#FAF8F3; margin-bottom:6px; cursor:pointer; transition:opacity .15s; }
 .fix-vrow.fixed { opacity:0.6; }
 .fix-vrow.fixed .fix-vtext { text-decoration:line-through; color:#9a9484; }
 .fix-vmain { flex:1; min-width:0; }
-.fix-vtext { font-size:15px; color:#16233d; line-height:1.25; font-weight:600; }
+.fix-vtext { font-size:14px; color:#16233d; line-height:1.25; font-weight:600; }
 .fix-vmeta { margin-top:3px; }
 .fix-vwho { display:inline-flex; align-items:center; gap:4px; font-size:11px; color:#7a7466; background:#F0ECE2; border-radius:999px; padding:2px 8px; width:fit-content; }
 
@@ -3759,6 +3760,22 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .insp-viewbtn.on { background:var(--navy); color:#fff; border-color:var(--navy); }
 .insp-del-btn { padding:11px 14px; border-radius:9px; border:1px solid rgba(192,57,43,0.4); background:rgba(192,57,43,0.12); color:#ff6b5a; font-size:16px; cursor:pointer; flex-shrink:0; }
 .insp-del-btn:active { background:rgba(192,57,43,0.25); }
+
+
+.sd-contact { display:flex; align-items:center; gap:11px; background:rgba(255,255,255,0.06); border-radius:9px; padding:11px 12px; margin-bottom:7px; text-decoration:none; }
+.sd-c-ic { font-size:17px; flex-shrink:0; }
+.sd-c-main { flex:1; display:flex; flex-direction:column; min-width:0; }
+.sd-c-label { font-size:10.5px; color:rgba(243,239,230,0.5); text-transform:uppercase; letter-spacing:0.5px; }
+.sd-c-value { font-size:14px; color:#f3efe6; font-weight:600; word-break:break-word; }
+.sd-c-go { color:rgba(243,239,230,0.4); font-size:18px; flex-shrink:0; }
+a.sd-contact:active { background:rgba(255,255,255,0.12); }
+.sd-mgr { background:rgba(255,255,255,0.04); border-radius:10px; padding:11px; margin-bottom:9px; }
+.sd-mgr-name { font-size:14px; font-weight:700; color:#f3efe6; margin-bottom:8px; }
+.sd-punch-btn { width:100%; display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:13px 14px; color:#f3efe6; font-size:14px; font-weight:600; cursor:pointer; }
+.sd-punch-count { font-size:12px; color:var(--gold); font-weight:700; }
+.sub-mgr-row { display:flex; gap:6px; margin-bottom:6px; align-items:center; flex-wrap:wrap; }
+.sub-mgr-f { flex:1; min-width:90px; font-size:12.5px; padding:7px 9px; }
+.sub-mgr-del { background:rgba(192,57,43,0.12); border:none; border-radius:7px; color:#c0392b; width:30px; height:30px; cursor:pointer; flex-shrink:0; font-size:13px; }
 
 </style>
   <!-- Firebase -->
@@ -4076,7 +4093,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v169</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v170</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4438,7 +4455,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v169</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v170</div>
     </div>
   </div>
 
@@ -5102,6 +5119,14 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
               <datalist id="sub-trade-list"></datalist></div>
             <div class="form-group"><label class="form-label">Phone <span style="font-weight:400;opacity:.6;">(optional)</span></label>
               <input class="form-input" id="sub-phone" type="tel" placeholder="845-000-0000"></div>
+            <div class="form-group"><label class="form-label">Email <span style="font-weight:400;opacity:.6;">(optional)</span></label>
+              <input class="form-input" id="sub-email" type="email" placeholder="company@example.com"></div>
+            <div class="form-group"><label class="form-label">Address <span style="font-weight:400;opacity:.6;">(optional)</span></label>
+              <input class="form-input" id="sub-address" type="text" placeholder="Street, City, State"></div>
+            <div class="form-group"><label class="form-label">Managers <span style="font-weight:400;opacity:.6;">(optional)</span></label>
+              <div id="subMgrList"></div>
+              <button type="button" onclick="_subAddMgrRow()" class="cu-mini-btn" style="margin-top:4px;">+ Add manager</button>
+            </div>
             <div class="form-group"><label class="form-label">4-digit access code</label>
               <div style="display:flex;gap:8px;align-items:center;">
                 <input class="form-input" id="sub-code" type="text" maxlength="4" inputmode="numeric" pattern="[0-9]*" style="flex:1;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:4px;text-align:center;" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4)" placeholder="0000">
@@ -5300,7 +5325,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v169';
+<script>var APP_VERSION = 'v170';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -14431,6 +14456,10 @@ function openSubForm(id) {
   document.getElementById('sub-trade').value = '';
   document.getElementById('sub-name').value = '';
   document.getElementById('sub-phone').value = '';
+  if (document.getElementById('sub-email')) document.getElementById('sub-email').value = '';
+  if (document.getElementById('sub-address')) document.getElementById('sub-address').value = '';
+  window._subMgrs = [];
+  _subRenderMgrRows();
   document.getElementById('sub-note').value = '';
   document.getElementById('sub-code').value = _genSubCode();
   if (id) {
@@ -14439,6 +14468,10 @@ function openSubForm(id) {
       document.getElementById('sub-name').value = s.name || '';
       document.getElementById('sub-trade').value = s.trade || TRADE_OPTIONS[0];
       document.getElementById('sub-phone').value = s.phone || '';
+      if (document.getElementById('sub-email')) document.getElementById('sub-email').value = s.email || '';
+      if (document.getElementById('sub-address')) document.getElementById('sub-address').value = s.address || '';
+      window._subMgrs = (s.managers || []).map(function(m){ return { name:m.name||'', phone:m.phone||'', email:m.email||'' }; });
+      _subRenderMgrRows();
       document.getElementById('sub-note').value = s.officeNote || '';
       document.getElementById('sub-code').value = s.code || _genSubCode();
     });
@@ -14447,10 +14480,33 @@ function openSubForm(id) {
 }
 function closeSubModal(){ document.getElementById('modal-sub').classList.remove('open'); _subEditId=null; }
 
+
+// ===== Sub manager rows (multiple managers per company) =====
+window._subMgrs = window._subMgrs || [];
+function _subRenderMgrRows() {
+  var host = document.getElementById('subMgrList');
+  if (!host) return;
+  host.innerHTML = (window._subMgrs||[]).map(function(m, i){
+    return '<div class="sub-mgr-row">' +
+      '<input class="form-input sub-mgr-f" placeholder="Manager name" value="' + _escAttr(m.name||'') + '" oninput="_subMgrSet(' + i + ',\'name\',this.value)">' +
+      '<input class="form-input sub-mgr-f" placeholder="Phone" value="' + _escAttr(m.phone||'') + '" oninput="_subMgrSet(' + i + ',\'phone\',this.value)">' +
+      '<input class="form-input sub-mgr-f" placeholder="Email" value="' + _escAttr(m.email||'') + '" oninput="_subMgrSet(' + i + ',\'email\',this.value)">' +
+      '<button type="button" class="sub-mgr-del" onclick="_subRemoveMgrRow(' + i + ')">\u2715</button>' +
+    '</div>';
+  }).join('');
+}
+function _subAddMgrRow() { window._subMgrs.push({ name:'', phone:'', email:'' }); _subRenderMgrRows(); }
+function _subRemoveMgrRow(i) { window._subMgrs.splice(i,1); _subRenderMgrRows(); }
+function _subMgrSet(i, field, val) { if (window._subMgrs[i]) window._subMgrs[i][field] = val; }
+function _escAttr(s) { return String(s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
 async function saveSub() {
   var name = document.getElementById('sub-name').value.trim();
   var trade = document.getElementById('sub-trade').value;
   var phone = document.getElementById('sub-phone').value.trim();
+  var email = (document.getElementById('sub-email')||{}).value ? document.getElementById('sub-email').value.trim() : '';
+  var address = (document.getElementById('sub-address')||{}).value ? document.getElementById('sub-address').value.trim() : '';
+  var managers = (window._subMgrs||[]).filter(function(m){ return (m.name||m.phone||m.email); });
   var note = document.getElementById('sub-note').value.trim();
   var code = document.getElementById('sub-code').value.trim();
   if (!name) { alert('Enter a name or company.'); return; }
@@ -14462,7 +14518,7 @@ async function saveSub() {
   var id = _subEditId || ('sub_' + Date.now() + '_' + Math.random().toString(36).slice(2,6));
   var existing = _subEditId ? (await DB.get('subcontractor:' + id)) : null;
   var rec = existing || { id: id, tasks: [], assignedItems: [], active: true };
-  rec.name = name; rec.trade = trade; rec.phone = phone; rec.officeNote = note; rec.code = code;
+  rec.name = name; rec.trade = trade; rec.phone = phone; rec.email = email; rec.address = address; rec.managers = managers; rec.officeNote = note; rec.code = code;
   if (rec.active === undefined) rec.active = true;
   await DB.set('subcontractor:' + id, rec);
   if (typeof logActivity === 'function') logActivity((existing?'Edited':'Added') + ' subcontractor ' + name);
@@ -14497,26 +14553,81 @@ function closeSubDetail(){ document.getElementById('modal-sub-detail').classList
 
 async function _renderSubDetailBody(s) {
   var body = document.getElementById('subDetailBody');
-  // count their punch items
   var items = await _collectSubPunchItems(s);
+  var openItems = items.filter(function(it){ return !it.done; }).length;
   var tasks = s.tasks || [];
+
+  // Contact rows: phone (tap to call), email (tap to mail), address.
+  function contactRow(icon, label, value, href) {
+    if (!value) return '';
+    var inner = '<span class="sd-c-ic">' + icon + '</span><span class="sd-c-main"><span class="sd-c-label">' + label + '</span><span class="sd-c-value">' + _esc(value) + '</span></span>';
+    return href ? '<a class="sd-contact" href="' + href + '">' + inner + '<span class="sd-c-go">\u203a</span></a>'
+                : '<div class="sd-contact">' + inner + '</div>';
+  }
+
+  var contact = '';
+  contact += contactRow('\ud83d\udcde', 'Phone', s.phone, s.phone ? ('tel:' + String(s.phone).replace(/[^\d+]/g,'')) : '');
+  contact += contactRow('\u2709\ufe0f', 'Email', s.email, s.email ? ('mailto:' + s.email) : '');
+  contact += contactRow('\ud83d\udccd', 'Address', s.address, s.address ? ('https://maps.google.com/?q=' + encodeURIComponent(s.address)) : '');
+
+  // Managers
+  var mgrs = s.managers || [];
+  var mgrHtml = '';
+  if (mgrs.length) {
+    mgrHtml = '<div class="cust-form-sec" style="color:#f3efe6;margin-top:16px;">Managers</div>';
+    mgrHtml += mgrs.map(function(m){
+      var rows = '';
+      rows += contactRow('\ud83d\udcde', 'Phone', m.phone, m.phone ? ('tel:' + String(m.phone).replace(/[^\d+]/g,'')) : '');
+      rows += contactRow('\u2709\ufe0f', 'Email', m.email, m.email ? ('mailto:' + m.email) : '');
+      return '<div class="sd-mgr"><div class="sd-mgr-name">\ud83d\udc64 ' + _esc(m.name||'Manager') + '</div>' + rows + '</div>';
+    }).join('');
+  }
+
   body.innerHTML =
+    // Access code
     '<div class="cust-form-sec" style="color:#f3efe6;">Access</div>' +
-    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">' +
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">' +
       '<span style="font-family:Inter,sans-serif;font-size:13px;color:#f3efe6;">Login code</span>' +
       '<span style="font-family:\'Bebas Neue\',sans-serif;font-size:24px;letter-spacing:3px;color:var(--gold);">' + _esc(String(s.code||'----')) + '</span>' +
     '</div>' +
-    '<div class="cust-form-sec" style="color:#f3efe6;">Punch items for this sub <span style="opacity:.6;font-weight:400;">(' + items.length + ')</span></div>' +
-    (items.length ? items.map(function(it){ return '<div style="font-size:13px;color:#f3efe6;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.08);">' + (it.done?'\u2705 ':'\u2022 ') + _esc(it.text) + ' <span style="color:rgba(243,239,230,0.5);">\u2014 ' + _esc(it._where) + '</span></div>'; }).join('') : '<div style="font-size:13px;color:rgba(243,239,230,0.5);margin-bottom:8px;">No matching punch items yet. Tag punch items with the trade \"' + _esc(s.trade||'') + '\" or assign them manually.</div>') +
-    '<div class="cust-form-sec" style="color:#f3efe6;margin-top:14px;">Tasks you assigned</div>' +
+    // Contact
+    (contact ? ('<div class="cust-form-sec" style="color:#f3efe6;">Contact</div>' + contact) : '') +
+    // Managers
+    mgrHtml +
+    // Punch items BUTTON (not plain list)
+    '<div class="cust-form-sec" style="color:#f3efe6;margin-top:16px;">Punch List</div>' +
+    '<button onclick="_subShowPunchItems()" class="sd-punch-btn">' +
+      '<span>\ud83d\udccb View punch items</span>' +
+      '<span class="sd-punch-count">' + (openItems ? (openItems + ' open') : (items.length ? 'all done' : 'none')) + '</span>' +
+    '</button>' +
+    '<div id="subPunchItemsBox" style="display:none;margin-top:8px;"></div>' +
+    // Tasks
+    '<div class="cust-form-sec" style="color:#f3efe6;margin-top:16px;">Tasks you assigned</div>' +
     '<div id="subTaskList">' + _renderSubTasks(tasks) + '</div>' +
     '<div style="display:flex;gap:8px;margin-top:8px;">' +
       '<input id="subNewTask" class="form-input" type="text" placeholder="Add a task..." style="flex:1;" onkeydown="if(event.key===\'Enter\')addSubTask()">' +
       '<button onclick="addSubTask()" class="btn-primary" style="flex-shrink:0;">Add</button>' +
     '</div>' +
-    '<div class="cust-form-sec" style="color:#f3efe6;margin-top:14px;">Office note</div>' +
+    // Office note
+    '<div class="cust-form-sec" style="color:#f3efe6;margin-top:16px;">Office note</div>' +
     '<textarea id="subDetailNote" class="form-input" rows="2" placeholder="Note the sub will see">' + _esc(s.officeNote||'') + '</textarea>' +
-    '<button onclick="saveSubNote()" class="cu-mini-btn" style="margin-top:6px;">Save note</button>';
+    '<button onclick="saveSubNote()" class="cu-mini-btn" style="margin-top:6px;">Save note</button>' +
+    // Edit button
+    '<button onclick="closeSubDetail();openSubForm(\'' + s.id + '\')" class="cu-mini-btn" style="margin-top:14px;width:100%;">\u270e Edit sub details</button>';
+
+  // stash items for the punch-items toggle
+  window._subDetailPunchItems = items;
+}
+function _subShowPunchItems() {
+  var box = document.getElementById('subPunchItemsBox');
+  if (!box) return;
+  var open = box.style.display !== 'none';
+  if (open) { box.style.display = 'none'; return; }
+  var items = window._subDetailPunchItems || [];
+  box.innerHTML = items.length ? items.map(function(it){
+    return '<div style="font-size:13px;color:#f3efe6;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.08);">' + (it.done?'\u2705 ':'\u2022 ') + _esc(it.text) + ' <span style="color:rgba(243,239,230,0.5);">\u2014 ' + _esc(it._where||'') + '</span></div>';
+  }).join('') : '<div style="font-size:13px;color:rgba(243,239,230,0.5);">No matching punch items yet.</div>';
+  box.style.display = 'block';
 }
 function _renderSubTasks(tasks) {
   if (!tasks || !tasks.length) return '<div style="font-size:13px;color:rgba(243,239,230,0.5);">No tasks yet.</div>';
