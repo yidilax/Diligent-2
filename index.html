@@ -3393,10 +3393,10 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 
 
 /* ===== SUB PORTAL REDESIGN ===== */
-#subPortalPage { background: #F4F1EB; min-height: 100vh; display: block !important; }
+#subPortalPage { background: #F4F1EB; min-height: 100vh; }
 #subPortalPage > div { width: 100%; box-sizing: border-box; }
 #subPortalContent { width: 100%; box-sizing: border-box; }
-.page#subPortalPage.active, .page#subPortalPage { display: block !important; }
+.page#subPortalPage.active { display: block !important; }
 #subPortalContent { padding: 16px; max-width: 760px; margin: 0 auto; }
 .spx-hero { background: linear-gradient(135deg, #0D1F3C 0%, #16294d 100%); border-radius: 16px; padding: 18px 18px 20px; color: #fff; margin-bottom: 14px; box-shadow: 0 4px 20px rgba(13,31,60,0.18); }
 .spx-hi { font-size: 13px; color: rgba(255,255,255,0.65); font-weight: 500; }
@@ -3461,6 +3461,39 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .spx-act { background:#fff; border:1px solid #E3DDD3; border-radius:8px; padding:8px 12px; font-size:12px; font-weight:700; color:var(--navy); cursor:pointer; }
 .spx-act-danger { color:#c0392b; border-color:rgba(192,57,43,0.3); }
 .spx-roomdone { background:none; border:none; color:var(--gold); font-size:11px; font-weight:700; cursor:pointer; }
+
+
+/* ===== PROJECTS TAB REDESIGN ===== */
+.pjx-card { background:#fff; border:1px solid #EAE5DC; border-radius:16px; margin-bottom:14px; overflow:hidden; box-shadow:0 2px 10px rgba(0,0,0,0.05); }
+.pjx-head { display:flex; align-items:flex-start; gap:10px; padding:16px 16px 12px; }
+.pjx-reorder { display:flex; flex-direction:column; gap:3px; flex-shrink:0; padding-top:2px; }
+.pjx-arrow { width:28px; height:24px; border:1px solid #E3DDD3; background:#FAF8F3; border-radius:7px; color:var(--navy); font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .12s; padding:0; }
+.pjx-arrow:hover:not(:disabled) { background:var(--navy); color:#fff; border-color:var(--navy); }
+.pjx-arrow:disabled { opacity:0.3; cursor:default; }
+.pjx-head-main { flex:1; min-width:0; }
+.pjx-name { font-family:'Bebas Neue',sans-serif; font-size:23px; letter-spacing:0.5px; color:var(--navy); line-height:1.1; }
+.pjx-meta { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:7px; }
+.pjx-status { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.4px; padding:3px 9px; border-radius:20px; }
+.pjx-vis { font-size:11px; color:#9a9484; font-weight:600; }
+.pjx-by { font-size:11px; color:#b5ae9c; }
+.pjx-notes { margin:0 16px 12px; padding:9px 12px; background:#FAF8F3; border-radius:9px; font-size:12.5px; color:#6a6453; font-style:italic; line-height:1.4; }
+.pjx-addrs { margin:0 12px; border-top:1px solid #F4F1EB; }
+.pjx-addr { padding:11px 6px; border-bottom:1px solid #F4F1EB; }
+.pjx-addr:last-child { border-bottom:none; }
+.pjx-addr-left { display:flex; align-items:center; gap:6px; }
+.pjx-pin { font-size:13px; flex-shrink:0; }
+.pjx-addr-name { font-size:14px; font-weight:700; color:#16233d; }
+.pjx-addr-units { display:block; font-size:11.5px; color:#9a9484; margin:3px 0 0 19px; }
+.pjx-scans { display:flex; flex-wrap:wrap; gap:6px; margin:7px 0 0 19px; }
+.pjx-scan { display:inline-flex; align-items:center; gap:3px; color:var(--gold); font-size:11px; font-weight:700; text-decoration:none; background:rgba(201,168,76,0.12); border:1px solid rgba(201,168,76,0.3); padding:3px 9px; border-radius:20px; white-space:nowrap; }
+.pjx-foot { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 16px; background:#FCFBF9; border-top:1px solid #F4F1EB; flex-wrap:wrap; }
+.pjx-stats { display:flex; align-items:center; gap:7px; font-size:12px; color:#8a8472; }
+.pjx-stat b { color:var(--navy); font-weight:800; }
+.pjx-dot { color:#d5cdbd; }
+.pjx-actions { display:flex; gap:6px; }
+.pjx-act { background:#fff; border:1px solid #E3DDD3; border-radius:8px; padding:7px 11px; font-size:12px; font-weight:700; color:var(--navy); cursor:pointer; white-space:nowrap; transition:background .12s; }
+.pjx-act:hover { background:#F4F1EB; }
+.pjx-act-danger { color:#c0392b; border-color:rgba(192,57,43,0.25); }
 
 </style>
   <!-- Firebase -->
@@ -3778,7 +3811,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v138</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v140</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4135,7 +4168,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     <div class="office-sidebar-footer">
       <div id="bioToggleRow" style="margin-bottom:10px;"></div>
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v138</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v140</div>
     </div>
   </div>
 
@@ -4956,7 +4989,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v138';
+<script>var APP_VERSION = 'v140';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -5547,7 +5580,7 @@ async function _syncPublicAddress(project) {
       return;
     }
     var houses = (project.houses || []).map(function(h){
-      return { address: h.address || '', units: h.units || [], basementUnits: h.basementUnits || [], scan3d: h.scan3d || '' };
+      return { address: h.address || '', units: h.units || [], basementUnits: h.basementUnits || [], scan3d: h.scan3d || '', scans: h.scans || [] };
     }).filter(function(h){ return h.address; });
     await DB.set('pubaddr:' + project.id, { id: project.id, name: project.name || '', houses: houses, _updatedAt: Date.now() });
   } catch(e) {}
@@ -10849,11 +10882,15 @@ function addHouseRow() {
   const scanLabel = document.createElement('label');
   scanLabel.className = 'form-label';
   scanLabel.style.cssText = 'margin-top:10px;';
-  scanLabel.innerHTML = '3D Scan Link <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);">(Matterport / tour URL \u2014 office & subs only)</span>';
-  const scanInput = document.createElement('input');
-  scanInput.className = 'form-input';
-  scanInput.id = 'hscan_' + id;
-  scanInput.placeholder = 'https://my.matterport.com/show/?m=...';
+  scanLabel.innerHTML = '3D Scans <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);">(Matterport / tour URLs \u2014 office & subs only)</span>';
+  const scanWrap = document.createElement('div');
+  scanWrap.id = 'hscanwrap_' + id;
+  const scanAddBtn = document.createElement('button');
+  scanAddBtn.type = 'button';
+  scanAddBtn.className = 'ue-add-item-btn';
+  scanAddBtn.style.cssText = 'margin-top:8px;';
+  scanAddBtn.textContent = '+ Add 3D scan';
+  scanAddBtn.onclick = function(){ _addScanRow(id); };
 
   div.appendChild(row);
   div.appendChild(unitsLabel);
@@ -10861,8 +10898,26 @@ function addHouseRow() {
   div.appendChild(bsmtLabel);
   div.appendChild(bsmtInput);
   div.appendChild(scanLabel);
-  div.appendChild(scanInput);
+  div.appendChild(scanWrap);
+  div.appendChild(scanAddBtn);
   container.appendChild(div);
+}
+// Add one scan row (label + URL) to a house's scan list.
+var _scanRowSeq = 0;
+function _addScanRow(houseId, label, url) {
+  var wrap = document.getElementById('hscanwrap_' + houseId);
+  if (!wrap) return;
+  _scanRowSeq++;
+  var rid = houseId + '_s' + _scanRowSeq;
+  var row = document.createElement('div');
+  row.className = 'scan-row';
+  row.id = 'scanrow_' + rid;
+  row.style.cssText = 'display:flex;gap:6px;align-items:center;margin-top:6px;';
+  row.innerHTML =
+    '<input class="form-input hscan-label" id="scanlbl_' + rid + '" placeholder="Label (e.g. Upper floor)" style="flex:0 0 38%;font-size:12.5px;" value="' + (label?_esc(label):'') + '">' +
+    '<input class="form-input hscan-url" id="scanurl_' + rid + '" placeholder="https://my.matterport.com/show/?m=..." style="flex:1;font-size:12.5px;" value="' + (url?_esc(url):'') + '">' +
+    '<button type="button" onclick="this.parentNode.remove()" style="background:none;border:none;color:#e07a6a;font-size:16px;cursor:pointer;flex-shrink:0;padding:0 4px;">\u2715</button>';
+  wrap.appendChild(row);
 }
 function removeHouseRow(id) {
   houseRows = houseRows.filter(h => h !== id);
@@ -10896,8 +10951,9 @@ async function editProject(id) {
       if (unitsEl) unitsEl.value = (house.units || []).join(', ');
       const bsmtEl = document.getElementById('hbsmt_' + lastId);
       if (bsmtEl) bsmtEl.value = (house.basementUnits || []).join(', ');
-      const scanEl = document.getElementById('hscan_' + lastId);
-      if (scanEl) scanEl.value = house.scan3d || '';
+      // Populate 3D scan rows. Support new scans[] and legacy single scan3d.
+      var hscans = (house.scans && house.scans.length) ? house.scans : (house.scan3d ? [{label:'', url:house.scan3d}] : []);
+      hscans.forEach(function(sc){ _addScanRow(lastId, sc.label || '', sc.url || ''); });
     });
   }
 
@@ -10920,9 +10976,20 @@ async function saveProject() {
     const bsmtEl = document.getElementById('hbsmt_' + id);
     const bsmtRaw = bsmtEl ? bsmtEl.value : '';
     const basementUnits = bsmtRaw.split(',').map(function(u) { return u.trim(); }).filter(Boolean);
-    const scanEl = document.getElementById('hscan_' + id);
-    const scan3d = scanEl ? scanEl.value.trim() : '';
-    return { address: addr, units: units, basementUnits: basementUnits, scan3d: scan3d };
+    // Collect all 3D scan rows for this house (label + url).
+    var scans = [];
+    var swrap = document.getElementById('hscanwrap_' + id);
+    if (swrap) {
+      swrap.querySelectorAll('.scan-row').forEach(function(rowEl){
+        var lbl = rowEl.querySelector('.hscan-label');
+        var url = rowEl.querySelector('.hscan-url');
+        var u = url ? url.value.trim() : '';
+        if (u) scans.push({ label: (lbl ? lbl.value.trim() : ''), url: u });
+      });
+    }
+    // Keep scan3d (first url) for backward compatibility with older readers.
+    var scan3d = scans.length ? scans[0].url : '';
+    return { address: addr, units: units, basementUnits: basementUnits, scan3d: scan3d, scans: scans };
   }).filter(function(h) { return h.address; });
 
   try {
@@ -12063,49 +12130,95 @@ async function renderProjects() {
   var listEl = document.getElementById('projectsList');
   var countEl = document.getElementById('proj-count');
   if (keys.length === 0) {
-    listEl.innerHTML = '<div class="tab-empty"><div class="tab-empty-icon">🏗️</div><div class="tab-empty-title">No Projects Yet</div><div class="tab-empty-desc">Create your first project to manage addresses and units.</div><button class="tab-empty-btn" onclick="showProjectForm()">+ New Project</button></div>';
+    listEl.innerHTML = '<div class="tab-empty"><div class="tab-empty-icon">\ud83c\udfd7\ufe0f</div><div class="tab-empty-title">No Projects Yet</div><div class="tab-empty-desc">Create your first project to manage addresses and units.</div><button class="tab-empty-btn" onclick="showProjectForm()">+ New Project</button></div>';
     if (countEl) countEl.textContent = '0 projects';
     return;
   }
   var all = (await Promise.all(keys.map(function(k) { return DB.get(k); }))).filter(Boolean);
   var projects = all.filter(canSee);
+  // Sort by saved order (projects without an order go to the end, then by name).
+  projects.sort(function(a,b){
+    var ao = (typeof a.order === 'number') ? a.order : 9999;
+    var bo = (typeof b.order === 'number') ? b.order : 9999;
+    if (ao !== bo) return ao - bo;
+    return (a.name||'').localeCompare(b.name||'');
+  });
+  window._projectOrder = projects.map(function(p){ return p.id; });
   if (countEl) countEl.textContent = projects.length + ' project' + (projects.length !== 1 ? 's' : '');
   if (projects.length === 0) {
-    listEl.innerHTML = '<div class="tab-empty"><div class="tab-empty-icon">🏗️</div><div class="tab-empty-title">No Projects Visible</div><div class="tab-empty-desc">No public projects or projects you own yet.</div></div>';
+    listEl.innerHTML = '<div class="tab-empty"><div class="tab-empty-icon">\ud83c\udfd7\ufe0f</div><div class="tab-empty-title">No Projects Visible</div><div class="tab-empty-desc">No public projects or projects you own yet.</div></div>';
     return;
   }
-  var sc = { active:'proj-status-active', completed:'proj-status-completed', archived:'proj-status-archived' };
-  var sl = { active:'● Active', completed:'✓ Completed', archived:'○ Archived' };
-  listEl.innerHTML = projects.map(function(p) {
+  var sl = { active:'Active', completed:'Completed', planning:'Planning', archived:'Archived', 'on-hold':'On Hold' };
+  var statusColor = { active:'#3a7d5d', completed:'#2c5d8a', planning:'#b8860b', archived:'#8a8472', 'on-hold':'#c0392b' };
+  listEl.innerHTML = projects.map(function(p, idx) {
     var houses = p.houses || [];
     var totalUnits = houses.reduce(function(s,h) { return s+(h.units?h.units.length:0); },0);
-    var addrRows = houses.map(function(h) {
-      var scanBtn = h.scan3d ? ' <a href="' + _esc(h.scan3d) + '" target="_blank" rel="noopener" onclick="event.stopPropagation();" style="color:var(--gold);font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap;">🏠 3D Scan</a>' : '';
-      return '<div class="proj-address-row">📍 ' + h.address + scanBtn + '<span class="proj-address-units">' + (h.units&&h.units.length?'Units: '+h.units.join(', '):'No units') + '</span></div>';
-    }).join('');
+    var sCol = statusColor[p.status] || '#3a7d5d';
     var canEditThis = canEdit(p);
-    return '<div class="proj-card">' +
-      '<div class="proj-card-top"><div style="flex:1;">' +
-        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">' +
-          '<div class="proj-card-name">' + p.name + '</div>' +
-          visBadge(p) +
+    var addrRows = houses.map(function(h) {
+      var hscans = (h.scans && h.scans.length) ? h.scans : (h.scan3d ? [{label:'',url:h.scan3d}] : []);
+      var scanBtns = hscans.map(function(sc){
+        var nm = sc.label ? _esc(sc.label) : '3D Scan';
+        return '<a href="' + _esc(sc.url) + '" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="pjx-scan">\ud83c\udfe0 ' + nm + '</a>';
+      }).join('');
+      return '<div class="pjx-addr">' +
+        '<div class="pjx-addr-left"><span class="pjx-pin">\ud83d\udccd</span><span class="pjx-addr-name">' + _esc(h.address) + '</span></div>' +
+        '<span class="pjx-addr-units">' + (h.units&&h.units.length? _esc(h.units.join(', ')) : 'No units') + '</span>' +
+        (scanBtns ? '<div class="pjx-scans">' + scanBtns + '</div>' : '') +
+      '</div>';
+    }).join('');
+    // reorder arrows
+    var reorder = canEditThis ? '<div class="pjx-reorder">' +
+      '<button class="pjx-arrow" ' + (idx===0?'disabled':'') + ' onclick="event.stopPropagation();_moveProject(\'' + p.id + '\',-1)" title="Move up">\u25b4</button>' +
+      '<button class="pjx-arrow" ' + (idx===projects.length-1?'disabled':'') + ' onclick="event.stopPropagation();_moveProject(\'' + p.id + '\',1)" title="Move down">\u25be</button>' +
+    '</div>' : '';
+    return '<div class="pjx-card">' +
+      '<div class="pjx-head">' +
+        reorder +
+        '<div class="pjx-head-main">' +
+          '<div class="pjx-name">' + _esc(p.name) + '</div>' +
+          '<div class="pjx-meta">' +
+            '<span class="pjx-status" style="color:' + sCol + ';background:' + sCol + '1a;">' + (sl[p.status]||'Active') + '</span>' +
+            '<span class="pjx-vis">' + (p.visibility==='private' ? '\ud83d\udd12 Private' : '\ud83c\udf10 Public') + '</span>' +
+            '<span class="pjx-by">by ' + _esc(p.ownerName||p.createdBy||'Admin') + '</span>' +
+          '</div>' +
         '</div>' +
-        '<span class="proj-status-pill ' + (sc[p.status]||'proj-status-active') + '">' + (sl[p.status]||'Active') + '</span>' +
-        '<span class="proj-card-meta" style="margin-left:8px;">by ' + (p.ownerName||p.createdBy||'Admin') + '</span>' +
-        (p.notes ? '<div class="proj-card-meta" style="margin-top:6px;font-style:italic;">' + p.notes + '</div>' : '') +
       '</div>' +
-      (canEditThis ? '<div class="proj-card-actions">' +
-        '<button class="icon-btn" onclick="openProjectFiles(\'' + p.id + '\')">📎 Files</button>' +
-        '<button class="icon-btn" onclick="editProject(\'' + p.id + '\')">✏️ Edit</button>' +
-        '<button class="icon-btn icon-btn-danger" onclick="deleteProject(\'' + p.id + '\')">🗑</button>' +
-      '</div>' : '') +
+      (p.notes ? '<div class="pjx-notes">' + _esc(p.notes) + '</div>' : '') +
+      (addrRows ? '<div class="pjx-addrs">' + addrRows + '</div>' : '') +
+      '<div class="pjx-foot">' +
+        '<div class="pjx-stats">' +
+          '<span class="pjx-stat"><b>' + houses.length + '</b> address' + (houses.length!==1?'es':'') + '</span>' +
+          '<span class="pjx-dot">\u00b7</span>' +
+          '<span class="pjx-stat"><b>' + totalUnits + '</b> unit' + (totalUnits!==1?'s':'') + '</span>' +
+        '</div>' +
+        (canEditThis ? '<div class="pjx-actions">' +
+          '<button class="pjx-act" onclick="openProjectFiles(\'' + p.id + '\')">\ud83d\udcce Files</button>' +
+          '<button class="pjx-act" onclick="editProject(\'' + p.id + '\')">\u270f\ufe0f Edit</button>' +
+          '<button class="pjx-act pjx-act-danger" onclick="deleteProject(\'' + p.id + '\')">\ud83d\uddd1</button>' +
+        '</div>' : '') +
       '</div>' +
-      (addrRows ? '<div class="proj-addresses">' + addrRows + '</div>' : '') +
-      '<div class="proj-card-footer">' +
-        '<span class="proj-footer-stat"><span>' + houses.length + '</span> address' + (houses.length!==1?'es':'') + '</span>' +
-        '<span class="proj-footer-stat"><span>' + totalUnits + '</span> unit' + (totalUnits!==1?'s':'') + '</span>' +
-      '</div></div>';
+    '</div>';
   }).join('');
+}
+// Move a project up (-1) or down (1) in the list and persist the new order.
+async function _moveProject(id, dir) {
+  var order = (window._projectOrder || []).slice();
+  var i = order.indexOf(id);
+  if (i === -1) return;
+  var j = i + dir;
+  if (j < 0 || j >= order.length) return;
+  var tmp = order[i]; order[i] = order[j]; order[j] = tmp;
+  // Persist order index onto each project.
+  for (var n = 0; n < order.length; n++) {
+    try {
+      var p = await DB.get('project:' + order[n]);
+      if (p) { p.order = n; await DB.set('project:' + order[n], p); }
+    } catch(e) {}
+  }
+  window._projectOrder = order;
+  await renderProjects();
 }
 
 
@@ -12773,7 +12886,9 @@ async function renderSubPortal() {
     var paRecs = (await Promise.all(paKeys.map(function(k){ return DB.get(k); }))).filter(Boolean);
     paRecs.forEach(function(rec){
       (rec.houses||[]).forEach(function(h){
-        if (h.address && h.scan3d) _allScans.push({ address: h.address, scan: h.scan3d, project: rec.name || '' });
+        if (!h.address) return;
+        var hscans = (h.scans && h.scans.length) ? h.scans : (h.scan3d ? [{label:'',url:h.scan3d}] : []);
+        hscans.forEach(function(sc){ if (sc.url) _allScans.push({ address: h.address, scan: sc.url, label: sc.label || '', project: rec.name || '' }); });
       });
     });
   } catch(e) {}
