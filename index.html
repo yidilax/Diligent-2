@@ -3393,7 +3393,10 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 
 
 /* ===== SUB PORTAL REDESIGN ===== */
-#subPortalPage { background: #F4F1EB; min-height: 100vh; }
+#subPortalPage { background: #F4F1EB; min-height: 100vh; display: block !important; }
+#subPortalPage > div { width: 100%; box-sizing: border-box; }
+#subPortalContent { width: 100%; box-sizing: border-box; }
+.page#subPortalPage.active, .page#subPortalPage { display: block !important; }
 #subPortalContent { padding: 16px; max-width: 760px; margin: 0 auto; }
 .spx-hero { background: linear-gradient(135deg, #0D1F3C 0%, #16294d 100%); border-radius: 16px; padding: 18px 18px 20px; color: #fff; margin-bottom: 14px; box-shadow: 0 4px 20px rgba(13,31,60,0.18); }
 .spx-hi { font-size: 13px; color: rgba(255,255,255,0.65); font-weight: 500; }
@@ -3409,7 +3412,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 
 .spx-section { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.7px; color: #8a8472; margin: 18px 4px 9px; }
 
-.spx-scan { background:#fff; border:1px solid #EAE5DC; border-radius:13px; overflow:hidden; margin-bottom:8px; box-shadow:0 1px 4px rgba(0,0,0,0.03); }
+.spx-scan { width:100%; box-sizing:border-box; background:#fff; border:1px solid #EAE5DC; border-radius:13px; overflow:hidden; margin-bottom:8px; box-shadow:0 1px 4px rgba(0,0,0,0.03); }
 .spx-scan a { display:flex; align-items:center; gap:11px; padding:13px 14px; text-decoration:none; }
 .spx-scan a:not(:last-child) { border-bottom:1px solid #F4F1EB; }
 .spx-scan-ic { width:40px; height:40px; border-radius:10px; background:rgba(201,168,76,0.15); display:flex; align-items:center; justify-content:center; font-size:19px; flex-shrink:0; }
@@ -3421,7 +3424,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .spx-filter { flex:1; padding:9px; border-radius:9px; border:1px solid #E3DDD3; background:#fff; color:#6a6453; font-size:12.5px; font-weight:700; cursor:pointer; transition: all .15s; }
 .spx-filter.active { background:var(--navy); color:#fff; border-color:var(--navy); }
 
-.spx-grp { background:#fff; border:1px solid #EAE5DC; border-radius:14px; overflow:hidden; margin-bottom:11px; box-shadow:0 1px 6px rgba(0,0,0,0.04); }
+.spx-grp { width:100%; box-sizing:border-box; display:block; background:#fff; border:1px solid #EAE5DC; border-radius:14px; overflow:hidden; margin-bottom:11px; box-shadow:0 1px 6px rgba(0,0,0,0.04); }
 .spx-grp-head { width:100%; display:flex; align-items:center; gap:11px; padding:14px 15px; background:none; border:none; cursor:pointer; text-align:left; }
 .spx-ring { position:relative; width:38px; height:38px; flex-shrink:0; }
 .spx-ring svg { transform: rotate(-90deg); }
@@ -3775,7 +3778,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v137</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v138</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4132,7 +4135,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     <div class="office-sidebar-footer">
       <div id="bioToggleRow" style="margin-bottom:10px;"></div>
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v137</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v138</div>
     </div>
   </div>
 
@@ -4953,7 +4956,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v137';
+<script>var APP_VERSION = 'v138';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -12957,8 +12960,58 @@ async function _subSaveOverlay(k, patch) {
   await DB.set('subpunch:' + _currentSub.id, overlay);
 }
 async function subToggleItem(k, checked) {
-  await _subSaveOverlay(k, { done: checked });
-  renderSubPortal();
+  // 1. Update the UI instantly (no waiting on the network).
+  try {
+    var iid = 'spi_' + k.replace(/[^a-zA-Z0-9]/g,'_');
+    var detail = document.getElementById(iid);
+    // the checkbox's row is .spx-item; toggle its done styling immediately
+    var cbs = document.querySelectorAll('.spx-cb');
+    cbs.forEach(function(cb){
+      if (cb.getAttribute('onchange') && cb.getAttribute('onchange').indexOf("'" + k + "'") > -1) {
+        var row = cb.closest('.spx-item');
+        if (row) row.classList.toggle('spx-item-done', checked);
+      }
+    });
+  } catch(e) {}
+  // 2. Update the progress counters live without rebuilding the list.
+  try { _spUpdateProgress(k, checked); } catch(e) {}
+  // 3. Save in the background.
+  try { await _subSaveOverlay(k, { done: checked }); } catch(e) {}
+}
+// Update the overall + per-group progress numbers without a full re-render.
+function _spUpdateProgress(k, checked) {
+  // Overall bar
+  var allCbs = document.querySelectorAll('.spx-cb');
+  var total = allCbs.length, done = 0;
+  allCbs.forEach(function(cb){ if (cb.checked) done++; });
+  var pct = total ? Math.round((done/total)*100) : 0;
+  var fill = document.querySelector('.spx-prog-fill');
+  if (fill) fill.style.width = pct + '%';
+  var count = document.querySelector('.spx-prog-count');
+  if (count) {
+    count.textContent = done + ' of ' + total + (pct===100 ? ' ✓ all done' : '');
+    count.classList.toggle('spx-prog-done', pct===100);
+  }
+  // Per-group ring + subtext
+  try {
+    document.querySelectorAll('.spx-grp').forEach(function(grp){
+      var cbs = grp.querySelectorAll('.spx-cb');
+      if (!cbs.length) return;
+      var gt = cbs.length, gd = 0;
+      cbs.forEach(function(cb){ if (cb.checked) gd++; });
+      var gpct = gt ? Math.round((gd/gt)*100) : 0;
+      var sub = grp.querySelector('.spx-grp-addr-sub');
+      if (sub) sub.textContent = gd + ' of ' + gt + ' done';
+      var ringTxt = grp.querySelector('.spx-ring-txt');
+      if (ringTxt) ringTxt.textContent = (gpct===100 ? '✓' : (gd + '/' + gt));
+      var arc = grp.querySelectorAll('.spx-ring circle');
+      if (arc && arc.length >= 2) {
+        var circ = 2 * Math.PI * 16;
+        arc[1].setAttribute('stroke-dasharray', (circ * (gpct/100)) + ' ' + circ);
+        arc[1].setAttribute('stroke', gpct===100 ? '#3a7d5d' : 'var(--gold)');
+      }
+    });
+  } catch(e) {}
 }
 async function subToggleTask(i, checked) {
   var s = await DB.get('subcontractor:' + _currentSub.id);
