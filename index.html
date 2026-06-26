@@ -3495,6 +3495,31 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .pjx-act:hover { background:#F4F1EB; }
 .pjx-act-danger { color:#c0392b; border-color:rgba(192,57,43,0.25); }
 
+
+/* ===== PROFILE / ACCOUNT MENU ===== */
+#profileMenuOverlay { display:none; position:fixed; inset:0; background:rgba(13,31,60,0.45); z-index:5000; align-items:flex-end; justify-content:center; }
+.pm-sheet { background:#fff; width:100%; max-width:480px; border-radius:18px 18px 0 0; padding:18px 18px 26px; box-shadow:0 -6px 30px rgba(0,0,0,0.2); max-height:85vh; overflow-y:auto; }
+.pm-handle { width:40px; height:4px; background:#E3DDD3; border-radius:3px; margin:0 auto 16px; }
+.pm-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.pm-title { font-family:'Bebas Neue',sans-serif; font-size:21px; letter-spacing:0.5px; color:var(--navy); }
+.pm-x { background:none; border:none; font-size:18px; color:#9a9484; cursor:pointer; }
+.pm-current { display:flex; align-items:center; gap:12px; background:#FAF8F3; border:1px solid #EAE5DC; border-radius:13px; padding:13px; margin-bottom:14px; }
+.pm-avatar { width:44px; height:44px; border-radius:50%; background:var(--navy); color:#fff; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:19px; flex-shrink:0; }
+.pm-avatar-sm { width:38px; height:38px; font-size:16px; background:#8a8472; }
+.pm-name { font-size:15px; font-weight:800; color:#16233d; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pm-email { font-size:12px; color:#9a9484; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pm-name-sm { font-size:14px; font-weight:700; color:#16233d; }
+.pm-email-sm { font-size:11.5px; color:#9a9484; }
+.pm-badge { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; color:#3a7d5d; background:rgba(58,125,93,0.12); padding:3px 9px; border-radius:20px; flex-shrink:0; }
+.pm-section { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.6px; color:#a39c8a; margin:6px 2px 8px; }
+.pm-acct { display:flex; align-items:center; gap:11px; padding:10px 11px; border-radius:11px; cursor:pointer; transition:background .12s; border:1px solid #F0ECE2; margin-bottom:7px; }
+.pm-acct:hover { background:#FAF8F3; }
+.pm-forget { background:none; border:none; color:#c2bbab; font-size:13px; cursor:pointer; flex-shrink:0; padding:4px; }
+.pm-actions { margin-top:14px; display:flex; flex-direction:column; gap:8px; }
+.pm-btn { width:100%; padding:12px; border-radius:10px; border:1px solid #E3DDD3; background:#fff; color:var(--navy); font-size:14px; font-weight:700; cursor:pointer; }
+.pm-btn-out { color:#c0392b; border-color:rgba(192,57,43,0.25); }
+.pm-settings { margin-top:8px; border-top:1px solid #F0ECE2; padding-top:14px; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -3811,7 +3836,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v141</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v145</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -3897,9 +3922,9 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     <!-- Request a Walkthrough -->
     <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;margin-top:14px;">
       <div style="font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:0.5px;color:var(--navy);margin-bottom:6px;">🚶 Request a Walkthrough</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.45;">Want to visit the site or do a final walkthrough? Request a time and we'll confirm.</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.45;">Pick a time that works for you from our available slots below, and it's booked — we'll see you then.</div>
       <div id="cdWalkStatus"></div>
-      <button onclick="openWalkRequest()" style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;width:100%;">Request a Time</button>
+      <div id="cdWalkSlots"></div>
     </div>
   </div>
 </div>
@@ -4067,7 +4092,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <span class="office-sidebar-title">Menu</span>
       <button class="office-sidebar-close" onclick="closeSidebar()">✕</button>
     </div>
-    <div class="office-sidebar-user" style="display:flex;align-items:center;gap:12px;">
+    <div class="office-sidebar-user" onclick="openProfileMenu()" style="display:flex;align-items:center;gap:12px;cursor:pointer;" title="Account & settings">
       <div id="sidebarAvatar" style="width:44px;height:44px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:18px;color:#fff;background-size:cover;background-position:center;"></div>
       <div style="min-width:0;">
         <div class="office-sidebar-user-name" id="sidebarUserName"></div>
@@ -4169,9 +4194,8 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       </li>
     </ul>
     <div class="office-sidebar-footer">
-      <div id="bioToggleRow" style="margin-bottom:10px;"></div>
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v141</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v145</div>
     </div>
   </div>
 
@@ -4380,6 +4404,15 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="margin-bottom:18px;">
         <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;color:var(--navy);">Walkthroughs</div>
         <div style="font-size:13px;color:var(--muted);">Walkthrough and site-visit requests from your customers.</div>
+      </div>
+      <div id="walkthroughAvail" style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:18px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:0.5px;color:var(--navy);">Available Walkthrough Times</div>
+          <button onclick="_addWalkSlotRow()" style="background:rgba(201,168,76,0.15);color:var(--gold-dark,#b8860b);border:1px solid rgba(201,168,76,0.4);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">+ Add time</button>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.45;">Set the times that work for you. Customers will pick from these when booking a walkthrough — no back-and-forth.</div>
+        <div id="walkSlotsList"></div>
+        <button onclick="saveWalkSlots()" style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;width:100%;margin-top:10px;">Save Available Times</button>
       </div>
       <div id="walkthroughsList"></div>
     </div>
@@ -4992,7 +5025,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v141';
+<script>var APP_VERSION = 'v145';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -6270,6 +6303,48 @@ async function _loadCustomerProgress(address, unit, targetId) {
 
 
 
+
+// ===== WALKTHROUGH AVAILABILITY (office sets open slots; customers book them) =====
+var _walkSlotSeq = 0;
+// Load saved slots into the office editor.
+async function renderWalkSlots() {
+  var host = document.getElementById('walkSlotsList');
+  if (!host) return;
+  var slots = await DB.get('walkslots:all') || { slots: [] };
+  host.innerHTML = '';
+  (slots.slots || []).forEach(function(s){ _addWalkSlotRow(s.date, s.time); });
+  if (!(slots.slots || []).length) _addWalkSlotRow();
+}
+// Add one date+time row to the editor.
+function _addWalkSlotRow(date, time) {
+  var host = document.getElementById('walkSlotsList');
+  if (!host) return;
+  _walkSlotSeq++;
+  var row = document.createElement('div');
+  row.className = 'walkslot-row';
+  row.style.cssText = 'display:flex;gap:7px;align-items:center;margin-bottom:8px;';
+  row.innerHTML =
+    '<input type="date" class="ws-date form-input" style="flex:1;" value="' + (date||'') + '">' +
+    '<input type="time" class="ws-time form-input" style="flex:1;" value="' + (time||'') + '">' +
+    '<button onclick="this.parentNode.remove()" style="background:rgba(192,57,43,0.1);color:#c0392b;border:none;border-radius:7px;width:36px;height:36px;font-size:15px;cursor:pointer;flex-shrink:0;">\u2715</button>';
+  host.appendChild(row);
+}
+// Save the slots (shared, all customers see them).
+async function saveWalkSlots() {
+  var rows = document.querySelectorAll('#walkSlotsList .walkslot-row');
+  var slots = [];
+  rows.forEach(function(r){
+    var d = r.querySelector('.ws-date').value;
+    var t = r.querySelector('.ws-time').value;
+    if (d && t) slots.push({ date: d, time: t });
+  });
+  // Sort chronologically.
+  slots.sort(function(a,b){ return (a.date + a.time).localeCompare(b.date + b.time); });
+  await DB.set('walkslots:all', { slots: slots, _updatedAt: Date.now() });
+  alert('Saved ' + slots.length + ' available time' + (slots.length!==1?'s':'') + '. Customers can now book these.');
+  renderWalkSlots();
+}
+
 async function renderWalkthroughs() {
   var host = document.getElementById('walkthroughsList');
   if (!host) return;
@@ -6534,6 +6609,70 @@ async function _loadWalkStatus(address, unit) {
     }).join('');
   } catch(e) { host.innerHTML = ''; }
 }
+// Show the office's available walkthrough slots for the customer to book (one tap).
+async function _loadWalkSlots(address, unit) {
+  var host = document.getElementById('cdWalkSlots');
+  if (!host) return;
+  try {
+    // If the customer already has an active (requested/proposed/confirmed) walkthrough, don't show slots.
+    var keys = await DB.list('walkreq:');
+    var reqs = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+    var hasActive = reqs.some(function(r){
+      return (r.address||'').toLowerCase().trim() === (address||'').toLowerCase().trim() &&
+             String(r.unit||'').toLowerCase().trim() === String(unit||'').toLowerCase().trim() &&
+             (r.status === 'requested' || r.status === 'proposed' || r.status === 'confirmed');
+    });
+    if (hasActive) { host.innerHTML = ''; return; }
+    var data = await DB.get('walkslots:all') || { slots: [] };
+    // Only show future slots that aren't already booked.
+    var booked = {};
+    reqs.forEach(function(r){ if (r._slotKey) booked[r._slotKey] = true; });
+    var now = new Date(); now.setHours(0,0,0,0);
+    var avail = (data.slots || []).filter(function(s){
+      var key = s.date + 'T' + s.time;
+      if (booked[key]) return false;
+      var d = new Date(s.date + 'T' + (s.time||'00:00'));
+      return d >= now;
+    });
+    if (!avail.length) {
+      host.innerHTML = '<div style="font-size:12px;color:var(--muted);text-align:center;padding:8px;">No open times right now \u2014 check back soon, or call the office.</div>';
+      return;
+    }
+    host.innerHTML = '<div style="display:flex;flex-direction:column;gap:8px;">' + avail.map(function(s){
+      var d = new Date(s.date + 'T' + (s.time||'00:00'));
+      var dateStr = d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+      var timeStr = (typeof _fmt12 === 'function') ? _fmt12(s.time) : s.time;
+      var key = s.date + 'T' + s.time;
+      return '<button onclick="_custBookSlot(\'' + key + '\')" style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;cursor:pointer;width:100%;text-align:left;">' +
+        '<span style="font-size:14px;font-weight:700;color:var(--navy);">' + dateStr + '</span>' +
+        '<span style="font-size:13px;color:var(--gold-dark,#b8860b);font-weight:700;">' + timeStr + ' \u203a</span>' +
+      '</button>';
+    }).join('') + '</div>';
+  } catch(e) { host.innerHTML = ''; }
+}
+// Customer books a slot -> creates a confirmed walkthrough request.
+async function _custBookSlot(slotKey) {
+  var parts = slotKey.split('T');
+  var date = parts[0], time = parts[1] || '';
+  var id = 'walk_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+  var rec = {
+    id: id,
+    name: window._custName || 'Customer',
+    address: window._custAddress || '',
+    unit: window._custUnit || '',
+    date: date, time: time,
+    status: 'confirmed',
+    _slotKey: slotKey,
+    _customerBooked: true,
+    at: Date.now()
+  };
+  await DB.set('walkreq:' + id, rec);
+  try { await _loadWalkStatus(rec.address, rec.unit); } catch(e) {}
+  try { await _loadWalkSlots(rec.address, rec.unit); } catch(e) {}
+  var t = (typeof _fmt12 === 'function') ? _fmt12(time) : time;
+  alert('Booked! Your walkthrough is set for ' + new Date(date+'T'+(time||'00:00')).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}) + ' at ' + t + '.');
+}
+
 
 // ===================== CUSTOMER DASHBOARD (post-login landing) =====================
 
@@ -6743,6 +6882,7 @@ async function openCustomerDashboard(name, address, unit, saveKey, existing) {
   try { await _loadCustomerFiles(address, unit, 'cdFiles'); } catch(e) {}
   try { await _cpRender('cdIssueList'); } catch(e) {}
   try { await _loadWalkStatus(address, unit); } catch(e) {}
+  try { await _loadWalkSlots(address, unit); } catch(e) {}
   try { await _loadCustomerChangeOrders(address, unit); } catch(e) {}
 }
 async function cdGoGallery() {
@@ -7057,6 +7197,117 @@ const HARDCODED_ADMINS = {
 // ════════════════════════════════════════════
 // LOGOUT
 // ════════════════════════════════════════════
+
+// ===== MULTI-ACCOUNT: remember accounts used on this device, allow quick switching =====
+function _getKnownAccounts() {
+  try { return JSON.parse(localStorage.getItem('dd_knownAccounts') || '[]'); } catch(e) { return []; }
+}
+function _rememberAccount(email, name, method) {
+  if (!email) return;
+  email = email.toLowerCase();
+  var list = _getKnownAccounts().filter(function(a){ return a.email !== email; });
+  list.unshift({ email: email, name: name || email, method: method || 'email', lastUsed: Date.now() });
+  if (list.length > 6) list = list.slice(0, 6);
+  try { localStorage.setItem('dd_knownAccounts', JSON.stringify(list)); } catch(e) {}
+}
+function _forgetAccount(email) {
+  var list = _getKnownAccounts().filter(function(a){ return a.email !== (email||'').toLowerCase(); });
+  try { localStorage.setItem('dd_knownAccounts', JSON.stringify(list)); } catch(e) {}
+  _renderProfileMenu();
+}
+// Open/close the profile menu.
+function openProfileMenu() {
+  _renderProfileMenu();
+  try { _renderBioToggle(); } catch(e) {}
+  var m = document.getElementById('profileMenuOverlay');
+  if (m) m.style.display = 'flex';
+}
+function closeProfileMenu() {
+  var m = document.getElementById('profileMenuOverlay');
+  if (m) m.style.display = 'none';
+}
+function _renderProfileMenu() {
+  var host = document.getElementById('profileMenuBody');
+  if (!host) return;
+  var cur = currentUser || {};
+  var curEmail = (cur.email || '').toLowerCase();
+  var initial = (cur.name || cur.email || 'U')[0].toUpperCase();
+  var html = '';
+  // Current account card
+  html += '<div class="pm-current">' +
+    '<div class="pm-avatar">' + initial + '</div>' +
+    '<div style="flex:1;min-width:0;">' +
+      '<div class="pm-name">' + _esc(cur.name || 'You') + '</div>' +
+      '<div class="pm-email">' + _esc(cur.email || '') + '</div>' +
+    '</div>' +
+    '<span class="pm-badge">Active</span>' +
+  '</div>';
+  // Other known accounts
+  var others = _getKnownAccounts().filter(function(a){ return a.email !== curEmail; });
+  if (others.length) {
+    html += '<div class="pm-section">Switch account</div>';
+    html += others.map(function(a){
+      var ai = (a.name || a.email || 'U')[0].toUpperCase();
+      return '<div class="pm-acct" onclick="switchAccount(\'' + encodeURIComponent(a.email) + '\',\'' + a.method + '\')">' +
+        '<div class="pm-avatar pm-avatar-sm">' + ai + '</div>' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div class="pm-name-sm">' + _esc(a.name || a.email) + '</div>' +
+          '<div class="pm-email-sm">' + _esc(a.email) + '</div>' +
+        '</div>' +
+        '<button class="pm-forget" onclick="event.stopPropagation();_forgetAccount(\'' + _esc(a.email) + '\')" title="Remove">\u2715</button>' +
+      '</div>';
+    }).join('');
+  }
+  // Actions
+  html += '<div class="pm-actions">' +
+    '<button class="pm-btn" onclick="addAnotherAccount()">+ Add another account</button>' +
+    '<button class="pm-btn pm-btn-out" onclick="closeProfileMenu();doLogout();">Sign out</button>' +
+  '</div>';
+  host.innerHTML = html;
+}
+// Switch to a known account. Google switches seamlessly; email asks for password.
+async function switchAccount(encEmail, method) {
+  var email = decodeURIComponent(encEmail);
+  closeProfileMenu();
+  var auth = _getAuth();
+  if (!auth) return;
+  // Sign out the current user first.
+  try { await auth.signOut(); } catch(e) {}
+  currentUser = null;
+  if (method === 'google') {
+    // Google: prompt the account picker (hint the email so it's one tap).
+    try {
+      await _ensurePersistence();
+      var provider = new firebase.auth.GoogleAuthProvider();
+      provider.setCustomParameters({ login_hint: email, prompt: 'select_account' });
+      var result = await auth.signInWithPopup(provider);
+      await handleAuthedUser(result.user);
+      return;
+    } catch(e) {
+      try { var provider2 = new firebase.auth.GoogleAuthProvider(); provider2.setCustomParameters({ login_hint: email }); await auth.signInWithRedirect(provider2); } catch(e2) {}
+      return;
+    }
+  } else {
+    // Email: go to login screen with the email pre-filled so they just type the password.
+    showPage('officeAuthPage');
+    setTimeout(function(){
+      try {
+        switchAuthTab('login');
+        var em = document.getElementById('loginEmail'); if (em) em.value = email;
+        var pw = document.getElementById('loginPassword'); if (pw) { pw.value=''; pw.focus(); }
+        var err = document.getElementById('loginError');
+        if (err) { err.textContent = 'Enter the password for ' + email + ' to switch.'; err.style.display='block'; }
+      } catch(e) {}
+    }, 200);
+  }
+}
+// Add another account = go to login screen, keeping known accounts.
+function addAnotherAccount() {
+  closeProfileMenu();
+  showPage('officeAuthPage');
+  try { switchAuthTab('login'); } catch(e) {}
+}
+
 async function doLogout() {
   var auth = _getAuth();
   if (auth) { try { await auth.signOut(); } catch(e) {} }
@@ -10620,7 +10871,7 @@ async function switchTab(tab) {
     if (tab === 'changeOrders') renderChangeOrders();
   } catch(e) {}
   try { if (tab === 'teamChat') { _loadChatUsers(); renderTeamChat(); startChatPolling(); } else { stopChatPolling(); } } catch(e) {}
-  try { if (tab === 'walkthroughs') renderWalkthroughs(); } catch(e) {}
+  try { if (tab === 'walkthroughs') { renderWalkthroughs(); renderWalkSlots(); } } catch(e) {}
   try { if (tab === 'vendors') renderVendors(); if (tab === 'subCalendar') renderSubCalendar(); } catch(e) {}
   try { if (tab === 'taskTemplates') renderTaskTemplates(); } catch(e) {}
   try { if (tab==='reporting') renderReporting(); if (tab==='photoTimeline') renderPhotoTimeline(); if (tab==='weeklyDigest') renderWeeklyDigest(); } catch(e) {}
@@ -11233,6 +11484,7 @@ function _refreshBioSignInBtn() {
 // Sign in by verifying fingerprint, then letting the kept-signed-in session through.
 async function bioSignIn() {
   var errEl = document.getElementById('loginError');
+  if (errEl) errEl.style.display = 'none';
   if (typeof _biometricVerify !== 'function') return;
   var ok = false;
   try { ok = await _biometricVerify(); } catch(e) { ok = false; }
@@ -11240,17 +11492,39 @@ async function bioSignIn() {
     if (errEl) { errEl.textContent = 'Fingerprint not recognized. Try again or use email.'; errEl.style.display = 'block'; }
     return;
   }
-  // Fingerprint verified. If the Firebase session is still alive, the user is already authed
-  // (we keep them signed in). Nudge the auth state so the app proceeds.
-  try {
-    var auth = _getAuth();
-    if (auth && auth.currentUser) {
-      await handleAuthedUser(auth.currentUser);
-      return;
-    }
-  } catch(e) {}
-  // No live session (e.g. first time or signed out): tell them to log in once with email.
-  if (errEl) { errEl.textContent = 'Please sign in once with email/Google. After that, fingerprint will work.'; errEl.style.display = 'block'; }
+  // Fingerprint verified. Now restore the kept-signed-in Firebase session.
+  // The session may still be loading, so wait briefly for onAuthStateChanged to settle.
+  var auth = _getAuth();
+  if (!auth) {
+    if (errEl) { errEl.textContent = 'Could not reach sign-in service. Check your connection.'; errEl.style.display = 'block'; }
+    return;
+  }
+  var btn = document.getElementById('bioSignInBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Unlocking\u2026'; }
+  // If the session is already live, go straight in.
+  if (auth.currentUser) {
+    await handleAuthedUser(auth.currentUser);
+    return;
+  }
+  // Otherwise wait up to ~6s for Firebase to restore the persisted session.
+  var user = await new Promise(function(resolve){
+    var done = false;
+    var unsub = auth.onAuthStateChanged(function(u){
+      if (done) return;
+      if (u) { done = true; try { unsub(); } catch(e){} resolve(u); }
+    });
+    setTimeout(function(){ if (!done) { done = true; try { unsub(); } catch(e){} resolve(auth.currentUser || null); } }, 6000);
+  });
+  if (user) {
+    await handleAuthedUser(user);
+    return;
+  }
+  // Genuinely no saved session (e.g. signed out, or session was cleared).
+  if (btn) { btn.disabled = false; btn.textContent = '\ud83d\udc46 Sign in with Fingerprint / Face ID'; }
+  if (errEl) {
+    errEl.textContent = 'Your saved sign-in has expired. Please sign in once with email or Google \u2014 then fingerprint will keep you in.';
+    errEl.style.display = 'block';
+  }
 }
 
 function biometricDiagnostic() {
@@ -11280,22 +11554,23 @@ function biometricDiagnostic() {
 }
 
 function _renderBioToggle() {
-  var host = document.getElementById('bioToggleRow');
+  // Render into the profile/settings menu (light theme). No sidebar row, no test button.
+  var host = document.getElementById('bioToggleRowProfile');
   if (!host) return;
   if (typeof _biometricSupported === 'function' && !_biometricSupported()) {
-    // On a phone but not in the installed app? Offer a tiny troubleshooting link.
     var isPhone = /Android|iPhone|iPod|Windows Phone/i.test(navigator.userAgent || '');
     if (isPhone) {
-      host.innerHTML = '<button onclick="biometricDiagnostic()" style="width:100%;background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;font-size:11px;cursor:pointer;">👆 Set up Fingerprint / Face ID</button>';
+      host.innerHTML = '<button onclick="biometricDiagnostic()" style="width:100%;background:#FAF8F3;color:#6a6453;border:1px solid #E3DDD3;border-radius:10px;padding:11px;font-size:13px;font-weight:600;cursor:pointer;">\ud83d\udc46 Set up Fingerprint / Face ID</button>';
     } else {
-      host.innerHTML = '';
+      host.innerHTML = '<div style="font-size:12px;color:#9a9484;padding:4px 2px;">Fingerprint / Face ID is available in the installed app on your phone.</div>';
     }
     return;
   }
   var on = (typeof biometricEnabled === 'function') && biometricEnabled();
-  var toggleBtn = '<button onclick="' + (on ? 'disableBiometric()' : 'enableBiometric()') + '" style="width:100%;background:' + (on?'rgba(201,168,76,0.18)':'rgba(255,255,255,0.06)') + ';color:' + (on?'var(--gold)':'#fff') + ';border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:9px;font-size:12px;font-weight:600;cursor:pointer;">👆 Fingerprint / Face ID: ' + (on ? 'On' : 'Off') + '</button>';
-  var testBtn = on ? '<button onclick="testBiometricNow()" style="width:100%;margin-top:6px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px;font-size:11px;cursor:pointer;">Test unlock now</button>' : '';
-  host.innerHTML = toggleBtn + testBtn;
+  host.innerHTML = '<button onclick="' + (on ? 'disableBiometric()' : 'enableBiometric()') + ';setTimeout(_renderBioToggle,300)" style="width:100%;display:flex;align-items:center;justify-content:space-between;background:' + (on?'rgba(201,168,76,0.12)':'#fff') + ';color:var(--navy);border:1px solid ' + (on?'rgba(201,168,76,0.4)':'#E3DDD3') + ';border-radius:10px;padding:12px 13px;font-size:14px;font-weight:700;cursor:pointer;">' +
+    '<span>\ud83d\udc46 Fingerprint / Face ID</span>' +
+    '<span style="font-size:12px;font-weight:800;color:' + (on?'var(--gold)':'#9a9484') + ';">' + (on ? 'ON' : 'OFF') + '</span>' +
+  '</button>';
 }
 // Trigger the fingerprint/Face ID prompt on demand so the user can confirm it works.
 async function testBiometricNow() {
@@ -11374,6 +11649,7 @@ async function _biometricVerify() {
       allowCredentials: [{ type:'public-key', id: _b64ToBuf(credId) }],
       userVerification: 'required', timeout: 60000
     }});
+    window._bioJustVerifiedAt = Date.now();
     return true;
   } catch(e) { return false; }
 }
@@ -11405,6 +11681,13 @@ document.addEventListener('visibilitychange', function() {
     if (document.visibilityState === 'visible') {
       if (typeof biometricEnabled !== 'function' || !biometricEnabled()) return;
       if (typeof _isInstalledPhoneApp !== 'function' || !_isInstalledPhoneApp()) return;
+      // Don't re-lock right after a login or biometric prompt (Google/WebAuthn flip visibility).
+      if (window._justAuthedAt && (Date.now() - window._justAuthedAt) < 8000) return;
+      if (window._bioJustVerifiedAt && (Date.now() - window._bioJustVerifiedAt) < 8000) return;
+      // Only re-lock when actually inside the app (not on the login or landing screens).
+      var office = document.getElementById('officePage');
+      var inApp = office && getComputedStyle(office).display !== 'none';
+      if (!inApp) return;
       // Only re-lock if it was backgrounded for more than 2 seconds (avoids prompt on quick tab switches).
       if (_bioBackgroundedAt && (Date.now() - _bioBackgroundedAt) < 2000) return;
       if (_bioLockShowing) return;
@@ -18892,6 +19175,7 @@ async function setEmployeeRole(email, role) {
 // ════════════════════════════════════════════
 
 var _authPersistenceSet = false;
+var _authPersistencePromise = null;
 function _getAuth() {
   try {
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
@@ -18899,10 +19183,16 @@ function _getAuth() {
     // Keep the user signed in across app restarts / days, not just the current session.
     if (!_authPersistenceSet && firebase.auth.Auth && firebase.auth.Auth.Persistence) {
       _authPersistenceSet = true;
-      try { auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(e){ console.warn('persistence:', e); }); } catch(e) {}
+      try { _authPersistencePromise = auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(e){ console.warn('persistence:', e); }); } catch(e) {}
     }
     return auth;
   } catch(e) { console.warn('Auth init failed:', e); return null; }
+}
+// Ensure LOCAL persistence is fully applied before a sign-in (so the session survives app restarts).
+async function _ensurePersistence() {
+  var auth = _getAuth();
+  try { if (_authPersistencePromise) await _authPersistencePromise; } catch(e) {}
+  return auth;
 }
 
 // Handle a logged-in Firebase user — check their approval status
@@ -18991,6 +19281,17 @@ async function handleAuthedUser(fbUser) {
   try { _renderBioToggle(); } catch(e) {}
   try { initPinning(); } catch(e) {}
   try { _autoPublish(); } catch(e) {}
+  // Mark a fresh authentication so the app doesn't immediately re-prompt for fingerprint.
+  window._justAuthedAt = Date.now();
+  // Remember this account on the device for quick switching.
+  try {
+    var _method = 'email';
+    if (fbUser.providerData && fbUser.providerData.length) {
+      var pid = fbUser.providerData[0].providerId || '';
+      if (pid.indexOf('google') !== -1) _method = 'google';
+    }
+    _rememberAccount(fbUser.email, (currentUser && currentUser.name) || fbUser.displayName || fbUser.email, _method);
+  } catch(e) {}
 }
 
 // Google sign-in
@@ -19005,6 +19306,7 @@ async function signInWithGoogle() {
 
   // Try popup first (gives immediate result + visible errors)
   try {
+    await _ensurePersistence();
     var result = await auth.signInWithPopup(provider);
     await handleAuthedUser(result.user);
     return;
@@ -19042,6 +19344,7 @@ async function officeLogin() {
   var auth = _getAuth();
   if (!auth) { errEl.textContent = 'Authentication unavailable.'; errEl.style.display = 'block'; return; }
   try {
+    await _ensurePersistence();
     var result = await auth.signInWithEmailAndPassword(email, password);
     await handleAuthedUser(result.user);
   } catch(e) {
@@ -19618,6 +19921,22 @@ if (document.readyState === 'loading') {
       <div class="form-group"><label class="form-label">Preferred time</label><input class="form-input" id="wr-time" type="text" placeholder="e.g. Morning, or 2:00 PM"></div>
       <div class="form-group"><label class="form-label">Anything to note?</label><textarea class="form-input" id="wr-note" rows="3" placeholder="Optional"></textarea></div>
       <button onclick="submitWalkRequest()" style="width:100%;padding:13px;border-radius:9px;border:none;background:var(--gold);color:#0D1F3C;font-size:14px;font-weight:700;cursor:pointer;">Send Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE / ACCOUNT MENU -->
+<div id="profileMenuOverlay" onclick="if(event.target===this)closeProfileMenu()">
+  <div class="pm-sheet">
+    <div class="pm-handle"></div>
+    <div class="pm-head">
+      <span class="pm-title">Account</span>
+      <button class="pm-x" onclick="closeProfileMenu()">&#10005;</button>
+    </div>
+    <div id="profileMenuBody"></div>
+    <div class="pm-settings">
+      <div class="pm-section">Settings</div>
+      <div id="bioToggleRowProfile"></div>
     </div>
   </div>
 </div>
