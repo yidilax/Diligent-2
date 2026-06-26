@@ -3590,8 +3590,8 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .ak-empty-sub { font-size:13px; color:#9a9484; }
 
 
-.fix-scope-btn { padding:10px; border:1.5px solid #E3DDD3; border-radius:9px; background:#fff; color:#6a6453; font-size:13px; font-weight:700; cursor:pointer; }
-.fix-scope-btn.on { background:var(--navy); color:#fff; border-color:var(--navy); }
+.fix-scope-btn { padding:10px; border:1.5px solid rgba(255,255,255,0.2); border-radius:9px; background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.6); font-size:13px; font-weight:700; cursor:pointer; }
+.fix-scope-btn.on { background:#fff; color:var(--navy); border-color:#fff; }
 .fix-item { border:1px solid #EAE5DC; border-radius:11px; padding:11px; margin-bottom:10px; background:#FAF8F3; }
 .fix-item.fixed { opacity:0.65; }
 .fix-item.fixed .fix-item-text { text-decoration:line-through; color:#9a9484; }
@@ -3611,8 +3611,8 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .modal-box .fix-item-text, #fixItemsList .fix-item-text { color:#16233d !important; background:#fff !important; -webkit-text-fill-color:#16233d; }
 .modal-box .fix-assign, #fixItemsList .fix-assign { color:#16233d !important; background:#fff !important; -webkit-text-fill-color:#16233d; }
 .fix-item-text::placeholder { color:#a39c8a; -webkit-text-fill-color:#a39c8a; }
-.fix-scope-btn { color:#6a6453 !important; -webkit-text-fill-color:#6a6453; }
-.fix-scope-btn.on { color:#fff !important; -webkit-text-fill-color:#fff; }
+.fix-scope-btn { color:rgba(255,255,255,0.6) !important; -webkit-text-fill-color:rgba(255,255,255,0.6); }
+.fix-scope-btn.on { color:var(--navy) !important; -webkit-text-fill-color:var(--navy); background:#fff !important; }
 .fix-photo-btn { color:var(--navy) !important; -webkit-text-fill-color:var(--navy); }
 
 
@@ -3633,6 +3633,20 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .fix-vtext { font-size:14.5px; color:#16233d; line-height:1.4; font-weight:500; }
 .fix-vmeta { margin-top:6px; }
 .fix-vwho { font-size:12px; color:#7a7466; background:#F0ECE2; border-radius:6px; padding:3px 9px; }
+
+
+.ifx-wrap { margin-top:10px; border-top:1px solid var(--border); padding-top:10px; }
+.ifx-group { margin-bottom:11px; }
+.ifx-group-hd { display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; }
+.ifx-group-name { font-size:12px; font-weight:800; color:var(--navy); }
+.ifx-group-count { font-size:11px; font-weight:700; color:#8a8472; background:#F0ECE2; border-radius:20px; padding:2px 9px; }
+.ifx-group-count.all { color:#3a7d5d; background:rgba(58,125,93,0.12); }
+.ifx-item { display:flex; align-items:flex-start; gap:8px; padding:5px 0; }
+.ifx-item.done .ifx-txt { text-decoration:line-through; color:#a8a292; }
+.ifx-dot { width:16px; height:16px; border-radius:5px; border:1.5px solid #cfc8b8; background:#fff; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:#fff; margin-top:1px; }
+.ifx-dot.on { background:#3a7d5d; border-color:#3a7d5d; }
+.ifx-txt { flex:1; font-size:12.5px; color:#3a3730; line-height:1.35; }
+.ifx-who { font-size:10.5px; color:#8a8472; background:#F4F1EB; border-radius:5px; padding:1px 7px; white-space:nowrap; flex-shrink:0; }
 
 </style>
   <!-- Firebase -->
@@ -3950,7 +3964,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v159</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v161</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4312,7 +4326,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v159</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v161</div>
     </div>
   </div>
 
@@ -5185,7 +5199,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v159';
+<script>var APP_VERSION = 'v161';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -12905,6 +12919,56 @@ async function saveDailyLog(){
 }
 
 // ---------- INSPECTIONS ----------
+
+// Build an inline summary of an inspection's fix items, grouped by unit (and whole-house).
+function _inspFixSummary(it) {
+  var items = it.fixItems || [];
+  if (!items.length) return '';
+  // group: whole-house items, then each unit
+  var house = items.filter(function(f){ return f.scope === 'house'; });
+  var byUnit = {};
+  items.filter(function(f){ return f.scope === 'unit'; }).forEach(function(f){
+    var u = f.unit || '\u2014';
+    (byUnit[u] = byUnit[u] || []).push(f);
+  });
+  var units = Object.keys(byUnit).sort();
+
+  function groupBlock(label, list) {
+    var done = list.filter(function(f){ return f.fixed; }).length;
+    var allDone = done === list.length;
+    var rows = list.map(function(f){
+      return '<div class="ifx-item' + (f.fixed?' done':'') + '">' +
+        '<span class="ifx-dot' + (f.fixed?' on':'') + '">' + (f.fixed?'\u2713':'') + '</span>' +
+        '<span class="ifx-txt">' + _esc(f.text||'(no description)') + '</span>' +
+        (f.assigneeName ? '<span class="ifx-who">' + _esc(f.assigneeName) + '</span>' : '') +
+      '</div>';
+    }).join('');
+    return '<div class="ifx-group">' +
+      '<div class="ifx-group-hd">' +
+        '<span class="ifx-group-name">' + _esc(label) + '</span>' +
+        '<span class="ifx-group-count' + (allDone?' all':'') + '">' + done + '/' + list.length + (allDone?' \u2713':'') + '</span>' +
+      '</div>' + rows +
+    '</div>';
+  }
+
+  var html = '<div class="ifx-wrap" id="ifx-' + it.id + '" style="display:none;">';
+  if (house.length) html += groupBlock('\ud83c\udfe0 Whole house', house);
+  units.forEach(function(u){ html += groupBlock('\ud83d\udeaa Unit ' + u, byUnit[u]); });
+  html += '</div>';
+  return html;
+}
+function _inspToggleSummary(id) {
+  var el = document.getElementById('ifx-' + id);
+  if (!el) return;
+  var open = el.style.display !== 'none';
+  el.style.display = open ? 'none' : 'block';
+  var btn = document.getElementById('ifxbtn-' + id);
+  if (btn) btn.textContent = open ? _ifxBtnLabel(id, false) : _ifxBtnLabel(id, true);
+}
+function _ifxBtnLabel(id, open) {
+  return (open ? '\u25b4 Hide items' : '\u25be View items by unit');
+}
+
 async function renderInspections(){
   var host=document.getElementById('inspectionsList'); if(!host)return;
   host.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;">Loading…</div>';
@@ -12925,10 +12989,12 @@ async function renderInspections(){
       (it.notes?'<div style="font-size:12px;color:#3a3730;margin-top:6px;line-height:1.45;">'+_esc(it.notes)+'</div>':'') +
       '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center;">' +
         '<button onclick="openFixList(\''+it.id+'\')" style="font-size:11px;padding:5px 11px;border-radius:6px;border:1px solid rgba(201,168,76,0.4);background:rgba(201,168,76,0.12);color:#b8860b;font-weight:700;cursor:pointer;">🔧 Items to Fix' + ((function(){ var o=(it.fixItems||[]).filter(function(f){return !f.fixed;}).length; return o?(' \u00b7 '+o):''; })()) + '</button>' +
+        ((it.fixItems||[]).length ? '<button id="ifxbtn-'+it.id+'" onclick="_inspToggleSummary(\''+it.id+'\')" style="font-size:11px;padding:5px 11px;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--navy);font-weight:700;cursor:pointer;">\u25be View items by unit</button>' : '') +
         '<button onclick="_inspSetStatus(\''+it.id+'\',\'passed\')" style="font-size:11px;padding:4px 10px;border-radius:6px;border:none;background:rgba(58,125,93,0.15);color:#3a7d5d;font-weight:700;cursor:pointer;">Passed</button>' +
         '<button onclick="_inspSetStatus(\''+it.id+'\',\'failed\')" style="font-size:11px;padding:4px 10px;border-radius:6px;border:none;background:rgba(192,57,43,0.12);color:#c0392b;font-weight:700;cursor:pointer;">Failed</button>' +
         '<button onclick="_lbDelete(\'inspection:'+it.id+'\',renderInspections)" style="font-size:11px;padding:4px 10px;border-radius:6px;border:none;background:rgba(0,0,0,0.05);color:#888;cursor:pointer;margin-left:auto;">Delete</button>' +
       '</div>' +
+      _inspFixSummary(it) +
     '</div>';
   }).join('');
   host.innerHTML=rows||'<div class="tab-empty"><div class="tab-empty-icon">\ud83d\udd0d</div><div class="tab-empty-title">No Inspections</div><div class="tab-empty-desc">Schedule your first inspection above.</div></div>';
@@ -13278,10 +13344,11 @@ async function saveChangeOrder(){
 
 // Shared delete
 async function _lbDelete(key, rerender){
-  if(!confirm('Delete this entry?')) return;
-  await DB.delete(key);
-  if(typeof rerender==='function') rerender();
-  try { _updateLogbookVisibility(); } catch(e) {}
+  ddConfirm('Delete this entry?', async function(){
+    await DB.delete(key);
+    if(typeof rerender==='function') rerender();
+    try { _updateLogbookVisibility(); } catch(e) {}
+  });
 }
 
 async function renderProjects() {
