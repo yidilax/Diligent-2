@@ -3687,6 +3687,36 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 
 .sch-gcal-info { font-size:12px; color:#7a7466; background:rgba(201,168,76,0.1); border:1px solid rgba(201,168,76,0.25); border-radius:9px; padding:9px 12px; margin-bottom:14px; line-height:1.4; }
 
+
+.dash-customize-btn { background:none; border:1px solid var(--border); border-radius:7px; padding:4px 10px; font-size:11px; font-weight:700; color:var(--navy); cursor:pointer; text-transform:none; letter-spacing:0; }
+.dcz-row { display:flex; align-items:center; gap:10px; background:#fff; border-radius:9px; padding:10px 12px; margin-bottom:8px; }
+.dcz-ic { font-size:18px; flex-shrink:0; }
+.dcz-lbl { flex:1; font-size:14px; font-weight:600; color:#16233d; }
+.dcz-ctrls { display:flex; align-items:center; gap:4px; }
+.dcz-mv { background:#F0ECE2; border:none; border-radius:6px; width:26px; height:26px; font-size:12px; color:var(--navy); cursor:pointer; }
+.dcz-mv-sp { width:26px; }
+.dcz-rm { background:rgba(192,57,43,0.1); border:none; border-radius:6px; width:26px; height:26px; font-size:12px; color:#c0392b; cursor:pointer; }
+.dcz-available { display:flex; flex-direction:column; gap:7px; }
+.dcz-add { display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); border-radius:9px; padding:10px 12px; font-size:13.5px; font-weight:600; color:#fff; cursor:pointer; text-align:left; }
+.dcz-add span:first-child { font-size:17px; }
+.dcz-plus { margin-left:auto; font-size:18px; font-weight:800; color:var(--gold); }
+
+
+.fix-ugroup { margin-bottom:14px; }
+.fix-ugroup-hd { display:flex; justify-content:space-between; align-items:center; font-size:12.5px; font-weight:800; color:#fff; padding:6px 2px; margin-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.12); }
+.fix-ugroup-ct { font-size:11px; font-weight:700; color:rgba(255,255,255,0.6); background:rgba(255,255,255,0.1); border-radius:20px; padding:2px 9px; }
+.fix-ugroup-ct.all { color:#7ddca0; background:rgba(58,125,93,0.25); }
+
+
+.sch-gcal-toggle { display:flex; align-items:center; gap:12px; background:rgba(201,168,76,0.08); border:1px solid rgba(201,168,76,0.25); border-radius:11px; padding:12px 14px; margin-bottom:14px; }
+.sch-gcal-toggle-main { flex:1; }
+.sch-gcal-toggle-title { font-size:13px; font-weight:700; color:var(--navy); }
+.sch-gcal-toggle-sub { font-size:11px; color:#8a8472; margin-top:2px; line-height:1.35; }
+.sch-toggle { width:46px; height:27px; border-radius:20px; background:#d5cdbd; border:none; cursor:pointer; position:relative; flex-shrink:0; transition:background .18s; padding:0; }
+.sch-toggle.on { background:#3a7d5d; }
+.sch-toggle-knob { position:absolute; top:3px; left:3px; width:21px; height:21px; border-radius:50%; background:#fff; transition:left .18s; box-shadow:0 1px 3px rgba(0,0,0,0.2); }
+.sch-toggle.on .sch-toggle-knob { left:22px; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -4003,7 +4033,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v163</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v165</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4365,7 +4395,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v163</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v165</div>
     </div>
   </div>
 
@@ -4434,31 +4464,13 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
         </div>
       </div>
 
-      <!-- Quick actions -->
+      <!-- Quick actions (customizable per user) -->
       <div style="margin-bottom:24px;">
-        <div class="dash-section-label">Quick Actions</div>
-        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
-          <button class="dash-action" onclick="switchTab('projects');setTimeout(showProjectForm,100);">
-            <span style="font-size:20px;">➕</span>
-            <span>New Project</span>
-          </button>
-          <button class="dash-action" onclick="switchTab('customers');setTimeout(showCustomerForm,100);">
-            <span style="font-size:20px;">👤</span>
-            <span>Add Customer</span>
-          </button>
-          <button class="dash-action" onclick="_openLogbook();">
-            <span style="font-size:20px;">📘</span>
-            <span>Logbook</span>
-          </button>
-          <button class="dash-action" onclick="switchTab('upgrades');">
-            <span style="font-size:20px;">📊</span>
-            <span>View Upgrades</span>
-          </button>
-          <button class="dash-action admin-only" onclick="switchTab('upgradeEditor');" style="display:none;">
-            <span style="font-size:20px;">✏️</span>
-            <span>Edit Form</span>
-          </button>
+        <div class="dash-section-label" style="display:flex;justify-content:space-between;align-items:center;">
+          <span>Quick Actions</span>
+          <button onclick="openDashCustomize()" class="dash-customize-btn">⚙ Customize</button>
         </div>
+        <div id="dashQuickActions" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;"></div>
       </div>
 
       <!-- Recent activity -->
@@ -5245,7 +5257,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v163';
+<script>var APP_VERSION = 'v165';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -9731,6 +9743,8 @@ async function saveTask() {
       end: task.dueDate || task.startDate,
       allDay: true
     });
+    // Link-based auto-add (works without OAuth setup) when the toggle is on.
+    try { _gcalAutoAdd('Task: ' + task.title, task.projectName ? ('Project: ' + task.projectName) : '', task.startDate || task.dueDate, task.dueDate || task.startDate); } catch(e) {}
   }
   closeTaskForm();
   renderTasks();
@@ -10400,12 +10414,40 @@ function _schedToggleEditor() {
   if (window._schedEditorOpen) { try { renderScheduling(); } catch(e) {} }
 }
 
-async function renderScheduleNew() {
+
+function _toggleGcalAuto() {
+  var cur = false;
+  try { cur = localStorage.getItem('dd_gcalAuto') === '1'; } catch(e) {}
+  try { localStorage.setItem('dd_gcalAuto', cur ? '0' : '1'); } catch(e) {}
+  renderScheduleNew(); // re-render to flip the toggle
+}
+function _gcalAutoOn() {
+  try { return localStorage.getItem('dd_gcalAuto') === '1'; } catch(e) { return false; }
+}
+// Auto-open Google Calendar for an item if auto-add is on.
+function _gcalAutoAdd(title, details, startYmd, endYmd) {
+  if (!_gcalAutoOn() || !startYmd) return;
+  try {
+    var s = startYmd.replace(/-/g,'');
+    var endD = new Date((endYmd||startYmd) + 'T00:00:00'); endD.setDate(endD.getDate()+1);
+    var e = endD.toISOString().slice(0,10).replace(/-/g,'');
+    var url = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent(title) +
+      '&details=' + encodeURIComponent(details||'') + '&dates=' + s + '/' + e;
+    window.open(url, '_blank');
+  } catch(e) {}
+}
+
+async function renderScheduleNew(forceReload) {
   var host = document.getElementById('schedNewContent');
   if (!host) return;
   try { if (!window._schedEditorOpen) { var _ew = document.getElementById('schedEditorWrap'); if (_ew) _ew.style.display = 'none'; } } catch(e) {}
-  host.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;">Loading\u2026</div>';
-  var all = await _schedGatherAll();
+  // Use cached data for instant re-render on button presses; only refetch when needed.
+  var all = window._schedCache;
+  if (forceReload || !all) {
+    host.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;">Loading\u2026</div>';
+    all = await _schedGatherAll();
+    window._schedCache = all;
+  }
   var uid = _effectiveUserId();
 
   var items = all;
@@ -10435,7 +10477,14 @@ async function renderScheduleNew() {
       }).join('') + '</div>';
   }
 
-  var gcalInfo = '<div class="sch-gcal-info">\ud83d\udcc5 Tap the calendar icon on any item to add it to your Google Calendar.</div>';
+  var autoOn = (function(){ try { return localStorage.getItem('dd_gcalAuto') === '1'; } catch(e){ return false; } })();
+  var gcalInfo = '<div class="sch-gcal-toggle">' +
+    '<div class="sch-gcal-toggle-main">' +
+      '<div class="sch-gcal-toggle-title">\ud83d\udcc5 Auto-add to Google Calendar</div>' +
+      '<div class="sch-gcal-toggle-sub">When on, new schedule items &amp; tasks open in Google Calendar to save with one tap.</div>' +
+    '</div>' +
+    '<button class="sch-toggle' + (autoOn?' on':'') + '" onclick="_toggleGcalAuto()"><span class="sch-toggle-knob"></span></button>' +
+  '</div>';
   host.innerHTML = modeBar + subBar + gcalInfo + _schedGroupRender(items);
 }
 function _schedSetMode(m){ window._schedMode=m; renderScheduleNew(); }
@@ -10590,6 +10639,7 @@ async function _loadSchedule() {
   };
 }
 async function _saveSchedule(sch) {
+  window._schedCache = null; // invalidate shared-schedule cache
   sch._updatedAt = Date.now();
   if (!sch.ownerId) sch.ownerId = _effectiveUserId();
   if (!sch.followers) sch.followers = [];
@@ -10808,6 +10858,7 @@ async function savePhase() {
       end: p.end || p.start,
       allDay: true
     });
+    try { _gcalAutoAdd(p.name + ' (construction)', 'Construction phase' + (p.notes ? (' - ' + p.notes) : ''), p.start || p.end, p.end || p.start); } catch(e) {}
   }
   closePhaseEditor();
   renderSchedView();
@@ -11691,7 +11742,7 @@ async function switchTab(tab) {
   if (tab === 'upgradeEditor') initUpgradeEditor();
   if (tab === 'punchlist') renderPunchList();
   if (tab === 'tasks') { _toggleTabChrome('tab-tasks', true); _populateTaskProjectFilter(); renderTasks(); }
-  if (tab === 'scheduling') { _toggleTabChrome('tab-scheduling', true); renderScheduleNew(); }
+  if (tab === 'scheduling') { _toggleTabChrome('tab-scheduling', true); renderScheduleNew(true); }
   if (tab === 'specs') renderSpecs();
   try { _openNavGroupForTab(tab); } catch(e) {}
   try { if (tab === 'custReports') { _renderOfficeCustomerIssues(); } } catch(e) {}
@@ -11700,7 +11751,7 @@ async function switchTab(tab) {
   if (tab === 'custPortals') { renderCustPortals(); } } catch(e) {}
   try {
     if (tab === 'dailyLog') renderDailyLog();
-    if (tab === 'inspections') renderInspections();
+    if (tab === 'inspections') renderInspections(true);
     if (tab === 'deliveries') renderDeliveries();
     if (tab === 'changeOrders') renderChangeOrders();
   } catch(e) {}
@@ -11795,6 +11846,126 @@ async function _renderDashToday() {
     }).join('') + '</div>';
   }
   host.innerHTML = html;
+}
+
+
+// ===== CUSTOMIZABLE DASHBOARD QUICK ACTIONS (per user) =====
+// Catalog of all available quick actions. id -> {icon, label, run}
+var DASH_ACTION_CATALOG = {
+  newProject:   { icon:'\u2795', label:'New Project',    run:function(){ switchTab('projects'); setTimeout(showProjectForm,100); } },
+  addCustomer:  { icon:'\ud83d\udc64', label:'Add Customer',  run:function(){ switchTab('customers'); setTimeout(showCustomerForm,100); } },
+  logbook:      { icon:'\ud83d\udcd8', label:'Logbook',       run:function(){ _openLogbook(); } },
+  viewUpgrades: { icon:'\ud83d\udcca', label:'View Upgrades', run:function(){ switchTab('upgrades'); } },
+  editForm:     { icon:'\u270f\ufe0f', label:'Edit Form',     run:function(){ switchTab('upgradeEditor'); } },
+  tasks:        { icon:'\u2713', label:'Tasks',          run:function(){ switchTab('tasks'); } },
+  schedule:     { icon:'\ud83d\udcc5', label:'Schedule',      run:function(){ switchTab('scheduling'); } },
+  inspections:  { icon:'\ud83d\udd0d', label:'Inspections',   run:function(){ switchTab('inspections'); } },
+  walkthroughs: { icon:'\ud83d\udeb6', label:'Walkthroughs',  run:function(){ switchTab('walkthroughs'); } },
+  custReports:  { icon:'\ud83d\udcdd', label:'Customer Reports', run:function(){ switchTab('custReports'); } },
+  teamChat:     { icon:'\ud83d\udcac', label:'Team Chat',     run:function(){ switchTab('teamChat'); } },
+  subs:         { icon:'\ud83d\udc77', label:'Subcontractors', run:function(){ switchTab('subs'); } },
+  photos:       { icon:'\ud83d\udcf7', label:'Photo Timeline', run:function(){ switchTab('photoTimeline'); } },
+  custPortals:  { icon:'\ud83c\udfe0', label:'Customer Portals', run:function(){ switchTab('custPortals'); } }
+};
+var DASH_DEFAULT_ACTIONS = ['newProject','addCustomer','logbook','viewUpgrades'];
+
+function _dashPrefsKey() {
+  var uid = (currentUser && currentUser.id) || ('email_' + ((currentUser&&currentUser.email)||'x'));
+  return 'dashprefs:' + uid;
+}
+async function _getDashActions() {
+  try {
+    var rec = await DB.get(_dashPrefsKey());
+    if (rec && Array.isArray(rec.actions) && rec.actions.length) {
+      // keep only ids that still exist in the catalog
+      return rec.actions.filter(function(id){ return DASH_ACTION_CATALOG[id]; });
+    }
+  } catch(e) {}
+  return DASH_DEFAULT_ACTIONS.slice();
+}
+async function _saveDashActions(ids) {
+  try { await DB.set(_dashPrefsKey(), { actions: ids, _updatedAt: Date.now() }); } catch(e) {}
+}
+
+// Render the user's chosen quick actions into the dashboard.
+async function renderQuickActions() {
+  var host = document.getElementById('dashQuickActions');
+  if (!host) return;
+  var ids = await _getDashActions();
+  window._dashCurrentActions = ids;
+  if (!ids.length) {
+    host.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:13px;padding:14px;">No quick actions. Tap \u201cCustomize\u201d to add some.</div>';
+    return;
+  }
+  host.innerHTML = ids.map(function(id){
+    var a = DASH_ACTION_CATALOG[id]; if (!a) return '';
+    return '<button class="dash-action" onclick="_runDashAction(\'' + id + '\')">' +
+      '<span style="font-size:20px;">' + a.icon + '</span>' +
+      '<span>' + _esc(a.label) + '</span>' +
+    '</button>';
+  }).join('');
+}
+function _runDashAction(id) {
+  var a = DASH_ACTION_CATALOG[id];
+  if (a && typeof a.run === 'function') a.run();
+}
+
+// ===== Customize modal =====
+async function openDashCustomize() {
+  window._dashEditActions = (await _getDashActions()).slice();
+  _renderDashCustomize();
+  document.getElementById('modal-dashCustomize').classList.add('open');
+}
+function closeDashCustomize() { document.getElementById('modal-dashCustomize').classList.remove('open'); }
+
+function _renderDashCustomize() {
+  var chosen = window._dashEditActions || [];
+  // Selected (in order) with remove + reorder
+  var selHost = document.getElementById('dashCustSelected');
+  if (selHost) {
+    selHost.innerHTML = chosen.length ? chosen.map(function(id, i){
+      var a = DASH_ACTION_CATALOG[id]; if (!a) return '';
+      return '<div class="dcz-row">' +
+        '<span class="dcz-ic">' + a.icon + '</span>' +
+        '<span class="dcz-lbl">' + _esc(a.label) + '</span>' +
+        '<div class="dcz-ctrls">' +
+          (i>0 ? '<button onclick="_dashMove(' + i + ',-1)" class="dcz-mv">\u25b4</button>' : '<span class="dcz-mv-sp"></span>') +
+          (i<chosen.length-1 ? '<button onclick="_dashMove(' + i + ',1)" class="dcz-mv">\u25be</button>' : '<span class="dcz-mv-sp"></span>') +
+          '<button onclick="_dashRemove(\'' + id + '\')" class="dcz-rm">\u2715</button>' +
+        '</div>' +
+      '</div>';
+    }).join('') : '<div style="color:rgba(255,255,255,0.5);font-size:13px;padding:10px;text-align:center;">None selected yet \u2014 add from below.</div>';
+  }
+  // Available (not chosen)
+  var avHost = document.getElementById('dashCustAvailable');
+  if (avHost) {
+    var available = Object.keys(DASH_ACTION_CATALOG).filter(function(id){ return chosen.indexOf(id) === -1; });
+    avHost.innerHTML = available.length ? available.map(function(id){
+      var a = DASH_ACTION_CATALOG[id];
+      return '<button class="dcz-add" onclick="_dashAdd(\'' + id + '\')"><span>' + a.icon + '</span> ' + _esc(a.label) + ' <span class="dcz-plus">+</span></button>';
+    }).join('') : '<div style="color:rgba(255,255,255,0.5);font-size:13px;padding:10px;">All actions added.</div>';
+  }
+}
+function _dashAdd(id) {
+  if (!window._dashEditActions) window._dashEditActions = [];
+  if (window._dashEditActions.indexOf(id) === -1) window._dashEditActions.push(id);
+  _renderDashCustomize();
+}
+function _dashRemove(id) {
+  window._dashEditActions = (window._dashEditActions||[]).filter(function(x){ return x !== id; });
+  _renderDashCustomize();
+}
+function _dashMove(i, dir) {
+  var arr = window._dashEditActions || [];
+  var j = i + dir;
+  if (j < 0 || j >= arr.length) return;
+  var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+  _renderDashCustomize();
+}
+async function saveDashCustomize() {
+  await _saveDashActions(window._dashEditActions || []);
+  closeDashCustomize();
+  await renderQuickActions();
 }
 
 async function refreshDashboard() {
@@ -11896,7 +12067,8 @@ async function refreshDashboard() {
       '<div style="font-size:32px;margin-bottom:8px;">📋</div>' +
       '<div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:4px;">No recent activity</div>' +
       '<div style="font-size:12px;">Your actions will show up here.</div></div>';
-    try { await _renderDashToday(); } catch(e) {}
+    try { await renderQuickActions(); } catch(e) {}
+  try { await _renderDashToday(); } catch(e) {}
     try { _updateCustReportsBadge(); } catch(e) {}
     try { _updateWalkBadge(); } catch(e) {}
     return;
@@ -11925,6 +12097,7 @@ async function refreshDashboard() {
       '</div>';
     }).join('') +
   '</div>';
+  try { await renderQuickActions(); } catch(e) {}
   try { await _renderDashToday(); } catch(e) {}
   try { _updateCustReportsBadge(); } catch(e) {}
   try { _updateWalkBadge(); } catch(e) {}
@@ -13200,12 +13373,16 @@ function _ifxBtnLabel(id, open) {
   return (open ? '\u25b4 Hide items' : '\u25be View items by unit');
 }
 
-async function renderInspections(){
+async function renderInspections(forceReload){
   var host=document.getElementById('inspectionsList'); if(!host)return;
-  host.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;">Loading\u2026</div>';
-  window._lbProjCache=await _lbProjects();
-  var keys=await DB.list('inspection:');
-  var items=(await Promise.all(keys.map(function(k){return DB.get(k);}))).filter(Boolean);
+  var items=window._inspCache;
+  if (forceReload || !items) {
+    host.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;">Loading\u2026</div>';
+    window._lbProjCache=await _lbProjects();
+    var keys=await DB.list('inspection:');
+    items=(await Promise.all(keys.map(function(k){return DB.get(k);}))).filter(Boolean);
+    window._inspCache=items;
+  }
   items.sort(function(a,b){ return (b.date||0)-(a.date||0); });
   var statusMeta={ scheduled:{c:'#b8860b',l:'Scheduled'}, passed:{c:'#3a7d5d',l:'Passed'}, failed:{c:'#c0392b',l:'Failed'} };
   var rows=items.map(function(it){
@@ -13249,7 +13426,7 @@ async function openInspectionDetail(inspId) {
 function closeInspectionDetail() {
   document.getElementById('modal-inspDetail').classList.remove('open');
   window._inspDetailId = null;
-  try { renderInspections(); } catch(e) {}
+  try { renderInspections(); } catch(e) {} // uses cache, instant
 }
 function _inspRenderStatusBtns(status) {
   var wrap = document.getElementById('inspDetailStatus');
@@ -13262,11 +13439,19 @@ function _inspRenderStatusBtns(status) {
 }
 async function _inspDetailSetStatus(status) {
   if (!window._inspDetailId) return;
+  // Update the UI immediately so it feels instant, then persist in the background.
+  _inspRenderStatusBtns(status);
+  // Update cache if present.
+  try {
+    if (window._inspCache) {
+      var c = window._inspCache.find(function(x){ return x.id === window._inspDetailId; });
+      if (c) c.status = status;
+    }
+  } catch(e) {}
   var r = await DB.get('inspection:' + window._inspDetailId);
   if (!r) return;
   r.status = status; r._updatedAt = Date.now();
   await DB.set('inspection:' + window._inspDetailId, r);
-  _inspRenderStatusBtns(status);
 }
 async function _inspSetStatus(id,status){ var r=await DB.get('inspection:'+id); if(!r)return; r.status=status; r._updatedAt=Date.now(); await DB.set('inspection:'+id,r); renderInspections(); }
 function openInspectionModal(){
@@ -13338,47 +13523,70 @@ function _fixSetScope(scope) {
 async function _fixRenderItems() {
   var host = document.getElementById('fixItemsList');
   if (!host || !_fixInspId) return;
-  var insp = await DB.get('inspection:' + _fixInspId);
+  var insp = (window._inspCache && window._inspCache.find(function(x){return x.id===_fixInspId;})) || await DB.get('inspection:' + _fixInspId);
   if (!insp) return;
   var items = insp.fixItems || [];
+  var editMode = !!window._fixEditMode;
+  var emps = window._fixEmps || [];
+
+  // Show/hide the scope toggle: only needed when editing.
+  try {
+    var scopeWrap = document.getElementById('fixScopeHouse');
+    if (scopeWrap && scopeWrap.parentNode && scopeWrap.parentNode.parentNode) {
+      scopeWrap.parentNode.parentNode.style.display = editMode ? 'block' : 'none';
+    }
+    if (!editMode) { var up = document.getElementById('fixUnitPickerWrap'); if (up) up.style.display = 'none'; }
+  } catch(e) {}
+
+  if (!editMode) {
+    // ===== VIEW MODE: ALL items, grouped by house + each unit, read-only checklist =====
+    if (!items.length) {
+      host.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.55);font-size:13px;padding:22px 8px;">No items yet. Tap \u201cEdit list\u201d to add what needs fixing.</div>';
+      return;
+    }
+    var doneAll = items.filter(function(it){ return it.fixed; }).length;
+    var summary = '<div class="fix-progress"><span class="fix-progress-txt">' + doneAll + ' of ' + items.length + ' done</span>' +
+      '<div class="fix-progress-bar"><div class="fix-progress-fill" style="width:' + Math.round(doneAll/items.length*100) + '%"></div></div></div>';
+
+    function rowHtml(it) {
+      var realIdx = items.indexOf(it);
+      var thumbs = (it.photos||[]).map(function(ph){ return '<img src="' + ph + '" class="fix-thumb" onclick="event.stopPropagation();_plLightbox && _plLightbox(\'' + encodeURIComponent(ph) + '\')">'; }).join('');
+      return '<div class="fix-vrow' + (it.fixed?' fixed':'') + '" onclick="_fixToggle(' + realIdx + ')">' +
+        '<button class="fix-check' + (it.fixed?' on':'') + '">' + (it.fixed?'\u2713':'') + '</button>' +
+        '<div class="fix-vmain">' +
+          '<div class="fix-vtext">' + _esc(it.text||'(no description)') + '</div>' +
+          (it.assigneeName ? '<div class="fix-vmeta"><span class="fix-vwho">\ud83d\udc64 ' + _esc(it.assigneeName) + '</span></div>' : '') +
+          (thumbs ? '<div class="fix-thumbs">' + thumbs + '</div>' : '') +
+        '</div>' +
+      '</div>';
+    }
+    function groupBlock(label, list) {
+      if (!list.length) return '';
+      var d = list.filter(function(x){return x.fixed;}).length;
+      return '<div class="fix-ugroup"><div class="fix-ugroup-hd">' + _esc(label) + '<span class="fix-ugroup-ct' + (d===list.length?' all':'') + '">' + d + '/' + list.length + (d===list.length?' \u2713':'') + '</span></div>' +
+        list.map(rowHtml).join('') + '</div>';
+    }
+    var house = items.filter(function(it){ return it.scope === 'house'; });
+    var byUnit = {};
+    items.filter(function(it){ return it.scope === 'unit'; }).forEach(function(it){ var u = it.unit || '\u2014'; (byUnit[u]=byUnit[u]||[]).push(it); });
+    var unitKeys = Object.keys(byUnit).sort();
+    var body = summary;
+    body += groupBlock('\ud83c\udfe0 Whole house', house);
+    unitKeys.forEach(function(u){ body += groupBlock('\ud83d\udeaa Unit ' + u, byUnit[u]); });
+    host.innerHTML = body;
+    return;
+  }
+
+  // ===== EDIT MODE: filtered by scope, full editing =====
   var unit = (_fixScope === 'unit') ? (document.getElementById('fixUnitPicker').value || '') : '';
   var shown = items.filter(function(it){
     if (_fixScope === 'house') return it.scope === 'house';
     return it.scope === 'unit' && String(it.unit) === String(unit);
   });
-  var editMode = !!window._fixEditMode;
-  var emps = window._fixEmps || [];
-
   if (!shown.length) {
-    host.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.55);font-size:13px;padding:22px 8px;">No items yet for ' + (_fixScope === 'house' ? 'the whole house' : ('Unit ' + _esc(unit || '\u2014'))) + (editMode ? '. Tap \u201c+ Add item\u201d below.' : '. Tap \u201cEdit\u201d to add items.') + '</div>';
+    host.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.55);font-size:13px;padding:22px 8px;">No items yet for ' + (_fixScope === 'house' ? 'the whole house' : ('Unit ' + _esc(unit || '\u2014'))) + '. Tap \u201c+ Add item\u201d below.</div>';
     return;
   }
-
-  // progress summary
-  var doneCount = shown.filter(function(it){ return it.fixed; }).length;
-  var summary = '<div class="fix-progress"><span class="fix-progress-txt">' + doneCount + ' of ' + shown.length + ' done</span>' +
-    '<div class="fix-progress-bar"><div class="fix-progress-fill" style="width:' + Math.round(doneCount/shown.length*100) + '%"></div></div></div>';
-
-  if (!editMode) {
-    // ===== VIEW / CHECK MODE: clean checklist =====
-    host.innerHTML = summary + shown.map(function(it){
-      var realIdx = items.indexOf(it);
-      var thumbs = (it.photos||[]).map(function(ph){ return '<img src="' + ph + '" class="fix-thumb" onclick="_plLightbox && _plLightbox(\'' + encodeURIComponent(ph) + '\')">'; }).join('');
-      return '<div class="fix-vrow' + (it.fixed?' fixed':'') + '" onclick="_fixToggle(' + realIdx + ')">' +
-        '<button class="fix-check' + (it.fixed?' on':'') + '">' + (it.fixed?'\u2713':'') + '</button>' +
-        '<div class="fix-vmain">' +
-          '<div class="fix-vtext">' + _esc(it.text||'(no description)') + '</div>' +
-          ((it.assigneeName||thumbs) ? '<div class="fix-vmeta">' +
-            (it.assigneeName ? '<span class="fix-vwho">\ud83d\udc64 ' + _esc(it.assigneeName) + '</span>' : '') +
-          '</div>' : '') +
-          (thumbs ? '<div class="fix-thumbs" onclick="event.stopPropagation();">' + thumbs + '</div>' : '') +
-        '</div>' +
-      '</div>';
-    }).join('');
-    return;
-  }
-
-  // ===== EDIT MODE: full editing =====
   host.innerHTML = shown.map(function(it){
     var realIdx = items.indexOf(it);
     var thumbs = (it.photos||[]).map(function(ph){ return '<img src="' + ph + '" class="fix-thumb" onclick="_plLightbox && _plLightbox(\'' + encodeURIComponent(ph) + '\')">'; }).join('');
@@ -13412,7 +13620,7 @@ function _fixUpdateModeUI() {
   if (add) add.style.display = edit ? 'block' : 'none';
 }
 
-async function _fixAddItem() {
+async function _fixAddItem() { window._inspCache=null;
   var insp = await DB.get('inspection:' + _fixInspId);
   if (!insp) return;
   if (!insp.fixItems) insp.fixItems = [];
@@ -13429,14 +13637,14 @@ async function _fixSetText(idx, val) {
   insp.fixItems[idx].text = val.trim();
   await DB.set('inspection:' + _fixInspId, insp);
 }
-async function _fixToggle(idx) {
+async function _fixToggle(idx) { window._inspCache=null;
   var insp = await DB.get('inspection:' + _fixInspId); if (!insp || !insp.fixItems[idx]) return;
   insp.fixItems[idx].fixed = !insp.fixItems[idx].fixed;
   await DB.set('inspection:' + _fixInspId, insp);
   await _fixRenderItems();
   try { renderInspections(); } catch(e) {}
 }
-async function _fixDelItem(idx) {
+async function _fixDelItem(idx) { window._inspCache=null;
   ddConfirm('Delete this fix item?', async function() {
     var insp = await DB.get('inspection:' + _fixInspId); if (!insp || !insp.fixItems[idx]) return;
     insp.fixItems.splice(idx, 1);
@@ -13482,7 +13690,7 @@ async function saveInspection(){
     author:_lbWho(), _createdAt:Date.now() };
   await DB.set('inspection:'+id,rec);
   try{ logActivity('Added an inspection'); }catch(e){}
-  closeInspectionModal(); renderInspections();
+  closeInspectionModal(); window._inspCache=null; renderInspections(true);
   try { _updateLogbookVisibility(); } catch(e) {}
 }
 
@@ -21054,6 +21262,22 @@ if (document.readyState === 'loading') {
 
 <!-- INSPECTION MODAL -->
 <!-- INSPECTION FIX LIST MODAL -->
+<div class="modal-overlay" id="modal-dashCustomize">
+  <div class="modal-box" style="max-width:460px;">
+    <div class="modal-header"><div class="modal-title">⚙ Customize Quick Actions</div><button class="modal-close" onclick="closeDashCustomize()">✕</button></div>
+    <div class="modal-body" style="max-height:72vh;overflow-y:auto;">
+      <label class="form-label">Your quick actions</label>
+      <div id="dashCustSelected" style="margin-bottom:18px;"></div>
+      <label class="form-label">Add more</label>
+      <div id="dashCustAvailable" class="dcz-available"></div>
+    </div>
+    <div class="fix-modal-footer">
+      <button onclick="closeDashCustomize()" class="fix-edit-btn">Cancel</button>
+      <button onclick="saveDashCustomize()" class="fix-done-btn">Save</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-inspDetail">
   <div class="modal-box" style="max-width:500px;">
     <div class="modal-header">
