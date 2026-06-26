@@ -3777,6 +3777,10 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
 .sub-mgr-f { flex:1; min-width:90px; font-size:12.5px; padding:7px 9px; }
 .sub-mgr-del { background:rgba(192,57,43,0.12); border:none; border-radius:7px; color:#c0392b; width:30px; height:30px; cursor:pointer; flex-shrink:0; font-size:13px; }
 
+
+.dd-toast { position:fixed; bottom:90px; left:50%; transform:translateX(-50%) translateY(20px); background:#1a2b4a; color:#fff; font-size:14px; font-weight:600; padding:12px 22px; border-radius:30px; box-shadow:0 8px 30px rgba(0,0,0,0.35); z-index:100000; opacity:0; pointer-events:none; transition:opacity .2s, transform .2s; border:1px solid rgba(201,168,76,0.4); }
+.dd-toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -4093,7 +4097,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v170</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v171</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4455,7 +4459,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v170</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v171</div>
     </div>
   </div>
 
@@ -5114,6 +5118,8 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
           <div class="modal-body">
             <div class="form-group"><label class="form-label">Name / Company</label>
               <input class="form-input" id="sub-name" type="text" placeholder="e.g. Mike's Electric"></div>
+            <div class="form-group"><label class="form-label">Owner name <span style="font-weight:400;opacity:.6;">(optional)</span></label>
+              <input class="form-input" id="sub-owner" type="text" placeholder="e.g. Mike Goldstein"></div>
             <div class="form-group"><label class="form-label">Trade</label>
               <input class="form-input" id="sub-trade" type="text" list="sub-trade-list" placeholder="e.g. Electrical, Trimmer, Cabinet Installer">
               <datalist id="sub-trade-list"></datalist></div>
@@ -5325,7 +5331,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
 </div>
 
 
-<script>var APP_VERSION = 'v170';
+<script>var APP_VERSION = 'v171';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -14455,6 +14461,7 @@ function openSubForm(id) {
   if (tlist) tlist.innerHTML = TRADE_OPTIONS.map(function(t){ return '<option value="'+t+'">'; }).join('');
   document.getElementById('sub-trade').value = '';
   document.getElementById('sub-name').value = '';
+  if (document.getElementById('sub-owner')) document.getElementById('sub-owner').value = '';
   document.getElementById('sub-phone').value = '';
   if (document.getElementById('sub-email')) document.getElementById('sub-email').value = '';
   if (document.getElementById('sub-address')) document.getElementById('sub-address').value = '';
@@ -14466,6 +14473,7 @@ function openSubForm(id) {
     DB.get('subcontractor:' + id).then(function(s){
       if (!s) return;
       document.getElementById('sub-name').value = s.name || '';
+      if (document.getElementById('sub-owner')) document.getElementById('sub-owner').value = s.owner || '';
       document.getElementById('sub-trade').value = s.trade || TRADE_OPTIONS[0];
       document.getElementById('sub-phone').value = s.phone || '';
       if (document.getElementById('sub-email')) document.getElementById('sub-email').value = s.email || '';
@@ -14500,9 +14508,24 @@ function _subRemoveMgrRow(i) { window._subMgrs.splice(i,1); _subRenderMgrRows();
 function _subMgrSet(i, field, val) { if (window._subMgrs[i]) window._subMgrs[i][field] = val; }
 function _escAttr(s) { return String(s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
 
+
+// Lightweight toast confirmation.
+function ddToast(msg) {
+  var t = document.getElementById('dd_toast');
+  if (!t) { t = document.createElement('div'); t.id = 'dd_toast'; document.body.appendChild(t); }
+  t.className = 'dd-toast';
+  t.textContent = msg;
+  // force reflow then show
+  void t.offsetWidth;
+  t.classList.add('show');
+  clearTimeout(window._ddToastT);
+  window._ddToastT = setTimeout(function(){ t.classList.remove('show'); }, 2200);
+}
+
 async function saveSub() {
   var name = document.getElementById('sub-name').value.trim();
   var trade = document.getElementById('sub-trade').value;
+  var owner = (document.getElementById('sub-owner')||{}).value ? document.getElementById('sub-owner').value.trim() : '';
   var phone = document.getElementById('sub-phone').value.trim();
   var email = (document.getElementById('sub-email')||{}).value ? document.getElementById('sub-email').value.trim() : '';
   var address = (document.getElementById('sub-address')||{}).value ? document.getElementById('sub-address').value.trim() : '';
@@ -14518,12 +14541,13 @@ async function saveSub() {
   var id = _subEditId || ('sub_' + Date.now() + '_' + Math.random().toString(36).slice(2,6));
   var existing = _subEditId ? (await DB.get('subcontractor:' + id)) : null;
   var rec = existing || { id: id, tasks: [], assignedItems: [], active: true };
-  rec.name = name; rec.trade = trade; rec.phone = phone; rec.email = email; rec.address = address; rec.managers = managers; rec.officeNote = note; rec.code = code;
+  rec.name = name; rec.owner = owner; rec.trade = trade; rec.phone = phone; rec.email = email; rec.address = address; rec.managers = managers; rec.officeNote = note; rec.code = code;
   if (rec.active === undefined) rec.active = true;
   await DB.set('subcontractor:' + id, rec);
   if (typeof logActivity === 'function') logActivity((existing?'Edited':'Added') + ' subcontractor ' + name);
   closeSubModal();
   renderSubs();
+  ddToast(existing ? 'Saved \u2713' : 'Subcontractor added \u2713');
 }
 
 async function toggleSubActive(id) {
@@ -14566,6 +14590,7 @@ async function _renderSubDetailBody(s) {
   }
 
   var contact = '';
+  contact += (s.owner ? contactRow('\ud83d\udc64', 'Owner', s.owner, '') : '');
   contact += contactRow('\ud83d\udcde', 'Phone', s.phone, s.phone ? ('tel:' + String(s.phone).replace(/[^\d+]/g,'')) : '');
   contact += contactRow('\u2709\ufe0f', 'Email', s.email, s.email ? ('mailto:' + s.email) : '');
   contact += contactRow('\ud83d\udccd', 'Address', s.address, s.address ? ('https://maps.google.com/?q=' + encodeURIComponent(s.address)) : '');
