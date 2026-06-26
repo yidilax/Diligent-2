@@ -3866,7 +3866,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v152</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v154</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4228,7 +4228,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v152</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v154</div>
     </div>
   </div>
 
@@ -5100,7 +5100,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v152';
+<script>var APP_VERSION = 'v154';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -10727,7 +10727,7 @@ async function _renderInbox() {
   body.innerHTML = tabs + list.map(function(n) {
     return '<div class="inbox-item' + (n.read ? '' : ' unread') + '" style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-bottom:1px solid #f0ece2;">' +
       '<div class="inbox-icon">' + (iconFor[n.type] || '\ud83d\udd14') + '</div>' +
-      '<div class="inbox-main" style="flex:1;min-width:0;"' + (n.taskId ? ' onclick="_inboxOpenTask(\'' + n.taskId + '\')" style="cursor:pointer;"' : '') + '>' +
+      '<div class="inbox-main" style="flex:1;min-width:0;cursor:pointer;" onclick="_inboxOpenNotif(\'' + n.id + '\',\'' + (n._pub?'1':'0') + '\')">' +
         '<div class="inbox-text"' + (n.read?'':' style="font-weight:600;"') + '><strong>' + _esc(n.actor||'') + '</strong> ' + _esc(n.text||'') + '</div>' +
         '<div class="inbox-time">' + _fmtCmtTime(n.at) + '</div>' +
       '</div>' +
@@ -10740,6 +10740,34 @@ async function _renderInbox() {
     '</div>';
   }).join('');
 }
+
+// Route a notification tap to the relevant screen based on its type/data.
+async function _inboxOpenNotif(id, isPub) {
+  try {
+    // Find the notification so we know where to send the user.
+    var all = await _loadMyNotifications();
+    var n = all.find(function(x){ return x.id === id; });
+    if (!n) return;
+    // Mark it read first.
+    try { await _notifMarkRead(id, isPub); } catch(e) {}
+    // If it's tied to a task, open the task detail (existing behavior).
+    if (n.taskId) { try { _inboxOpenTask(n.taskId); return; } catch(e) {} }
+    // Otherwise route by type.
+    var t = n.type || 'info';
+    var dest = null;
+    if (t === 'issue') dest = 'custReports';
+    else if (t === 'change') dest = 'changeOrders';
+    else if (t === 'walk') dest = 'walkthroughs';
+    else if (t === 'status' || t === 'info') dest = 'scheduling';
+    else if (t === 'mention') dest = 'teamChat';
+    else if (t === 'assign' || t === 'comment' || t === 'due') dest = 'tasks';
+    if (dest) {
+      try { closeInbox && closeInbox(); } catch(e) {}
+      try { switchTab(dest); } catch(e) {}
+    }
+  } catch(e) {}
+}
+
 function _inboxSwitch(view) { window._inboxView = view; _renderInbox(); }
 function _notifKey(id, isPub) {
   return isPub === '1' ? ('pubnotif:' + (currentUser.email||'').toLowerCase() + ':' + id) : ('notif:' + currentUser.id + ':' + id);
@@ -11617,6 +11645,7 @@ async function saveProject() {
     document.getElementById('proj-status').value = 'planning';
     document.getElementById('housesContainer').innerHTML = '';
     houseRows = [];
+    try { logActivity('Saved project: ' + (name || 'Untitled')); } catch(e) {}
     await renderProjects();
     await refreshDashboard();
     _autoPublish();
