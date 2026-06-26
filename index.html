@@ -3596,15 +3596,15 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .fix-item.fixed { opacity:0.65; }
 .fix-item.fixed .fix-item-text { text-decoration:line-through; color:#9a9484; }
 .fix-item-top { display:flex; align-items:flex-start; gap:9px; }
-.fix-check { width:22px; height:22px; border-radius:6px; border:1.5px solid #cfc8b8; background:#fff; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; color:#fff; font-size:13px; padding:0; }
+.fix-check { width:22px; height:22px; border-radius:6px; border:1.5px solid #cfc8b8; background:#fff; cursor:pointer; flex:0 0 auto; display:flex; align-items:center; justify-content:center; color:#fff; font-size:13px; padding:0; margin-top:0; }
 .fix-check.on { background:#3a7d5d; border-color:#3a7d5d; }
 .fix-item-text { flex:1; font-size:14px; color:#16233d; border:none; background:none; resize:none; font-family:inherit; outline:none; line-height:1.4; min-height:20px; padding:2px 0; }
 .fix-del { background:none; border:none; color:#c2bbab; font-size:14px; cursor:pointer; flex-shrink:0; }
 .fix-item-row { display:flex; gap:8px; align-items:center; margin-top:9px; flex-wrap:wrap; }
 .fix-assign { flex:1; min-width:120px; font-size:12.5px; padding:7px 9px; border:1px solid #E3DDD3; border-radius:7px; background:#fff; }
 .fix-photo-btn { font-size:12px; font-weight:700; color:var(--navy); background:#fff; border:1px solid #E3DDD3; border-radius:7px; padding:7px 11px; cursor:pointer; white-space:nowrap; }
-.fix-thumbs { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
-.fix-thumb { width:46px; height:46px; border-radius:6px; object-fit:cover; cursor:pointer; }
+.fix-thumbs { display:flex; gap:6px; flex-wrap:wrap; margin-top:5px; }
+.fix-thumb { width:40px; height:40px; border-radius:6px; object-fit:cover; cursor:pointer; }
 
 
 /* Fix-list fields sit on a light card inside the dark modal — force dark, readable text. */
@@ -3626,13 +3626,13 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .fix-progress-txt { font-size:12px; font-weight:700; color:rgba(255,255,255,0.7); }
 .fix-progress-bar { height:6px; background:rgba(255,255,255,0.12); border-radius:4px; margin-top:5px; overflow:hidden; }
 .fix-progress-fill { height:100%; background:#3a7d5d; border-radius:4px; transition:width .25s; }
-.fix-vrow { display:flex; align-items:flex-start; gap:11px; padding:13px 12px; border-radius:11px; background:#FAF8F3; margin-bottom:9px; cursor:pointer; transition:opacity .15s; }
+.fix-vrow { display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border-radius:10px; background:#FAF8F3; margin-bottom:8px; cursor:pointer; transition:opacity .15s; }
 .fix-vrow.fixed { opacity:0.6; }
 .fix-vrow.fixed .fix-vtext { text-decoration:line-through; color:#9a9484; }
 .fix-vmain { flex:1; min-width:0; }
-.fix-vtext { font-size:14.5px; color:#16233d; line-height:1.4; font-weight:500; }
-.fix-vmeta { margin-top:6px; }
-.fix-vwho { font-size:12px; color:#7a7466; background:#F0ECE2; border-radius:6px; padding:3px 9px; }
+.fix-vtext { font-size:15px; color:#16233d; line-height:1.25; font-weight:600; }
+.fix-vmeta { margin-top:3px; }
+.fix-vwho { display:inline-flex; align-items:center; gap:4px; font-size:11px; color:#7a7466; background:#F0ECE2; border-radius:999px; padding:2px 8px; width:fit-content; }
 
 
 .ifx-wrap { margin-top:10px; border-top:1px solid var(--border); padding-top:10px; }
@@ -3752,6 +3752,13 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .spv-walk-status.spv-confirmed { background:rgba(58,125,93,0.15); color:#3a7d5d; }
 .spv-walk-status.spv-proposed { background:rgba(184,134,11,0.15); color:#b8860b; }
 .spx-scan-go { font-size:12px; font-weight:700; color:var(--gold); flex-shrink:0; }
+
+
+.insp-viewbar { display:flex; gap:8px; margin-bottom:14px; }
+.insp-viewbtn { flex:1; padding:10px; border-radius:9px; border:1.5px solid var(--border); background:#fff; color:#6a6453; font-size:13px; font-weight:700; cursor:pointer; }
+.insp-viewbtn.on { background:var(--navy); color:#fff; border-color:var(--navy); }
+.insp-del-btn { padding:11px 14px; border-radius:9px; border:1px solid rgba(192,57,43,0.4); background:rgba(192,57,43,0.12); color:#ff6b5a; font-size:16px; cursor:pointer; flex-shrink:0; }
+.insp-del-btn:active { background:rgba(192,57,43,0.25); }
 
 </style>
   <!-- Firebase -->
@@ -4069,7 +4076,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v167</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v169</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4431,7 +4438,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v167</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v169</div>
     </div>
   </div>
 
@@ -5293,7 +5300,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v167';
+<script>var APP_VERSION = 'v169';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -13466,7 +13473,16 @@ async function renderInspections(forceReload){
   }
   items.sort(function(a,b){ return (b.date||0)-(a.date||0); });
   var statusMeta={ scheduled:{c:'#b8860b',l:'Scheduled'}, passed:{c:'#3a7d5d',l:'Passed'}, failed:{c:'#c0392b',l:'Failed'} };
-  var rows=items.map(function(it){
+  // Split into active (scheduled/failed) vs passed.
+  var view = window._inspListView || 'active';
+  var passedItems = items.filter(function(it){ return it.status === 'passed'; });
+  var activeItems = items.filter(function(it){ return it.status !== 'passed'; });
+  var shownItems = (view === 'passed') ? passedItems : activeItems;
+  var toggle = '<div class="insp-viewbar">' +
+    '<button class="insp-viewbtn' + (view==='active'?' on':'') + '" onclick="_inspSetListView(\'active\')">Active' + (activeItems.length?(' \u00b7 ' + activeItems.length):'') + '</button>' +
+    '<button class="insp-viewbtn' + (view==='passed'?' on':'') + '" onclick="_inspSetListView(\'passed\')">Passed' + (passedItems.length?(' \u00b7 ' + passedItems.length):'') + '</button>' +
+  '</div>';
+  var rows=shownItems.map(function(it){
     var proj=(window._lbProjCache||[]).find(function(p){return p.id===it.projectId;});
     var loc=proj?proj.name:'';
     var sm=statusMeta[it.status]||{c:'#aaa',l:''};
@@ -13481,10 +13497,25 @@ async function renderInspections(forceReload){
       '<span class="insp-card-arrow">\u203a</span>' +
     '</div>';
   }).join('');
-  host.innerHTML=rows||'<div class="tab-empty"><div class="tab-empty-icon">\ud83d\udd0d</div><div class="tab-empty-title">No Inspections</div><div class="tab-empty-desc">Schedule your first inspection above.</div></div>';
+  host.innerHTML = toggle + (rows || '<div class="tab-empty"><div class="tab-empty-icon">\ud83d\udd0d</div><div class="tab-empty-title">No ' + (view==='passed'?'passed':'active') + ' inspections</div><div class="tab-empty-desc">' + (view==='passed'?'Passed inspections will appear here.':'Schedule an inspection above.') + '</div></div>');
 }
 
 // Open the inspection detail modal (status controls + fix list).
+
+window._inspListView = window._inspListView || 'active'; // 'active' | 'passed'
+
+async function deleteInspection(inspId) {
+  ddConfirm('Delete this inspection? This cannot be undone.', async function() {
+    // Remove from cache instantly so it disappears right away.
+    try { if (window._inspCache) window._inspCache = window._inspCache.filter(function(x){ return x.id !== inspId; }); } catch(e) {}
+    try { closeInspectionDetail(); } catch(e) {}
+    renderInspections(); // instant, from updated cache
+    await DB.delete('inspection:' + inspId); // persist in background
+  });
+}
+
+function _inspSetListView(v) { window._inspListView = v; renderInspections(); }
+
 async function openInspectionDetail(inspId) {
   var insp = await DB.get('inspection:' + inspId);
   if (!insp) return;
@@ -21605,6 +21636,7 @@ if (document.readyState === 'loading') {
       <button id="fixAddBtn" onclick="_fixAddItem()" class="fix-add-btn" style="display:none;">+ Add item</button>
     </div>
     <div class="fix-modal-footer">
+      <button onclick="deleteInspection(window._inspDetailId)" class="insp-del-btn">🗑</button>
       <button id="fixEditBtn" onclick="_fixToggleEdit()" class="fix-edit-btn">✎ Edit list</button>
       <button onclick="closeInspectionDetail()" class="fix-done-btn">Done</button>
     </div>
