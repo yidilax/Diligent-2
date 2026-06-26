@@ -301,7 +301,7 @@ body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--t
   font-size: 18px;
   letter-spacing: 2px;
   color: var(--gold);
-  flex: 1;
+  flex-shrink: 0;
 }
 .office-user {
   display: flex;
@@ -3549,6 +3549,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .wcal-time:hover { border-color:var(--navy); background:#FAF8F3; }
 .wcal-empty { text-align:center; color:#9a9484; font-size:13px; padding:24px 10px; }
 
+@media (max-width: 600px) { .topbar-greeting { display: none !important; } }
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -3865,7 +3866,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v149</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v152</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4227,7 +4228,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v149</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v152</div>
     </div>
   </div>
 
@@ -4237,7 +4238,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <span></span><span></span><span></span>
     </button>
     <div class="office-logo">Diligent Developers</div>
-    <span id="topbarGreeting" style="margin-left:auto;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:rgba(255,255,255,0.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></span>
+    <span id="topbarGreeting" class="topbar-greeting" style="margin-left:auto;padding-left:12px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:rgba(255,255,255,0.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></span>
     <button class="office-user" onclick="openProfileModal()" aria-label="My profile" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:0;flex-shrink:0;">
       <span id="topbarAvatar" style="width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:16px;color:#fff;background-size:cover;background-position:center;"></span>
     </button>
@@ -4556,6 +4557,10 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
         <div style="font-size:13px;color:var(--muted);">Issues your customers reported from their portal.</div>
       </div>
       <div id="officeCustomerIssues"></div>
+      <div style="margin-top:14px;">
+        <button onclick="_showAllReportsDiag()" style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:9px 14px;font-size:12px;font-weight:700;color:var(--navy);cursor:pointer;">Show all reports (incl. resolved)</button>
+      </div>
+      <div id="allReportsDiag" style="margin-top:12px;"></div>
     </div>
 
     <!-- CUSTOMERS TAB -->
@@ -5095,7 +5100,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v149';
+<script>var APP_VERSION = 'v152';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -6780,10 +6785,10 @@ async function _loadCustStatusLine() {
   try {
     var data = await DB.get('custglobal:status') || {};
     if (data.text) {
-      host.innerHTML = '<div style="background:linear-gradient(135deg,rgba(201,168,76,0.16),rgba(201,168,76,0.06));border:1px solid rgba(201,168,76,0.35);border-radius:12px;padding:13px 15px;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px;">' +
+      host.innerHTML = '<div style="background:linear-gradient(135deg,rgba(201,168,76,0.22),rgba(201,168,76,0.1));border:1px solid rgba(201,168,76,0.45);border-radius:12px;padding:13px 15px;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px;">' +
         '<span style="font-size:17px;flex-shrink:0;">\ud83d\udce2</span>' +
-        '<div><div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:#b8860b;margin-bottom:2px;">What\u2019s happening now</div>' +
-        '<div style="font-size:13.5px;color:#16233d;line-height:1.4;">' + _esc(data.text) + '</div></div>' +
+        '<div><div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:var(--gold);margin-bottom:3px;">What\u2019s happening now</div>' +
+        '<div style="font-size:13.5px;color:#f3efe6;line-height:1.45;">' + _esc(data.text) + '</div></div>' +
       '</div>';
     } else { host.innerHTML = ''; }
   } catch(e) { host.innerHTML = ''; }
@@ -11229,13 +11234,31 @@ async function _renderDashToday() {
     subs.forEach(function(s){ if (s._submittedAt && s._submittedAt > weekAgo) newSubs++; });
   } catch(e) {}
 
-  if (dueToday === 0 && overdue === 0 && activePhases.length === 0 && newSubs === 0) {
+  // 4. Pending walkthrough requests (need approval)
+  var pendingWalks = 0;
+  try {
+    var wkeys = await DB.list('walkreq:');
+    var wreqs = (await Promise.all(wkeys.map(function(k){return DB.get(k);}))).filter(Boolean);
+    wreqs.forEach(function(r){ if (r.status === 'requested') pendingWalks++; });
+  } catch(e) {}
+
+  // 5. Open customer reports
+  var openReports = 0;
+  try {
+    var ckeys = await DB.list('custpunch:');
+    var creps = (await Promise.all(ckeys.map(function(k){return DB.get(k);}))).filter(Boolean);
+    creps.forEach(function(r){ (r.items||[]).forEach(function(it){ if (it.status !== 'resolved') openReports++; }); });
+  } catch(e) {}
+
+  if (dueToday === 0 && overdue === 0 && activePhases.length === 0 && newSubs === 0 && pendingWalks === 0 && openReports === 0) {
     host.innerHTML = '<div class="dash-today-hd">Today</div>' +
       '<div class="dash-today-clear">You\'re all caught up. Nothing needs attention right now.</div>';
     return;
   }
 
   var html = '<div class="dash-today-hd">Today at a glance</div><div class="dash-today-grid">';
+  if (pendingWalks > 0) html += '<button class="dash-today-card gold" onclick="switchTab(\'walkthroughs\')"><div class="dash-today-num">' + pendingWalks + '</div><div class="dash-today-lbl">Walkthrough request' + (pendingWalks!==1?'s':'') + '</div></button>';
+  if (openReports > 0) html += '<button class="dash-today-card urgent" onclick="switchTab(\'custReports\')"><div class="dash-today-num">' + openReports + '</div><div class="dash-today-lbl">Customer report' + (openReports!==1?'s':'') + '</div></button>';
   if (overdue > 0) html += '<button class="dash-today-card urgent" onclick="switchTab(\'tasks\')"><div class="dash-today-num">' + overdue + '</div><div class="dash-today-lbl">Overdue task' + (overdue!==1?'s':'') + '</div></button>';
   if (dueToday > 0) html += '<button class="dash-today-card" onclick="switchTab(\'tasks\')"><div class="dash-today-num">' + dueToday + '</div><div class="dash-today-lbl">Due today</div></button>';
   if (activePhases.length > 0) html += '<button class="dash-today-card" onclick="switchTab(\'scheduling\')"><div class="dash-today-num">' + activePhases.length + '</div><div class="dash-today-lbl">Phase' + (activePhases.length!==1?'s':'') + ' in progress</div></button>';
@@ -11350,6 +11373,9 @@ async function refreshDashboard() {
       '<div style="font-size:32px;margin-bottom:8px;">📋</div>' +
       '<div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:4px;">No recent activity</div>' +
       '<div style="font-size:12px;">Your actions will show up here.</div></div>';
+    try { await _renderDashToday(); } catch(e) {}
+    try { _updateCustReportsBadge(); } catch(e) {}
+    try { _updateWalkBadge(); } catch(e) {}
     return;
   }
 
@@ -11378,6 +11404,7 @@ async function refreshDashboard() {
   '</div>';
   try { await _renderDashToday(); } catch(e) {}
   try { _updateCustReportsBadge(); } catch(e) {}
+  try { _updateWalkBadge(); } catch(e) {}
 }
 
 // ════════════════════════════════════════════
@@ -17398,6 +17425,40 @@ async function _updateCustReportsBadge() {
       else { badge.style.display = 'none'; }
     }
   } catch(e) {}
+}
+
+
+// Diagnostic: show EVERY customer report in storage (open + resolved) so nothing is hidden.
+async function _showAllReportsDiag() {
+  var host = document.getElementById('allReportsDiag');
+  if (!host) return;
+  host.innerHTML = '<div style="color:var(--muted);font-size:13px;">Loading all reports\u2026</div>';
+  try {
+    var keys = await DB.list('custpunch:');
+    var recs = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+    var total = 0;
+    recs.forEach(function(r){ total += (r.items||[]).length; });
+    if (!recs.length || total === 0) {
+      host.innerHTML = '<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;font-size:13px;color:#6a6453;line-height:1.5;">No customer reports are stored in the database at all \u2014 not even resolved ones. This means no reports were saved (they may not have gone through on the older version), rather than them being hidden or deleted.</div>';
+      return;
+    }
+    host.innerHTML = '<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;">' +
+      '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:16px;color:var(--navy);margin-bottom:10px;">All Reports in Database (' + total + ')</div>' +
+      recs.map(function(r){
+        if (!(r.items||[]).length) return '';
+        return '<div style="margin-bottom:10px;">' +
+          '<div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:4px;">\ud83d\udccd ' + _esc(r.address||'(no address)') + (r.unit?(' \u00b7 Unit '+_esc(r.unit)):'') + '</div>' +
+          r.items.map(function(it, idx){
+            var resolved = it.status === 'resolved';
+            return '<div style="border-bottom:1px solid #f0ece2;padding:7px 0;display:flex;align-items:flex-start;gap:8px;">' +
+              '<div style="flex:1;font-size:13px;color:#16233d;">' + _esc(it.text||'(empty)') + (resolved?' <span style="color:#3a7d5d;font-size:11px;font-weight:700;">[resolved]</span>':'') + '</div>' +
+              '<button onclick="_officeDeleteIssue(\'' + (r.address||'').replace(/\'/g,"") + '\',\'' + (r.unit||'').replace(/\'/g,"") + '\',' + idx + ')" style="background:rgba(192,57,43,0.1);color:#c0392b;border:none;border-radius:5px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;">\ud83d\uddd1</button>' +
+            '</div>';
+          }).join('') +
+        '</div>';
+      }).join('') +
+    '</div>';
+  } catch(e) { host.innerHTML = '<div style="color:#c0392b;font-size:13px;">Error reading reports: ' + _esc(String(e)) + '</div>'; }
 }
 
 async function _renderOfficeCustomerIssues() {
