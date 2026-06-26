@@ -3606,6 +3606,15 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .fix-thumbs { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
 .fix-thumb { width:46px; height:46px; border-radius:6px; object-fit:cover; cursor:pointer; }
 
+
+/* Fix-list fields sit on a light card inside the dark modal — force dark, readable text. */
+.modal-box .fix-item-text, #fixItemsList .fix-item-text { color:#16233d !important; background:#fff !important; -webkit-text-fill-color:#16233d; }
+.modal-box .fix-assign, #fixItemsList .fix-assign { color:#16233d !important; background:#fff !important; -webkit-text-fill-color:#16233d; }
+.fix-item-text::placeholder { color:#a39c8a; -webkit-text-fill-color:#a39c8a; }
+.fix-scope-btn { color:#6a6453 !important; -webkit-text-fill-color:#6a6453; }
+.fix-scope-btn.on { color:#fff !important; -webkit-text-fill-color:#fff; }
+.fix-photo-btn { color:var(--navy) !important; -webkit-text-fill-color:var(--navy); }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -3922,7 +3931,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v157</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v158</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4284,7 +4293,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v157</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v158</div>
     </div>
   </div>
 
@@ -5157,7 +5166,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 </div>
 
 
-<script>var APP_VERSION = 'v157';
+<script>var APP_VERSION = 'v158';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -12983,7 +12992,7 @@ async function _fixRenderItems() {
     return it.scope === 'unit' && String(it.unit) === String(unit);
   });
   if (!shown.length) {
-    host.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:18px 8px;">No items yet for ' + (_fixScope === 'house' ? 'the whole house' : ('Unit ' + _esc(unit || '\u2014'))) + '. Add the first one below.</div>';
+    host.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.55);font-size:13px;padding:18px 8px;">No items yet for ' + (_fixScope === 'house' ? 'the whole house' : ('Unit ' + _esc(unit || '\u2014'))) + '. Add the first one below.</div>';
     return;
   }
   var emps = window._fixEmps || [];
@@ -20653,7 +20662,7 @@ if (document.readyState === 'loading') {
   <div class="modal-box" style="max-width:480px;">
     <div class="modal-header"><div class="modal-title">🔧 Items to Fix</div><button class="modal-close" onclick="closeFixList()">✕</button></div>
     <div class="modal-body" style="max-height:78vh;overflow-y:auto;">
-      <div id="fixListSub" style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.4;"></div>
+      <div id="fixListSub" style="font-size:12.5px;color:rgba(255,255,255,0.6);margin-bottom:12px;line-height:1.4;"></div>
 
       <!-- Scope toggle -->
       <div class="form-group">
