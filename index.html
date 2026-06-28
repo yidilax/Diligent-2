@@ -4452,7 +4452,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v210</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v211</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4473,8 +4473,13 @@ div[style*="position:fixed"][style*="inset:0"] {
         <label class="form-label">Unit Number</label>
         <input class="form-input" type="text" id="custUnitManual" placeholder="e.g. 2A">
       </div>
+      <div class="form-group">
+        <label class="form-label">Phone Number on File</label>
+        <input class="form-input" type="tel" id="custPhoneVerify" placeholder="e.g. 845-555-1234" inputmode="tel">
+        <div style="font-size:11px;color:var(--muted);margin-top:5px;">For your security, this must match the number we have on file for your unit.</div>
+      </div>
       <button class="btn-primary" onclick="customerAccess()" style="margin-top:8px;">Make My Selections</button>
-      <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:16px;line-height:1.6;">Enter your address to find your unit and view your upgrade options.</p>
+      <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:16px;line-height:1.6;">Enter your address, unit, and the phone number on file to view your upgrade options.</p>
     </div>
   </div>
 </div>
@@ -4814,7 +4819,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v210</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v211</div>
     </div>
   </div>
 
@@ -5676,7 +5681,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v210';
+<script>var APP_VERSION = 'v211';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -6527,6 +6532,42 @@ async function customerAccess() {
   }
 
   const finalUnit = unit || 'Main';
+
+  // ===== Verify phone number against customer records on file =====
+  var enteredPhoneRaw = (document.getElementById('custPhoneVerify') ? document.getElementById('custPhoneVerify').value : '') || '';
+  var enteredPhone = enteredPhoneRaw.replace(/\D/g, ''); // digits only
+  // Find customer record(s) matching this address + unit.
+  var custKeys = await DB.list('customer:');
+  var custs = (await Promise.all(custKeys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+  var matchAddr = address.toLowerCase().trim();
+  var matchUnit = (finalUnit === 'Main' ? '' : finalUnit).toLowerCase().trim();
+  var unitCustomers = custs.filter(function(c){
+    var ca = (c.houseAddress || '').toLowerCase().trim();
+    var cu = (c.unit || '').toLowerCase().trim();
+    return ca === matchAddr && cu === matchUnit;
+  });
+  // Only enforce the phone check if we actually have customer record(s) (with a phone) for this unit.
+  var onFile = [];
+  unitCustomers.forEach(function(c){
+    [c.phoneHome, c.phoneCell1, c.phoneCell2].forEach(function(p){
+      if (p) { var d = String(p).replace(/\D/g, ''); if (d) onFile.push(d); }
+    });
+  });
+  if (onFile.length > 0) {
+    if (!enteredPhone) {
+      errEl.textContent = 'Please enter the phone number we have on file for your unit.';
+      errEl.style.display = 'block'; return;
+    }
+    // match on the last 10 digits to ignore country code / formatting differences
+    var ent10 = enteredPhone.slice(-10);
+    var matched = onFile.some(function(d){ return d.slice(-10) === ent10; });
+    if (!matched) {
+      errEl.textContent = 'That phone number doesn\'t match our records for this unit. Please contact the office if you need help.';
+      errEl.style.display = 'block'; return;
+    }
+  }
+  // (If no customer record exists yet for this unit, we don't block — the office may not have added contact info.)
+
   const saveKey = 'upgrades:' + btoa(unescape(encodeURIComponent(address + '|' + finalUnit))).replace(/=/g,'');
   const existing = await DB.get(saveKey) || {};
 
