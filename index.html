@@ -3845,6 +3845,9 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
 .scal-day-gcal { background:none; border:none; font-size:18px; cursor:pointer; flex-shrink:0; }
 .scal-sheet-close { width:100%; background:var(--navy); color:#fff; border:none; border-radius:11px; padding:13px; font-size:14px; font-weight:700; cursor:pointer; margin-top:6px; }
 
+
+#ddWriteAlert { display:none; position:fixed; left:0; right:0; top:0; z-index:100001; background:#c0392b; color:#fff; font-size:13px; font-weight:600; text-align:center; padding:11px 14px calc(11px + env(safe-area-inset-top)); box-shadow:0 2px 12px rgba(0,0,0,0.3); }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -4172,7 +4175,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v183</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v184</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4534,7 +4537,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v183</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v184</div>
     </div>
   </div>
 
@@ -5406,7 +5409,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
 </div>
 
 
-<script>var APP_VERSION = 'v183';
+<script>var APP_VERSION = 'v184';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -5477,6 +5480,34 @@ function _cachedList(prefix) {
 }
 
 // ── The DB interface (unchanged surface; direct internals) ──
+
+var _writeHealthy = true;
+var _writeFailShown = 0;
+function _reportWriteFailure(e) {
+  var now = Date.now();
+  if (now - _writeFailShown < 8000) return; // don't spam
+  _writeFailShown = now;
+  var msg = (e && e.code) ? String(e.code) : (e && e.message ? e.message : 'unknown');
+  var human = 'Changes are NOT saving to the cloud.';
+  if (msg.indexOf('permission') > -1 || msg.indexOf('PERMISSION') > -1) {
+    human = 'Saving is blocked by the database security rules. (Owner: open Firestore Rules.)';
+  } else if (msg.indexOf('unavailable') > -1 || msg.indexOf('network') > -1 || msg.indexOf('offline') > -1) {
+    human = 'No connection to the cloud right now. Changes will not be saved.';
+  }
+  try {
+    var bar = document.getElementById('ddWriteAlert');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'ddWriteAlert';
+      document.body.appendChild(bar);
+    }
+    bar.textContent = '\u26a0\ufe0f ' + human;
+    bar.style.display = 'block';
+    clearTimeout(window._ddWriteAlertT);
+    window._ddWriteAlertT = setTimeout(function(){ bar.style.display = 'none'; }, 6000);
+  } catch(_) {}
+}
+
 const DB = {
   // READ one record. _store is always current, so return it directly.
   async get(key) {
@@ -5520,8 +5551,15 @@ const DB = {
     _saveToLS();             // persist locally
     try {
       const fs = _getFirestore();
-      if (fs) { await fs.collection(_fsCol(key)).doc(_fsKey(key)).set({ v: str, k: key, t: Date.now() }); }
-    } catch(e) { console.warn('DB.set error:', e); }
+      if (fs) {
+        await fs.collection(_fsCol(key)).doc(_fsKey(key)).set({ v: str, k: key, t: Date.now() });
+        _writeHealthy = true;
+      }
+    } catch(e) {
+      console.warn('DB.set error:', e);
+      _writeHealthy = false;
+      _reportWriteFailure(e);
+    }
     return true;
   },
 
@@ -5531,8 +5569,15 @@ const DB = {
     _saveToLS();
     try {
       const fs = _getFirestore();
-      if (fs) { await fs.collection(_fsCol(key)).doc(_fsKey(key)).delete(); }
-    } catch(e) { console.warn('DB.delete error:', e); }
+      if (fs) {
+        await fs.collection(_fsCol(key)).doc(_fsKey(key)).delete();
+        _writeHealthy = true;
+      }
+    } catch(e) {
+      console.warn('DB.delete error:', e);
+      _writeHealthy = false;
+      _reportWriteFailure(e);
+    }
     return true;
   }
 };
