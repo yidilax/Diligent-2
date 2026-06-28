@@ -4125,6 +4125,12 @@ div[style*="position:fixed"][style*="inset:0"] {
   overflow-y: auto;
 }
 
+
+/* ===== Portal Setup tabbed sections (v214) ===== */
+.ps-tabs { display:flex; gap:5px; background:var(--cream); border-radius:11px; padding:4px; margin-bottom:16px; position:sticky; top:0; z-index:2; }
+.ps-tab { flex:1; padding:9px 4px; font-size:12px; font-weight:700; border:none; background:none; border-radius:8px; color:var(--muted); cursor:pointer; font-family:inherit; white-space:nowrap; }
+.ps-tab.on { background:#fff; color:var(--navy); box-shadow:0 1px 3px rgba(22,41,74,0.1); }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -4452,7 +4458,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v211</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v215</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4519,6 +4525,17 @@ div[style*="position:fixed"][style*="inset:0"] {
       </button>
     </div>
 
+    <div style="margin-bottom:8px;">
+      <button onclick="cdOpenUpdates()" style="width:100%;background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px 18px;cursor:pointer;text-align:left;box-shadow:0 2px 12px rgba(13,31,60,0.07);display:flex;align-items:center;gap:14px;">
+        <div style="font-size:30px;flex-shrink:0;">📣</div>
+        <div style="flex:1;">
+          <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:19px;letter-spacing:0.5px;color:var(--navy);">What's Happening Now</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">Latest updates on your home <span id="cdUpdatesCount" style="display:none;background:var(--gold);color:#1a1407;border-radius:10px;padding:1px 7px;font-weight:700;font-size:11px;margin-left:4px;"></span></div>
+        </div>
+        <div style="font-size:22px;color:var(--gold);flex-shrink:0;">›</div>
+      </button>
+    </div>
+
     <!-- Dynamic sections injected here -->
     <div id="cdDates"></div>
     <div id="cdProgress"></div>
@@ -4550,6 +4567,19 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div id="cdWalkStatus"></div>
       <div id="cdWalkCta"></div>
     </div>
+  </div>
+</div>
+
+<div class="page" id="customerUpdatesPage" style="background:var(--offwhite);">
+  <div style="background:linear-gradient(160deg,#16294A 0%,#233D63 100%);padding:16px 20px 22px;position:sticky;top:0;z-index:100;border-bottom:2px solid var(--gold);">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;">
+      <button onclick="showPage('customerDashboardPage')" style="background:rgba(255,255,255,0.12);color:#fff;border:none;border-radius:8px;padding:7px 13px;font-size:12px;font-weight:600;cursor:pointer;">‹ Back</button>
+    </div>
+    <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:24px;letter-spacing:0.5px;color:#fff;line-height:1.05;">What's Happening Now</div>
+    <div id="cuPageUnit" style="font-size:12px;color:var(--gold);margin-top:3px;"></div>
+  </div>
+  <div style="max-width:720px;margin:0 auto;padding:18px 16px 40px;">
+    <div id="cuPageFeed"></div>
   </div>
 </div>
 
@@ -4819,7 +4849,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v211</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v215</div>
     </div>
   </div>
 
@@ -5681,7 +5711,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v211';
+<script>var APP_VERSION = 'v215';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -6546,27 +6576,29 @@ async function customerAccess() {
     var cu = (c.unit || '').toLowerCase().trim();
     return ca === matchAddr && cu === matchUnit;
   });
-  // Only enforce the phone check if we actually have customer record(s) (with a phone) for this unit.
+  // Collect every phone number on file for this unit.
   var onFile = [];
   unitCustomers.forEach(function(c){
     [c.phoneHome, c.phoneCell1, c.phoneCell2].forEach(function(p){
       if (p) { var d = String(p).replace(/\D/g, ''); if (d) onFile.push(d); }
     });
   });
-  if (onFile.length > 0) {
-    if (!enteredPhone) {
-      errEl.textContent = 'Please enter the phone number we have on file for your unit.';
-      errEl.style.display = 'block'; return;
-    }
-    // match on the last 10 digits to ignore country code / formatting differences
-    var ent10 = enteredPhone.slice(-10);
-    var matched = onFile.some(function(d){ return d.slice(-10) === ent10; });
-    if (!matched) {
-      errEl.textContent = 'That phone number doesn\'t match our records for this unit. Please contact the office if you need help.';
-      errEl.style.display = 'block'; return;
-    }
+  // POLICY: a phone match is REQUIRED. No number on file for this unit => no entry.
+  if (onFile.length === 0) {
+    errEl.textContent = 'This unit isn\'t set up for portal access yet. Please contact the office to get added.';
+    errEl.style.display = 'block'; return;
   }
-  // (If no customer record exists yet for this unit, we don't block — the office may not have added contact info.)
+  if (!enteredPhone) {
+    errEl.textContent = 'Please enter the phone number we have on file for your unit.';
+    errEl.style.display = 'block'; return;
+  }
+  // match on the last 10 digits to ignore country code / formatting differences
+  var ent10 = enteredPhone.slice(-10);
+  var matched = onFile.some(function(d){ return d.slice(-10) === ent10; });
+  if (!matched) {
+    errEl.textContent = 'That phone number doesn\'t match our records for this unit. Please contact the office if you need help.';
+    errEl.style.display = 'block'; return;
+  }
 
   const saveKey = 'upgrades:' + btoa(unescape(encodeURIComponent(address + '|' + finalUnit))).replace(/=/g,'');
   const existing = await DB.get(saveKey) || {};
@@ -6846,6 +6878,17 @@ async function _psGet(address, unit) {
   var rec = await DB.get('portalcfg:' + _psKey(address, unit));
   return rec || { welcome:'', contactName:'', contactRole:'', contactPhone:'', contactEmail:'', dateCompletion:'', dateNext:'', dateNextLabel:'', photos:[] };
 }
+
+// Switch which Portal Setup section is visible (tabbed view, no long scroll).
+function _psShowSection(sec) {
+  document.querySelectorAll('#modal-portalsettings .ps-tab').forEach(function(t){
+    t.classList.toggle('on', t.getAttribute('data-pssec') === sec);
+  });
+  document.querySelectorAll('#modal-portalsettings .ps-sec').forEach(function(s){
+    s.style.display = (s.getAttribute('data-pssec') === sec) ? 'block' : 'none';
+  });
+}
+
 async function openPortalSettings(address, unit) {
   _psTarget = { address: address, unit: unit };
   var rec = await _psGet(address, unit);
@@ -6862,6 +6905,7 @@ async function openPortalSettings(address, unit) {
   _psRenderPhotos();
   var aa = document.getElementById('ps-applyAll'); if (aa) aa.checked = false;
   await _psRenderMultiUnits(address, unit);
+  try { _psShowSection('welcome'); } catch(e) {}
   document.getElementById('modal-portalsettings').classList.add('open');
 }
 // Build a checklist of OTHER units at the same address so info can be applied to several at once.
@@ -7508,11 +7552,13 @@ async function _loadWalkSlots(address, unit) {
     });
     if (hasActive) { host.innerHTML = ''; return; }
     var cfg = await DB.get('walkavail:config');
+    var btnStyle = 'background:var(--navy);color:#fff;border:none;border-radius:10px;padding:13px 16px;font-size:14px;font-weight:700;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;';
     if (!cfg || !(cfg.days||[]).length) {
-      host.innerHTML = '<div style="font-size:12px;color:var(--muted);text-align:center;padding:6px;">Call the office to schedule a walkthrough.</div>';
+      // No availability calendar set up — still let the customer request via the simple form.
+      host.innerHTML = '<button onclick="openWalkRequest()" style="' + btnStyle + '">\ud83d\uddd3\ufe0f Request a Walkthrough</button>';
       return;
     }
-    host.innerHTML = '<button onclick="openWalkCal()" style="background:var(--navy);color:#fff;border:none;border-radius:10px;padding:13px 16px;font-size:14px;font-weight:700;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;">\ud83d\uddd3\ufe0f Request a Walkthrough</button>';
+    host.innerHTML = '<button onclick="openWalkCal()" style="' + btnStyle + '">\ud83d\uddd3\ufe0f Request a Walkthrough</button>';
   } catch(e) { host.innerHTML = ''; }
 }
 
@@ -7839,6 +7885,59 @@ function _fmtDate(d) {
   catch(e) { return d; }
 }
 
+
+// ===== Dedicated customer Updates page =====
+async function cdOpenUpdates() {
+  var addr = window._custAddress || '';
+  var unit = window._custUnit || '';
+  var u = document.getElementById('cuPageUnit');
+  if (u) u.textContent = addr + (unit && unit !== 'Main' ? (' \u00b7 Unit ' + unit) : '');
+  showPage('customerUpdatesPage');
+  window.scrollTo(0,0);
+  var feed = document.getElementById('cuPageFeed');
+  if (feed) feed.innerHTML = '<div style="text-align:center;color:var(--muted);padding:30px;">Loading updates\u2026</div>';
+  try {
+    await _loadCustomerUpdatesInto(addr, unit, 'cuPageFeed');
+    // If there were no updates, show a friendly empty state.
+    if (feed && !feed.innerHTML.trim()) {
+      feed.innerHTML = '<div style="text-align:center;padding:50px 20px;">' +
+        '<div style="font-size:40px;margin-bottom:10px;">\ud83c\udfd7\ufe0f</div>' +
+        '<div style="font-family:\'Archivo\',sans-serif;font-weight:800;font-size:18px;color:var(--navy);margin-bottom:6px;">No updates yet</div>' +
+        '<div style="font-size:13px;color:var(--muted);">When there\'s news about your home, it\'ll show up here.</div>' +
+      '</div>';
+    }
+  } catch(e) {
+    if (feed) feed.innerHTML = '<div style="text-align:center;color:var(--muted);padding:30px;">Could not load updates.</div>';
+  }
+}
+
+// Show a count badge on the dashboard "What's Happening Now" card.
+async function _cdUpdatesCount(address, unit) {
+  try {
+    var badge = document.getElementById('cdUpdatesCount');
+    if (!badge) return;
+    var keys = await DB.list('custupdate:');
+    var ups = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+    var myAddr = (address||'').toLowerCase().trim();
+    var myProjectId = '';
+    var pkeys = await DB.list('project:');
+    var projects = (await Promise.all(pkeys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+    projects.forEach(function(p){ (p.houses||[]).forEach(function(h){ if ((h.address||'').toLowerCase().trim() === myAddr) myProjectId = p.id; }); });
+    var myUnit = String(unit||'').toLowerCase().trim();
+    var n = ups.filter(function(u){
+      var uAddr = (u.houseAddress || u.address || '').toLowerCase().trim();
+      if (u.projectId) { if (!myProjectId || u.projectId !== myProjectId) return false; }
+      else if (uAddr && uAddr !== myAddr) return false;
+      if (uAddr && uAddr !== myAddr) return false;
+      var uUnit = String(u.unit||'').toLowerCase().trim();
+      if (uUnit && uUnit !== myUnit) return false;
+      return true;
+    }).length;
+    if (n > 0) { badge.textContent = n; badge.style.display = 'inline-block'; }
+    else { badge.style.display = 'none'; }
+  } catch(e) {}
+}
+
 async function openCustomerDashboard(name, address, unit, saveKey, existing) {
   window._custName = name; window._custAddress = address; window._custUnit = unit; _custSaveKey = saveKey;
   var first = (name || '').split(' ')[0] || 'there';
@@ -7856,6 +7955,7 @@ async function openCustomerDashboard(name, address, unit, saveKey, existing) {
   try { await _loadPortalConfig(address, unit); } catch(e) {}
   try { await _loadCustomerProgress(address, unit, 'cdProgress'); } catch(e) {}
   try { await _loadCustomerUpdatesInto(address, unit, 'cdUpdates'); } catch(e) {}
+  try { await _cdUpdatesCount(address, unit); } catch(e) {}
   try { await _loadCustomerFiles(address, unit, 'cdFiles'); } catch(e) {}
   try { await _cpRender('cdIssueList'); } catch(e) {}
   try { await _loadWalkStatus(address, unit); } catch(e) {}
@@ -8936,7 +9036,11 @@ function _renderSidebarIdentity() {
 
 async function openOfficeDashboard() {
   var _bl = document.getElementById('bootLoader');
-  // Warm the data cache once so all tabs respond instantly
+  // Land on the office page IMMEDIATELY so a slow/failed cache warm can never leave the
+  // user stuck on the login screen. Everything else is best-effort after this.
+  if (_bl) _bl.style.display = 'none';
+  showPage('officePage');
+  // Warm the data cache once so all tabs respond instantly (non-blocking for navigation).
   if (!_cacheWarm) { try { await warmCache(); } catch(e) {} }
   // If Google Calendar is connected, quietly get a token now so the first task syncs silently.
   try { _gcalEnsureToken(); } catch(e) {}
@@ -8948,12 +9052,15 @@ async function openOfficeDashboard() {
     }
   } catch(e) {}
   if (_bl) _bl.style.display = 'none';
-  showPage('officePage');
-  document.getElementById('topbarUserName').textContent = currentUser.name;
-  _renderSidebarIdentity();
-  const badge = document.getElementById('topbarRoleBadge');
-  badge.textContent = currentUser.role === 'admin' ? 'Admin' : (currentUser.title || 'Employee');
-  badge.className = 'office-role-badge ' + (currentUser.role === 'admin' ? 'role-admin' : 'role-employee');
+  try {
+    var _un = document.getElementById('topbarUserName'); if (_un) _un.textContent = currentUser.name;
+    _renderSidebarIdentity();
+    var badge = document.getElementById('topbarRoleBadge');
+    if (badge) {
+      badge.textContent = currentUser.role === 'admin' ? 'Admin' : (currentUser.title || 'Employee');
+      badge.className = 'office-role-badge ' + (currentUser.role === 'admin' ? 'role-admin' : 'role-employee');
+    }
+  } catch(e) { console.warn('dashboard header render', e); }
 
   // Show admin-only tabs
   document.querySelectorAll('.admin-only').forEach(function(el) {
@@ -23408,9 +23515,15 @@ if (document.readyState === 'loading') {
       <button class="modal-close" onclick="closePortalSettings()">✕</button>
     </div>
     <div class="modal-body" style="max-height:72vh;overflow-y:auto;">
-      <div class="form-group"><label class="form-label">Welcome message to customer</label>
+      <div class="ps-tabs">
+        <button class="ps-tab on" data-pssec="welcome" onclick="_psShowSection('welcome')">👋 Welcome</button>
+        <button class="ps-tab" data-pssec="contact" onclick="_psShowSection('contact')">📞 Contact</button>
+        <button class="ps-tab" data-pssec="dates" onclick="_psShowSection('dates')">📅 Dates</button>
+        <button class="ps-tab" data-pssec="photos" onclick="_psShowSection('photos')">📷 Photos</button>
+      </div>
+      <div class="ps-sec" data-pssec="welcome"><div class="form-group"><label class="form-label">Welcome message to customer</label>
         <textarea class="form-input" id="ps-welcome" rows="3" placeholder="e.g. Welcome to the Maple Estates family!"></textarea></div>
-      <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:15px;letter-spacing:1px;color:var(--gold);margin:16px 0 8px;">Your Point of Contact</div>
+      </div><div class="ps-sec" data-pssec="contact" style="display:none;"><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:15px;letter-spacing:1px;color:var(--gold);margin:4px 0 12px;">Your Point of Contact</div>
       <div class="form-group"><label class="form-label">Name</label>
         <input class="form-input" id="ps-contactName" type="text" placeholder="e.g. Shmily Lax"></div>
       <div class="form-group"><label class="form-label">Role / Title</label>
@@ -23419,17 +23532,17 @@ if (document.readyState === 'loading') {
         <input class="form-input" id="ps-contactPhone" type="text" inputmode="text" placeholder="845-288-1036 #5"></div>
       <div class="form-group"><label class="form-label">Email</label>
         <input class="form-input" id="ps-contactEmail" type="email" placeholder="shmily@diligentdevelopersny.com"></div>
-      <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:15px;letter-spacing:1px;color:var(--gold);margin:16px 0 8px;">Important Dates</div>
+      </div><div class="ps-sec" data-pssec="dates" style="display:none;"><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:15px;letter-spacing:1px;color:var(--gold);margin:4px 0 12px;">Important Dates</div>
       <div class="form-group"><label class="form-label">Estimated completion date</label>
         <input class="form-input" id="ps-dateCompletion" type="date"></div>
       <div class="form-group"><label class="form-label">Next milestone label</label>
         <input class="form-input" id="ps-dateNextLabel" type="text" placeholder="e.g. Framing inspection"></div>
       <div class="form-group"><label class="form-label">Next milestone date</label>
         <input class="form-input" id="ps-dateNext" type="date"></div>
-      <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:15px;letter-spacing:1px;color:var(--gold);margin:16px 0 8px;">Progress Photos</div>
+      </div><div class="ps-sec" data-pssec="photos" style="display:none;"><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:15px;letter-spacing:1px;color:var(--gold);margin:4px 0 12px;">Progress Photos</div>
       <div id="ps-photos" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;"></div>
-      <button onclick="_psAddPhoto()" style="width:100%;padding:10px;border-radius:8px;border:1px dashed rgba(255,255,255,0.3);background:rgba(255,255,255,0.06);color:#f3efe6;font-size:13px;font-weight:600;cursor:pointer;">📷 Add Progress Photo</button>
-      <div style="background:rgba(201,168,76,0.1);border:1px solid var(--gold);border-radius:10px;padding:12px;margin-bottom:12px;">
+      <button onclick="_psAddPhoto()" style="width:100%;padding:11px;border-radius:9px;border:1.5px dashed #BFA055;background:#fff;color:#16294A;font-size:13px;font-weight:700;cursor:pointer;">📷 Add Progress Photo</button>
+      </div><div style="background:rgba(201,168,76,0.1);border:1px solid var(--gold);border-radius:10px;padding:12px;margin:14px 0 12px;">
         <label style="display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--navy);cursor:pointer;font-weight:600;"><input type="checkbox" id="ps-applyAll" style="margin-top:2px;"> Apply welcome &amp; contact to ALL customers</label>
         <div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.4;">Sends this welcome message and point-of-contact to every unit in every project. Each home keeps its own dates and photos.</div>
       </div>
