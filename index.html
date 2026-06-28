@@ -4495,7 +4495,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v218</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v220</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4595,16 +4595,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     <!-- Issue / punch list -->
         <div id="cdFaq"></div>
 
-    <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;margin-top:14px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;">
-        <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:17px;letter-spacing:0.5px;color:var(--navy);">📝 Report an Issue</div>
-        <button onclick="_cpAddItem()" style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:8px 13px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">+ Add</button>
-      </div>
-      <div style="background:#fdf3e3;border:1px solid #f0d9a8;border-radius:9px;padding:10px 12px;margin-bottom:10px;">
-        <div style="font-size:12px;color:#8a6a1a;line-height:1.45;"><b>⚠️ For non-emergencies only.</b> For anything urgent, please call the office at <a href="tel:8452881036" style="color:#8a6a1a;font-weight:700;">845-288-1036 #5</a>.</div>
-      </div>
-      <div id="cdIssueList"></div>
-    </div>
+    <div id="cdIssueList" style="display:none;"></div>
 
     <div id="cdChangeOrders"></div>
 
@@ -4914,7 +4905,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v218</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v220</div>
     </div>
   </div>
 
@@ -5776,7 +5767,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v218';
+<script>var APP_VERSION = 'v220';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -6302,10 +6293,15 @@ async function init() {
     if (_handled && !fbUser) return;
     if (fbUser) {
       _handled = true;
+      try { sessionStorage.removeItem('dd_pendingGoogle'); } catch(e) {}
       _settleBoot();
       try { await handleAuthedUser(fbUser); } catch(e) { console.warn('auth handler error', e); _hideLoader(); showPage('officeAuthPage'); }
     } else {
-      // Only show landing if we're not mid-redirect
+      // If a Google redirect sign-in is in flight, keep the loader instead of flashing
+      // the landing page — the result will arrive momentarily.
+      var _pendingG = false;
+      try { _pendingG = sessionStorage.getItem('dd_pendingGoogle') === '1'; } catch(e) {}
+      if (_pendingG) { return; }
       _settleBoot();
       showPage('landingPage');
       _hideLoader();
@@ -6317,7 +6313,14 @@ async function init() {
     var rr = await auth.getRedirectResult();
     if (rr && rr.user) {
       _handled = true;
+      try { sessionStorage.removeItem('dd_pendingGoogle'); } catch(e) {}
       await handleAuthedUser(rr.user);
+    } else {
+      // No redirect result and not signed in: clear any stale pending flag so the
+      // landing page can show normally on the next load.
+      try {
+        if (!auth.currentUser) sessionStorage.removeItem('dd_pendingGoogle');
+      } catch(e) {}
     }
   } catch(e) {
     console.warn('Redirect error:', e);
@@ -6876,18 +6879,28 @@ function _cpRenderDraftPhotos() {
   }).join('');
 }
 function _cpRemoveDraftPhoto(i) { _cpDraftPhotos.splice(i, 1); _cpRenderDraftPhotos(); }
-async function _cpSubmitReport() {
+async function _cpSubmitReport(keepOpen) {
   var ta = document.getElementById('cpReportText');
   var text = ta ? ta.value.trim() : '';
   if (!text) { if (ta) { ta.style.borderColor = '#e07a6a'; ta.focus(); } return; }
   var rec = await _cpGet();
   rec.items.push({ id: 'ci_' + Date.now(), text: text, photos: _cpDraftPhotos.slice(), at: Date.now(), status: 'submitted' });
   await _cpSave(rec);
-  closeCpReport();
-  await _cpRender();
+  try { await _cpRender(); } catch(e) {}
   try { await _cpRender('cpPageList'); } catch(e) {}
   try { await _cdPunchCount(); } catch(e) {}
   try { await _notifyOfficeOfIssue(text); } catch(e) {}
+  if (keepOpen) {
+    // Clear the form but keep the modal open so they can add the next problem right away.
+    _cpDraftPhotos = [];
+    if (ta) { ta.value = ''; ta.style.borderColor = ''; }
+    var pv = document.getElementById('cpReportPhotos'); if (pv) pv.innerHTML = '';
+    try { ddToast('Added \u2713 \u2014 add the next one'); } catch(e) {}
+    if (ta) ta.focus();
+  } else {
+    closeCpReport();
+    try { ddToast('Report submitted \u2713'); } catch(e) {}
+  }
 }
 // Writes a PUBLIC notification the office inbox will pick up (customers can't write office-only keys).
 async function _notifyOfficeOfIssue(issueText) {
@@ -17473,13 +17486,20 @@ async function _refreshSubmissions() {
     var fs = (typeof _getFirestore === 'function') ? _getFirestore() : null;
     if (fs) {
       var prefixes = ['upgrades:', 'submission:'];
-      for (var pi = 0; pi < prefixes.length; pi++) {
-        var pfx = prefixes[pi];
-        var snap = await fs.collection('dd').where('k', '>=', pfx).where('k', '<', pfx + '\uf8ff').get();
-        snap.docs.forEach(function(d) {
-          var data = d.data();
-          if (data.k && data.v) { _store[data.k] = data.v; }
-        });
+      // upgrades: and submission: are PUBLIC prefixes -> they live in the 'pub' collection.
+      // Query 'pub' first, then 'dd' as a fallback for any legacy records.
+      var collections = ['pub', 'dd'];
+      for (var ci = 0; ci < collections.length; ci++) {
+        for (var pi = 0; pi < prefixes.length; pi++) {
+          var pfx = prefixes[pi];
+          try {
+            var snap = await fs.collection(collections[ci]).where('k', '>=', pfx).where('k', '<', pfx + '\uf8ff').get();
+            snap.docs.forEach(function(d) {
+              var data = d.data();
+              if (data.k && data.v) { _store[data.k] = data.v; }
+            });
+          } catch(e) { console.warn('refresh ' + collections[ci] + '/' + pfx, e); }
+        }
       }
       if (typeof _saveToLS === 'function') _saveToLS();
     } else if (window.storage) {
@@ -23104,7 +23124,25 @@ async function signInWithGoogle() {
   var errEl = document.getElementById('loginError');
   if (errEl) errEl.style.display = 'none';
 
-  // Try popup first (gives immediate result + visible errors)
+  // On phones, popups often don't close cleanly (you end up stuck on the Google page).
+  // Use the redirect flow there — it returns into the same window and lands on the
+  // dashboard automatically via onAuthStateChanged. Popups stay for desktop only.
+  var isPhone = /Android|iPhone|iPod|iPad|Windows Phone|Mobile/i.test(navigator.userAgent || '');
+  if (isPhone) {
+    try {
+      await _ensurePersistence();
+      // Remember we kicked off a Google sign-in so boot can show a spinner, not the landing page.
+      try { sessionStorage.setItem('dd_pendingGoogle', '1'); } catch(e) {}
+      await auth.signInWithRedirect(provider);
+      return;
+    } catch(e) {
+      try { sessionStorage.removeItem('dd_pendingGoogle'); } catch(_) {}
+      if (errEl) { errEl.textContent = 'Sign-in failed: ' + (e.code || e.message); errEl.style.display = 'block'; }
+      return;
+    }
+  }
+
+  // Desktop: popup gives an immediate result.
   try {
     await _ensurePersistence();
     var result = await auth.signInWithPopup(provider);
@@ -23112,9 +23150,9 @@ async function signInWithGoogle() {
     return;
   } catch(e) {
     console.warn('Popup sign-in failed:', e);
-    // Popup blocked or not supported → fall back to redirect
     if (e.code === 'auth/popup-blocked' || e.code === 'auth/cancelled-popup-request' || e.code === 'auth/operation-not-supported-in-this-environment') {
       try {
+        try { sessionStorage.setItem('dd_pendingGoogle', '1'); } catch(_) {}
         await auth.signInWithRedirect(provider);
         return;
       } catch(e2) {
@@ -23122,7 +23160,6 @@ async function signInWithGoogle() {
         return;
       }
     }
-    // Other errors — show them
     var msg = 'Google sign-in failed.';
     if (e.code === 'auth/unauthorized-domain') msg = 'Domain not authorized. Add your site in Firebase → Authentication → Settings → Authorized domains.';
     else if (e.code === 'auth/popup-closed-by-user') msg = 'Sign-in window was closed. Please try again.';
@@ -23703,7 +23740,10 @@ if (document.readyState === 'loading') {
         <button onclick="_cpReportAddPhoto(true)" style="flex:1;padding:11px;border-radius:9px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.08);color:#f3efe6;font-size:13px;font-weight:600;cursor:pointer;">📷 Camera</button>
         <button onclick="_cpReportAddPhoto(false)" style="flex:1;padding:11px;border-radius:9px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.08);color:#f3efe6;font-size:13px;font-weight:600;cursor:pointer;">🖼️ Gallery</button>
       </div>
-      <button onclick="_cpSubmitReport()" style="width:100%;padding:13px;border-radius:9px;border:none;background:var(--gold);color:#0D1F3C;font-size:14px;font-weight:700;cursor:pointer;margin-top:14px;">Submit Report</button>
+      <div style="display:flex;gap:8px;margin-top:14px;">
+        <button onclick="_cpSubmitReport(true)" style="flex:1;padding:13px;border-radius:9px;border:1.5px solid var(--gold);background:rgba(255,255,255,0.06);color:var(--gold);font-size:13px;font-weight:700;cursor:pointer;">＋ Save &amp; add another</button>
+        <button onclick="_cpSubmitReport(false)" style="flex:1;padding:13px;border-radius:9px;border:none;background:var(--gold);color:#0D1F3C;font-size:14px;font-weight:700;cursor:pointer;">Save &amp; close</button>
+      </div>
       <div style="background:#fdf3e3;border-radius:8px;padding:9px 11px;margin-top:10px;">
         <div style="font-size:11px;color:#8a6a1a;line-height:1.4;"><b>⚠️ For non-emergencies only.</b> For anything urgent, call the office at <a href="tel:8452881036" style="color:#8a6a1a;font-weight:700;">845-288-1036 #5</a>.</div>
       </div>
