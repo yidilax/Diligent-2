@@ -4174,14 +4174,33 @@ div[style*="position:fixed"][style*="inset:0"] {
       bar.onclick = function(){ bar.style.display = 'none'; };
     } catch(e) {}
   }
+  // Some errors are harmless background noise (service worker updates, network blips,
+  // resource loads). These don't break the app, so we never alarm the user with them.
+  function _isHarmless(msg){
+    if (!msg) return true;
+    msg = String(msg);
+    var ignore = [
+      'ServiceWorker', 'service worker', 'sw.js',
+      'Failed to update', 'Failed to register', 'fetching the script',
+      'Failed to load resource', 'Load failed', 'NetworkError',
+      'Failed to fetch', 'importScripts', 'getImageData',
+      'ResizeObserver', 'Non-Error promise rejection',
+      'The operation was aborted', 'AbortError'
+    ];
+    for (var i = 0; i < ignore.length; i++) { if (msg.indexOf(ignore[i]) !== -1) return true; }
+    return false;
+  }
   window.addEventListener('error', function(ev){
     var m = (ev && ev.message) ? ev.message : 'unknown error';
+    if (_isHarmless(m) || (ev && ev.filename && _isHarmless(ev.filename))) return;
     var src = (ev && ev.filename) ? (' @' + (ev.lineno||'?')) : '';
     showCrash(m + src);
   });
   window.addEventListener('unhandledrejection', function(ev){
     var r = ev && ev.reason;
-    showCrash('(async) ' + ((r && r.message) ? r.message : String(r)));
+    var msg = (r && r.message) ? r.message : String(r);
+    if (_isHarmless(msg)) return;
+    showCrash('(async) ' + msg);
   });
 })();
 </script>
@@ -4495,7 +4514,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v224</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v228</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4905,7 +4924,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v224</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v228</div>
     </div>
   </div>
 
@@ -5767,7 +5786,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v224';
+<script>var APP_VERSION = 'v228';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -6289,57 +6308,23 @@ async function init() {
 
   // onAuthStateChanged is the single source of truth.
   // After a Google redirect returns, Firebase auto-fires this with the user.
+  // onAuthStateChanged is the single source of truth. It ONLY reads the current user and
+  // routes the UI — it never triggers sign-in (that happens solely from the button click).
   auth.onAuthStateChanged(async function(fbUser) {
     if (_handled && !fbUser) return;
     if (fbUser) {
       _handled = true;
-      try { sessionStorage.removeItem('dd_pendingGoogle'); } catch(e) {}
       _settleBoot();
       try { await handleAuthedUser(fbUser); } catch(e) { console.warn('auth handler error', e); _hideLoader(); showPage('officeAuthPage'); }
     } else {
-      // If a Google redirect sign-in is genuinely in flight (flag set within the last
-      // 90 seconds), keep the loader briefly. Otherwise clear any stale flag and show
-      // the landing page so a stuck flag can never freeze boot or re-pop Google.
-      var _pendingG = false;
-      try {
-        var _pg = sessionStorage.getItem('dd_pendingGoogle');
-        var _pgTime = _pg ? parseInt(_pg, 10) : 0;
-        _pendingG = _pgTime && (Date.now() - _pgTime < 90000);
-        if (!_pendingG) sessionStorage.removeItem('dd_pendingGoogle');
-      } catch(e) {}
-      if (_pendingG) { return; }
       _settleBoot();
       showPage('landingPage');
       _hideLoader();
     }
   });
 
-  // Also explicitly check redirect result (helps surface errors)
-  try {
-    var rr = await auth.getRedirectResult();
-    if (rr && rr.user) {
-      _handled = true;
-      try { sessionStorage.removeItem('dd_pendingGoogle'); } catch(e) {}
-      await handleAuthedUser(rr.user);
-    } else {
-      // No redirect result and not signed in: clear any stale pending flag so the
-      // landing page can show normally on the next load.
-      try {
-        if (!auth.currentUser) sessionStorage.removeItem('dd_pendingGoogle');
-      } catch(e) {}
-    }
-  } catch(e) {
-    console.warn('Redirect error:', e);
-    var errEl = document.getElementById('loginError');
-    if (errEl) {
-      var m = 'Sign-in failed: ' + (e.code || e.message || 'unknown');
-      if (e.code === 'auth/unauthorized-domain') m = 'Domain not authorized. Add diligentdevelopers.app and yidilax.github.io in Firebase → Authentication → Settings → Authorized domains.';
-      errEl.textContent = m;
-      errEl.style.display = 'block';
-    }
-    showPage('officeAuthPage');
-    _hideLoader();
-  }
+  // (Google sign-in uses popup, not redirect, so there is no getRedirectResult() to
+  // process on load. This prevents the refresh loop that redirect caused on GitHub Pages.)
 }
 
 // ════════════════════════════════════════════
@@ -8601,7 +8586,16 @@ async function switchAccount(encEmail, method) {
       await handleAuthedUser(result.user);
       return;
     } catch(e) {
-      try { var provider2 = new firebase.auth.GoogleAuthProvider(); provider2.setCustomParameters({ login_hint: email }); await auth.signInWithRedirect(provider2); } catch(e2) {}
+      // Popup failed (closed or blocked). Show a clear message instead of a broken redirect.
+      console.error('Switch-account Google sign-in failed:', e);
+      showPage('officeAuthPage');
+      var err = document.getElementById('loginError');
+      if (err) {
+        err.textContent = (e.code === 'auth/popup-blocked')
+          ? 'Your browser blocked the sign-in popup. Please allow popups and try again.'
+          : 'Couldn\'t switch accounts. Please sign in again.';
+        err.style.display = 'block';
+      }
       return;
     }
   } else {
@@ -17555,6 +17549,9 @@ async function refreshUpgradesNow() {
 
 async function renderUpgrades() {
   _cachedSubmissions = null; // reset cache
+  // Cache the current edited global sheet so the customer-detail view can fall back to it
+  // (instead of the hardcoded default) when a submission has no embedded sheet snapshot.
+  try { window._officeUpgradeSheet = await ue_load(); } catch(e) { window._officeUpgradeSheet = null; }
   await _refreshSubmissions(); // pull latest customer submissions from the database
   switchUpgradeView('customers'); // default to customer view
 }
@@ -19076,6 +19073,9 @@ async function submitUpgrades() {
     upgradeTotal: (function(){ try { var a=document.getElementById('upgradeTotalAmount'); return a?a.textContent:''; } catch(e){ return ''; } })(),
     signature: canvas ? canvas.toDataURL() : '',
     sigDate: sigDate.value,
+    // Snapshot the EXACT sheet the customer filled out, so the office always displays
+    // their selections against the sheet they actually used \u2014 not the default sheet.
+    _sheet: (function(){ try { return JSON.parse(JSON.stringify(window._upgradeSections || [])); } catch(e){ return []; } })(),
     _submittedAt: isUpdate ? existing._submittedAt : now,
     _updatedAt: now
   };
@@ -20250,7 +20250,7 @@ function getSubmissions() {
   var results = [];
   Object.keys(_store).forEach(function(k) {
     if (k.startsWith('submission:')) {
-      try { results.push(JSON.parse(_store[k])); } catch(e) {}
+      try { var _sd = JSON.parse(_store[k]); _sd._key = k; results.push(_sd); } catch(e) {}
     }
   });
   return results.sort(function(a,b) { return new Date(b.submittedAt) - new Date(a.submittedAt); });
@@ -20387,6 +20387,7 @@ function getStoredSubmissions() {
         submittedAt: d._submittedAt,
         _submittedAt: d._submittedAt,
         _updatedAt: d._updatedAt || d._submittedAt,
+        _sheet: d._sheet || null,
         _pin: d._pin || '',
         _pinResetRequested: d._pinResetRequested || null
       });
@@ -20454,7 +20455,12 @@ function renderCustomerTab(filter) {
   var html = '';
   filtered.forEach(function(s, i) {
     var yesCount = 0;
-    UPGRADE_SECTIONS.forEach(function(sec) { sec.fields.forEach(function(f) { if ((s.selections||{})[f.key]==='yes') yesCount++; }); });
+    // Count against the customer's own sheet if available, else the default.
+    var _countSheet = (s._sheet && s._sheet.length) ? s._sheet : UPGRADE_SECTIONS;
+    _countSheet.forEach(function(sec) {
+      var _ff = (sec.fields && sec.fields.length) ? sec.fields : (sec.items||[]).map(function(it){ return { key: it.key || it.glassKey || it.id }; });
+      _ff.forEach(function(f) { if ((s.selections||{})[f.key]==='yes') yesCount++; });
+    });
     var hasSpecials = s.specialUpgrades && s.specialUpgrades.length > 0;
     var initial = (s.name||'?')[0].toUpperCase();
     var submittedDate = s.submittedAt ? new Date(s.submittedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
@@ -20588,6 +20594,9 @@ function showCustomerDetail(idx) {
         if (fresh.upgradeTotal !== undefined) s.upgradeTotal = fresh.upgradeTotal;
         if (fresh.signature !== undefined) s.signature = fresh.signature;
         if (fresh.specialUpgrades !== undefined) s.specialUpgrades = fresh.specialUpgrades;
+        // Also refresh the sheet snapshot — without this, the office would render the
+        // customer's selections against the default sheet and miss any edited/added items.
+        if (fresh._sheet !== undefined) s._sheet = fresh._sheet;
       }
     }
   } catch(e) {}
@@ -20613,11 +20622,16 @@ function showCustomerDetail(idx) {
       '</div>' +
     '</div>';
 
-  // Upgrade selections
+  // Upgrade selections \u2014 display against the sheet the customer ACTUALLY used
+  // (stored as _sheet on their submission). Fall back to the default for old submissions.
   var hasAny = false;
-  UPGRADE_SECTIONS.forEach(function(sec) {
+  var _displaySheet = (s._sheet && s._sheet.length) ? s._sheet : ((window._officeUpgradeSheet && window._officeUpgradeSheet.length) ? window._officeUpgradeSheet : UPGRADE_SECTIONS);
+  _displaySheet.forEach(function(sec) {
     var secItems = '';
-    sec.fields.forEach(function(f) {
+    var _fields = (sec.fields && sec.fields.length) ? sec.fields : (sec.items || []).map(function(it){
+      return { key: it.key || it.glassKey || it.id, name: it.name || it.label || '', glassKey: it.glassKey };
+    });
+    _fields.forEach(function(f) {
       var val = sel[f.key];
       if (val !== 'yes') return;
       hasAny = true;
@@ -20628,7 +20642,7 @@ function showCustomerDetail(idx) {
       secItems += '<div class="upg-row"><span class="upg-row-name">' + f.name + glass + '</span><span class="upg-yes-badge">YES</span></div>';
     });
     if (secItems) {
-      html += '<div class="cust-detail-card"><div class="cust-detail-hdr">' + sec.label + '</div>' + secItems + '</div>';
+      html += '<div class="cust-detail-card"><div class="cust-detail-hdr">' + (sec.label || sec.title || '') + '</div>' + secItems + '</div>';
     }
     if (sec.label === 'Flooring and Finishes' && s.paintColor) {
       html += '<div class="cust-detail-card"><div class="cust-detail-hdr">Paint Color</div>' +
@@ -23182,53 +23196,31 @@ async function handleAuthedUser(fbUser) {
 async function signInWithGoogle() {
   var auth = _getAuth();
   if (!auth) { alert('Authentication unavailable. Please try again.'); return; }
-  var provider = new firebase.auth.GoogleAuthProvider();
-  provider.setCustomParameters({ prompt: 'select_account' });
-
   var errEl = document.getElementById('loginError');
   if (errEl) errEl.style.display = 'none';
 
-  // On phones, popups often don't close cleanly (you end up stuck on the Google page).
-  // Use the redirect flow there — it returns into the same window and lands on the
-  // dashboard automatically via onAuthStateChanged. Popups stay for desktop only.
-  var isPhone = /Android|iPhone|iPod|iPad|Windows Phone|Mobile/i.test(navigator.userAgent || '');
-  if (isPhone) {
-    try {
-      await _ensurePersistence();
-      // Remember we kicked off a Google sign-in so boot can show a spinner, not the landing page.
-      try { sessionStorage.setItem('dd_pendingGoogle', String(Date.now())); } catch(e) {}
-      await auth.signInWithRedirect(provider);
-      return;
-    } catch(e) {
-      try { sessionStorage.removeItem('dd_pendingGoogle'); } catch(_) {}
-      if (errEl) { errEl.textContent = 'Sign-in failed: ' + (e.code || e.message); errEl.style.display = 'block'; }
-      return;
-    }
-  }
-
-  // Desktop: popup gives an immediate result.
+  // Popup-only sign-in. Our app is on GitHub Pages (diligentdevelopers.app) but Firebase's
+  // authDomain is a different domain, and since mid-2024 signInWithRedirect no longer
+  // completes on browsers that block third-party storage (Android Chrome). Redirect would
+  // bounce back with getRedirectResult() === null, never sign the user in, and re-loop the
+  // account picker. Popup is Firebase's recommended fix for apps not on Firebase Hosting.
+  var provider = new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
   try {
     await _ensurePersistence();
     var result = await auth.signInWithPopup(provider);
     await handleAuthedUser(result.user);
-    return;
   } catch(e) {
-    console.warn('Popup sign-in failed:', e);
-    if (e.code === 'auth/popup-blocked' || e.code === 'auth/cancelled-popup-request' || e.code === 'auth/operation-not-supported-in-this-environment') {
-      try {
-        try { sessionStorage.setItem('dd_pendingGoogle', String(Date.now())); } catch(_) {}
-        await auth.signInWithRedirect(provider);
-        return;
-      } catch(e2) {
-        if (errEl) { errEl.textContent = 'Sign-in failed: ' + (e2.code || e2.message); errEl.style.display = 'block'; }
-        return;
-      }
-    }
+    console.error('Google sign-in failed:', e);
     var msg = 'Google sign-in failed.';
-    if (e.code === 'auth/unauthorized-domain') msg = 'Domain not authorized. Add your site in Firebase → Authentication → Settings → Authorized domains.';
-    else if (e.code === 'auth/popup-closed-by-user') msg = 'Sign-in window was closed. Please try again.';
-    else if (e.code) msg = 'Sign-in failed: ' + e.code;
+    if (e.code === 'auth/popup-closed-by-user') msg = 'Sign-in window was closed before finishing. Please try again.';
+    else if (e.code === 'auth/popup-blocked') msg = 'Your browser blocked the sign-in popup. Please allow popups for this site and try again, or use email & password.';
+    else if (e.code === 'auth/cancelled-popup-request') return; // a newer popup superseded this one; ignore
+    else if (e.code === 'auth/unauthorized-domain') msg = 'This domain isn\'t authorized for sign-in. Add it in Firebase \u2192 Authentication \u2192 Settings \u2192 Authorized domains.';
+    else if (e.code === 'auth/account-exists-with-different-credential') msg = 'An account already exists with this email using a different sign-in method.';
+    else if (e.message) msg = 'Google sign-in failed: ' + e.message;
     if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
+    else { alert(msg); }
   }
 }
 
