@@ -3850,6 +3850,8 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <!-- Google Identity Services (for calendar connect) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <!-- PWA -->
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#0D1F3C">
@@ -4012,6 +4014,15 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
     color: rgba(255,255,255,0.15);
     text-transform: uppercase; text-align: center;
   }
+  .lp-legal {
+    margin-top: 8px; text-align: center;
+    font-size: 10px; letter-spacing: 1px;
+  }
+  .lp-legal a {
+    color: rgba(255,255,255,0.3); text-decoration: none; font-weight: 600;
+  }
+  .lp-legal a:active { color: rgba(201,168,76,0.7); }
+  .lp-legal span { color: rgba(255,255,255,0.15); margin: 0 7px; }
 
   /* ── DESKTOP (≥ 860px) ── */
   @media (min-width: 860px) {
@@ -4121,7 +4132,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
 
       </div>
 
-      <div class="lp-footer">Diligent Developers &copy; 2026</div>
+      <div class="lp-footer">Diligent Developers &copy; 2026</div><div class="lp-legal"><a href="https://diligentdevelopers.app/privacy.html" target="_blank" rel="noopener">Privacy</a><span>&middot;</span><a href="https://diligentdevelopers.app/terms.html" target="_blank" rel="noopener">Terms</a></div>
 
     </div>
 
@@ -4161,7 +4172,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v181</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v183</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4523,7 +4534,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v181</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v183</div>
     </div>
   </div>
 
@@ -5395,7 +5406,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
 </div>
 
 
-<script>var APP_VERSION = 'v181';
+<script>var APP_VERSION = 'v183';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -11136,27 +11147,40 @@ function _loadScript(src) {
 
 async function connectGoogleCalendar() {
   if (!_gcalConfigured()) {
-    alert('Google Calendar setup required.\n\nThe app owner needs to add a Google OAuth Client ID first (one-time setup in Google Cloud Console). Once that is done, you can connect your calendar here.');
+    var isOwner = (currentUser && (currentUser.isOwner || currentUser.role === 'admin'));
+    if (isOwner) {
+      ddConfirm('Automatic Google Calendar sync needs a one-time setup (a free Google Client ID). Open the setup now?', function(){
+        try { switchTab('scheduling'); } catch(e) {}
+        setTimeout(function(){ try { _gcalShowSetup(); var w = document.getElementById('gcalSetupWrap'); if (w) w.scrollIntoView({behavior:'smooth',block:'center'}); } catch(e) {} }, 300);
+      });
+    } else {
+      ddToast('Calendar sync isn\'t set up yet \u2014 ask the office to enable it.');
+    }
     return;
   }
   try {
     await _loadScript('https://accounts.google.com/gsi/client');
-    // Request a calendar access token for THIS user only
+    // One tap -> Google's own account-picker + consent (like Asana). No codes to type.
     var tokenClient = google.accounts.oauth2.initTokenClient({
       client_id: GOOGLE_CLIENT_ID,
       scope: 'https://www.googleapis.com/auth/calendar.events',
+      prompt: '',
       callback: async function(resp) {
         if (resp && resp.access_token) {
           _gcalToken = resp.access_token;
           await DB.set(_gcalUserKey(), { connected: true, connectedAt: Date.now(), userId: currentUser ? currentUser.id : null });
-          alert('Google Calendar connected! New tasks and schedule phases you create will be added to your calendar.');
+          try { localStorage.setItem('dd_gcalAuto', '1'); } catch(e) {}
+          try { ddToast('Google Calendar connected \u2713'); } catch(e) {}
+          try { renderScheduleNew(); } catch(e) {}
           if (typeof renderSettings === 'function') renderSettings();
+        } else {
+          try { ddToast('Calendar not connected'); } catch(e) {}
         }
       }
     });
     tokenClient.requestAccessToken();
   } catch (e) {
-    alert('Could not connect to Google Calendar. Please try again.');
+    try { ddToast('Could not reach Google. Try again.'); } catch(e) { alert('Could not connect to Google Calendar.'); }
   }
 }
 
