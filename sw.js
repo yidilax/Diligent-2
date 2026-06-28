@@ -1,6 +1,6 @@
 // Diligent Developers — Service Worker
 // IMPORTANT: bump CACHE_VERSION every time you deploy a new version
-const CACHE_VERSION = 'v186';
+const CACHE_VERSION = 'v188';
 const CACHE_NAME = 'dd-platform-' + CACHE_VERSION;
 
 // Install — activate immediately
@@ -20,33 +20,52 @@ self.addEventListener('activate', function(event) {
   );
 });
 
-// Fetch — network-first for the app, so users always get the latest when online
+// Fetch — network-first for the app, so users always get the latest when online.
 self.addEventListener('fetch', function(event) {
   var req = event.request;
-  // Only handle GET requests
   if (req.method !== 'GET') return;
-  // Skip Firebase / external API calls — let them go straight to network
+
   var url = req.url;
+  // Let Firebase / Google calls go straight to the network.
   if (url.indexOf('firebase') !== -1 || url.indexOf('googleapis') !== -1 || url.indexOf('gstatic') !== -1 || url.indexOf('google.com') !== -1) {
     return;
   }
 
+  var isHTML = req.mode === 'navigate' ||
+               (req.headers.get('accept') || '').indexOf('text/html') !== -1 ||
+               url.endsWith('/') || url.indexOf('index.html') !== -1;
+
   event.respondWith(
     fetch(req).then(function(res) {
-      // Cache the fresh copy
+      // For the main HTML, only cache it if it's a COMPLETE document.
+      // This prevents a broken/truncated upload from ever getting cached and
+      // trapping the user on a blank screen.
+      if (isHTML) {
+        var clone = res.clone();
+        return clone.text().then(function(body) {
+          var looksComplete = body && body.length > 5000 &&
+                              body.toLowerCase().lastIndexOf('</html>') !== -1;
+          if (looksComplete) {
+            caches.open(CACHE_NAME).then(function(cache) { cache.put(req, res.clone()); });
+            return res;
+          }
+          // Broken/incomplete HTML from the network: don't cache it.
+          // Try a known-good cached copy instead; if none, return what we got.
+          return caches.match(req).then(function(cached) { return cached || res; });
+        }).catch(function() { return res; });
+      }
+      // Non-HTML assets: cache normally.
       var resClone = res.clone();
-      caches.open(CACHE_NAME).then(function(cache) {
-        cache.put(req, resClone);
-      });
+      caches.open(CACHE_NAME).then(function(cache) { cache.put(req, resClone); });
       return res;
     }).catch(function() {
-      // Offline — serve from cache
+      // Offline — serve from cache.
       return caches.match(req);
     })
   );
 });
 
-// Listen for skip-waiting message from the page (update button)
+// Allow the page to trigger an immediate update.
 self.addEventListener('message', function(event) {
   if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });
