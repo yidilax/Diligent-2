@@ -4218,8 +4218,8 @@ div[style*="position:fixed"][style*="inset:0"] {
     </div>
   </div>
 
-  <div id="bootLoader" style="position:fixed;inset:0;background:#0D1F3C;z-index:99999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;">
-    <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:28px;letter-spacing:4px;color:#C9A84C;">DILIGENT DEVELOPERS</div>
+  <div id="bootLoader" style="position:fixed;inset:0;background:#0D1F3C;z-index:99999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;padding:24px;box-sizing:border-box;text-align:center;">
+    <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:28px;letter-spacing:4px;color:#C9A84C;text-align:center;text-indent:4px;max-width:100%;line-height:1.2;">DILIGENT DEVELOPERS</div>
     <div style="width:40px;height:40px;border:3px solid rgba(201,168,76,0.2);border-top-color:#C9A84C;border-radius:50%;animation:bootspin 0.8s linear infinite;"></div>
   </div>
   <style>@keyframes bootspin { to { transform: rotate(360deg); } }</style>
@@ -4495,7 +4495,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v220</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v224</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4905,7 +4905,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v220</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v224</div>
     </div>
   </div>
 
@@ -5767,7 +5767,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v220';
+<script>var APP_VERSION = 'v224';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -6297,10 +6297,16 @@ async function init() {
       _settleBoot();
       try { await handleAuthedUser(fbUser); } catch(e) { console.warn('auth handler error', e); _hideLoader(); showPage('officeAuthPage'); }
     } else {
-      // If a Google redirect sign-in is in flight, keep the loader instead of flashing
-      // the landing page — the result will arrive momentarily.
+      // If a Google redirect sign-in is genuinely in flight (flag set within the last
+      // 90 seconds), keep the loader briefly. Otherwise clear any stale flag and show
+      // the landing page so a stuck flag can never freeze boot or re-pop Google.
       var _pendingG = false;
-      try { _pendingG = sessionStorage.getItem('dd_pendingGoogle') === '1'; } catch(e) {}
+      try {
+        var _pg = sessionStorage.getItem('dd_pendingGoogle');
+        var _pgTime = _pg ? parseInt(_pg, 10) : 0;
+        _pendingG = _pgTime && (Date.now() - _pgTime < 90000);
+        if (!_pendingG) sessionStorage.removeItem('dd_pendingGoogle');
+      } catch(e) {}
       if (_pendingG) { return; }
       _settleBoot();
       showPage('landingPage');
@@ -7821,6 +7827,22 @@ async function _loadCustomerUpdatesInto(address, unit, targetId) {
     });
     mine.sort(function(a,b){ return new Date(b.createdAt||b._updatedAt||0) - new Date(a.createdAt||a._updatedAt||0); });
     if (!mine.length) { host.innerHTML = ''; return; }
+    var isPage = (targetId === 'cuPageFeed');
+    if (isPage) {
+      // Dedicated Updates page: each update is its own full-width card.
+      host.innerHTML = mine.map(function(u){
+        var ts = u.createdAt || u._updatedAt;
+        var when = ts ? new Date(ts).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}) : '';
+        var body = u.text || u.body || '';
+        var photos = (u.photos||[]).map(function(ph){ return '<img src="'+ph+'" style="width:100%;max-width:340px;border-radius:10px;object-fit:cover;cursor:pointer;margin-top:4px;" onclick="_plLightbox(\''+encodeURIComponent(ph)+'\')">'; }).join('');
+        return '<div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(13,31,60,0.05);">' +
+          (when ? '<div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:7px;text-transform:uppercase;letter-spacing:0.5px;">' + when + '</div>' : '') +
+          (body ? '<div style="font-size:15px;color:#16233d;line-height:1.6;">' + _esc(body) + '</div>' : '') +
+          (photos ? '<div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">' + photos + '</div>' : '') +
+        '</div>';
+      }).join('');
+      return;
+    }
     host.innerHTML = '<div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;margin-top:14px;">' +
       '<div style="font-family:\'Archivo\',sans-serif;font-size:17px;letter-spacing:0.5px;color:var(--navy);margin-bottom:10px;">\ud83d\udce3 Latest Updates</div>' +
       mine.slice(0,8).map(function(u){
@@ -20555,6 +20577,20 @@ function showCustomerDetail(idx) {
   var subs = window._filteredSubs || _cachedSubmissions || [];
   var s = subs[idx];
   if (!s) return;
+  // Re-read the FRESHEST copy from the store by key, so an edit the customer made
+  // (within the 5-hour window) is reflected here instead of a stale cached snapshot.
+  try {
+    if (s._key && _store[s._key]) {
+      var fresh = JSON.parse(_store[s._key]);
+      if (fresh) {
+        if (fresh.selections) s.selections = fresh.selections;
+        if (fresh._updatedAt) s._updatedAt = fresh._updatedAt;
+        if (fresh.upgradeTotal !== undefined) s.upgradeTotal = fresh.upgradeTotal;
+        if (fresh.signature !== undefined) s.signature = fresh.signature;
+        if (fresh.specialUpgrades !== undefined) s.specialUpgrades = fresh.specialUpgrades;
+      }
+    }
+  } catch(e) {}
   var sel = s.selections || {};
 
   // Info card
@@ -20873,34 +20909,62 @@ async function _renderOfficeCustomerIssues() {
   try {
     var keys = await DB.list('custpunch:');
     var recs = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
-    // flatten to open (non-resolved) items
-    var groups = recs.filter(function(r){ return (r.items||[]).length; });
-    var openCount = 0;
-    groups.forEach(function(g){ (g.items||[]).forEach(function(it){ if (it.status !== 'resolved') openCount++; }); });
-    if (!groups.length || openCount === 0) { host.innerHTML = ''; return; }
-    host.innerHTML = '<div style="background:#fff;border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:12px;padding:14px 16px;">' +
-      '<div style="font-family:\'Archivo\',sans-serif;font-size:17px;letter-spacing:1px;color:var(--navy);margin-bottom:10px;">📝 Customer-Reported Issues (' + openCount + ')</div>' +
+    // Keep only units that have at least one OPEN (non-resolved) issue.
+    var groups = recs.filter(function(r){ return (r.items||[]).some(function(it){ return it.status !== 'resolved'; }); });
+    if (!groups.length) {
+      host.innerHTML = '<div class="tab-empty" style="background:#fff;border-radius:14px;padding:28px 20px;"><div class="tab-empty-icon">\u2705</div><div class="tab-empty-title">No open reports</div><div class="tab-empty-desc">When a customer reports an issue from their portal, the unit will show up here.</div></div>';
+      return;
+    }
+    // If a unit is selected, show its detail. Otherwise show the unit list.
+    if (window._custReportUnit) {
+      var sel = groups.filter(function(g){
+        return (g.address||'') === window._custReportUnit.address && (g.unit||'') === window._custReportUnit.unit;
+      })[0];
+      if (!sel) { window._custReportUnit = null; return _renderOfficeCustomerIssues(); }
+      var openItems = (sel.items||[]).filter(function(it){ return it.status !== 'resolved'; });
+      var addrSafe = (sel.address||'').replace(/'/g, '');
+      var unitSafe = (sel.unit||'').replace(/'/g, '');
+      host.innerHTML = '<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;">' +
+        '<button onclick="window._custReportUnit=null;_renderOfficeCustomerIssues();" style="background:var(--cream);border:none;border-radius:8px;padding:7px 13px;font-size:12px;font-weight:700;color:var(--navy);cursor:pointer;margin-bottom:12px;">\u2039 All units</button>' +
+        '<div style="font-family:\'Archivo\',sans-serif;font-size:18px;letter-spacing:0.5px;color:var(--navy);margin-bottom:2px;">\ud83d\udccd ' + _esc(sel.address||'') + (sel.unit?(' \u00b7 Unit '+_esc(sel.unit)):'') + '</div>' +
+        '<div style="font-size:12px;color:var(--muted);margin-bottom:12px;">' + openItems.length + ' open issue' + (openItems.length>1?'s':'') + '</div>' +
+        openItems.map(function(it){
+          var origIdx = sel.items.indexOf(it);
+          var thumbs = (it.photos||[]).map(function(ph){ return '<img src="' + ph + '" style="width:54px;height:54px;border-radius:6px;object-fit:cover;cursor:pointer;" onclick="_plLightbox(\'' + encodeURIComponent(ph) + '\')">'; }).join('');
+          var when = it.at ? new Date(it.at).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+          return '<div style="border-top:1px solid #f0ece2;padding:11px 0;">' +
+            (when ? '<div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:3px;">' + when + '</div>' : '') +
+            '<div style="display:flex;align-items:flex-start;gap:8px;">' +
+              '<div style="flex:1;min-width:0;font-size:14px;color:#16233d;line-height:1.45;">' + _esc(it.text) + '</div>' +
+              '<button onclick="_officeResolveIssue(\'' + addrSafe + '\',\'' + unitSafe + '\',' + origIdx + ')" style="background:#2D7A4F;color:#fff;border:none;border-radius:6px;padding:5px 11px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">Resolve</button>' +
+              '<button onclick="_officeDeleteIssue(\'' + addrSafe + '\',\'' + unitSafe + '\',' + origIdx + ')" style="background:rgba(192,57,43,0.1);color:#c0392b;border:none;border-radius:6px;padding:5px 9px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;" title="Delete">\ud83d\uddd1</button>' +
+            '</div>' +
+            (thumbs ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:7px;">' + thumbs + '</div>' : '') +
+          '</div>';
+        }).join('') +
+      '</div>';
+      return;
+    }
+    // Unit list view: one row per unit with an open-issue count.
+    var totalOpen = 0;
+    groups.forEach(function(g){ (g.items||[]).forEach(function(it){ if (it.status!=='resolved') totalOpen++; }); });
+    host.innerHTML = '<div style="font-family:\'Archivo\',sans-serif;font-size:15px;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">' + groups.length + ' unit' + (groups.length>1?'s':'') + ' reported \u00b7 ' + totalOpen + ' open issue' + (totalOpen>1?'s':'') + '</div>' +
       groups.map(function(g){
         var openItems = (g.items||[]).filter(function(it){ return it.status !== 'resolved'; });
-        if (!openItems.length) return '';
-        return '<div style="margin-bottom:10px;">' +
-          '<div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:4px;">📍 ' + _esc(g.address||'') + (g.unit?(' \u00b7 Unit '+_esc(g.unit)):'') + '</div>' +
-          openItems.map(function(it){
-            var origIdx = g.items.indexOf(it);
-            var thumbs = (it.photos||[]).map(function(ph){ return '<img src="' + ph + '" style="width:40px;height:40px;border-radius:5px;object-fit:cover;cursor:pointer;" onclick="_plLightbox(\'' + encodeURIComponent(ph) + '\')">'; }).join('');
-            return '<div style="border-bottom:1px solid #f0ece2;padding:7px 0;">' +
-              '<div style="display:flex;align-items:flex-start;gap:8px;">' +
-                '<div style="flex:1;min-width:0;font-size:13px;color:#16233d;">' + _esc(it.text) + '</div>' +
-                '<button onclick="_officeResolveIssue(\'' + g.address.replace(/\'/g,"") + '\',\'' + (g.unit||'').replace(/\'/g,"") + '\',' + origIdx + ')" style="background:#2D7A4F;color:#fff;border:none;border-radius:5px;padding:3px 9px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;">Resolve</button>' +
-                '<button onclick="_officeDeleteIssue(\'' + g.address.replace(/\'/g,"") + '\',\'' + (g.unit||'').replace(/\'/g,"") + '\',' + origIdx + ')" style="background:rgba(192,57,43,0.1);color:#c0392b;border:none;border-radius:5px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;" title="Delete">🗑</button>' +
-              '</div>' +
-              (thumbs ? '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px;">' + thumbs + '</div>' : '') +
-            '</div>';
-          }).join('') +
-        '</div>';
-      }).join('') +
-    '</div>';
-  } catch(e) { host.innerHTML = ''; }
+        var latest = openItems.reduce(function(m,it){ return Math.max(m, it.at||0); }, 0);
+        var when = latest ? new Date(latest).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+        var addrSafe = (g.address||'').replace(/'/g, '');
+        var unitSafe = (g.unit||'').replace(/'/g, '');
+        return '<button onclick="window._custReportUnit={address:\'' + addrSafe + '\',unit:\'' + unitSafe + '\'};_renderOfficeCustomerIssues();" style="width:100%;text-align:left;background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:12px;">' +
+          '<div style="flex:1;min-width:0;">' +
+            '<div style="font-size:14px;font-weight:700;color:var(--navy);">\ud83d\udccd ' + _esc(g.address||'') + (g.unit?(' \u00b7 Unit '+_esc(g.unit)):'') + '</div>' +
+            '<div style="font-size:12px;color:var(--muted);margin-top:2px;">' + openItems.length + ' open issue' + (openItems.length>1?'s':'') + (when?(' \u00b7 latest ' + when):'') + '</div>' +
+          '</div>' +
+          '<span style="background:var(--gold);color:#1a1407;border-radius:11px;padding:2px 9px;font-weight:800;font-size:12px;flex-shrink:0;">' + openItems.length + '</span>' +
+          '<span style="font-size:20px;color:var(--gold);flex-shrink:0;">\u203a</span>' +
+        '</button>';
+      }).join('');
+  } catch(e) { console.warn('render office issues', e); host.innerHTML = ''; }
 }
 async function _officeResolveIssue(address, unit, idx) {
   try {
@@ -23132,7 +23196,7 @@ async function signInWithGoogle() {
     try {
       await _ensurePersistence();
       // Remember we kicked off a Google sign-in so boot can show a spinner, not the landing page.
-      try { sessionStorage.setItem('dd_pendingGoogle', '1'); } catch(e) {}
+      try { sessionStorage.setItem('dd_pendingGoogle', String(Date.now())); } catch(e) {}
       await auth.signInWithRedirect(provider);
       return;
     } catch(e) {
@@ -23152,7 +23216,7 @@ async function signInWithGoogle() {
     console.warn('Popup sign-in failed:', e);
     if (e.code === 'auth/popup-blocked' || e.code === 'auth/cancelled-popup-request' || e.code === 'auth/operation-not-supported-in-this-environment') {
       try {
-        try { sessionStorage.setItem('dd_pendingGoogle', '1'); } catch(_) {}
+        try { sessionStorage.setItem('dd_pendingGoogle', String(Date.now())); } catch(_) {}
         await auth.signInWithRedirect(provider);
         return;
       } catch(e2) {
@@ -23170,6 +23234,8 @@ async function signInWithGoogle() {
 
 // Email/password LOGIN
 async function officeLogin() {
+  // Clear any leftover Google redirect flag so email login can't trigger the Google picker.
+  try { sessionStorage.removeItem('dd_pendingGoogle'); } catch(e) {}
   var email = document.getElementById('loginEmail').value.trim().toLowerCase();
   var password = document.getElementById('loginPassword').value;
   var errEl = document.getElementById('loginError');
