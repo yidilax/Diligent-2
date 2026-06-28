@@ -4175,7 +4175,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v189</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v190</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4537,7 +4537,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v189</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v190</div>
     </div>
   </div>
 
@@ -5409,7 +5409,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
 </div>
 
 
-<script>var APP_VERSION = 'v189';
+<script>var APP_VERSION = 'v190';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -5600,23 +5600,31 @@ async function warmCache() {
     const fs = _getFirestore();
     if (fs) {
       const cols = ['dd', 'pub'];
+      var fresh = {};            // build the authoritative set from Firebase
+      var loadedOk = false;
       for (var ci = 0; ci < cols.length; ci++) {
         try {
           const snap = await fs.collection(cols[ci]).get();
+          loadedOk = true;
           snap.docs.forEach(function(d) {
             const data = d.data();
-            if (!data) return;
-            if (data.k && data.v) {
-              // Healthy record.
-              _store[data.k] = data.v;
-            } else if (data.k && (data.v === undefined || data.v === '' || data.v === null)) {
-              // Corrupt record (blank value). Track it for cleanup; don't load broken data.
+            if (!data || !data.k) return;
+            if (data.v !== undefined && data.v !== '' && data.v !== null) {
+              fresh[data.k] = data.v;        // healthy record from Firebase
+            } else {
               window._corruptDocs.push({ col: cols[ci], id: d.id, k: data.k });
             }
           });
         } catch(e) {}
       }
-      _saveToLS();
+      if (loadedOk) {
+        // Firebase is the source of truth: drop any stale local entries that aren't in
+        // Firebase, then load the fresh set. This prevents records being hidden or
+        // resurrected by an out-of-date local copy.
+        Object.keys(_store).forEach(function(k){ if (!(k in fresh)) delete _store[k]; });
+        Object.keys(fresh).forEach(function(k){ _store[k] = fresh[k]; });
+        _saveToLS();
+      }
     }
   } catch(e) { console.warn('warmCache error', e); }
   _cacheWarm = true;
@@ -13694,22 +13702,18 @@ function _ifxBtnLabel(id, open) {
 
 async function renderInspections(forceReload){
   var host=document.getElementById('inspectionsList'); if(!host)return;
-  var items=window._inspCache;
-  if (forceReload || !items) {
-    if (_cacheWarm) {
-      // Instant: read from local store, refresh from Firebase in the background.
-      _bgListRefresh('inspection:'); _bgListRefresh('project:');
-      window._lbProjCache = _cachedList('project:').map(_cachedGet).filter(Boolean);
-      items = _cachedList('inspection:').map(_cachedGet).filter(Boolean);
-      window._inspCache = items;
-    } else {
-      host.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;">Loading\u2026</div>';
-      window._lbProjCache=await _lbProjects();
-      var keys=await DB.list('inspection:');
-      items=(await Promise.all(keys.map(function(k){return DB.get(k);}))).filter(Boolean);
-      window._inspCache=items;
-    }
+  // Always rebuild from the live store so nothing can be hidden by a stale snapshot.
+  var items;
+  if (_cacheWarm) {
+    window._lbProjCache = _cachedList('project:').map(_cachedGet).filter(Boolean);
+    items = _cachedList('inspection:').map(_cachedGet).filter(Boolean);
+  } else {
+    host.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;">Loading\u2026</div>';
+    window._lbProjCache=await _lbProjects();
+    var keys=await DB.list('inspection:');
+    items=(await Promise.all(keys.map(function(k){return DB.get(k);}))).filter(Boolean);
   }
+  window._inspCache = items;
   items.sort(function(a,b){ return (b.date||0)-(a.date||0); });
   var statusMeta={ scheduled:{c:'#b8860b',l:'Scheduled'}, passed:{c:'#3a7d5d',l:'Passed'}, failed:{c:'#c0392b',l:'Failed'} };
   // Split into active (scheduled/failed) vs passed.
