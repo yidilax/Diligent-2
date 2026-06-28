@@ -3909,6 +3909,17 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
 .pm-toggle { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 2px; font-size:13.5px; color:#2c3340; }
 .pm-toggle input { width:20px; height:20px; accent-color:var(--gold); flex-shrink:0; }
 
+
+.sd-visit-btn { width:100%; background:rgba(201,162,39,0.15); border:1px solid var(--gold); color:var(--gold); border-radius:9px; padding:11px; font-size:14px; font-weight:700; cursor:pointer; margin-bottom:6px; }
+.sd-visit-row { display:flex; align-items:flex-start; gap:8px; background:rgba(255,255,255,0.05); border-radius:8px; padding:9px 11px; margin-bottom:6px; }
+.sd-visit-main { flex:1; min-width:0; }
+.sd-visit-date { font-size:13.5px; font-weight:600; color:#f3efe6; }
+.sd-visit-sub { font-size:12px; color:#b9b3a3; margin-top:2px; }
+.sd-visit-note { font-size:12px; color:#9a9484; margin-top:3px; font-style:italic; }
+.sd-visit-x { background:none; border:none; color:#9a9484; font-size:15px; cursor:pointer; flex-shrink:0; padding:2px 4px; }
+
+.spv-walk-note { font-size:12px; color:#9a9484; margin-top:3px; font-style:italic; }
+.pm-push-setup { margin-top:10px; padding-top:10px; border-top:1px solid var(--border); }
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -4236,7 +4247,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v196</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v198</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4598,7 +4609,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v196</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v198</div>
     </div>
   </div>
 
@@ -5471,7 +5482,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
 </div>
 
 
-<script>var APP_VERSION = 'v196';
+<script>var APP_VERSION = 'v198';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -5522,7 +5533,7 @@ async function checkSyncStatus() {
 }
 function _firebaseSelfTest() { return !!_getFirestore(); }
 
-const _PUBLIC_PREFIXES = ['upgrades:', 'submission:', 'upgrade_sections', 'upgrade_sections_proj:', 'custupdate:', 'subcontractor:', 'subpunch:', 'pubaddr:', 'pubpunch:', 'pubfiles:', 'custpunch:', 'pubprogress:', 'pubnotif:', 'pubportalcfg:', 'walkreq:', 'pubchangeorder:'];
+const _PUBLIC_PREFIXES = ['upgrades:', 'submission:', 'upgrade_sections', 'upgrade_sections_proj:', 'custupdate:', 'subcontractor:', 'subpunch:', 'pubaddr:', 'pubpunch:', 'pubfiles:', 'custpunch:', 'pubprogress:', 'pubnotif:', 'pubportalcfg:', 'walkreq:', 'pubchangeorder:', 'subvisit:', 'pushsub:'];
 function _fsCol(key) {
   for (var i = 0; i < _PUBLIC_PREFIXES.length; i++) {
     if (String(key).indexOf(_PUBLIC_PREFIXES[i]) === 0) return 'pub';
@@ -7884,6 +7895,9 @@ function _renderProfileMenu() {
       '</div>';
     }).join('');
   }
+  // Push notifications
+  html += '<div class="pm-section">Notifications</div>';
+  html += '<div id="pmPushBox" class="pm-gcal"></div>';
   // Calendar settings
   html += '<div class="pm-section">Google Calendar</div>';
   html += '<div id="pmGcalBox" class="pm-gcal"></div>';
@@ -7893,6 +7907,7 @@ function _renderProfileMenu() {
     '<button class="pm-btn pm-btn-out" onclick="closeProfileMenu();doLogout();">Sign out</button>' +
   '</div>';
   host.innerHTML = html;
+  try { _renderPushSetting(); } catch(e) {}
   try { _renderProfileGcal(); } catch(e) {}
 }
 
@@ -7905,6 +7920,48 @@ function _toggleGcalShowButtons() {
   try { _renderProfileGcal(); } catch(e) {}
   try { if (typeof renderScheduleNew === 'function') renderScheduleNew(); } catch(e) {}
   try { if (typeof renderTasks === 'function') renderTasks(); } catch(e) {}
+}
+
+
+function _renderPushSetting() {
+  var host = document.getElementById('pmPushBox');
+  if (!host) return;
+  var supported = ('serviceWorker' in navigator) && ('PushManager' in window) && ('Notification' in window);
+  var html = '';
+  if (!supported) {
+    html += '<div class="pm-gcal-note">This device doesn\'t support push notifications.</div>';
+  } else {
+    var on = _pushIsOn();
+    html += '<label class="pm-toggle"><span>Buzz my phone for new alerts</span>' +
+      '<input type="checkbox" ' + (on?'checked':'') + ' onchange="_togglePush(this.checked)"></label>';
+    if (Notification.permission === 'denied') {
+      html += '<div class="pm-gcal-note">Notifications are blocked in your browser settings. Allow them there to turn this on.</div>';
+    }
+  }
+  // Owner-only: configure the push sender URL.
+  if (currentUser && (currentUser.isOwner || currentUser.role === 'admin')) {
+    var cur = '';
+    try { cur = localStorage.getItem('dd_pushSendUrl') || ''; } catch(e) {}
+    html += '<div class="pm-push-setup">' +
+      '<div class="pm-gcal-note" style="padding-bottom:4px;">Push sender URL (Val Town). Set once.</div>' +
+      '<input id="pmPushUrl" class="form-input" style="font-size:13px;" placeholder="https://...val.run" value="' + _esc(cur) + '">' +
+      '<button class="pm-gcal-connect" style="margin-top:6px;" onclick="_savePushSendUrl()">Save sender URL</button>' +
+    '</div>';
+  }
+  host.innerHTML = html;
+}
+
+async function _togglePush(want) {
+  if (want) { await enablePushNotifications(); }
+  else { await disablePushNotifications(); }
+}
+
+function _savePushSendUrl() {
+  var el = document.getElementById('pmPushUrl');
+  if (!el) return;
+  var v = (el.value || '').trim();
+  try { localStorage.setItem('dd_pushSendUrl', v); } catch(e) {}
+  try { ddToast(v ? 'Sender URL saved \u2713' : 'Sender URL cleared'); } catch(e) {}
 }
 
 async function _renderProfileGcal() {
@@ -15119,6 +15176,91 @@ async function deleteSub(id) {
 
 // ===== Sub detail: office adds tasks & notes, sees their punch items =====
 var _subDetailId = null;
+
+// ============ SUB VISIT SCHEDULING ============
+// Office schedules a visit/walkthrough WITH a subcontractor. Stored as subvisit:<id>
+// and surfaced in that sub's portal Walkthroughs view.
+var _visitSubId = null;
+async function openScheduleVisit(subId) {
+  _visitSubId = subId;
+  var s = await DB.get('subcontractor:' + subId);
+  // Populate the project dropdown.
+  var projSel = document.getElementById('visit-project');
+  if (projSel) {
+    var projects = _cachedList('project:').map(_cachedGet).filter(Boolean);
+    projSel.innerHTML = '<option value="">No specific project</option>' +
+      projects.map(function(p){ return '<option value="' + p.id + '">' + _esc(p.name) + '</option>'; }).join('');
+  }
+  document.getElementById('visit-sub-name').textContent = s ? (s.name || 'Subcontractor') : 'Subcontractor';
+  document.getElementById('visit-date').value = '';
+  document.getElementById('visit-time').value = '';
+  document.getElementById('visit-address').value = '';
+  document.getElementById('visit-note').value = '';
+  document.getElementById('modal-schedule-visit').classList.add('open');
+}
+function closeScheduleVisit() {
+  var m = document.getElementById('modal-schedule-visit');
+  if (m) m.classList.remove('open');
+}
+async function saveScheduledVisit() {
+  var subId = _visitSubId;
+  if (!subId) return;
+  var s = await DB.get('subcontractor:' + subId);
+  var date = document.getElementById('visit-date').value;
+  var time = document.getElementById('visit-time').value;
+  if (!date) { try { ddToast('Pick a date'); } catch(e) {} return; }
+  var projSel = document.getElementById('visit-project');
+  var projectId = projSel ? projSel.value : '';
+  var projectName = '';
+  if (projectId) { var pp = await DB.get('project:' + projectId); projectName = pp ? (pp.name||'') : ''; }
+  var id = 'visit_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+  var rec = {
+    id: id, subId: subId, subName: s ? (s.name||'') : '',
+    projectId: projectId, projectName: projectName,
+    address: document.getElementById('visit-address').value.trim(),
+    date: date, time: time,
+    note: document.getElementById('visit-note').value.trim(),
+    status: 'scheduled', createdAt: Date.now(),
+    createdBy: (currentUser && currentUser.name) || 'Office'
+  };
+  await DB.set('subvisit:' + id, rec);
+  // Notify the sub in-app (they'll see it next time they open their portal).
+  try { if (typeof createNotification === 'function') {
+    await createNotification(subId, { title:'Visit scheduled',
+      body:'A visit is scheduled for ' + date + (time?(' at ' + time):''), kind:'visit' });
+  } } catch(e) {}
+  try { await sendPushToOwner(subId, 'Visit scheduled', 'A visit is scheduled for ' + date + (time?(' at ' + time):'')); } catch(e) {}
+  try { logActivity('Scheduled a visit with ' + (s?s.name:'a sub')); } catch(e) {}
+  try { ddToast('Visit scheduled \u2713'); } catch(e) {}
+  closeScheduleVisit();
+}
+async function _deleteScheduledVisit(id) {
+  ddConfirm('Cancel this scheduled visit?', async function(){
+    await DB.delete('subvisit:' + id);
+    try { ddToast('Visit cancelled'); } catch(e) {}
+    try { if (_subDetailId) { var s = await DB.get('subcontractor:' + _subDetailId); if (s) await _renderSubDetailBody(s); } } catch(e) {}
+  });
+}
+// Gather visits scheduled for a given sub.
+function _visitsForSub(subId) {
+  return _cachedList('subvisit:').map(_cachedGet).filter(Boolean)
+    .filter(function(v){ return v.subId === subId; })
+    .sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
+}
+
+
+function _renderSubVisitList(subId) {
+  var visits = _visitsForSub(subId);
+  if (!visits.length) return '<div style="font-size:12px;color:#9a9484;margin-bottom:8px;">No visits scheduled yet.</div>';
+  return visits.map(function(v){
+    return '<div class="sd-visit-row">' +
+      '<div class="sd-visit-main"><div class="sd-visit-date">\ud83d\udcc5 ' + _esc(v.date) + (v.time?(' \u00b7 ' + _esc(v.time)):'') + '</div>' +
+      (v.projectName||v.address ? '<div class="sd-visit-sub">' + _esc([v.projectName, v.address].filter(Boolean).join(' \u00b7 ')) + '</div>' : '') +
+      (v.note ? '<div class="sd-visit-note">' + _esc(v.note) + '</div>' : '') + '</div>' +
+      '<button class="sd-visit-x" onclick="_deleteScheduledVisit(\'' + v.id + '\')">\u2715</button>' +
+    '</div>';
+  }).join('');
+}
 async function openSubDetail(id) {
   _subDetailId = id;
   var s = await DB.get('subcontractor:' + id);
@@ -15163,8 +15305,12 @@ async function _renderSubDetailBody(s) {
   }
 
   body.innerHTML =
+    // Scheduled visits
+    '<div class="cust-form-sec" style="color:#f3efe6;">Scheduled visits</div>' +
+    _renderSubVisitList(s.id) +
+    '<button onclick="openScheduleVisit(\'' + s.id + '\')" class="sd-visit-btn">\ud83d\udcc5 Schedule a visit</button>' +
     // Access code
-    '<div class="cust-form-sec" style="color:#f3efe6;">Access</div>' +
+    '<div class="cust-form-sec" style="color:#f3efe6;margin-top:16px;">Access</div>' +
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">' +
       '<span style="font-family:Inter,sans-serif;font-size:13px;color:#f3efe6;">Login code</span>' +
       '<span style="font-family:\'Bebas Neue\',sans-serif;font-size:24px;letter-spacing:3px;color:var(--gold);">' + _esc(String(s.code||'----')) + '</span>' +
@@ -15583,11 +15729,24 @@ async function _renderSubWalkView() {
     walks = walks.filter(function(w){ return w.status === 'confirmed' || w.status === 'proposed'; });
     walks.sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
   } catch(e) {}
-  if (!walks.length) {
+  // Office-scheduled visits for this sub.
+  var visits = [];
+  try {
+    if (_currentSub && _currentSub.id) { visits = _visitsForSub(_currentSub.id); }
+  } catch(e) {}
+  if (!walks.length && !visits.length) {
     host.innerHTML = hdr + '<div class="tab-empty" style="background:#fff;border-radius:14px;padding:28px 20px;"><div class="tab-empty-icon">\ud83d\udeb6</div><div class="tab-empty-title">No walkthroughs scheduled</div><div class="tab-empty-desc">Upcoming walkthrough visits will show here.</div></div>';
     return;
   }
-  host.innerHTML = hdr + '<div class="spv-walks">' + walks.map(function(w){
+  var visitsHtml = visits.map(function(v){
+    var vd = v.date ? new Date(v.date + 'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) : '';
+    return '<div class="spv-walk"><div class="spv-walk-date">' + vd + (v.time?(' \u00b7 ' + _esc(v.time)):'') + '</div>' +
+      '<div class="spv-walk-addr">' + _esc([v.projectName, v.address].filter(Boolean).join(' \u00b7 ')) + '</div>' +
+      (v.note ? '<div class="spv-walk-note">' + _esc(v.note) + '</div>' : '') +
+      '<div class="spv-walk-status spv-confirmed">Scheduled by office</div>' +
+    '</div>';
+  }).join('');
+  host.innerHTML = hdr + '<div class="spv-walks">' + visitsHtml + walks.map(function(w){
     var d = w.date ? new Date(w.date + 'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) : '';
     return '<div class="spv-walk"><div class="spv-walk-date">' + d + (w.time?(' \u00b7 ' + _esc(w.time)):'') + '</div>' +
       '<div class="spv-walk-addr">' + _esc(w.address||'') + (w.unit?(' \u00b7 Unit ' + _esc(w.unit)):'') + '</div>' +
@@ -21935,6 +22094,101 @@ async function forgotPassword() {
 // PWA — Service Worker, Updates, Install
 // ════════════════════════════════════════════
 var _pwaWaitingWorker = null;
+
+// ============ WEB PUSH NOTIFICATIONS (parts 1-3) ============
+// Public VAPID key (safe to expose). The matching PRIVATE key lives only in the Val Town sender.
+var _VAPID_PUBLIC_KEY = 'BKCVUGFaGbA9DsUndvq5d9lRKrQRyGjFEOZrFUqJvoC48AJWHnZakBDa2PQx_bqPBQTFKG6eSbWIvWcC3XnOSCs';
+// Where the Val Town sender lives (set later in Profile, or hardcode once you have it).
+function _pushSendUrl() { try { return localStorage.getItem('dd_pushSendUrl') || ''; } catch(e) { return ''; } }
+
+function _urlBase64ToUint8Array(base64String) {
+  var padding = '='.repeat((4 - base64String.length % 4) % 4);
+  var base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  var raw = atob(base64);
+  var out = new Uint8Array(raw.length);
+  for (var i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+  return out;
+}
+
+// Whose subscriptions: keyed by the current user/sub/customer id.
+function _pushSubKey(ownerId) { return 'pushsub:' + (ownerId || _effectiveUserId() || 'x'); }
+
+// Ask permission + subscribe this device, storing the subscription so the sender can reach it.
+async function enablePushNotifications(ownerId, silent) {
+  try {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+      if (!silent) { try { ddToast('Push not supported on this device'); } catch(e) {} }
+      return false;
+    }
+    var perm = Notification.permission;
+    if (perm === 'default') { perm = await Notification.requestPermission(); }
+    if (perm !== 'granted') {
+      if (!silent) { try { ddToast('Notifications were not allowed'); } catch(e) {} }
+      return false;
+    }
+    var reg = await navigator.serviceWorker.ready;
+    var sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: _urlBase64ToUint8Array(_VAPID_PUBLIC_KEY)
+      });
+    }
+    // Store under this owner so the sender knows where to push. Multiple devices => list.
+    var oid = ownerId || _effectiveUserId();
+    var rec = (await DB.get(_pushSubKey(oid))) || { ownerId: oid, subs: [] };
+    var json = JSON.parse(JSON.stringify(sub));
+    var exists = (rec.subs || []).some(function(s){ return s.endpoint === json.endpoint; });
+    if (!exists) { rec.subs = (rec.subs || []).concat([json]); }
+    rec.updatedAt = Date.now();
+    await DB.set(_pushSubKey(oid), rec);
+    if (!silent) { try { ddToast('Push notifications on \u2713'); } catch(e) {} }
+    try { _renderProfileGcal(); } catch(e) {}
+    try { _renderPushSetting(); } catch(e) {}
+    return true;
+  } catch(e) { if (!silent) { try { ddToast('Could not enable push'); } catch(e2) {} } return false; }
+}
+
+async function disablePushNotifications(ownerId) {
+  try {
+    var reg = await navigator.serviceWorker.ready;
+    var sub = await reg.pushManager.getSubscription();
+    var oid = ownerId || _effectiveUserId();
+    if (sub) {
+      var json = JSON.parse(JSON.stringify(sub));
+      var rec = (await DB.get(_pushSubKey(oid)));
+      if (rec && rec.subs) {
+        rec.subs = rec.subs.filter(function(s){ return s.endpoint !== json.endpoint; });
+        await DB.set(_pushSubKey(oid), rec);
+      }
+      await sub.unsubscribe();
+    }
+    try { ddToast('Push notifications off'); } catch(e) {}
+    try { _renderPushSetting(); } catch(e) {}
+    return true;
+  } catch(e) { return false; }
+}
+
+function _pushIsOn() {
+  try { return Notification && Notification.permission === 'granted'; } catch(e) { return false; }
+}
+
+// Send a push to a given owner id (sub/customer/user) by asking the Val Town sender to deliver it.
+// This is a no-op until the send URL is configured. In-app notifications still work regardless.
+async function sendPushToOwner(ownerId, title, body, url) {
+  try {
+    var sendUrl = _pushSendUrl();
+    if (!sendUrl) return; // sender not set up yet
+    var rec = await DB.get(_pushSubKey(ownerId));
+    if (!rec || !rec.subs || !rec.subs.length) return;
+    await fetch(sendUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subs: rec.subs, title: title, body: body, url: url || '/' })
+    });
+  } catch(e) {}
+}
+
 var _pwaDeferredInstall = null;
 
 if ('serviceWorker' in navigator) {
@@ -22436,6 +22690,21 @@ if (document.readyState === 'loading') {
     <div class="wcal-grid" id="wcalDow"></div>
     <div class="wcal-grid" id="wcalDays"></div>
     <div class="wcal-times" id="wcalTimes"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-schedule-visit">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-header"><div class="modal-title">📅 Schedule a Visit</div><button class="modal-close" onclick="closeScheduleVisit()">✕</button></div>
+    <div class="modal-body">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:12px;">Visit with <b id="visit-sub-name" style="color:var(--navy);">Subcontractor</b></div>
+      <div class="form-group"><label class="form-label">Project (optional)</label><select class="form-input" id="visit-project"></select></div>
+      <div class="form-group"><label class="form-label">Address (optional)</label><input class="form-input" id="visit-address" type="text" placeholder="e.g. 12 Maple Ave, Unit 2B"></div>
+      <div class="form-group"><label class="form-label">Date</label><input class="form-input" id="visit-date" type="date"></div>
+      <div class="form-group"><label class="form-label">Time (optional)</label><input class="form-input" id="visit-time" type="text" placeholder="e.g. 9:00 AM"></div>
+      <div class="form-group"><label class="form-label">Note for the sub (optional)</label><textarea class="form-input" id="visit-note" rows="2" placeholder="e.g. Meet at the front gate"></textarea></div>
+      <button onclick="saveScheduledVisit()" style="width:100%;padding:13px;border-radius:9px;border:none;background:var(--gold);color:#1a1407;font-weight:700;font-size:15px;cursor:pointer;">Schedule visit</button>
+    </div>
   </div>
 </div>
 

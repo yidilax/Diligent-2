@@ -1,6 +1,6 @@
 // Diligent Developers — Service Worker
 // IMPORTANT: bump CACHE_VERSION every time you deploy a new version
-const CACHE_VERSION = 'v196';
+const CACHE_VERSION = 'v198';
 const CACHE_NAME = 'dd-platform-' + CACHE_VERSION;
 
 // Install — activate immediately
@@ -61,6 +61,39 @@ self.addEventListener('fetch', function(event) {
     }).catch(function() {
       // Offline — serve from cache.
       return caches.match(req);
+    })
+  );
+});
+
+
+// ============ PUSH NOTIFICATIONS ============
+// Receive a push and show a notification, even when the app is closed.
+self.addEventListener('push', function(event) {
+  var data = {};
+  try { data = event.data ? event.data.json() : {}; } catch(e) {
+    try { data = { title: 'Diligent Developers', body: event.data ? event.data.text() : '' }; } catch(e2) {}
+  }
+  var title = data.title || 'Diligent Developers';
+  var options = {
+    body: data.body || '',
+    icon: data.icon || './icon-192.png',
+    badge: './icon-192.png',
+    data: { url: data.url || './' },
+    vibrate: [100, 50, 100]
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// Tap a notification -> focus or open the app.
+self.addEventListener('notificationclick', function(event) {
+  event.notification.close();
+  var target = (event.notification.data && event.notification.data.url) || './';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(list) {
+      for (var i = 0; i < list.length; i++) {
+        if ('focus' in list[i]) return list[i].focus();
+      }
+      if (self.clients.openWindow) return self.clients.openWindow(target);
     })
   );
 });
