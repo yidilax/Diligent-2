@@ -3858,6 +3858,57 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
 .insp-repair-del { background:#c0392b; color:#fff; border:none; border-radius:8px; padding:7px 14px; font-size:13px; font-weight:700; cursor:pointer; flex-shrink:0; }
 .insp-repair-all { display:block; width:100%; margin:12px 0; background:#c0392b; color:#fff; border:none; border-radius:10px; padding:12px; font-size:14px; font-weight:700; cursor:pointer; }
 
+
+.sub-vis-list { display:flex; flex-direction:column; gap:2px; margin-top:4px; }
+.sub-vis-row { display:flex; align-items:center; gap:10px; padding:9px 11px; background:#fff; border:1px solid var(--border); border-radius:9px; font-size:14px; color:#2c3340; cursor:pointer; }
+.sub-vis-row input { width:18px; height:18px; accent-color:var(--gold); flex-shrink:0; }
+
+
+.pjl-row { display:flex; align-items:center; gap:11px; width:100%; background:#fff; border:none; border-bottom:1px solid var(--border); padding:15px 14px; cursor:pointer; text-align:left; font-family:inherit; }
+.pjl-row:first-child { border-top-left-radius:12px; border-top-right-radius:12px; }
+.pjl-row:last-child { border-bottom:none; border-bottom-left-radius:12px; border-bottom-right-radius:12px; }
+.pjl-row:active { background:#FAF8F3; }
+.pjl-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.pjl-name { flex:1; font-size:15.5px; font-weight:600; color:#1d2940; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pjl-arrow-go { color:rgba(0,0,0,0.25); font-size:20px; flex-shrink:0; }
+.pjl-reorder { display:flex; flex-direction:column; gap:1px; flex-shrink:0; }
+.pjl-arrow { background:none; border:none; color:#b5ae9c; font-size:13px; line-height:1; cursor:pointer; padding:1px 4px; }
+.pjl-arrow:disabled { opacity:0.25; }
+#projectsList { background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.04); }
+
+
+.ppg-back { background:none; border:none; color:var(--navy); font-size:14px; font-weight:600; cursor:pointer; padding:8px 0 12px; }
+.ppg-hero { background:#fff; border-radius:14px; padding:18px; margin-bottom:14px; box-shadow:0 1px 4px rgba(0,0,0,0.04); }
+.ppg-hero-top { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.ppg-status { font-size:11px; font-weight:800; letter-spacing:0.5px; text-transform:uppercase; padding:3px 9px; border-radius:20px; }
+.ppg-vis { font-size:11px; color:var(--muted); }
+.ppg-name { font-family:'Bebas Neue',sans-serif; font-size:30px; letter-spacing:0.5px; color:var(--navy); line-height:1.05; }
+.ppg-substat { font-size:13px; color:var(--muted); margin-top:4px; }
+.ppg-notes { font-size:13px; color:#3a3730; margin-top:10px; line-height:1.45; background:#FAF8F3; border-radius:8px; padding:9px 11px; }
+.ppg-actions { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+.ppg-act { flex:1; min-width:90px; background:#fff; border:1px solid var(--border); border-radius:10px; padding:11px; font-size:13px; font-weight:600; color:var(--navy); cursor:pointer; }
+.ppg-act-danger { color:#c0392b; flex:0 0 auto; }
+.ppg-section { background:#fff; border-radius:12px; margin-bottom:12px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.03); }
+.ppg-sec-head { display:flex; align-items:center; justify-content:space-between; padding:13px 15px; border-bottom:1px solid var(--border); }
+.ppg-sec-title { font-size:13px; font-weight:800; letter-spacing:0.5px; text-transform:uppercase; color:var(--navy); }
+.ppg-sec-count { font-size:12px; font-weight:700; color:#fff; background:var(--gold); min-width:22px; text-align:center; border-radius:11px; padding:2px 8px; }
+.ppg-item { display:block; width:100%; text-align:left; background:none; border:none; border-bottom:1px solid #f0ece3; padding:12px 15px; font-family:inherit; }
+.ppg-item:last-child { border-bottom:none; }
+.ppg-tap { cursor:pointer; }
+.ppg-tap:active { background:#FAF8F3; }
+.ppg-item-main { font-size:14.5px; font-weight:600; color:#1d2940; }
+.ppg-item-sub { font-size:12px; color:var(--muted); margin-top:2px; }
+.ppg-empty { padding:14px 15px; font-size:13px; color:var(--muted); text-align:center; }
+
+
+.pm-gcal { padding:4px 0 8px; }
+.pm-gcal-note { font-size:12.5px; color:var(--muted); padding:8px 2px; line-height:1.4; }
+.pm-gcal-note a { color:#9a7d12; font-weight:600; }
+.pm-gcal-connect { width:100%; background:var(--navy); color:#fff; border:none; border-radius:9px; padding:11px; font-size:13.5px; font-weight:700; cursor:pointer; margin:4px 0; }
+.pm-gcal-connected { font-size:13px; color:#3a7d5d; font-weight:600; padding:6px 2px; }
+.pm-toggle { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 2px; font-size:13.5px; color:#2c3340; }
+.pm-toggle input { width:20px; height:20px; accent-color:var(--gold); flex-shrink:0; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -4185,7 +4236,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v193</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v196</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4547,7 +4598,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v193</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v196</div>
     </div>
   </div>
 
@@ -5229,6 +5280,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
               <div style="font-size:12px;color:rgba(243,239,230,0.6);margin-top:4px;">Type your own 4-digit code or tap ↻ New. Give this code to the sub to log in.</div></div>
             <div class="form-group"><label class="form-label">Office note for this sub <span style="font-weight:400;opacity:.6;">(optional)</span></label>
               <textarea class="form-input" id="sub-note" rows="2" placeholder="e.g. Start with Unit 2B, gate code 1234"></textarea></div>
+            <div class="form-group"><label class="form-label">What this sub can see in their dashboard</label><div class="sub-vis-list"><label class="sub-vis-row"><input type="checkbox" id="sub-vis-punch" checked> <span>✅ Punch List</span></label><label class="sub-vis-row"><input type="checkbox" id="sub-vis-fixes" checked> <span>🔧 Inspection Fixes</span></label><label class="sub-vis-row"><input type="checkbox" id="sub-vis-walkthroughs" checked> <span>🚶 Walkthroughs</span></label><label class="sub-vis-row"><input type="checkbox" id="sub-vis-scans" checked> <span>🏠 3D Scans</span></label></div></div>
           </div>
           <div class="modal-footer">
             <button class="btn-logout" onclick="closeSubModal()">Cancel</button>
@@ -5419,7 +5471,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
 </div>
 
 
-<script>var APP_VERSION = 'v193';
+<script>var APP_VERSION = 'v196';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -7832,11 +7884,51 @@ function _renderProfileMenu() {
       '</div>';
     }).join('');
   }
+  // Calendar settings
+  html += '<div class="pm-section">Google Calendar</div>';
+  html += '<div id="pmGcalBox" class="pm-gcal"></div>';
   // Actions
   html += '<div class="pm-actions">' +
     '<button class="pm-btn" onclick="addAnotherAccount()">+ Add another account</button>' +
     '<button class="pm-btn pm-btn-out" onclick="closeProfileMenu();doLogout();">Sign out</button>' +
   '</div>';
+  host.innerHTML = html;
+  try { _renderProfileGcal(); } catch(e) {}
+}
+
+// Settings toggles for whether calendar buttons appear in tabs.
+function _gcalShowButtons() {
+  try { return localStorage.getItem('dd_gcalShowBtns') !== '0'; } catch(e) { return true; }
+}
+function _toggleGcalShowButtons() {
+  try { localStorage.setItem('dd_gcalShowBtns', _gcalShowButtons() ? '0' : '1'); } catch(e) {}
+  try { _renderProfileGcal(); } catch(e) {}
+  try { if (typeof renderScheduleNew === 'function') renderScheduleNew(); } catch(e) {}
+  try { if (typeof renderTasks === 'function') renderTasks(); } catch(e) {}
+}
+
+async function _renderProfileGcal() {
+  var host = document.getElementById('pmGcalBox');
+  if (!host) return;
+  var configured = _gcalConfigured();
+  var connected = configured && (await isGcalConnected());
+  var autoOn = _gcalAutoOn();
+  var showBtns = _gcalShowButtons();
+  var html = '';
+  if (!configured) {
+    html += '<div class="pm-gcal-note">Calendar sync isn\'t set up yet.' +
+      (currentUser && (currentUser.isOwner || currentUser.role==='admin') ? ' <a href="#" onclick="closeProfileMenu();switchTab(\'scheduling\');setTimeout(_gcalShowSetup,300);return false;">Set it up</a>' : ' Ask the office to enable it.') +
+    '</div>';
+  } else if (!connected) {
+    html += '<button class="pm-gcal-connect" onclick="connectGoogleCalendar()">Connect Google Calendar</button>';
+  } else {
+    html += '<div class="pm-gcal-connected">\u2705 Connected</div>';
+    html += '<label class="pm-toggle"><span>Auto-add new items to my calendar</span>' +
+      '<input type="checkbox" ' + (autoOn?'checked':'') + ' onchange="_toggleGcalAuto()"></label>';
+  }
+  // Show/hide the in-tab calendar buttons (available regardless of connection).
+  html += '<label class="pm-toggle"><span>Show calendar buttons in Schedule &amp; Tasks</span>' +
+    '<input type="checkbox" ' + (showBtns?'checked':'') + ' onchange="_toggleGcalShowButtons()"></label>';
   host.innerHTML = html;
 }
 // Switch to a known account. Google switches seamlessly; email asks for password.
@@ -8956,7 +9048,7 @@ async function openTaskQuickActions(id) {
         '<button class="tas-act tas-open" onclick="_tasOpen()"><span class="tas-ic">&#9776;</span>Open task &middot; subtasks &amp; notes</button>' +
         '<button class="tas-act" onclick="_tasDone()"><span class="tas-ic">' + (done?'\u21ba':'\u2713') + '</span>' + (done?'Reopen':'Mark done') + '</button>' +
         '<button class="tas-act" onclick="_tasDate()"><span class="tas-ic">&#128197;</span>Set date</button>' +
-        (t.dueDate ? '<button class="tas-act" onclick="_tasGcal()"><span class="tas-ic">&#128467;</span>Add to Google Calendar</button>' : '') +
+        ((t.dueDate && _gcalShowButtons()) ? '<button class="tas-act" onclick="_tasGcal()"><span class="tas-ic">&#128467;</span>Add to Google Calendar</button>' : '') +
         '<button class="tas-act" onclick="_tasAssign()"><span class="tas-ic">&#128100;</span>Assign</button>' +
         '<button class="tas-act" onclick="_tasEdit()"><span class="tas-ic">&#9998;</span>Edit details</button>' +
         '<button class="tas-act tas-danger" onclick="_tasDelete()"><span class="tas-ic">&#128465;</span>Delete</button>' +
@@ -9881,15 +9973,8 @@ async function saveTask() {
   }
   // Auto-sync to the connected user's Google Calendar (only theirs)
   if (!existing && (task.dueDate || task.startDate)) {
-    gcalAddEvent({
-      title: 'Task: ' + task.title,
-      description: task.description || '',
-      start: task.startDate || task.dueDate,
-      end: task.dueDate || task.startDate,
-      allDay: true
-    });
-    // Link-based auto-add (works without OAuth setup) when the toggle is on.
-    try { var _taskAssignees = [task.assigneeId, task.assignee2Id].concat(task.followers || []).filter(Boolean); await _gcalAutoAdd('Task: ' + task.title, task.projectName ? ('Project: ' + task.projectName) : '', task.startDate || task.dueDate, task.dueDate || task.startDate, _taskAssignees); } catch(e) {}
+    // Single calendar add: _gcalAutoAdd pushes silently if connected, or offers the link if not.
+    try { var _taskAssignees = [task.assigneeId, task.assignee2Id].concat(task.followers || []).filter(Boolean); await _gcalAutoAdd('Task: ' + task.title, task.projectName ? ('Project: ' + task.projectName) : '', task.startDate || task.dueDate, task.dueDate || task.startDate, _taskAssignees, 'task:' + task.id); } catch(e) {}
   }
   closeTaskForm();
   renderTasks();
@@ -9939,6 +10024,7 @@ async function toggleTaskDone(id) {
 
 async function deleteTask(id) {
   if (!confirm('Delete this task? This cannot be undone.')) return;
+  try { await _gcalDeleteForRecord('task:' + id); } catch(e) {}
   await DB.delete('task:' + id);
   closeTaskForm();
   closeTaskDetail();
@@ -10523,7 +10609,7 @@ function _schedItemRow(it) {
       '<div class="sch-row-name">' + _esc(it.name) + '</div>' +
       '<div class="sch-row-sub">' + _esc(it.projName) + (it.address?(' \u00b7 ' + _esc(it.address)):'') + (dateLabel?(' \u00b7 ' + dateLabel):'') + '</div>' +
     '</div>' +
-    (it.start ? '<button class="sch-gcal" onclick="_schedAddToGcal(\'' + encodeURIComponent(JSON.stringify({t:it.name,d:it.projName+' '+it.address,s:it.start,e:it.end})) + '\')" title="Add to Google Calendar">\ud83d\udcc5</button>' : '') +
+    ((it.start && _gcalShowButtons()) ? '<button class="sch-gcal" onclick="_schedAddToGcal(\'' + encodeURIComponent(JSON.stringify({t:it.name,d:it.projName+' '+it.address,s:it.start,e:it.end})) + '\')" title="Add to Google Calendar">\ud83d\udcc5</button>' : '') +
   '</div>';
 }
 
@@ -10617,7 +10703,7 @@ function _schedCalOpenDay(ymd) {
       '<span class="scal-day-dot" style="background:' + c + '"></span>' +
       '<div class="scal-day-main"><div class="scal-day-name">' + _esc(it.name) + '</div>' +
       '<div class="scal-day-sub">' + _esc(it.projName) + (it.address ? (' \u00b7 ' + _esc(it.address)) : '') + '</div></div>' +
-      '<button class="scal-day-gcal" onclick="_schedAddToGcal(\'' + encodeURIComponent(JSON.stringify({t:it.name,d:it.projName+' '+it.address,s:it.start,e:it.end})) + '\')">\ud83d\udcc5</button>' +
+      (_gcalShowButtons() ? '<button class="scal-day-gcal" onclick="_schedAddToGcal(\'' + encodeURIComponent(JSON.stringify({t:it.name,d:it.projName+' '+it.address,s:it.start,e:it.end})) + '\')">\ud83d\udcc5</button>' : '') +
     '</div>';
   }).join('') : '<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px;">Nothing scheduled this day.</div>';
   sheet.className = 'scal-sheet-overlay';
@@ -10684,7 +10770,7 @@ function _gcalAutoOn() {
   try { return localStorage.getItem('dd_gcalAuto') === '1'; } catch(e) { return false; }
 }
 // Auto-open Google Calendar for an item if auto-add is on.
-async function _gcalAutoAdd(title, details, startYmd, endYmd, assigneeIds) {
+async function _gcalAutoAdd(title, details, startYmd, endYmd, assigneeIds, recordKey) {
   if (!_gcalAutoOn() || !startYmd) return;
   // Only add to MY calendar if I'm one of the assignees (or no assignee list was given).
   try {
@@ -10698,7 +10784,11 @@ async function _gcalAutoAdd(title, details, startYmd, endYmd, assigneeIds) {
   try {
     if (_gcalConfigured() && _gcalToken && (await isGcalConnected())) {
       var ok = await gcalAddEvent({ title: title, description: details || '', start: startYmd, end: endYmd || startYmd, allDay: true });
-      if (ok) { try { ddToast('Added to Google Calendar \u2713'); } catch(e) {} return; }
+      if (ok) {
+        if (ok && ok.id && recordKey) { try { await _gcalRememberEvent(recordKey, ok.id); } catch(e) {} }
+        try { ddToast('Added to Google Calendar \u2713'); } catch(e) {}
+        return;
+      }
     }
   } catch(e) {}
   // Otherwise fall back to opening the prefilled Google Calendar page (one tap to save).
@@ -10794,7 +10884,7 @@ async function renderScheduleNew(forceReload) {
       '<button onclick="_gcalSaveClientId()" class="sch-gcal-connect" style="width:100%;">Save Client ID</button>' +
     '</div>') : '');
   }
-  host.innerHTML = modeBar + subBar + gcalInfo + _schedGroupRender(items);
+  host.innerHTML = modeBar + subBar + _schedGroupRender(items);
 }
 function _schedSetMode(m){ window._schedMode=m; renderScheduleNew(); }
 function _schedSetGroup(g){ window._schedGroupBy=g; renderScheduleNew(); }
@@ -11160,14 +11250,8 @@ async function savePhase() {
     });
   }
   if (p.start || p.end) {
-    gcalAddEvent({
-      title: p.name + ' (construction)',
-      description: 'Construction phase' + (p.notes ? (' - ' + p.notes) : ''),
-      start: p.start || p.end,
-      end: p.end || p.start,
-      allDay: true
-    });
-    try { var _schedPeople = (sch.followers || []).concat(sch.ownerId ? [sch.ownerId] : []).filter(Boolean); await _gcalAutoAdd(p.name + ' (construction)', 'Construction phase' + (p.notes ? (' - ' + p.notes) : ''), p.start || p.end, p.end || p.start, _schedPeople.length ? _schedPeople : null); } catch(e) {}
+    // Single calendar add via _gcalAutoAdd (pushes if connected, else offers link).
+    try { var _schedPeople = (sch.followers || []).concat(sch.ownerId ? [sch.ownerId] : []).filter(Boolean); await _gcalAutoAdd(p.name + ' (construction)', 'Construction phase' + (p.notes ? (' - ' + p.notes) : ''), p.start || p.end, p.end || p.start, _schedPeople.length ? _schedPeople : null, 'phase:' + (p.id || '')); } catch(e) {}
   }
   closePhaseEditor();
   renderSchedView();
@@ -11322,8 +11406,36 @@ async function gcalAddEvent(opts) {
       headers: { 'Authorization': 'Bearer ' + _gcalToken, 'Content-Type': 'application/json' },
       body: JSON.stringify(ev)
     });
-    return res.ok;
+    if (!res.ok) return false;
+    try { var body = await res.json(); return body && body.id ? { id: body.id } : true; } catch(e) { return true; }
   } catch (e) { return false; }
+}
+
+// Map a record (task/phase) to the Google Calendar event id it created, so we can delete it later.
+function _gcalMapKey() { return 'gcalmap:' + ((currentUser && currentUser.id) || 'x'); }
+async function _gcalRememberEvent(recordKey, eventId) {
+  if (!recordKey || !eventId) return;
+  try {
+    var map = (await DB.get(_gcalMapKey())) || {};
+    map[recordKey] = eventId;
+    await DB.set(_gcalMapKey(), map);
+  } catch(e) {}
+}
+async function _gcalDeleteForRecord(recordKey) {
+  // Remove the Google Calendar event linked to this record, if any.
+  try {
+    if (!_gcalConfigured() || !_gcalToken) return;
+    if (!(await isGcalConnected())) return;
+    var map = (await DB.get(_gcalMapKey())) || {};
+    var eventId = map[recordKey];
+    if (!eventId) return;
+    await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events/' + encodeURIComponent(eventId), {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + _gcalToken }
+    });
+    delete map[recordKey];
+    await DB.set(_gcalMapKey(), map);
+  } catch(e) {}
 }
 
 // Settings panel content (Connect / Disconnect)
@@ -12213,16 +12325,25 @@ function _dashPrefsKey() {
   return 'dashprefs:' + uid;
 }
 async function _getDashActions() {
+  // Prefer the cloud record; fall back to the local copy; then defaults.
   try {
     var rec = await DB.get(_dashPrefsKey());
     if (rec && Array.isArray(rec.actions) && rec.actions.length) {
-      // keep only ids that still exist in the catalog
       return rec.actions.filter(function(id){ return DASH_ACTION_CATALOG[id]; });
+    }
+  } catch(e) {}
+  try {
+    var local = localStorage.getItem('dd_dashactions_' + ((currentUser&&currentUser.id)||'x'));
+    if (local) {
+      var arr = JSON.parse(local);
+      if (Array.isArray(arr) && arr.length) return arr.filter(function(id){ return DASH_ACTION_CATALOG[id]; });
     }
   } catch(e) {}
   return DASH_DEFAULT_ACTIONS.slice();
 }
 async function _saveDashActions(ids) {
+  // Save locally first so it persists instantly across refreshes, then to the cloud.
+  try { localStorage.setItem('dd_dashactions_' + ((currentUser&&currentUser.id)||'x'), JSON.stringify(ids)); } catch(e) {}
   try { await DB.set(_dashPrefsKey(), { actions: ids, _updatedAt: Date.now() }); } catch(e) {}
 }
 
@@ -13713,97 +13834,7 @@ function _ifxBtnLabel(id, open) {
 }
 
 
-// ============ INSPECTION REPAIR TOOL ============
-async function _inspRepairScan() {
-  var host = document.getElementById('inspectionsList');
-  if (host) host.innerHTML = '<div style="text-align:center;color:var(--muted);padding:24px;">Scanning database\u2026</div>';
-  var fs = _getFirestore();
-  var found = [];
-  try {
-    if (fs) {
-      var snap = await fs.collection('dd').get();
-      var projects = _cachedList('project:').map(_cachedGet).filter(Boolean);
-      snap.docs.forEach(function(d){
-        var data = d.data();
-        if (!data || !data.k) return;
-        if (data.k.indexOf('inspection:') !== 0) return;
-        var rec = null;
-        try { rec = JSON.parse(data.v); } catch(e) {}
-        var proj = rec && rec.projectId ? projects.find(function(p){ return p.id === rec.projectId; }) : null;
-        var broken = !rec || !rec.id || !rec.type || !proj ||
-                     ['scheduled','passed','failed'].indexOf(rec.status) === -1;
-        found.push({
-          key: data.k, docId: d.id,
-          type: (rec && rec.type) || '(no type)',
-          status: (rec && rec.status) || '(no status)',
-          project: proj ? proj.name : '(missing project)',
-          broken: broken
-        });
-      });
-    }
-  } catch(e) { console.warn('repair scan failed', e); }
-  window._inspRepairFound = found;
-  _inspRepairRender();
-}
 
-function _inspRepairRender() {
-  var host = document.getElementById('inspectionsList');
-  if (!host) return;
-  var found = window._inspRepairFound || [];
-  var broken = found.filter(function(f){ return f.broken; });
-  var healthy = found.filter(function(f){ return !f.broken; });
-  var html = '<div class="insp-viewbar"><button class="insp-viewbtn on" onclick="renderInspections(true)">\u2039 Back to inspections</button></div>';
-  html += '<div style="padding:4px 2px 12px;font-size:13px;color:var(--muted);">Found ' + found.length + ' inspection record' + (found.length===1?'':'s') + ' in the database. ' + (broken.length ? (broken.length + ' look broken.') : 'All look healthy.') + '</div>';
-  if (broken.length) {
-    html += '<div style="font-size:12px;font-weight:800;letter-spacing:0.5px;text-transform:uppercase;color:#c0392b;margin:6px 0;">Broken / old records</div>';
-    broken.forEach(function(f){
-      html += '<div class="insp-repair-row"><div class="insp-repair-info"><div class="insp-repair-type">' + _esc(f.type) + '</div><div class="insp-repair-sub">' + _esc(f.project) + ' \u00b7 ' + _esc(f.status) + '</div></div>' +
-        '<button class="insp-repair-del" onclick="_inspRepairDelete(\'' + encodeURIComponent(f.key) + '\', \'' + encodeURIComponent(f.docId) + '\')">Delete</button></div>';
-    });
-    html += '<button class="insp-repair-all" onclick="_inspRepairDeleteAll()">Delete all ' + broken.length + ' broken records</button>';
-  }
-  if (healthy.length) {
-    html += '<div style="font-size:12px;font-weight:800;letter-spacing:0.5px;text-transform:uppercase;color:#3a7d5d;margin:16px 0 6px;">Healthy records</div>';
-    healthy.forEach(function(f){
-      html += '<div class="insp-repair-row"><div class="insp-repair-info"><div class="insp-repair-type">' + _esc(f.type) + '</div><div class="insp-repair-sub">' + _esc(f.project) + ' \u00b7 ' + _esc(f.status) + '</div></div></div>';
-    });
-  }
-  host.innerHTML = html;
-}
-
-async function _inspRepairDelete(encKey, encDocId) {
-  var key = decodeURIComponent(encKey);
-  var docId = decodeURIComponent(encDocId);
-  ddConfirm('Delete this record permanently?', async function(){
-    var fs = _getFirestore();
-    try {
-      if (fs && docId) { await fs.collection('dd').doc(docId).delete(); }
-      else if (fs) { await fs.collection('dd').doc(_fsKey(key)).delete(); }
-    } catch(e) {}
-    try { delete _store[key]; _saveToLS(); } catch(e) {}
-    window._inspCache = null;
-    if (window._inspRepairFound) window._inspRepairFound = window._inspRepairFound.filter(function(f){ return f.key !== key; });
-    try { ddToast('Deleted'); } catch(e) {}
-    _inspRepairRender();
-  });
-}
-
-async function _inspRepairDeleteAll() {
-  var broken = (window._inspRepairFound || []).filter(function(f){ return f.broken; });
-  if (!broken.length) return;
-  ddConfirm('Delete all ' + broken.length + ' broken records permanently?', async function(){
-    var fs = _getFirestore();
-    for (var i = 0; i < broken.length; i++) {
-      try { if (fs && broken[i].docId) { await fs.collection('dd').doc(broken[i].docId).delete(); } } catch(e) {}
-      try { delete _store[broken[i].key]; } catch(e) {}
-    }
-    _saveToLS();
-    window._inspCache = null;
-    window._inspRepairFound = (window._inspRepairFound || []).filter(function(f){ return !f.broken; });
-    try { ddToast('Cleaned up ' + broken.length + ' record' + (broken.length>1?'s':'')); } catch(e) {}
-    _inspRepairRender();
-  });
-}
 
 
 // ============ FRESH START / RESET TOOL (owner only) ============
@@ -13935,12 +13966,7 @@ async function renderInspections(forceReload){
     '</div>';
   }).join('');
   host.innerHTML = toggle + (rows || '<div class="tab-empty"><div class="tab-empty-icon">\ud83d\udd0d</div><div class="tab-empty-title">No ' + (view==='passed'?'passed':'active') + ' inspections</div><div class="tab-empty-desc">' + (view==='passed'?'Passed inspections will appear here.':'Schedule an inspection above.') + '</div></div>');
-  // Owner-only cleanup tool for old/broken records.
-  try {
-    if (currentUser && (currentUser.isOwner || currentUser.role === 'admin')) {
-      host.innerHTML += '<button class="insp-repair-entry" onclick="_inspRepairScan()">\ud83e\uddf9 Clean up old records</button>';
-    }
-  } catch(e) {}
+
 }
 
 // Open the inspection detail modal (status controls + fix list).
@@ -14424,6 +14450,111 @@ async function _lbDelete(key, rerender){
   });
 }
 
+
+// ============ PROJECT DETAIL PAGE ============
+// Opens a full page for one project showing everything connected to it.
+async function openProjectPage(projectId) {
+  window._openProjectId = projectId;
+  var host = document.getElementById('projectsList');
+  var headEl = document.querySelector('.tab-header-actions') || null;
+  if (!host) return;
+  host.innerHTML = '<div style="text-align:center;color:var(--muted);padding:30px;">Loading project\u2026</div>';
+
+  var p = await DB.get('project:' + projectId);
+  if (!p) { host.innerHTML = '<div style="padding:20px;">Project not found.</div>'; return; }
+
+  // Gather everything linked to this project.
+  function listGet(prefix){ return _cachedList(prefix).map(_cachedGet).filter(Boolean); }
+  var inspections = listGet('inspection:').filter(function(x){ return x.projectId === projectId; });
+  var tasks = listGet('task:').filter(function(x){ return x.projectId === projectId; });
+  var deliveries = listGet('delivery:').filter(function(x){ return x.projectId === projectId; });
+  var changeOrders = listGet('changeorder:').filter(function(x){ return x.projectId === projectId; });
+  var siteLogs = listGet('sitelog:').filter(function(x){ return x.projectId === projectId; });
+  var customers = listGet('customer:').filter(function(x){ return x.projectId === projectId; });
+
+  var sl = { active:'Active', completed:'Completed', planning:'Planning', archived:'Archived', 'on-hold':'On Hold' };
+  var statusColor = { active:'#3a7d5d', completed:'#2c5d8a', planning:'#b8860b', archived:'#8a8472', 'on-hold':'#c0392b' };
+  var sCol = statusColor[p.status] || '#3a7d5d';
+  var houses = p.houses || [];
+  var totalUnits = houses.reduce(function(s,h){ return s+(h.units?h.units.length:0); },0);
+  var canEditThis = canEdit(p);
+
+  function section(icon, title, count, bodyHtml, addFn) {
+    return '<div class="ppg-section">' +
+      '<div class="ppg-sec-head"><span class="ppg-sec-title">' + icon + ' ' + title + '</span>' +
+      '<span class="ppg-sec-count">' + count + '</span></div>' +
+      bodyHtml +
+    '</div>';
+  }
+  function rows(items, fn){ return items.length ? items.map(fn).join('') : '<div class="ppg-empty">None yet</div>'; }
+
+  var html = '';
+  // Header
+  html += '<button class="ppg-back" onclick="renderProjects()">\u2039 All projects</button>';
+  html += '<div class="ppg-hero">' +
+    '<div class="ppg-hero-top"><span class="pjl-dot" style="background:' + sCol + ';"></span>' +
+    '<span class="ppg-status" style="color:' + sCol + ';background:' + sCol + '1a;">' + (sl[p.status]||'Active') + '</span>' +
+    (p.visibility==='private' ? '<span class="ppg-vis">\ud83d\udd12 Private</span>' : '') + '</div>' +
+    '<div class="ppg-name">' + _esc(p.name) + '</div>' +
+    '<div class="ppg-substat">' + houses.length + ' address' + (houses.length!==1?'es':'') + ' \u00b7 ' + totalUnits + ' unit' + (totalUnits!==1?'s':'') + '</div>' +
+    (p.notes ? '<div class="ppg-notes">' + _esc(p.notes) + '</div>' : '') +
+  '</div>';
+
+  // Actions
+  if (canEditThis) {
+    html += '<div class="ppg-actions">' +
+      '<button class="ppg-act" onclick="openProjectFiles(\'' + p.id + '\')">\ud83d\udcce Files</button>' +
+      '<button class="ppg-act" onclick="editProject(\'' + p.id + '\')">\u270f\ufe0f Edit</button>' +
+      '<button class="ppg-act ppg-act-danger" onclick="deleteProject(\'' + p.id + '\')">\ud83d\uddd1 Delete</button>' +
+    '</div>';
+  }
+
+  // Addresses & units
+  html += section('\ud83d\udccd', 'Addresses', houses.length, rows(houses, function(h){
+    return '<div class="ppg-item"><div class="ppg-item-main">' + _esc(h.address || 'Address') + '</div>' +
+      '<div class="ppg-item-sub">' + (h.units&&h.units.length ? _esc(h.units.join(', ')) : 'No units') + '</div></div>';
+  }));
+
+  // Inspections
+  html += section('\ud83d\udd0d', 'Inspections', inspections.length, rows(inspections, function(it){
+    return '<button class="ppg-item ppg-tap" onclick="switchTab(\'inspections\');setTimeout(function(){openInspectionDetail(\'' + it.id + '\');},250)">' +
+      '<div class="ppg-item-main">' + _esc(it.type||'Inspection') + '</div>' +
+      '<div class="ppg-item-sub">' + _esc(it.status||'') + '</div></button>';
+  }));
+
+  // Tasks
+  html += section('\u2705', 'Tasks', tasks.length, rows(tasks, function(t){
+    return '<div class="ppg-item"><div class="ppg-item-main">' + _esc(t.title||'Task') + '</div>' +
+      '<div class="ppg-item-sub">' + _esc(t.status||'') + (t.dueDate?(' \u00b7 due ' + _esc(t.dueDate)):'') + '</div></div>';
+  }));
+
+  // Deliveries
+  html += section('\ud83d\ude9a', 'Deliveries', deliveries.length, rows(deliveries, function(d){
+    return '<div class="ppg-item"><div class="ppg-item-main">' + _esc(d.item||d.name||'Delivery') + '</div>' +
+      '<div class="ppg-item-sub">' + _esc(d.status||d.date||'') + '</div></div>';
+  }));
+
+  // Change orders
+  html += section('\ud83d\udcdd', 'Change Orders', changeOrders.length, rows(changeOrders, function(c){
+    return '<div class="ppg-item"><div class="ppg-item-main">' + _esc(c.title||c.desc||'Change order') + '</div>' +
+      '<div class="ppg-item-sub">' + _esc(c.status||'') + '</div></div>';
+  }));
+
+  // Customers
+  html += section('\ud83d\udc64', 'Customers', customers.length, rows(customers, function(c){
+    return '<div class="ppg-item"><div class="ppg-item-main">' + _esc(c.name||'Customer') + '</div>' +
+      '<div class="ppg-item-sub">' + _esc(c.address||'') + '</div></div>';
+  }));
+
+  // Daily logs
+  html += section('\ud83d\udcd3', 'Daily Logs', siteLogs.length, rows(siteLogs, function(l){
+    return '<div class="ppg-item"><div class="ppg-item-main">' + _esc(l.note||l.notes||'Log entry') + '</div>' +
+      '<div class="ppg-item-sub">' + _esc(l.date||'') + '</div></div>';
+  }));
+
+  host.innerHTML = html;
+}
+
 async function renderProjects() {
   var keys = await DB.list('project:');
   var listEl = document.getElementById('projectsList');
@@ -14451,54 +14582,18 @@ async function renderProjects() {
   var sl = { active:'Active', completed:'Completed', planning:'Planning', archived:'Archived', 'on-hold':'On Hold' };
   var statusColor = { active:'#3a7d5d', completed:'#2c5d8a', planning:'#b8860b', archived:'#8a8472', 'on-hold':'#c0392b' };
   listEl.innerHTML = projects.map(function(p, idx) {
-    var houses = p.houses || [];
-    var totalUnits = houses.reduce(function(s,h) { return s+(h.units?h.units.length:0); },0);
     var sCol = statusColor[p.status] || '#3a7d5d';
     var canEditThis = canEdit(p);
-    var addrRows = houses.map(function(h) {
-      var hscans = (h.scans && h.scans.length) ? h.scans : (h.scan3d ? [{label:'',url:h.scan3d}] : []);
-      var scanBtns = hscans.map(function(sc){
-        var nm = sc.label ? _esc(sc.label) : '3D Scan';
-        return '<a href="' + _esc(sc.url) + '" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="pjx-scan">\ud83c\udfe0 ' + nm + '</a>';
-      }).join('');
-      return '<div class="pjx-addr">' +
-        '<div class="pjx-addr-left"><span class="pjx-pin">\ud83d\udccd</span><span class="pjx-addr-name">' + _esc(h.address) + '</span></div>' +
-        '<span class="pjx-addr-units">' + (h.units&&h.units.length? _esc(h.units.join(', ')) : 'No units') + '</span>' +
-        (scanBtns ? '<div class="pjx-scans">' + scanBtns + '</div>' : '') +
-      '</div>';
-    }).join('');
-    // reorder arrows
-    var reorder = canEditThis ? '<div class="pjx-reorder">' +
-      '<button class="pjx-arrow" ' + (idx===0?'disabled':'') + ' onclick="event.stopPropagation();_moveProject(\'' + p.id + '\',-1)" title="Move up">\u25b4</button>' +
-      '<button class="pjx-arrow" ' + (idx===projects.length-1?'disabled':'') + ' onclick="event.stopPropagation();_moveProject(\'' + p.id + '\',1)" title="Move down">\u25be</button>' +
+    var reorder = canEditThis ? '<div class="pjl-reorder">' +
+      '<button class="pjl-arrow" ' + (idx===0?'disabled':'') + ' onclick="event.stopPropagation();_moveProject(\'' + p.id + '\',-1)">\u25b4</button>' +
+      '<button class="pjl-arrow" ' + (idx===projects.length-1?'disabled':'') + ' onclick="event.stopPropagation();_moveProject(\'' + p.id + '\',1)">\u25be</button>' +
     '</div>' : '';
-    return '<div class="pjx-card">' +
-      '<div class="pjx-head">' +
-        reorder +
-        '<div class="pjx-head-main">' +
-          '<div class="pjx-name">' + _esc(p.name) + '</div>' +
-          '<div class="pjx-meta">' +
-            '<span class="pjx-status" style="color:' + sCol + ';background:' + sCol + '1a;">' + (sl[p.status]||'Active') + '</span>' +
-            '<span class="pjx-vis">' + (p.visibility==='private' ? '\ud83d\udd12 Private' : '\ud83c\udf10 Public') + '</span>' +
-            '<span class="pjx-by">by ' + _esc(p.ownerName||p.createdBy||'Admin') + '</span>' +
-          '</div>' +
-        '</div>' +
-      '</div>' +
-      (p.notes ? '<div class="pjx-notes">' + _esc(p.notes) + '</div>' : '') +
-      (addrRows ? '<div class="pjx-addrs">' + addrRows + '</div>' : '') +
-      '<div class="pjx-foot">' +
-        '<div class="pjx-stats">' +
-          '<span class="pjx-stat"><b>' + houses.length + '</b> address' + (houses.length!==1?'es':'') + '</span>' +
-          '<span class="pjx-dot">\u00b7</span>' +
-          '<span class="pjx-stat"><b>' + totalUnits + '</b> unit' + (totalUnits!==1?'s':'') + '</span>' +
-        '</div>' +
-        (canEditThis ? '<div class="pjx-actions">' +
-          '<button class="pjx-act" onclick="openProjectFiles(\'' + p.id + '\')">\ud83d\udcce Files</button>' +
-          '<button class="pjx-act" onclick="editProject(\'' + p.id + '\')">\u270f\ufe0f Edit</button>' +
-          '<button class="pjx-act pjx-act-danger" onclick="deleteProject(\'' + p.id + '\')">\ud83d\uddd1</button>' +
-        '</div>' : '') +
-      '</div>' +
-    '</div>';
+    return '<button class="pjl-row" onclick="openProjectPage(\'' + p.id + '\')">' +
+      reorder +
+      '<span class="pjl-dot" style="background:' + sCol + ';" title="' + (sl[p.status]||'Active') + '"></span>' +
+      '<span class="pjl-name">' + _esc(p.name) + '</span>' +
+      '<span class="pjl-arrow-go">\u203a</span>' +
+    '</button>';
   }).join('');
 }
 // Move a project up (-1) or down (1) in the list and persist the new order.
@@ -14917,6 +15012,7 @@ function openSubForm(id) {
   window._subMgrs = [];
   _subRenderMgrRows();
   document.getElementById('sub-note').value = '';
+  ['punch','fixes','walkthroughs','scans'].forEach(function(s){ var el = document.getElementById('sub-vis-' + s); if (el) el.checked = true; });
   document.getElementById('sub-code').value = _genSubCode();
   if (id) {
     DB.get('subcontractor:' + id).then(function(s){
@@ -14930,6 +15026,9 @@ function openSubForm(id) {
       window._subMgrs = (s.managers || []).map(function(m){ return { name:m.name||'', phone:m.phone||'', email:m.email||'' }; });
       _subRenderMgrRows();
       document.getElementById('sub-note').value = s.officeNote || '';
+      var _vs = s.visibleSections || {};
+      function _setVis(idSuffix, val){ var el = document.getElementById('sub-vis-' + idSuffix); if (el) el.checked = (val !== false); }
+      _setVis('punch', _vs.punch); _setVis('fixes', _vs.fixes); _setVis('walkthroughs', _vs.walkthroughs); _setVis('scans', _vs.scans);
       document.getElementById('sub-code').value = s.code || _genSubCode();
     });
   }
@@ -14980,6 +15079,12 @@ async function saveSub() {
   var address = (document.getElementById('sub-address')||{}).value ? document.getElementById('sub-address').value.trim() : '';
   var managers = (window._subMgrs||[]).filter(function(m){ return (m.name||m.phone||m.email); });
   var note = document.getElementById('sub-note').value.trim();
+  var visibleSections = {
+    punch: document.getElementById('sub-vis-punch') ? document.getElementById('sub-vis-punch').checked : true,
+    fixes: document.getElementById('sub-vis-fixes') ? document.getElementById('sub-vis-fixes').checked : true,
+    walkthroughs: document.getElementById('sub-vis-walkthroughs') ? document.getElementById('sub-vis-walkthroughs').checked : true,
+    scans: document.getElementById('sub-vis-scans') ? document.getElementById('sub-vis-scans').checked : true
+  };
   var code = document.getElementById('sub-code').value.trim();
   if (!name) { alert('Enter a name or company.'); return; }
   if (!/^\d{4}$/.test(code)) { alert('Code must be 4 digits.'); return; }
@@ -14990,7 +15095,7 @@ async function saveSub() {
   var id = _subEditId || ('sub_' + Date.now() + '_' + Math.random().toString(36).slice(2,6));
   var existing = _subEditId ? (await DB.get('subcontractor:' + id)) : null;
   var rec = existing || { id: id, tasks: [], assignedItems: [], active: true };
-  rec.name = name; rec.owner = owner; rec.trade = trade; rec.phone = phone; rec.email = email; rec.address = address; rec.managers = managers; rec.officeNote = note; rec.code = code;
+  rec.name = name; rec.owner = owner; rec.trade = trade; rec.phone = phone; rec.email = email; rec.address = address; rec.managers = managers; rec.officeNote = note; rec.code = code; rec.visibleSections = visibleSections;
   if (rec.active === undefined) rec.active = true;
   await DB.set('subcontractor:' + id, rec);
   if (typeof logActivity === 'function') logActivity((existing?'Edited':'Added') + ' subcontractor ' + name);
@@ -15315,7 +15420,15 @@ async function renderSubPortal() {
   if (view === 'walkthroughs') return _renderSubWalkView();
   return _renderSubDashboard();
 }
-function _subGo(view) { window._subView = view; renderSubPortal(); }
+function _subGo(view) {
+  // Block navigation to sections hidden for this sub.
+  var vis = (_currentSub && _currentSub.visibleSections) || {};
+  if (['punch','fixes','walkthroughs','scans'].indexOf(view) > -1 && vis[view] === false) {
+    try { ddToast('That section is not available'); } catch(e) {}
+    return;
+  }
+  window._subView = view; renderSubPortal();
+}
 function _subBack() { window._subView = 'dashboard'; renderSubPortal(); }
 
 // ---- Dashboard landing with navigation cards ----
@@ -15356,12 +15469,16 @@ async function _renderSubDashboard() {
       '<span class="spd-card-arrow">\u203a</span>' +
     '</button>';
   }
-  html += '<div class="spd-cards">' +
-    card('punch', '\u2705', 'Punch List', 'Your to-do items', punchOpen||'') +
-    card('fixes', '\ud83d\udd27', 'Inspection Fixes', 'Items to repair', fixOpen||'') +
-    card('walkthroughs', '\ud83d\udeb6', 'Walkthroughs', 'Scheduled visits', '') +
-    card('scans', '\ud83c\udfe0', '3D Scans', 'View property scans', scans||'') +
-  '</div>';
+  // Respect per-sub visibility settings (default: everything visible).
+  var vis = _currentSub.visibleSections || {};
+  function _show(name){ return vis[name] !== false; }
+  var cards = '';
+  if (_show('punch'))        cards += card('punch', '\u2705', 'Punch List', 'Your to-do items', punchOpen||'');
+  if (_show('fixes'))        cards += card('fixes', '\ud83d\udd27', 'Inspection Fixes', 'Items to repair', fixOpen||'');
+  if (_show('walkthroughs')) cards += card('walkthroughs', '\ud83d\udeb6', 'Walkthroughs', 'Scheduled visits', '');
+  if (_show('scans'))        cards += card('scans', '\ud83c\udfe0', '3D Scans', 'View property scans', scans||'');
+  if (!cards) { cards = '<div style="text-align:center;color:var(--muted);padding:30px 16px;font-size:13px;">No sections have been shared with you yet. Your office will enable them soon.</div>'; }
+  html += '<div class="spd-cards">' + cards + '</div>';
   host.innerHTML = html;
 }
 
