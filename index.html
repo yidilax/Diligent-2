@@ -3962,6 +3962,93 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
 .tp-com-text { font-size:14px; color:#3a3730; margin-top:1px; }
 .tp-empty { font-size:13px; color:var(--muted,#8a8472); padding:4px 0; }
 
+
+.tp-top-actions { display:flex; align-items:center; gap:10px; }
+.tp-save { background:var(--gold); color:#1a1407; border:none; border-radius:8px; padding:8px 18px; font-size:14px; font-weight:800; cursor:pointer; }
+.tp-save:active { opacity:0.9; }
+
+
+.tp-asg-wrap { flex:1; display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+.tp-asg-chip { display:inline-flex; align-items:center; gap:6px; background:var(--navy); color:#fff; border-radius:16px; padding:5px 10px; font-size:13px; font-weight:600; }
+.tp-asg-x { background:none; border:none; color:rgba(255,255,255,0.7); font-size:12px; cursor:pointer; padding:0; line-height:1; }
+.tp-asg-empty { font-size:13.5px; color:var(--muted,#8a8472); }
+.tp-asg-add { border:1px solid var(--border,#e8e2d5); border-radius:8px; padding:7px 9px; font-size:13px; font-family:inherit; color:var(--navy); background:#fff; cursor:pointer; }
+
+
+/* ========== GLOBAL COMPACTION & POLISH (v205) ========== */
+/* Tighter main content padding -> less wasted space, less scrolling */
+.office-content { padding: 14px 16px !important; }
+
+/* Dashboard: smaller stat cards + numbers */
+.dash-stat { padding: 13px 14px 11px !important; border-radius: 10px !important; }
+.dash-stat-num { font-size: 27px !important; letter-spacing: 0.5px !important; }
+.dash-section-label { font-size: 10.5px !important; letter-spacing: 1.2px !important; margin: 6px 0 8px !important; }
+.dash-action { padding: 12px 12px !important; font-size: 13px !important; }
+
+/* Tighter gaps between dashboard sections */
+.dash-grid, .dash-stats, .dash-actions-grid { gap: 10px !important; }
+.dash-section { margin-bottom: 16px !important; }
+
+/* Cards across the app: trim padding + softer, smaller radius */
+.card, .tsk-card, .pjl-row, .insp-card, .sub-card, .cust-card, .ppg-section, .ppg-hero {
+  border-radius: 10px;
+}
+
+/* Tasks: compress the stack of controls above the list */
+.task-new-btn { padding: 11px 16px !important; font-size: 14px !important; margin-bottom: 10px !important; }
+#tasksContent .insp-viewbar, .task-scope-bar, .task-view-bar { margin-bottom: 8px !important; }
+
+/* Generic section headers: smaller, less shouty */
+.tab-section-label, .section-label { font-size: 11px !important; letter-spacing: 1px !important; }
+
+/* Buttons: a touch smaller so they don't dominate */
+.btn, .btn-pri, .btn-primary { font-size: 14px; }
+
+/* Inputs: consistent, slightly tighter */
+.form-input { padding: 10px 12px; font-size: 14px; }
+
+/* Reduce empty-state vertical bulk */
+.tab-empty { padding: 30px 16px !important; }
+.tab-empty-icon { font-size: 34px !important; }
+
+/* Subtle, consistent card shadow everywhere (less heavy than before) */
+.dash-stat, .tsk-card, .ppg-section, .insp-card, .sub-card {
+  box-shadow: 0 1px 3px rgba(13,31,60,0.06) !important;
+}
+
+/* Section spacing rhythm: consistent 14px between major blocks */
+.office-tab > * + * { }
+
+/* Make the app-install banner less intrusive (smaller) */
+.pwa-banner, #appDownloadBanner { font-size: 12.5px; }
+
+
+.ak-toolbar { display:flex; align-items:center; gap:8px; margin:4px 0 10px !important; }
+.ak-toolbar-lbl { font-size:11px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; color:var(--muted); }
+.ak-gselect { border:1px solid var(--border); border-radius:8px; padding:6px 10px; font-size:13px; font-weight:600; color:var(--navy); background:#fff; font-family:inherit; cursor:pointer; }
+
+
+/* ----- Projects list fixes (v205) ----- */
+.pjl-dot { display:inline-block !important; width:10px; height:10px; border-radius:50%; flex-shrink:0; box-shadow:0 0 0 1px rgba(0,0,0,0.06) inset; }
+#projectsList { background:#fff; border-radius:10px; overflow:hidden; border:1px solid var(--border); box-shadow:0 1px 3px rgba(13,31,60,0.06); }
+#projectsList .pjl-row:last-child { border-bottom:none; }
+#projectsList .pjl-row:first-child { border-top:none; }
+.pjl-row { padding:13px 14px !important; }
+
+
+/* ----- Projects list: remove phantom top gap + spacing (v205b) ----- */
+#projectsList { padding:0 !important; }
+#projectsList .pjl-row { display:flex !important; margin:0 !important; }
+.pjl-row { gap:9px !important; }
+.pjl-reorder { margin-right:2px; }
+.pjl-name { margin-left:2px; }
+
+
+/* ----- Tab header buttons: prevent awkward wrapping (v205b) ----- */
+.tab-header .btn-primary, .tab-header .btn, .tab-header button { white-space:nowrap; }
+.tab-header { gap:10px; align-items:flex-start; }
+.tab-title { font-size:30px; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -4289,7 +4376,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v202</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v205</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4651,7 +4738,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v202</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v205</div>
     </div>
   </div>
 
@@ -5512,7 +5599,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
 </div>
 
 
-<script>var APP_VERSION = 'v202';
+<script>var APP_VERSION = 'v205';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -8813,17 +8900,24 @@ function _taskUid() { return 'task_' + Date.now() + '_' + Math.floor(Math.random
 
 var _viewAsUserId = null;
 function _effectiveUserId() { return _viewAsUserId || (currentUser ? currentUser.id : null); }
+function _taskAssigneeIds(t) {
+  // Unified list of everyone assigned (supports multiple assignees + legacy single field).
+  var ids = [];
+  if (t) {
+    if (Array.isArray(t.assigneeIds)) ids = t.assigneeIds.slice();
+    if (t.assigneeId && ids.indexOf(t.assigneeId) === -1) ids.push(t.assigneeId);
+  }
+  return ids.filter(Boolean);
+}
 function _isTaskOwner(t, uid) {
   if (!t || !uid) return false;
-  // Assignees always see their task
-  if (t.assigneeId === uid) return true;
-  if (t.assignee2Id === uid) return true;
-  // Creator sees it ONLY while it has no assignee (otherwise it leaves their list)
-  var hasAssignee = !!(t.assigneeId || t.assignee2Id);
-  if (!hasAssignee && t.ownerId === uid) return true;
+  // Anyone assigned (one of possibly several) has this in "My Tasks".
+  if (_taskAssigneeIds(t).indexOf(uid) > -1) return true;
+  // Creator sees it ONLY while it has no assignees at all.
+  if (_taskAssigneeIds(t).length === 0 && t.ownerId === uid) return true;
   return false;
 }
-function _isTaskFollower(t, uid) { return !!(t && uid && t.followers && t.followers.indexOf(uid) > -1); }
+function _isTaskFollower(t, uid) { if (!t || !uid) return false; if (t.assignee2Id === uid) return true; return !!(t.followers && t.followers.indexOf(uid) > -1); }
 function _canSeeTask(t, uid) { return _isTaskOwner(t, uid) || _isTaskFollower(t, uid); }
 
 async function _loadAllTasks() {
@@ -9477,11 +9571,11 @@ function _renderTaskAsana(tasks) {
   // Group-by switcher
   var html = '<div class="ak-toolbar">' +
     '<span class="ak-toolbar-lbl">Group by</span>' +
-    '<div class="ak-gbtns">' +
+    '<select class="ak-gselect" onchange="_setTaskGroupBy(this.value)">' +
       ['section','due','priority','project'].map(function(g){
-        return '<button class="ak-gbtn' + (gb===g?' on':'') + '" onclick="_setTaskGroupBy(\'' + g + '\')">' + gbLabels[g] + '</button>';
+        return '<option value="' + g + '"' + (gb===g?' selected':'') + '>' + gbLabels[g] + '</option>';
       }).join('') +
-    '</div>' +
+    '</select>' +
   '</div>';
 
   if (!groups.length) {
@@ -10322,9 +10416,10 @@ async function _renderTaskPage() {
   var html =
   '<div class="tp-wrap">' +
     '<div class="tp-top">' +
-      '<button class="tp-back" onclick="closeTaskPage()">\u2039 Tasks</button>' +
+      '<button class="tp-back" onclick="closeTaskPage()">' + (_taskPageIsNew ? '\u2715 Cancel' : '\u2039 Tasks') + '</button>' +
       '<div class="tp-top-actions">' +
-        '<button class="tp-del" onclick="_tpDelete()">\ud83d\uddd1</button>' +
+        (_taskPageIsNew ? '' : '<button class="tp-del" onclick="_tpDelete()">\ud83d\uddd1</button>') +
+        '<button class="tp-save" onclick="_tpSaveAndClose()">' + (_taskPageIsNew ? 'Save' : 'Done') + '</button>' +
       '</div>' +
     '</div>' +
     '<div class="tp-body">' +
@@ -10335,7 +10430,7 @@ async function _renderTaskPage() {
       '</div>' +
 
       '<div class="tp-fields">' +
-        _tpField2('Assignee', '<select class="tp-input" onchange="_tpFieldAssignee(this.value)">' + opts(employees, t.assigneeId, '\u2014 Unassigned \u2014') + '</select>') +
+        _tpField2('Assignees', _tpAssigneeControl(employees, t)) +
         _tpField2('Collaborator', '<select class="tp-input" onchange="_tpFieldCollab(this.value)">' + opts(employees, t.assignee2Id, '\u2014 None \u2014') + '</select>') +
         _tpField2('Project', '<select class="tp-input" onchange="_tpFieldProject(this.value)">' + opts(projects, t.projectId, '\u2014 None \u2014') + '</select>') +
         _tpField2('Status', '<select class="tp-input" onchange="_tpField(\'status\',this.value)">' + statusList.map(function(s){return '<option value="'+s[0]+'"'+(t.status===s[0]?' selected':'')+'>'+s[1]+'</option>';}).join('') + '</select>') +
@@ -10377,53 +10472,98 @@ function _tpAutoGrow(el){ el.style.height='auto'; el.style.height=(el.scrollHeig
 async function _tpField(key, val) {
   var t = window._taskPageDraft; if (!t) return;
   t[key] = val;
-  await _tpSave();
+  if (!_taskPageIsNew) { await _tpSave(); }  // existing task: auto-save; new task: wait for Save
 }
 async function _tpFieldCollab(id) {
   var t = window._taskPageDraft; if (!t) return;
   var emps = await _loadEmployeesForAssign();
   var emp = emps.find(function(e){return e.id===id;});
   t.assignee2Id = id; t.assignee2Name = emp ? (emp.name||emp.email) : '';
-  await _tpSave();
+  if (!_taskPageIsNew) { await _tpSave(); }
 }
+
+function _tpAssigneeControl(employees, t) {
+  var ids = _taskAssigneeIds(t);
+  var chips = ids.map(function(id){
+    var e = employees.find(function(x){return x.id===id;});
+    var nm = e ? (e.name||e.email) : 'Unknown';
+    return '<span class="tp-asg-chip">' + _esc(nm) + '<button class="tp-asg-x" onclick="_tpRemoveAssignee(\'' + id + '\')">\u2715</button></span>';
+  }).join('');
+  // dropdown of people not already added
+  var avail = employees.filter(function(e){ return ids.indexOf(e.id) === -1; });
+  var addSel = '<select class="tp-asg-add" onchange="_tpAddAssignee(this.value);this.selectedIndex=0;">' +
+    '<option value="">+ Add assignee</option>' +
+    avail.map(function(e){ return '<option value="' + e.id + '">' + _esc(e.name||e.email) + '</option>'; }).join('') +
+  '</select>';
+  return '<div class="tp-asg-wrap">' + (chips || '<span class="tp-asg-empty">Unassigned</span>') + addSel + '</div>';
+}
+
+async function _tpAddAssignee(id) {
+  if (!id) return;
+  var t = window._taskPageDraft; if (!t) return;
+  var ids = _taskAssigneeIds(t);
+  if (ids.indexOf(id) === -1) ids.push(id);
+  t.assigneeIds = ids;
+  t.assigneeId = ids[0] || null;  // keep legacy primary in sync
+  var emps = await _loadEmployeesForAssign();
+  var pe = emps.find(function(e){return e.id===t.assigneeId;});
+  t.assigneeName = pe ? (pe.name||pe.email) : '';
+  if (!_taskPageIsNew) await _tpSave();
+  _renderTaskPage();
+}
+
+async function _tpRemoveAssignee(id) {
+  var t = window._taskPageDraft; if (!t) return;
+  var ids = _taskAssigneeIds(t).filter(function(x){return x !== id;});
+  t.assigneeIds = ids;
+  t.assigneeId = ids[0] || null;
+  var emps = await _loadEmployeesForAssign();
+  var pe = emps.find(function(e){return e.id===t.assigneeId;});
+  t.assigneeName = pe ? (pe.name||pe.email) : '';
+  if (!_taskPageIsNew) await _tpSave();
+  _renderTaskPage();
+}
+
 async function _tpFieldAssignee(id) {
   var t = window._taskPageDraft; if (!t) return;
   var emps = await _loadEmployeesForAssign();
   var emp = emps.find(function(e){return e.id===id;});
   t.assigneeId = id; t.assigneeName = emp ? (emp.name||emp.email) : '';
-  await _tpSave();
+  if (!_taskPageIsNew) { await _tpSave(); }
 }
 async function _tpFieldProject(id) {
   var t = window._taskPageDraft; if (!t) return;
   var projs = await _loadProjectsForLink();
   var p = projs.find(function(x){return x.id===id;});
   t.projectId = id; t.projectName = p ? (p.name||'') : '';
-  await _tpSave();
+  if (!_taskPageIsNew) { await _tpSave(); }
 }
 
 async function _tpToggleDone() {
   var t = window._taskPageDraft; if (!t) return;
   t.status = (t.status === 'done') ? 'todo' : 'done';
-  await _tpSave(); _renderTaskPage();
+  if (!_taskPageIsNew) await _tpSave();
+  _renderTaskPage();
 }
 async function _tpAddSub() {
   var inp = document.getElementById('tpNewSub'); if (!inp) return;
   var v = (inp.value||'').trim(); if (!v) return;
   var t = window._taskPageDraft; if (!t) return;
   t.subtasks = t.subtasks || []; t.subtasks.push({ title: v, done: false });
-  await _tpSave(); _renderTaskPage();
+  if (!_taskPageIsNew) await _tpSave();
+  _renderTaskPage();
 }
 async function _tpToggleSub(i) {
   var t = window._taskPageDraft; if (!t || !t.subtasks[i]) return;
-  t.subtasks[i].done = !t.subtasks[i].done; await _tpSave(); _renderTaskPage();
+  t.subtasks[i].done = !t.subtasks[i].done; if (!_taskPageIsNew) await _tpSave(); _renderTaskPage();
 }
 async function _tpEditSub(i, val) {
   var t = window._taskPageDraft; if (!t || !t.subtasks[i]) return;
-  t.subtasks[i].title = val; await _tpSave();
+  t.subtasks[i].title = val; if (!_taskPageIsNew) await _tpSave();
 }
 async function _tpDelSub(i) {
   var t = window._taskPageDraft; if (!t) return;
-  t.subtasks.splice(i,1); await _tpSave(); _renderTaskPage();
+  t.subtasks.splice(i,1); if (!_taskPageIsNew) await _tpSave(); _renderTaskPage();
 }
 async function _tpAddCom() {
   var inp = document.getElementById('tpNewCom'); if (!inp) return;
@@ -10431,7 +10571,8 @@ async function _tpAddCom() {
   var t = window._taskPageDraft; if (!t) return;
   t.comments = t.comments || [];
   t.comments.push({ who: (currentUser&&currentUser.name)||'Someone', text: v, at: Date.now() });
-  await _tpSave(); _renderTaskPage();
+  if (!_taskPageIsNew) await _tpSave();
+  _renderTaskPage();
 }
 async function _tpDelete() {
   ddConfirm('Delete this task? This cannot be undone.', async function(){
@@ -10454,6 +10595,16 @@ async function _tpSave() {
         await _gcalAutoAdd('Task: ' + t.title, t.projectName?('Project: '+t.projectName):'', t.startDate||t.dueDate, t.dueDate||t.startDate, a, 'task:'+t.id); } catch(e) {}
     }
   }
+}
+
+
+async function _tpSaveAndClose() {
+  var t = window._taskPageDraft; if (!t) { closeTaskPage(); return; }
+  if (_taskPageIsNew) {
+    if (!(t.title || '').trim()) { try { ddToast('Add a task name first'); } catch(e) {} var ti=document.querySelector('#taskDetailModal .tp-title'); if (ti) ti.focus(); return; }
+    await _tpSave();  // first save fires notifications + calendar
+  }
+  closeTaskPage();  // closeTaskPage calls renderTasks()
 }
 
 function closeTaskPage() {
@@ -10661,7 +10812,7 @@ async function deleteSubtask(id, idx) {
 
 function _notifyTaskStakeholders(t, opts) {
   var seen = {}; var targets = [];
-  if (t.assigneeId) targets.push(t.assigneeId);
+  _taskAssigneeIds(t).forEach(function(id){ targets.push(id); });
   if (t.assignee2Id) targets.push(t.assignee2Id);
   (t.followers || []).forEach(function(f) { targets.push(f); });
   if (t.ownerId) targets.push(t.ownerId);
@@ -15020,12 +15171,12 @@ async function renderProjects() {
       '<button class="pjl-arrow" ' + (idx===0?'disabled':'') + ' onclick="event.stopPropagation();_moveProject(\'' + p.id + '\',-1)">\u25b4</button>' +
       '<button class="pjl-arrow" ' + (idx===projects.length-1?'disabled':'') + ' onclick="event.stopPropagation();_moveProject(\'' + p.id + '\',1)">\u25be</button>' +
     '</div>' : '';
-    return '<button class="pjl-row" onclick="openProjectPage(\'' + p.id + '\')">' +
+    return '<div class="pjl-row" role="button" tabindex="0" onclick="openProjectPage(\'' + p.id + '\')">' +
       reorder +
       '<span class="pjl-dot" style="background:' + sCol + ';" title="' + (sl[p.status]||'Active') + '"></span>' +
       '<span class="pjl-name">' + _esc(p.name) + '</span>' +
       '<span class="pjl-arrow-go">\u203a</span>' +
-    '</button>';
+    '</div>';
   }).join('');
 }
 // Move a project up (-1) or down (1) in the list and persist the new order.
