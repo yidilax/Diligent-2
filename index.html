@@ -4514,7 +4514,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v228</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v230</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4924,7 +4924,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v228</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v230</div>
     </div>
   </div>
 
@@ -5786,7 +5786,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v228';
+<script>var APP_VERSION = 'v230';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -6303,6 +6303,15 @@ async function init() {
     _hideLoader();
     return;
   }
+
+  // One-time cleanup: a previous version used signInWithRedirect, which can leave a stuck
+  // "pending redirect" record in the browser's storage. On every load Firebase tries to
+  // resolve it, which re-opens the Google page — even when already logged in. Calling
+  // getRedirectResult() once drains and clears that pending state. We never start a redirect
+  // anymore (popup only), so this runs once, clears the leftover, and won't loop.
+  try {
+    await auth.getRedirectResult().catch(function(){});
+  } catch(e) {}
 
   var _handled = false;
 
@@ -20633,13 +20642,32 @@ function showCustomerDetail(idx) {
     });
     _fields.forEach(function(f) {
       var val = sel[f.key];
-      if (val !== 'yes') return;
+      // Show a field if the customer chose ANYTHING meaningful for it \u2014 not only literal 'yes'.
+      // This covers yes/no, dropdowns (e.g. paint color), and 'agreed' checkboxes.
+      var isEmpty = (val === undefined || val === null || val === '' || val === 'no' || val === 'N/A' || val === 'none');
+      if (isEmpty) return;
       hasAny = true;
+
+      // The value pill on the right: 'YES' for a yes answer, otherwise the actual choice
+      // (paint color, dropdown option, 'Agreed', etc.).
+      var pill;
+      if (val === 'yes') pill = '<span class="upg-yes-badge">YES</span>';
+      else if (val === 'agreed') pill = '<span class="upg-yes-badge">AGREED</span>';
+      else pill = '<span style="background:#F0EDE8;color:var(--navy);font-size:11px;font-weight:800;padding:3px 10px;border-radius:20px;">' + _esc(String(val)) + '</span>';
+
+      // Glass option, if any.
       var glass = '';
       if (f.glassKey && sel[f.glassKey] && sel[f.glassKey] !== 'N/A') {
-        glass = '<span style="font-size:10px;background:#F0EDE8;color:var(--navy);border-radius:10px;padding:2px 8px;margin-left:6px;font-weight:700;">' + sel[f.glassKey] + '</span>';
+        glass = '<span style="font-size:10px;background:#F0EDE8;color:var(--navy);border-radius:10px;padding:2px 8px;margin-left:6px;font-weight:700;">' + _esc(sel[f.glassKey]) + '</span>';
       }
-      secItems += '<div class="upg-row"><span class="upg-row-name">' + f.name + glass + '</span><span class="upg-yes-badge">YES</span></div>';
+      // 'If yes' sub-option follow-up (stored under '<key>_type'), shown when the customer
+      // picked yes and then chose a specific type.
+      var subVal = sel[f.key + '_type'];
+      if (subVal && subVal !== 'N/A' && subVal !== '') {
+        glass += '<span style="font-size:10px;background:#EAF2FB;color:#2c5d8a;border-radius:10px;padding:2px 8px;margin-left:6px;font-weight:700;">' + _esc(subVal) + '</span>';
+      }
+
+      secItems += '<div class="upg-row"><span class="upg-row-name">' + _esc(f.name) + glass + '</span>' + pill + '</div>';
     });
     if (secItems) {
       html += '<div class="cust-detail-card"><div class="cust-detail-hdr">' + (sec.label || sec.title || '') + '</div>' + secItems + '</div>';
