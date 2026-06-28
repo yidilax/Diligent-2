@@ -3848,6 +3848,16 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
 
 #ddWriteAlert { display:none; position:fixed; left:0; right:0; top:0; z-index:100001; background:#c0392b; color:#fff; font-size:13px; font-weight:600; text-align:center; padding:11px 14px calc(11px + env(safe-area-inset-top)); box-shadow:0 2px 12px rgba(0,0,0,0.3); }
 
+
+.insp-repair-entry { display:block; width:100%; margin:18px 0 4px; background:none; border:1px dashed var(--border); border-radius:10px; padding:11px; font-size:12.5px; color:var(--muted); font-weight:600; cursor:pointer; }
+.insp-repair-entry:active { background:#F0ECE2; }
+.insp-repair-row { display:flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--border); border-radius:10px; padding:11px 13px; margin-bottom:7px; }
+.insp-repair-info { flex:1; min-width:0; }
+.insp-repair-type { font-size:14px; font-weight:600; color:#1d2940; }
+.insp-repair-sub { font-size:12px; color:var(--muted); margin-top:2px; }
+.insp-repair-del { background:#c0392b; color:#fff; border:none; border-radius:8px; padding:7px 14px; font-size:13px; font-weight:700; cursor:pointer; flex-shrink:0; }
+.insp-repair-all { display:block; width:100%; margin:12px 0; background:#c0392b; color:#fff; border:none; border-radius:10px; padding:12px; font-size:14px; font-weight:700; cursor:pointer; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -4175,7 +4185,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v190</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v192</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4537,7 +4547,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v190</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v192</div>
     </div>
   </div>
 
@@ -5409,7 +5419,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
 </div>
 
 
-<script>var APP_VERSION = 'v190';
+<script>var APP_VERSION = 'v192';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -11982,6 +11992,8 @@ function applyTabPermissions() {
     var empLi = empBtn.closest('.office-nav-item') || empBtn;
     empLi.style.display = (currentUser.role === 'admin') ? '' : 'none';
   }
+  var resetBtn = document.getElementById('resetDataBtn');
+  if (resetBtn) { resetBtn.style.display = (currentUser.isOwner || currentUser.role === 'admin') ? 'block' : 'none'; }
   // admin-only sub buttons (upgrade editor, employees) follow admin role
   ['navbtn-upgradeEditor','navbtn-employees'].forEach(function(id){
     var b = document.getElementById(id);
@@ -13700,6 +13712,180 @@ function _ifxBtnLabel(id, open) {
   return (open ? '\u25b4 Hide items' : '\u25be View items by unit');
 }
 
+
+// ============ INSPECTION REPAIR TOOL ============
+async function _inspRepairScan() {
+  var host = document.getElementById('inspectionsList');
+  if (host) host.innerHTML = '<div style="text-align:center;color:var(--muted);padding:24px;">Scanning database\u2026</div>';
+  var fs = _getFirestore();
+  var found = [];
+  try {
+    if (fs) {
+      var snap = await fs.collection('dd').get();
+      var projects = _cachedList('project:').map(_cachedGet).filter(Boolean);
+      snap.docs.forEach(function(d){
+        var data = d.data();
+        if (!data || !data.k) return;
+        if (data.k.indexOf('inspection:') !== 0) return;
+        var rec = null;
+        try { rec = JSON.parse(data.v); } catch(e) {}
+        var proj = rec && rec.projectId ? projects.find(function(p){ return p.id === rec.projectId; }) : null;
+        var broken = !rec || !rec.id || !rec.type || !proj ||
+                     ['scheduled','passed','failed'].indexOf(rec.status) === -1;
+        found.push({
+          key: data.k, docId: d.id,
+          type: (rec && rec.type) || '(no type)',
+          status: (rec && rec.status) || '(no status)',
+          project: proj ? proj.name : '(missing project)',
+          broken: broken
+        });
+      });
+    }
+  } catch(e) { console.warn('repair scan failed', e); }
+  window._inspRepairFound = found;
+  _inspRepairRender();
+}
+
+function _inspRepairRender() {
+  var host = document.getElementById('inspectionsList');
+  if (!host) return;
+  var found = window._inspRepairFound || [];
+  var broken = found.filter(function(f){ return f.broken; });
+  var healthy = found.filter(function(f){ return !f.broken; });
+  var html = '<div class="insp-viewbar"><button class="insp-viewbtn on" onclick="renderInspections(true)">\u2039 Back to inspections</button></div>';
+  html += '<div style="padding:4px 2px 12px;font-size:13px;color:var(--muted);">Found ' + found.length + ' inspection record' + (found.length===1?'':'s') + ' in the database. ' + (broken.length ? (broken.length + ' look broken.') : 'All look healthy.') + '</div>';
+  if (broken.length) {
+    html += '<div style="font-size:12px;font-weight:800;letter-spacing:0.5px;text-transform:uppercase;color:#c0392b;margin:6px 0;">Broken / old records</div>';
+    broken.forEach(function(f){
+      html += '<div class="insp-repair-row"><div class="insp-repair-info"><div class="insp-repair-type">' + _esc(f.type) + '</div><div class="insp-repair-sub">' + _esc(f.project) + ' \u00b7 ' + _esc(f.status) + '</div></div>' +
+        '<button class="insp-repair-del" onclick="_inspRepairDelete(\'' + encodeURIComponent(f.key) + '\', \'' + encodeURIComponent(f.docId) + '\')">Delete</button></div>';
+    });
+    html += '<button class="insp-repair-all" onclick="_inspRepairDeleteAll()">Delete all ' + broken.length + ' broken records</button>';
+  }
+  if (healthy.length) {
+    html += '<div style="font-size:12px;font-weight:800;letter-spacing:0.5px;text-transform:uppercase;color:#3a7d5d;margin:16px 0 6px;">Healthy records</div>';
+    healthy.forEach(function(f){
+      html += '<div class="insp-repair-row"><div class="insp-repair-info"><div class="insp-repair-type">' + _esc(f.type) + '</div><div class="insp-repair-sub">' + _esc(f.project) + ' \u00b7 ' + _esc(f.status) + '</div></div></div>';
+    });
+  }
+  host.innerHTML = html;
+}
+
+async function _inspRepairDelete(encKey, encDocId) {
+  var key = decodeURIComponent(encKey);
+  var docId = decodeURIComponent(encDocId);
+  ddConfirm('Delete this record permanently?', async function(){
+    var fs = _getFirestore();
+    try {
+      if (fs && docId) { await fs.collection('dd').doc(docId).delete(); }
+      else if (fs) { await fs.collection('dd').doc(_fsKey(key)).delete(); }
+    } catch(e) {}
+    try { delete _store[key]; _saveToLS(); } catch(e) {}
+    window._inspCache = null;
+    if (window._inspRepairFound) window._inspRepairFound = window._inspRepairFound.filter(function(f){ return f.key !== key; });
+    try { ddToast('Deleted'); } catch(e) {}
+    _inspRepairRender();
+  });
+}
+
+async function _inspRepairDeleteAll() {
+  var broken = (window._inspRepairFound || []).filter(function(f){ return f.broken; });
+  if (!broken.length) return;
+  ddConfirm('Delete all ' + broken.length + ' broken records permanently?', async function(){
+    var fs = _getFirestore();
+    for (var i = 0; i < broken.length; i++) {
+      try { if (fs && broken[i].docId) { await fs.collection('dd').doc(broken[i].docId).delete(); } } catch(e) {}
+      try { delete _store[broken[i].key]; } catch(e) {}
+    }
+    _saveToLS();
+    window._inspCache = null;
+    window._inspRepairFound = (window._inspRepairFound || []).filter(function(f){ return !f.broken; });
+    try { ddToast('Cleaned up ' + broken.length + ' record' + (broken.length>1?'s':'')); } catch(e) {}
+    _inspRepairRender();
+  });
+}
+
+
+// ============ FRESH START / RESET TOOL (owner only) ============
+// Wipes ALL business/test data from Firebase but KEEPS user accounts, logins, and
+// app config so nobody gets locked out. One-way action with a typed confirmation.
+var _RESET_KEEP_PREFIXES = ['user:', 'pending:', 'authgate:', 'config:', 'custglobal:'];
+
+function _resetIsProtected(key) {
+  for (var i = 0; i < _RESET_KEEP_PREFIXES.length; i++) {
+    if (key.indexOf(_RESET_KEEP_PREFIXES[i]) === 0) return true;
+  }
+  return false;
+}
+
+async function _openResetTool() {
+  if (!currentUser || !(currentUser.isOwner || currentUser.role === 'admin')) {
+    try { ddToast('Only the owner can reset data'); } catch(e) {}
+    return;
+  }
+  // Count what's out there straight from Firebase.
+  var host = document.getElementById('inspectionsList');
+  var fs = _getFirestore();
+  var dataCount = 0, keepCount = 0;
+  try {
+    if (fs) {
+      var cols = ['dd', 'pub'];
+      for (var ci = 0; ci < cols.length; ci++) {
+        var snap = await fs.collection(cols[ci]).get();
+        snap.docs.forEach(function(d){
+          var data = d.data();
+          if (!data || !data.k) return;
+          if (_resetIsProtected(data.k)) keepCount++; else dataCount++;
+        });
+      }
+    }
+  } catch(e) {}
+
+  var msg = 'FRESH START\n\nThis permanently deletes ALL ' + dataCount + ' business records ' +
+            '(projects, customers, inspections, submissions, deliveries, tasks, schedules, subs, and more) from the database.\n\n' +
+            'It KEEPS your ' + keepCount + ' user accounts and logins so no one is locked out.\n\n' +
+            'This cannot be undone. Continue?';
+  ddConfirm(msg, function(){
+    // Second confirmation to be safe.
+    ddConfirm('Are you absolutely sure? This erases all test data for good.', async function(){
+      await _runReset();
+    });
+  });
+}
+
+async function _runReset() {
+  var fs = _getFirestore();
+  if (!fs) { try { ddToast('No database connection'); } catch(e){}; return; }
+  var deleted = 0;
+  try {
+    var cols = ['dd', 'pub'];
+    for (var ci = 0; ci < cols.length; ci++) {
+      var snap = await fs.collection(cols[ci]).get();
+      var docs = snap.docs;
+      for (var i = 0; i < docs.length; i++) {
+        var data = docs[i].data();
+        if (!data || !data.k) continue;
+        if (_resetIsProtected(data.k)) continue; // keep accounts/config
+        try {
+          await fs.collection(cols[ci]).doc(docs[i].id).delete();
+          try { delete _store[data.k]; } catch(e) {}
+          deleted++;
+        } catch(e) {}
+      }
+    }
+    _saveToLS();
+  } catch(e) { console.warn('reset error', e); }
+
+  // Clear in-memory caches so the UI reflects the empty state immediately.
+  try {
+    window._inspCache = null; window._schedCache = null; window._cachedSubmissions = null;
+    window._lbProjCache = null; window._filteredSubs = null;
+  } catch(e) {}
+
+  try { ddToast('Fresh start complete \u2014 deleted ' + deleted + ' records'); } catch(e) {}
+  // Send the user back to a clean dashboard.
+  setTimeout(function(){ try { switchTab('dashboard'); } catch(e) {} }, 600);
+}
 async function renderInspections(forceReload){
   var host=document.getElementById('inspectionsList'); if(!host)return;
   // Always rebuild from the live store so nothing can be hidden by a stale snapshot.
@@ -13741,6 +13927,12 @@ async function renderInspections(forceReload){
     '</div>';
   }).join('');
   host.innerHTML = toggle + (rows || '<div class="tab-empty"><div class="tab-empty-icon">\ud83d\udd0d</div><div class="tab-empty-title">No ' + (view==='passed'?'passed':'active') + ' inspections</div><div class="tab-empty-desc">' + (view==='passed'?'Passed inspections will appear here.':'Schedule an inspection above.') + '</div></div>');
+  // Owner-only cleanup tool for old/broken records.
+  try {
+    if (currentUser && (currentUser.isOwner || currentUser.role === 'admin')) {
+      host.innerHTML += '<button class="insp-repair-entry" onclick="_inspRepairScan()">\ud83e\uddf9 Clean up old records</button>';
+    }
+  } catch(e) {}
 }
 
 // Open the inspection detail modal (status controls + fix list).
