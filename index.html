@@ -4175,7 +4175,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v184</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v185</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4537,7 +4537,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v184</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v185</div>
     </div>
   </div>
 
@@ -5409,7 +5409,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
 </div>
 
 
-<script>var APP_VERSION = 'v184';
+<script>var APP_VERSION = 'v185';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -21259,6 +21259,22 @@ async function _ensurePersistence() {
 }
 
 // Handle a logged-in Firebase user — check their approval status
+
+// Writes a small 'auth gate' record keyed by the Firebase uid. The Firestore security
+// rules check this doc to confirm the signed-in user is an active office account.
+// Keyed by uid (which needs no URL-encoding), so the rules can find it reliably.
+async function _writeAuthGate(fbUser, status) {
+  try {
+    if (!fbUser || !fbUser.uid) return;
+    await DB.set('authgate:' + fbUser.uid, {
+      uid: fbUser.uid,
+      email: (fbUser.email || '').toLowerCase(),
+      status: status || 'pending',
+      at: Date.now()
+    });
+  } catch(e) { console.warn('auth gate write failed:', e); }
+}
+
 async function handleAuthedUser(fbUser) {
   if (!fbUser) return;
   var email = (fbUser.email || '').toLowerCase();
@@ -21318,6 +21334,9 @@ async function handleAuthedUser(fbUser) {
         try { await DB.set('user:' + email, userRec); } catch(e) {}
       }
     }
+
+    // Write/refresh the auth gate so the secure rules recognize this account.
+    await _writeAuthGate(fbUser, userRec.status);
 
     if (userRec.status === 'active') {
       openOfficeDashboard();
