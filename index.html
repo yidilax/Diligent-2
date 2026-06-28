@@ -3920,6 +3920,48 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
 
 .spv-walk-note { font-size:12px; color:#9a9484; margin-top:3px; font-style:italic; }
 .pm-push-setup { margin-top:10px; padding-top:10px; border-top:1px solid var(--border); }
+
+.task-new-btn { display:flex; align-items:center; gap:8px; background:var(--navy); color:#fff; border:none; border-radius:11px; padding:13px 18px; font-size:15px; font-weight:700; cursor:pointer; margin-bottom:14px; font-family:inherit; }
+.task-new-plus { font-size:20px; line-height:1; }
+.task-new-btn:active { opacity:0.9; }
+
+/* Unified task page */
+#taskDetailModal { position:fixed; inset:0; background:var(--bg,#F5F1E8); z-index:5000; overflow-y:auto; }
+.tp-wrap { max-width:760px; margin:0 auto; min-height:100%; background:#fff; }
+@media (min-width:768px){ .tp-wrap { margin:24px auto; border-radius:16px; min-height:auto; box-shadow:0 10px 40px rgba(0,0,0,0.15); overflow:hidden; } }
+.tp-top { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid var(--border,#e8e2d5); position:sticky; top:0; background:#fff; z-index:2; }
+.tp-back { background:none; border:none; color:var(--navy); font-size:15px; font-weight:700; cursor:pointer; }
+.tp-del { background:none; border:none; font-size:18px; cursor:pointer; opacity:0.7; }
+.tp-body { padding:18px 18px 60px; }
+.tp-titlerow { display:flex; align-items:flex-start; gap:12px; margin-bottom:18px; }
+.tp-done { width:26px; height:26px; border-radius:50%; border:2px solid #cfc8b6; background:none; color:#fff; cursor:pointer; flex-shrink:0; margin-top:4px; font-size:14px; }
+.tp-done { border:2px solid #cfc8b6; }
+.tp-done.on { background:#3a7d5d; border-color:#3a7d5d; }
+.tp-title { flex:1; border:none; outline:none; font-size:23px; font-weight:700; color:#1d2940; font-family:inherit; resize:none; overflow:hidden; line-height:1.25; background:none; padding:2px 0; }
+.tp-fields { display:flex; flex-direction:column; gap:2px; margin-bottom:8px; }
+.tp-field { display:flex; align-items:center; gap:12px; padding:8px 0; border-bottom:1px solid #f3efe6; }
+.tp-field-label { width:110px; flex-shrink:0; font-size:13px; color:var(--muted,#8a8472); font-weight:600; }
+.tp-input { flex:1; border:1px solid var(--border,#e8e2d5); border-radius:8px; padding:9px 11px; font-size:14.5px; font-family:inherit; color:#1d2940; background:#fff; }
+.tp-section-label { font-size:12px; font-weight:800; letter-spacing:0.6px; text-transform:uppercase; color:var(--navy); margin:22px 0 8px; }
+.tp-count { color:var(--muted,#8a8472); font-weight:700; }
+.tp-desc { width:100%; border:1px solid var(--border,#e8e2d5); border-radius:10px; padding:11px; font-size:14.5px; font-family:inherit; color:#1d2940; resize:none; overflow:hidden; line-height:1.5; }
+.tp-subs { display:flex; flex-direction:column; gap:4px; }
+.tp-sub { display:flex; align-items:center; gap:9px; }
+.tp-sub.done .tp-sub-title { text-decoration:line-through; color:var(--muted,#8a8472); }
+.tp-sub-check { width:22px; height:22px; border-radius:6px; border:2px solid #cfc8b6; background:none; cursor:pointer; flex-shrink:0; color:#fff; font-size:12px; }
+.tp-sub-check.on { background:#3a7d5d; border-color:#3a7d5d; }
+.tp-sub-title { flex:1; border:1px solid transparent; border-radius:7px; padding:7px 9px; font-size:14px; font-family:inherit; color:#1d2940; background:none; }
+.tp-sub-title:focus { border-color:var(--border,#e8e2d5); outline:none; background:#fff; }
+.tp-sub-x { background:none; border:none; color:#b5ae9c; font-size:14px; cursor:pointer; flex-shrink:0; }
+.tp-addsub, .tp-addcom { display:flex; gap:8px; margin-top:8px; }
+.tp-addsub-btn { background:var(--navy); color:#fff; border:none; border-radius:8px; padding:0 16px; font-size:13.5px; font-weight:700; cursor:pointer; flex-shrink:0; }
+.tp-coms { display:flex; flex-direction:column; gap:12px; }
+.tp-com { display:flex; gap:10px; }
+.tp-com-av { width:32px; height:32px; border-radius:50%; background:var(--navy); color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; }
+.tp-com-who { font-size:13px; font-weight:700; color:#1d2940; }
+.tp-com-text { font-size:14px; color:#3a3730; margin-top:1px; }
+.tp-empty { font-size:13px; color:var(--muted,#8a8472); padding:4px 0; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -4247,7 +4289,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v198</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v202</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4609,7 +4651,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v198</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v202</div>
     </div>
   </div>
 
@@ -5391,19 +5433,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
   <div class="office-tab" id="tab-tasks" style="display:none;">
         <div id="tasks-count" style="display:none;">0 open tasks</div>
 
-    <div class="qa2">
-      <div class="qa2-row1">
-        <span class="qa2-plus">+</span>
-        <input id="taskQuickInput" class="qa2-input" type="text" placeholder="Add a task..." onkeydown="_quickAddTask(event)">
-        <button class="qa2-add" onclick="_quickAddTask({key:'Enter'})">Add</button>
-      </div>
-      <div class="qa2-row2">
-        <button class="qa2-chip" id="qa2-who" onclick="_qaOpenWho(event)"><span class="qa2-chip-i">&#128100;</span><span id="qa2-who-lbl">Me</span></button>
-        <button class="qa2-chip" id="qa2-house" onclick="_qaOpenHouse(event)"><span class="qa2-chip-i">&#8962;</span><span id="qa2-house-lbl">House</span></button>
-        <button class="qa2-chip" id="qa2-when" onclick="_qaCycleWhen()"><span class="qa2-chip-i">&#128197;</span><span id="qa2-when-lbl">No date</span></button>
-        <button class="qa2-chip qa2-prio" id="qa2-prio" onclick="_qaCyclePrio()"><span class="qa2-prio-dot" id="qa2-prio-dot"></span><span id="qa2-prio-lbl">Medium</span></button>
-      </div>
-    </div>
+    <button class="task-new-btn" onclick="openTaskPage()"><span class="task-new-plus">+</span> New task</button>
 
     <!-- Scope + view switcher -->
     <div class="tsk-controls">
@@ -5482,7 +5512,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
 </div>
 
 
-<script>var APP_VERSION = 'v198';
+<script>var APP_VERSION = 'v202';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -5667,6 +5697,112 @@ const DB = {
 
 // Load ALL records into memory once at login. After this, _store is the source of truth.
 window._corruptDocs = [];
+
+// ============ REAL-TIME LIVE SYNC ============
+// Keeps the local store in sync with Firebase as changes happen, and re-renders the
+// current view so updates appear without a manual refresh.
+var _liveUnsub = [];
+var _liveRerenderTimer = null;
+var _liveReady = false;
+
+function _startLiveSync() {
+  try {
+    var fs = _getFirestore();
+    if (!fs) return;
+    _stopLiveSync();
+    var cols = ['dd', 'pub'];
+    cols.forEach(function(col) {
+      try {
+        var unsub = fs.collection(col).onSnapshot(function(snap) {
+          var changed = false;
+          snap.docChanges().forEach(function(ch) {
+            var d = ch.doc; var data = d.data();
+            if (!data || !data.k) return;
+            if (ch.type === 'removed') {
+              if (_store[data.k] !== undefined) { delete _store[data.k]; changed = true; }
+            } else {
+              if (data.v !== undefined && data.v !== '' && data.v !== null) {
+                if (_store[data.k] !== data.v) { _store[data.k] = data.v; changed = true; }
+              }
+            }
+          });
+          if (changed) {
+            try { _saveToLS(); } catch(e) {}
+            // Ignore the very first snapshot (it's just the initial load we already have).
+            if (_liveReady) _scheduleLiveRerender();
+          }
+        }, function(err) { /* listener error: ignore, fall back to manual refresh */ });
+        _liveUnsub.push(unsub);
+      } catch(e) {}
+    });
+    // Mark ready after the initial snapshots settle.
+    setTimeout(function(){ _liveReady = true; }, 1500);
+  } catch(e) {}
+}
+
+function _stopLiveSync() {
+  _liveUnsub.forEach(function(u){ try { u(); } catch(e) {} });
+  _liveUnsub = [];
+  _liveReady = false;
+}
+
+// Debounced re-render so a burst of changes only repaints once.
+function _scheduleLiveRerender() {
+  if (_liveRerenderTimer) clearTimeout(_liveRerenderTimer);
+  _liveRerenderTimer = setTimeout(function(){ _liveRerenderTimer = null; _rerenderCurrentView(); }, 400);
+}
+
+// Re-render whatever the user is currently looking at, without disrupting typing.
+async function _rerenderCurrentView() {
+  // Don't repaint while the user is editing a field (would lose focus/caret).
+  try {
+    var ae = document.activeElement;
+    if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.tagName === 'SELECT')) {
+      _scheduleLiveRerender(); // try again shortly
+      return;
+    }
+  } catch(e) {}
+
+  // If a task page is open, refresh it (unless it's a brand-new unsaved task).
+  try {
+    var tp = document.getElementById('taskDetailModal');
+    if (tp && tp.style.display === 'block' && _taskPageId && !_taskPageIsNew) {
+      var fresh = await DB.get('task:' + _taskPageId);
+      if (fresh) { window._taskPageDraft = fresh; _renderTaskPage(); }
+      return;
+    }
+  } catch(e) {}
+
+  // Refresh notification badge always.
+  try { if (typeof refreshNotifBadge === 'function') refreshNotifBadge(); } catch(e) {}
+
+  // Re-render the active office tab.
+  var tab = window._currentTab;
+  try {
+    if (tab === 'dashboard') { await refreshDashboard(); }
+    else if (tab === 'projects') {
+      // Don't clobber an open project detail page.
+      if (window._openProjectId && document.querySelector('.ppg-hero')) { await openProjectPage(window._openProjectId); }
+      else { await renderProjects(); }
+    }
+    else if (tab === 'customers') { await renderCustomers(); }
+    else if (tab === 'employees') { await renderEmployees(); }
+    else if (tab === 'custUpdates') { await renderCustUpdates(); }
+    else if (tab === 'subs') { await renderSubs(); }
+    else if (tab === 'punchlist') { renderPunchList(); }
+    else if (tab === 'tasks') { renderTasks(); }
+    else if (tab === 'scheduling') { renderScheduleNew(); }
+    else if (tab === 'specs') { renderSpecs(); }
+    else if (tab === 'inspections') { renderInspections(true); }
+  } catch(e) {}
+
+  // Sub portal / customer portal live refresh.
+  try {
+    if (typeof renderSubPortal === 'function' && document.getElementById('subPortalContent') && _currentSub) { renderSubPortal(); }
+  } catch(e) {}
+}
+
+
 async function warmCache() {
   window._corruptDocs = [];
   try {
@@ -5701,6 +5837,7 @@ async function warmCache() {
     }
   } catch(e) { console.warn('warmCache error', e); }
   _cacheWarm = true;
+  try { _startLiveSync(); } catch(e) {}
 }
 
 // One-time cleanup: remove corrupt (blank-value) documents from Firebase. Safe because
@@ -7898,6 +8035,11 @@ function _renderProfileMenu() {
   // Push notifications
   html += '<div class="pm-section">Notifications</div>';
   html += '<div id="pmPushBox" class="pm-gcal"></div>';
+  // AI assistant (owner-only setup)
+  if (currentUser && (currentUser.isOwner || currentUser.role === 'admin')) {
+    html += '<div class="pm-section">AI Assistant</div>';
+    html += '<div id="pmAiBox" class="pm-gcal"></div>';
+  }
   // Calendar settings
   html += '<div class="pm-section">Google Calendar</div>';
   html += '<div id="pmGcalBox" class="pm-gcal"></div>';
@@ -7908,6 +8050,7 @@ function _renderProfileMenu() {
   '</div>';
   host.innerHTML = html;
   try { _renderPushSetting(); } catch(e) {}
+  try { _renderAiSetting(); } catch(e) {}
   try { _renderProfileGcal(); } catch(e) {}
 }
 
@@ -7922,6 +8065,25 @@ function _toggleGcalShowButtons() {
   try { if (typeof renderTasks === 'function') renderTasks(); } catch(e) {}
 }
 
+
+
+function _renderAiSetting() {
+  var host = document.getElementById('pmAiBox');
+  if (!host) return;
+  var cur = '';
+  try { cur = localStorage.getItem('dd_aiUrl') || ''; } catch(e) {}
+  host.innerHTML =
+    '<div class="pm-gcal-note" style="padding-bottom:4px;">AI service URL. Lets \u201c\u2728 Help me write\u201d polish customer updates.</div>' +
+    '<input id="pmAiUrl" class="form-input" style="font-size:13px;" placeholder="https://your-ai-service-url" value="' + _esc(cur) + '">' +
+    '<button class="pm-gcal-connect" style="margin-top:6px;" onclick="_saveAiUrl()">Save AI URL</button>';
+}
+function _saveAiUrl() {
+  var el = document.getElementById('pmAiUrl');
+  if (!el) return;
+  var v = (el.value || '').trim();
+  try { localStorage.setItem('dd_aiUrl', v); } catch(e) {}
+  try { ddToast(v ? 'AI service saved \u2713' : 'AI service cleared'); } catch(e) {}
+}
 
 function _renderPushSetting() {
   var host = document.getElementById('pmPushBox');
@@ -7943,8 +8105,8 @@ function _renderPushSetting() {
     var cur = '';
     try { cur = localStorage.getItem('dd_pushSendUrl') || ''; } catch(e) {}
     html += '<div class="pm-push-setup">' +
-      '<div class="pm-gcal-note" style="padding-bottom:4px;">Push sender URL (Val Town). Set once.</div>' +
-      '<input id="pmPushUrl" class="form-input" style="font-size:13px;" placeholder="https://...val.run" value="' + _esc(cur) + '">' +
+      '<div class="pm-gcal-note" style="padding-bottom:4px;">Push sender URL (Firebase function). Set once.</div>' +
+      '<input id="pmPushUrl" class="form-input" style="font-size:13px;" placeholder="https://...cloudfunctions.net/sendPush" value="' + _esc(cur) + '">' +
       '<button class="pm-gcal-connect" style="margin-top:6px;" onclick="_savePushSendUrl()">Save sender URL</button>' +
     '</div>';
   }
@@ -8858,12 +9020,12 @@ function _renderTaskTimeline(tasks) {
     var pm = _taskPriorityMeta(t.priority);
     var done = t.status === 'done';
     rowsHtml += '<div class="tl-row" style="width:' + (labelW + totalDays * dayW) + 'px">' +
-      '<div class="tl-label" style="width:' + labelW + 'px" onclick="openTaskDetail(\'' + t.id + '\')">' +
+      '<div class="tl-label" style="width:' + labelW + 'px" onclick="openTaskPage(\'' + t.id + '\')">' +
         (t.isMilestone ? '\u2691 ' : '') + _esc(t.title || '') + '</div>' +
       '<div class="tl-track" style="width:' + (totalDays * dayW) + 'px">' +
         (t.isMilestone
-          ? '<div class="tl-milestone" style="left:' + (offset * dayW + dayW/2 - 9) + 'px;background:' + pm.color + '" onclick="openTaskDetail(\'' + t.id + '\')" title="' + _esc(t.title) + '">\u2691</div>'
-          : '<div class="tl-bar' + (done ? ' tl-done' : '') + '" style="left:' + (offset * dayW) + 'px;width:' + (span * dayW - 4) + 'px;background:' + pm.color + '" onclick="openTaskDetail(\'' + t.id + '\')" title="' + _esc(t.title) + '"></div>') +
+          ? '<div class="tl-milestone" style="left:' + (offset * dayW + dayW/2 - 9) + 'px;background:' + pm.color + '" onclick="openTaskPage(\'' + t.id + '\')" title="' + _esc(t.title) + '">\u2691</div>'
+          : '<div class="tl-bar' + (done ? ' tl-done' : '') + '" style="left:' + (offset * dayW) + 'px;width:' + (span * dayW - 4) + 'px;background:' + pm.color + '" onclick="openTaskPage(\'' + t.id + '\')" title="' + _esc(t.title) + '"></div>') +
       '</div>' +
     '</div>';
   });
@@ -9129,7 +9291,7 @@ async function _tasDone() {
 function _tasOpen() {
   var id = _qaCurrentTask && _qaCurrentTask.id;
   closeTaskQuickActions();
-  if (id) openTaskDetail(id);
+  if (id) openTaskPage(id);
 }
 function _tasEdit() {
   var id = _qaCurrentTask && _qaCurrentTask.id;
@@ -9291,7 +9453,7 @@ function _asanaRow(t) {
   var initials = who ? who.split(' ').map(function(p){return p[0];}).slice(0,2).join('').toUpperCase() : '';
   var subCount = (t.subtasks||[]).length;
   var subDone = (t.subtasks||[]).filter(function(s){return s.done;}).length;
-  return '<div class="ak-row' + (done?' done':'') + '" onclick="openTaskQuickActions(\'' + t.id + '\')">' +
+  return '<div class="ak-row' + (done?' done':'') + '" onclick="openTaskPage(\'' + t.id + '\')">' +
     '<button class="ak-check' + (done?' on':'') + '" onclick="event.stopPropagation();toggleTaskDone(\'' + t.id + '\')" aria-label="Complete task">' + (done?'\u2713':'') + '</button>' +
     '<div class="ak-main">' +
       '<div class="ak-title">' + (t.isMilestone?'<span class="ak-ms">\u2691</span> ':'') + _esc(t.title||'Untitled') + '</div>' +
@@ -9430,7 +9592,7 @@ function _woLine(t) {
   var subDone = (t.subtasks||[]).filter(function(s){return s.done;}).length;
   var who = (t.assigneeName||'').trim();
 
-  return '<div class="wo-line' + (done?' done':'') + '" onclick="openTaskQuickActions(\'' + t.id + '\')">' +
+  return '<div class="wo-line' + (done?' done':'') + '" onclick="openTaskPage(\'' + t.id + '\')">' +
     '<span class="wo-line-tab" style="background:' + pm.color + '" title="' + pm.label + '"></span>' +
     '<button class="wo-line-check' + (done?' on':'') + '" onclick="event.stopPropagation();toggleTaskDone(\'' + t.id + '\')" aria-label="Mark done">' + (done?'\u2713':'') + '</button>' +
     '<div class="wo-line-main">' +
@@ -9455,7 +9617,7 @@ function _taskCardHtml(t) {
   var subDone = (t.subtasks || []).filter(function(s){ return s.done; }).length;
   var cmtCount = (t.comments || []).length;
   var initials = (t.assigneeName||'').trim().split(/\s+/).map(function(w){return w[0];}).slice(0,2).join('').toUpperCase();
-  return '<div class="tsk-card' + (done?' tsk-done':'') + '" onclick="openTaskDetail(\'' + t.id + '\')">' +
+  return '<div class="tsk-card' + (done?' tsk-done':'') + '" onclick="openTaskPage(\'' + t.id + '\')">' +
     '<button class="tsk-check' + (done?' on':'') + '" onclick="event.stopPropagation();toggleTaskDone(\'' + t.id + '\')" aria-label="Toggle complete">' + (done?'\u2713':'') + '</button>' +
     '<div class="tsk-card-body">' +
       '<div class="tsk-card-title">' + (t.isMilestone?'<span class="tsk-ms">\u2691</span> ':'') + _esc(t.title||'Untitled') + '</div>' +
@@ -9496,7 +9658,7 @@ function _taskBoardCardHtml(t){
   var done = (t.status||'todo')==='done';
   var overdue = t.dueDate && !done && new Date(t.dueDate+'T00:00:00') < new Date(new Date().toDateString());
   var initials = (t.assigneeName||'').trim().split(/\s+/).map(function(w){return w[0];}).slice(0,2).join('').toUpperCase();
-  return '<div class="tsk-bcard" draggable="true" ondragstart="_taskDragNew(event,\'' + t.id + '\')" onclick="openTaskDetail(\'' + t.id + '\')">' +
+  return '<div class="tsk-bcard" draggable="true" ondragstart="_taskDragNew(event,\'' + t.id + '\')" onclick="openTaskPage(\'' + t.id + '\')">' +
     '<div class="tsk-bcard-top"><span class="tsk-prio-dot" style="background:' + pm.color + '"></span>' +
       (due ? '<span class="tsk-bdue' + (overdue?' over':'') + '">' + due + '</span>' : '') + '</div>' +
     '<div class="tsk-bcard-title">' + _esc(t.title||'Untitled') + '</div>' +
@@ -9669,7 +9831,7 @@ function _taskRowHtml(t) {
   var subCount = (t.subtasks || []).length;
   var subDone = (t.subtasks || []).filter(function(s) { return s.done; }).length;
   var cmtCount = (t.comments || []).length;
-  return '<div class="task-row' + (done ? ' task-done' : '') + '" onclick="openTaskDetail(\'' + t.id + '\')">' +
+  return '<div class="task-row' + (done ? ' task-done' : '') + '" onclick="openTaskPage(\'' + t.id + '\')">' +
     '<button class="task-check' + (done ? ' checked' : '') + '" onclick="event.stopPropagation();toggleTaskDone(\'' + t.id + '\')">' + (done ? '✓' : '') + '</button>' +
     '<div class="task-row-main">' +
       '<div class="task-row-title">' + (t.isMilestone ? '<span class="task-ms-flag">\u2691</span> ' : '') + _esc(t.title || 'Untitled') + '</div>' +
@@ -9697,7 +9859,7 @@ function _renderTaskBoard(tasks) {
       var pm = _taskPriorityMeta(t.priority);
       var due = t.dueDate ? _fmtTaskDate(t.dueDate) : '';
       var overdue = t.dueDate && t.status !== 'done' && new Date(t.dueDate) < new Date(new Date().toDateString());
-      html += '<div class="task-card" draggable="true" data-id="' + t.id + '" ondragstart="_dragTask(event,\'' + t.id + '\')" onclick="openTaskDetail(\'' + t.id + '\')">' +
+      html += '<div class="task-card" draggable="true" data-id="' + t.id + '" ondragstart="_dragTask(event,\'' + t.id + '\')" onclick="openTaskPage(\'' + t.id + '\')">' +
         '<div class="task-card-prio" style="background:' + pm.color + '"></div>' +
         '<div class="task-card-title">' + (t.isMilestone ? '<span class="task-ms-flag">\u2691</span> ' : '') + _esc(t.title || 'Untitled') + '</div>' +
         '<div class="task-card-meta">' +
@@ -9756,7 +9918,7 @@ function _renderTaskCalendar(tasks) {
       '<div class="task-cal-daynum">' + day + '</div>';
     dayTasks.slice(0, 3).forEach(function(t) {
       var pm = _taskPriorityMeta(t.priority);
-      html += '<div class="task-cal-pill" style="border-left:3px solid ' + pm.color + '" onclick="openTaskDetail(\'' + t.id + '\')">' + (t.isMilestone ? '\u2691 ' : '') + _esc(t.title || '') + '</div>';
+      html += '<div class="task-cal-pill" style="border-left:3px solid ' + pm.color + '" onclick="openTaskPage(\'' + t.id + '\')">' + (t.isMilestone ? '\u2691 ' : '') + _esc(t.title || '') + '</div>';
     });
     if (dayTasks.length > 3) html += '<div class="task-cal-more">+' + (dayTasks.length - 3) + ' more</div>';
     html += '</div>';
@@ -10089,6 +10251,219 @@ async function deleteTask(id) {
 }
 
 /* ── DETAIL VIEW (subtasks + comments) ── */
+
+// ============ UNIFIED TASK PAGE (Asana-style, all on one page) ============
+var _taskPageId = null;
+var _taskPageIsNew = false;
+
+async function openTaskPage(taskId) {
+  var employees = await _loadEmployeesForAssign();
+  var projects = await _loadProjectsForLink();
+  var t = taskId ? await DB.get('task:' + taskId) : null;
+
+  if (!t) {
+    // New task — create a blank one immediately so subtasks/comments can attach.
+    _taskPageIsNew = true;
+    var nid = 'task_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+    t = { id: nid, title: '', status: 'todo', priority: 'medium', subtasks: [], comments: [],
+          attachments: [], activity: [{ who: (currentUser&&currentUser.name)||'Someone', what: 'created this task', at: Date.now() }],
+          _createdAt: Date.now(), ownerId: currentUser ? currentUser.id : null, visibility: 'public' };
+  } else {
+    _taskPageIsNew = false;
+  }
+  _taskPageId = t.id;
+  window._taskPageDraft = t;
+
+  var page = document.getElementById('taskDetailModal');
+  page.style.display = 'block';
+  _renderTaskPage();
+}
+
+function _tpInitials(name) {
+  if (!name) return '?';
+  var p = name.trim().split(/\s+/);
+  return (p[0][0] + (p[1] ? p[1][0] : '')).toUpperCase();
+}
+
+async function _renderTaskPage() {
+  var t = window._taskPageDraft;
+  if (!t) return;
+  var page = document.getElementById('taskDetailModal');
+  var employees = await _loadEmployeesForAssign();
+  var projects = await _loadProjectsForLink();
+  var done = t.status === 'done';
+
+  function opts(list, selId, noneLabel) {
+    var h = '<option value="">' + noneLabel + '</option>';
+    list.forEach(function(e){ h += '<option value="' + e.id + '"' + (selId===e.id?' selected':'') + '>' + _esc(e.name||e.email) + '</option>'; });
+    return h;
+  }
+  var statusList = [['todo','To do'],['inprogress','In progress'],['done','Done'],['blocked','Blocked']];
+  var prioList = [['low','Low'],['medium','Medium'],['high','High'],['urgent','Urgent']];
+
+  // Subtasks
+  var subTotal = (t.subtasks||[]).length;
+  var subDone = (t.subtasks||[]).filter(function(s){return s.done;}).length;
+  var subHtml = (t.subtasks||[]).map(function(s,i){
+    return '<div class="tp-sub' + (s.done?' done':'') + '">' +
+      '<button class="tp-sub-check' + (s.done?' on':'') + '" onclick="_tpToggleSub(' + i + ')">' + (s.done?'\u2713':'') + '</button>' +
+      '<input class="tp-sub-title" value="' + _esc(s.title) + '" onchange="_tpEditSub(' + i + ',this.value)" placeholder="Subtask">' +
+      '<button class="tp-sub-x" onclick="_tpDelSub(' + i + ')">\u2715</button>' +
+    '</div>';
+  }).join('');
+
+  // Comments
+  var comHtml = (t.comments||[]).map(function(c){
+    return '<div class="tp-com"><div class="tp-com-av">' + _tpInitials(c.who) + '</div>' +
+      '<div class="tp-com-body"><div class="tp-com-who">' + _esc(c.who||'Someone') + '</div>' +
+      '<div class="tp-com-text">' + _esc(c.text||'') + '</div></div></div>';
+  }).join('') || '<div class="tp-empty">No comments yet</div>';
+
+  var html =
+  '<div class="tp-wrap">' +
+    '<div class="tp-top">' +
+      '<button class="tp-back" onclick="closeTaskPage()">\u2039 Tasks</button>' +
+      '<div class="tp-top-actions">' +
+        '<button class="tp-del" onclick="_tpDelete()">\ud83d\uddd1</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="tp-body">' +
+      // Done toggle + title
+      '<div class="tp-titlerow">' +
+        '<button class="tp-done' + (done?' on':'') + '" onclick="_tpToggleDone()">' + (done?'\u2713':'') + '</button>' +
+        '<textarea class="tp-title" rows="1" placeholder="Task name" oninput="_tpAutoGrow(this);_tpField(\'title\',this.value)">' + _esc(t.title||'') + '</textarea>' +
+      '</div>' +
+
+      '<div class="tp-fields">' +
+        _tpField2('Assignee', '<select class="tp-input" onchange="_tpFieldAssignee(this.value)">' + opts(employees, t.assigneeId, '\u2014 Unassigned \u2014') + '</select>') +
+        _tpField2('Collaborator', '<select class="tp-input" onchange="_tpFieldCollab(this.value)">' + opts(employees, t.assignee2Id, '\u2014 None \u2014') + '</select>') +
+        _tpField2('Project', '<select class="tp-input" onchange="_tpFieldProject(this.value)">' + opts(projects, t.projectId, '\u2014 None \u2014') + '</select>') +
+        _tpField2('Status', '<select class="tp-input" onchange="_tpField(\'status\',this.value)">' + statusList.map(function(s){return '<option value="'+s[0]+'"'+(t.status===s[0]?' selected':'')+'>'+s[1]+'</option>';}).join('') + '</select>') +
+        _tpField2('Priority', '<select class="tp-input" onchange="_tpField(\'priority\',this.value)">' + prioList.map(function(s){return '<option value="'+s[0]+'"'+(t.priority===s[0]?' selected':'')+'>'+s[1]+'</option>';}).join('') + '</select>') +
+        _tpField2('Start date', '<input type="date" class="tp-input" value="' + _esc(t.startDate||'') + '" onchange="_tpField(\'startDate\',this.value)">') +
+        _tpField2('Due date', '<input type="date" class="tp-input" value="' + _esc(t.dueDate||'') + '" onchange="_tpField(\'dueDate\',this.value)">') +
+      '</div>' +
+
+      // Description
+      '<div class="tp-section-label">Description</div>' +
+      '<textarea class="tp-desc" rows="3" placeholder="Add more detail\u2026" oninput="_tpAutoGrow(this);_tpField(\'description\',this.value)">' + _esc(t.description||'') + '</textarea>' +
+
+      // Subtasks
+      '<div class="tp-section-label">Subtasks' + (subTotal?(' <span class="tp-count">' + subDone + '/' + subTotal + '</span>'):'') + '</div>' +
+      '<div class="tp-subs">' + subHtml + '</div>' +
+      '<div class="tp-addsub"><input id="tpNewSub" class="tp-sub-title" placeholder="+ Add subtask" onkeydown="if(event.key===\'Enter\')_tpAddSub()"><button class="tp-addsub-btn" onclick="_tpAddSub()">Add</button></div>' +
+
+      // Comments
+      '<div class="tp-section-label">Comments</div>' +
+      '<div class="tp-coms">' + comHtml + '</div>' +
+      '<div class="tp-addcom"><input id="tpNewCom" class="tp-input" placeholder="Write a comment\u2026" onkeydown="if(event.key===\'Enter\')_tpAddCom()"><button class="tp-addsub-btn" onclick="_tpAddCom()">Post</button></div>' +
+    '</div>' +
+  '</div>';
+
+  page.innerHTML = html;
+  // auto-grow the title/desc on open
+  setTimeout(function(){
+    document.querySelectorAll('#taskDetailModal .tp-title, #taskDetailModal .tp-desc').forEach(function(el){ _tpAutoGrow(el); });
+    if (_taskPageIsNew) { var ti = document.querySelector('#taskDetailModal .tp-title'); if (ti) ti.focus(); }
+  }, 30);
+}
+
+function _tpField2(label, control) {
+  return '<div class="tp-field"><div class="tp-field-label">' + label + '</div>' + control + '</div>';
+}
+function _tpAutoGrow(el){ el.style.height='auto'; el.style.height=(el.scrollHeight)+'px'; }
+
+// Persist a single field, saving the whole task.
+async function _tpField(key, val) {
+  var t = window._taskPageDraft; if (!t) return;
+  t[key] = val;
+  await _tpSave();
+}
+async function _tpFieldCollab(id) {
+  var t = window._taskPageDraft; if (!t) return;
+  var emps = await _loadEmployeesForAssign();
+  var emp = emps.find(function(e){return e.id===id;});
+  t.assignee2Id = id; t.assignee2Name = emp ? (emp.name||emp.email) : '';
+  await _tpSave();
+}
+async function _tpFieldAssignee(id) {
+  var t = window._taskPageDraft; if (!t) return;
+  var emps = await _loadEmployeesForAssign();
+  var emp = emps.find(function(e){return e.id===id;});
+  t.assigneeId = id; t.assigneeName = emp ? (emp.name||emp.email) : '';
+  await _tpSave();
+}
+async function _tpFieldProject(id) {
+  var t = window._taskPageDraft; if (!t) return;
+  var projs = await _loadProjectsForLink();
+  var p = projs.find(function(x){return x.id===id;});
+  t.projectId = id; t.projectName = p ? (p.name||'') : '';
+  await _tpSave();
+}
+
+async function _tpToggleDone() {
+  var t = window._taskPageDraft; if (!t) return;
+  t.status = (t.status === 'done') ? 'todo' : 'done';
+  await _tpSave(); _renderTaskPage();
+}
+async function _tpAddSub() {
+  var inp = document.getElementById('tpNewSub'); if (!inp) return;
+  var v = (inp.value||'').trim(); if (!v) return;
+  var t = window._taskPageDraft; if (!t) return;
+  t.subtasks = t.subtasks || []; t.subtasks.push({ title: v, done: false });
+  await _tpSave(); _renderTaskPage();
+}
+async function _tpToggleSub(i) {
+  var t = window._taskPageDraft; if (!t || !t.subtasks[i]) return;
+  t.subtasks[i].done = !t.subtasks[i].done; await _tpSave(); _renderTaskPage();
+}
+async function _tpEditSub(i, val) {
+  var t = window._taskPageDraft; if (!t || !t.subtasks[i]) return;
+  t.subtasks[i].title = val; await _tpSave();
+}
+async function _tpDelSub(i) {
+  var t = window._taskPageDraft; if (!t) return;
+  t.subtasks.splice(i,1); await _tpSave(); _renderTaskPage();
+}
+async function _tpAddCom() {
+  var inp = document.getElementById('tpNewCom'); if (!inp) return;
+  var v = (inp.value||'').trim(); if (!v) return;
+  var t = window._taskPageDraft; if (!t) return;
+  t.comments = t.comments || [];
+  t.comments.push({ who: (currentUser&&currentUser.name)||'Someone', text: v, at: Date.now() });
+  await _tpSave(); _renderTaskPage();
+}
+async function _tpDelete() {
+  ddConfirm('Delete this task? This cannot be undone.', async function(){
+    try { await _gcalDeleteForRecord('task:' + _taskPageId); } catch(e) {}
+    await DB.delete('task:' + _taskPageId);
+    closeTaskPage();
+  });
+}
+
+// Save the working draft. First save of a new task also fires notifications/calendar.
+async function _tpSave() {
+  var t = window._taskPageDraft; if (!t) return;
+  var wasNew = _taskPageIsNew && !(await DB.get('task:' + t.id));
+  await DB.set('task:' + t.id, t);
+  if (wasNew && t.title) {
+    _taskPageIsNew = false;
+    try { if (typeof _notifyTaskStakeholders === 'function') _notifyTaskStakeholders(t, 'created'); } catch(e) {}
+    if (t.dueDate || t.startDate) {
+      try { var a=[t.assigneeId,t.assignee2Id].concat(t.followers||[]).filter(Boolean);
+        await _gcalAutoAdd('Task: ' + t.title, t.projectName?('Project: '+t.projectName):'', t.startDate||t.dueDate, t.dueDate||t.startDate, a, 'task:'+t.id); } catch(e) {}
+    }
+  }
+}
+
+function closeTaskPage() {
+  var page = document.getElementById('taskDetailModal');
+  if (page) { page.style.display = 'none'; page.innerHTML = ''; }
+  window._taskPageDraft = null; _taskPageId = null;
+  try { renderTasks(); } catch(e) {}
+}
+
+
 async function openTaskDetail(id) {
   var t = await DB.get('task:' + id);
   if (!t) return;
@@ -10160,7 +10535,7 @@ async function openTaskDetail(id) {
       '<div class="td-topbar">' +
         '<button class="td-icon-btn" onclick="closeTaskDetail()">\u2190</button>' +
         '<div class="td-spacer"></div>' +
-        '<button class="td-complete' + (done ? ' done' : '') + '" onclick="toggleTaskDone(\'' + id + '\');setTimeout(function(){openTaskDetail(\'' + id + '\')},150)">' +
+        '<button class="td-complete' + (done ? ' done' : '') + '" onclick="toggleTaskDone(\'' + id + '\');setTimeout(function(){openTaskPage(\'' + id + '\')},150)">' +
           '<span>' + (done ? '\u2713' : '\u25cb') + '</span><span>' + (done ? 'Completed' : 'Mark complete') + '</span></button>' +
         '<button class="td-icon-btn" onclick="openTaskForm(\'' + id + '\')">\u270e</button>' +
       '</div>' +
@@ -10228,7 +10603,7 @@ async function addSubtask(id) {
   t.subtasks.push({ title: v, done: false });
   t._updatedAt = Date.now();
   await DB.set('task:' + id, t);
-  openTaskDetail(id);
+  openTaskPage(id);
 }
 
 async function _subSetDate(id, i) {
@@ -10239,7 +10614,7 @@ async function _subSetDate(id, i) {
   t.subtasks[i].dueDate = (val||'').trim();
   t._updatedAt = Date.now();
   await DB.set('task:' + id, t);
-  openTaskDetail(id);
+  openTaskPage(id);
 }
 async function _subAssign(id, i) {
   var t = await DB.get('task:' + id); if (!t || !t.subtasks[i]) return;
@@ -10256,7 +10631,7 @@ async function _subAssign(id, i) {
   }
   t._updatedAt = Date.now();
   await DB.set('task:' + id, t);
-  openTaskDetail(id);
+  openTaskPage(id);
 }
 async function _subEditTitle(id, i) {
   var t = await DB.get('task:' + id); if (!t || !t.subtasks[i]) return;
@@ -10266,7 +10641,7 @@ async function _subEditTitle(id, i) {
   t.subtasks[i].title = v;
   t._updatedAt = Date.now();
   await DB.set('task:' + id, t);
-  openTaskDetail(id);
+  openTaskPage(id);
 }
 
 async function toggleSubtask(id, idx) {
@@ -10274,14 +10649,14 @@ async function toggleSubtask(id, idx) {
   t.subtasks[idx].done = !t.subtasks[idx].done;
   t._updatedAt = Date.now();
   await DB.set('task:' + id, t);
-  openTaskDetail(id);
+  openTaskPage(id);
 }
 async function deleteSubtask(id, idx) {
   var t = await DB.get('task:' + id); if (!t) return;
   t.subtasks.splice(idx, 1);
   t._updatedAt = Date.now();
   await DB.set('task:' + id, t);
-  openTaskDetail(id);
+  openTaskPage(id);
 }
 
 function _notifyTaskStakeholders(t, opts) {
@@ -10317,7 +10692,7 @@ async function addComment(id) {
   });
   inp._mentions = [];
 
-  openTaskDetail(id);
+  openTaskPage(id);
 }
 function _fmtCmtTime(ts) {
   if (!ts) return '';
@@ -11808,7 +12183,7 @@ function closeInbox() { var p = document.getElementById('inboxPanel'); if (p) p.
 async function _inboxOpenTask(taskId) {
   closeInbox();
   if (typeof switchTab === 'function') switchTab('tasks');
-  setTimeout(function() { if (typeof openTaskDetail === 'function') openTaskDetail(taskId); }, 150);
+  setTimeout(function() { if (typeof openTaskDetail === 'function') openTaskPage(taskId); }, 150);
 }
 
 async function clearAllNotifications() {
@@ -16214,8 +16589,9 @@ async function cuAiWrite() {
     if (hint) { hint.style.display = 'block'; ta.focus(); }
     return;
   }
-  if (!AI_ENDPOINT) {
-    alert('AI writing isn\'t set up yet. Add your backend URL to AI_ENDPOINT at the top of the file. Until then, you can type the update manually.');
+  var aiUrl = _aiUrl();
+  if (!aiUrl) {
+    alert('AI writing isn\'t set up yet. Add your AI service URL in your profile under \u201cAI Assistant\u201d.');
     return;
   }
   var projName = '';
@@ -16229,10 +16605,10 @@ async function cuAiWrite() {
   btn.textContent = '\u2728 Writing\u2026';
   btn.disabled = true;
   try {
-    var resp = await fetch(AI_ENDPOINT, {
+    var resp = await fetch(aiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ notes: notes, location: loc })
+      body: JSON.stringify({ notes: notes, location: loc, task: 'customer_update' })
     });
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     var data = await resp.json();
@@ -22096,10 +22472,11 @@ async function forgotPassword() {
 var _pwaWaitingWorker = null;
 
 // ============ WEB PUSH NOTIFICATIONS (parts 1-3) ============
-// Public VAPID key (safe to expose). The matching PRIVATE key lives only in the Val Town sender.
+// Public VAPID key (safe to expose). The matching PRIVATE key lives only in the Firebase function.
 var _VAPID_PUBLIC_KEY = 'BKCVUGFaGbA9DsUndvq5d9lRKrQRyGjFEOZrFUqJvoC48AJWHnZakBDa2PQx_bqPBQTFKG6eSbWIvWcC3XnOSCs';
-// Where the Val Town sender lives (set later in Profile, or hardcode once you have it).
+// Where the push sender (Firebase function) lives. Set in Profile once deployed.
 function _pushSendUrl() { try { return localStorage.getItem('dd_pushSendUrl') || ''; } catch(e) { return ''; } }
+function _aiUrl() { try { return localStorage.getItem('dd_aiUrl') || ''; } catch(e) { return ''; } }
 
 function _urlBase64ToUint8Array(base64String) {
   var padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -22173,7 +22550,7 @@ function _pushIsOn() {
   try { return Notification && Notification.permission === 'granted'; } catch(e) { return false; }
 }
 
-// Send a push to a given owner id (sub/customer/user) by asking the Val Town sender to deliver it.
+// Send a push to a given owner id (sub/customer/user) by asking the Firebase function to deliver it.
 // This is a no-op until the send URL is configured. In-app notifications still work regardless.
 async function sendPushToOwner(ownerId, title, body, url) {
   try {
