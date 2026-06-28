@@ -4175,7 +4175,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v188</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v189</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4537,7 +4537,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v188</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v189</div>
     </div>
   </div>
 
@@ -5409,7 +5409,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
 </div>
 
 
-<script>var APP_VERSION = 'v188';
+<script>var APP_VERSION = 'v189';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -5546,7 +5546,17 @@ const DB = {
 
   // WRITE a record. Update memory immediately, persist to Firebase. No background refresh.
   async set(key, val) {
+    // Guard against corruption: never write an empty/undefined value. A bad save here
+    // is what produced phantom records with a blank 'v' that the app couldn't read.
+    if (val === undefined || val === null) {
+      console.warn('DB.set skipped: empty value for', key);
+      return false;
+    }
     const str = JSON.stringify(val);
+    if (str === undefined || str === '' || str === 'null') {
+      console.warn('DB.set skipped: value stringified to empty for', key);
+      return false;
+    }
     _store[key] = str;       // instant: reads see it right away
     _saveToLS();             // persist locally
     try {
@@ -5583,7 +5593,9 @@ const DB = {
 };
 
 // Load ALL records into memory once at login. After this, _store is the source of truth.
+window._corruptDocs = [];
 async function warmCache() {
+  window._corruptDocs = [];
   try {
     const fs = _getFirestore();
     if (fs) {
@@ -5593,7 +5605,14 @@ async function warmCache() {
           const snap = await fs.collection(cols[ci]).get();
           snap.docs.forEach(function(d) {
             const data = d.data();
-            if (data && data.k && data.v) { _store[data.k] = data.v; }
+            if (!data) return;
+            if (data.k && data.v) {
+              // Healthy record.
+              _store[data.k] = data.v;
+            } else if (data.k && (data.v === undefined || data.v === '' || data.v === null)) {
+              // Corrupt record (blank value). Track it for cleanup; don't load broken data.
+              window._corruptDocs.push({ col: cols[ci], id: d.id, k: data.k });
+            }
           });
         } catch(e) {}
       }
@@ -5601,6 +5620,24 @@ async function warmCache() {
     }
   } catch(e) { console.warn('warmCache error', e); }
   _cacheWarm = true;
+}
+
+// One-time cleanup: remove corrupt (blank-value) documents from Firebase. Safe because
+// they hold no real data — they're failed writes that were cluttering the database.
+async function _cleanCorruptDocs() {
+  try {
+    var fs = _getFirestore();
+    if (!fs) return 0;
+    var bad = window._corruptDocs || [];
+    var removed = 0;
+    for (var i = 0; i < bad.length; i++) {
+      try { await fs.collection(bad[i].col).doc(bad[i].id).delete(); removed++; } catch(e) {}
+      try { if (bad[i].k) delete _store[bad[i].k]; } catch(e) {}
+    }
+    if (removed) { _saveToLS(); }
+    window._corruptDocs = [];
+    return removed;
+  } catch(e) { return 0; }
 }
 
 // Compatibility no-ops — the background-refresh layer was removed. _store is always
@@ -8367,6 +8404,13 @@ async function openOfficeDashboard() {
   var _bl = document.getElementById('bootLoader');
   // Warm the data cache once so all tabs respond instantly
   if (!_cacheWarm) { try { await warmCache(); } catch(e) {} }
+  // Remove any corrupt (blank) records left in the database by past failed writes.
+  try {
+    if (window._corruptDocs && window._corruptDocs.length && currentUser && (currentUser.isOwner || currentUser.role === 'admin')) {
+      var _n = await _cleanCorruptDocs();
+      if (_n > 0 && typeof ddToast === 'function') { setTimeout(function(){ ddToast('Cleaned up ' + _n + ' broken record' + (_n>1?'s':'')); }, 800); }
+    }
+  } catch(e) {}
   if (_bl) _bl.style.display = 'none';
   showPage('officePage');
   document.getElementById('topbarUserName').textContent = currentUser.name;
