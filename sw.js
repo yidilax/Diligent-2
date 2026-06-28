@@ -1,6 +1,6 @@
 // Diligent Developers — Service Worker
 // IMPORTANT: bump CACHE_VERSION every time you deploy a new version
-const CACHE_VERSION = 'v185';
+const CACHE_VERSION = 'v186';
 const CACHE_NAME = 'dd-platform-' + CACHE_VERSION;
 
 // Install — activate immediately
