@@ -3800,6 +3800,14 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
 .fix-vrow .fix-thumbs { gap:4px; margin-top:4px; }
 .fix-vrow .fix-thumb { width:28px; height:28px; border-radius:5px; }
 
+
+.fix-loc { font-size:12px; padding:5px 8px; border:1px solid #E3DDD3; border-radius:6px; background:#fff; color:var(--navy); font-weight:600; max-width:140px; }
+
+
+.fix-vrow .fix-thumbs-right { display:flex; gap:4px; flex-shrink:0; align-items:center; margin-left:8px; }
+.fix-vrow .fix-thumbs-right .fix-thumb { width:34px; height:34px; border-radius:5px; object-fit:cover; cursor:pointer; }
+.fix-vrow { align-items:center; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -4116,7 +4124,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v174</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v177</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4478,7 +4486,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v174</div>
+      <div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v177</div>
     </div>
   </div>
 
@@ -5350,7 +5358,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
 </div>
 
 
-<script>var APP_VERSION = 'v174';
+<script>var APP_VERSION = 'v177';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — in-memory store with localStorage persistence
@@ -5369,9 +5377,23 @@ function _loadFromLS() {
   } catch(e) {}
 }
 
-function _saveToLS() {
+var _saveLSTimer = null;
+function _flushToLS() {
+  if (_saveLSTimer) { clearTimeout(_saveLSTimer); _saveLSTimer = null; }
   try { localStorage.setItem(_LS_KEY, JSON.stringify(_store)); } catch(e) {}
 }
+function _saveToLS() {
+  // Debounce: avoid serializing the whole store on every write (prevents UI freezes).
+  if (_saveLSTimer) return;
+  _saveLSTimer = setTimeout(function() {
+    _saveLSTimer = null;
+    try { localStorage.setItem(_LS_KEY, JSON.stringify(_store)); } catch(e) {}
+  }, 400);
+}
+try {
+  window.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'hidden') _flushToLS(); });
+  window.addEventListener('pagehide', _flushToLS);
+} catch(e) {}
 
 _loadFromLS();
 
@@ -5462,7 +5484,17 @@ function _fsKey(key) {
 
 
 // Records deleted locally; the background refresh must not resurrect them.
-var _deletedTombstones = {};
+var _TOMB_KEY = 'dd_tombstones_v1';
+var _deletedTombstones = (function(){ try { return JSON.parse(localStorage.getItem(_TOMB_KEY)) || {}; } catch(e) { return {}; } })();
+function _saveTombstones() {
+  // prune anything older than 2 minutes, then persist
+  var now = Date.now();
+  Object.keys(_deletedTombstones).forEach(function(k){ if (now - _deletedTombstones[k] > 120000) delete _deletedTombstones[k]; });
+  try { localStorage.setItem(_TOMB_KEY, JSON.stringify(_deletedTombstones)); } catch(e) {}
+}
+// Records written locally very recently; background refreshes must not revert them
+// until the write has had time to propagate to Firebase.
+var _recentWrites = {};
 
 // Invalidate feature-level render caches when underlying data changes, so the UI
 // reflects edits immediately without needing a manual refresh.
@@ -5519,6 +5551,7 @@ const DB = {
     const str = JSON.stringify(val);
     _store[key] = str;
     delete _deletedTombstones[key];
+    _recentWrites[key] = Date.now();
     _invalidateCachesFor(key);
     _saveToLS();
     // 1. Write to Firebase
@@ -5578,6 +5611,7 @@ const DB = {
   async delete(key) {
     delete _store[key];
     _deletedTombstones[key] = Date.now();
+    _saveTombstones();
     _invalidateCachesFor(key);
     _saveToLS();
     // 1. Delete from Firebase
@@ -5601,8 +5635,13 @@ var _bgPending = {};
 var _bgListPending = {};
 
 // Refresh a single key from Firebase in the background (non-blocking)
+var _bgGetLast = {};
 function _bgRefresh(key) {
+  var now = Date.now();
+  // Throttle: don't refetch the same key more than once every 15s (avoids a network/serialize storm).
+  if (_bgGetLast[key] && (now - _bgGetLast[key]) < 15000) return;
   if (_bgPending[key]) return;
+  _bgGetLast[key] = now;
   _bgPending[key] = 1;
   setTimeout(async function() {
     try {
@@ -5611,7 +5650,9 @@ function _bgRefresh(key) {
         const doc = await fs.collection(_fsCol(key)).doc(_fsKey(key)).get();
         if (doc.exists) {
           const val = doc.data().v;
-          if (_store[key] !== val) { _store[key] = val; _saveToLS(); }
+          // Don't revert a value we wrote locally in the last 8s (write may still be propagating).
+          var recent = _recentWrites[key] && (Date.now() - _recentWrites[key]) < 8000;
+          if (!recent && _store[key] !== val) { _store[key] = val; _saveToLS(); }
         }
       }
     } catch(e) {}
@@ -5638,7 +5679,9 @@ function _bgListRefresh(prefix) {
           const data = d.data();
           if (!data.k) return;
           // Skip records we just deleted locally (avoid resurrecting them).
-          if (_deletedTombstones[data.k] && (nowTs - _deletedTombstones[data.k]) < 30000) return;
+          if (_deletedTombstones[data.k] && (nowTs - _deletedTombstones[data.k]) < 120000) return;
+          // Skip records we just wrote locally (avoid reverting them mid-propagation).
+          if (_recentWrites[data.k] && (nowTs - _recentWrites[data.k]) < 8000) return;
           if (data.v && _store[data.k] !== data.v) { _store[data.k] = data.v; changed = true; }
         });
         if (changed) _saveToLS();
@@ -5653,9 +5696,14 @@ async function warmCache() {
     const fs = _getFirestore();
     if (fs) {
       const snap = await fs.collection('dd').get();
+      var nowT = Date.now();
       snap.docs.forEach(function(d) {
         const data = d.data();
-        if (data.k && data.v) { _store[data.k] = data.v; }
+        if (data.k && data.v) {
+          // Don't reload a record we just deleted (tombstone within 2 min).
+          if (_deletedTombstones[data.k] && (nowT - _deletedTombstones[data.k]) < 120000) return;
+          _store[data.k] = data.v;
+        }
       });
       _saveToLS();
     } else if (window.storage) {
@@ -13752,8 +13800,8 @@ async function _fixRenderItems() {
         '<div class="fix-vmain">' +
           '<div class="fix-vtext">' + _esc(it.text||'(no description)') + '</div>' +
           (it.assigneeName ? '<div class="fix-vmeta"><span class="fix-vwho">\ud83d\udc64 ' + _esc(it.assigneeName) + '</span></div>' : '') +
-          (thumbs ? '<div class="fix-thumbs">' + thumbs + '</div>' : '') +
         '</div>' +
+        (thumbs ? '<div class="fix-thumbs-right">' + thumbs + '</div>' : '') +
       '</div>';
     }
     function groupBlock(label, list) {
@@ -13783,6 +13831,15 @@ async function _fixRenderItems() {
     host.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.55);font-size:13px;padding:22px 8px;">No items yet for ' + (_fixScope === 'house' ? 'the whole house' : ('Unit ' + _esc(unit || '\u2014'))) + '. Tap \u201c+ Add item\u201d below.</div>';
     return;
   }
+  var _units = window._fixUnits || [];
+  function locOpts(it) {
+    var o = '<option value="house"' + (it.scope !== 'unit' ? ' selected' : '') + '>\ud83c\udfe0 Whole house</option>';
+    _units.forEach(function(u){
+      var uname = (typeof u === 'string') ? u : (u.name || u);
+      o += '<option value="unit::' + _escAttr(uname) + '"' + (it.scope === 'unit' && String(it.unit) === String(uname) ? ' selected' : '') + '>\ud83d\udeaa Unit ' + _esc(uname) + '</option>';
+    });
+    return o;
+  }
   host.innerHTML = shown.map(function(it){
     var realIdx = items.indexOf(it);
     var thumbs = (it.photos||[]).map(function(ph){ return '<img src="' + ph + '" class="fix-thumb" onclick="_plLightbox && _plLightbox(\'' + encodeURIComponent(ph) + '\')">'; }).join('');
@@ -13797,6 +13854,7 @@ async function _fixRenderItems() {
         '<button class="fix-del" onclick="_fixDelItem(' + realIdx + ')">\u2715</button>' +
       '</div>' +
       '<div class="fix-item-row">' +
+        '<select class="fix-loc" onchange="_fixSetLocation(' + realIdx + ',this)">' + locOpts(it) + '</select>' +
         '<select class="fix-assign" onchange="_fixSetAssignee(' + realIdx + ',this)">' + opts + '</select>' +
         '<button class="fix-photo-btn" onclick="_fixAddPhoto(' + realIdx + ')">\ud83d\udcf7 Photo</button>' +
       '</div>' +
@@ -13839,10 +13897,13 @@ async function _fixSetText(idx, val) {
   insp.fixItems[idx].text = val.trim();
   await DB.set('inspection:' + _fixInspId, insp);
 }
-async function _fixToggle(idx) { window._inspCache=null;
+async function _fixToggle(idx) {
   var insp = await DB.get('inspection:' + _fixInspId); if (!insp || !insp.fixItems[idx]) return;
   insp.fixItems[idx].fixed = !insp.fixItems[idx].fixed;
   await DB.set('inspection:' + _fixInspId, insp);
+  // Block any in-flight background refresh from reverting this change.
+  try { if (window._bgListPending) window._bgListPending['inspection:'] = Date.now(); } catch(e) {}
+  window._inspCache = null;
   await _fixRenderItems();
   try { renderInspections(); } catch(e) {}
 }
@@ -13855,6 +13916,23 @@ async function _fixDelItem(idx) { window._inspCache=null;
     try { renderInspections(); } catch(e) {}
   });
 }
+
+async function _fixSetLocation(idx, sel) {
+  var insp = await DB.get('inspection:' + _fixInspId); if (!insp || !insp.fixItems[idx]) return;
+  var v = sel.value;
+  var label = '';
+  if (v === 'house') { insp.fixItems[idx].scope = 'house'; insp.fixItems[idx].unit = ''; label = 'Whole house'; }
+  else if (v.indexOf('unit::') === 0) { insp.fixItems[idx].scope = 'unit'; insp.fixItems[idx].unit = v.slice(6); label = 'Unit ' + v.slice(6); }
+  await DB.set('inspection:' + _fixInspId, insp);
+  try { if (window._bgListPending) window._bgListPending['inspection:'] = Date.now(); } catch(e) {}
+  window._inspCache = null;
+  // If the item moved out of the current filtered view, tell the user where it went.
+  var stillVisible = (_fixScope === 'house' && insp.fixItems[idx].scope === 'house') ||
+                     (_fixScope === 'unit' && insp.fixItems[idx].scope === 'unit' && String(insp.fixItems[idx].unit) === String((document.getElementById('fixUnitPicker')||{}).value || ''));
+  await _fixRenderItems();
+  if (!stillVisible) { try { ddToast('Moved to ' + label); } catch(e) {} }
+}
+
 async function _fixSetAssignee(idx, sel) {
   var insp = await DB.get('inspection:' + _fixInspId); if (!insp || !insp.fixItems[idx]) return;
   var emps = window._fixEmps || [];
@@ -21416,14 +21494,15 @@ if ('serviceWorker' in navigator) {
         newWorker.addEventListener('statechange', function() {
           // A new worker is installed and waiting, and there's an existing controller
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            // Auto-apply the update immediately so the user always runs the latest code
+            // without needing to tap a banner or manually refresh.
             _pwaWaitingWorker = newWorker;
-            var banner = document.getElementById('pwaUpdateBanner');
-            if (banner) banner.style.display = 'flex';
+            try { newWorker.postMessage('SKIP_WAITING'); } catch(e) {}
           }
         });
       });
       // Periodically check for a new version (every 60s)
-      setInterval(function() { reg.update(); }, 60000);
+      setInterval(function() { reg.update(); }, 20000);
     }).catch(function(e) { console.warn('SW registration failed:', e); });
 
     // Reload once the new worker takes over
