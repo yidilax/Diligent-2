@@ -4581,7 +4581,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v258</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v260</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4991,7 +4991,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v258</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v260</div>
     </div>
   </div>
 
@@ -5838,7 +5838,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v258';
+<script>var APP_VERSION = 'v260';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -5999,6 +5999,9 @@ const DB = {
       _writeHealthy = false;
       _reportWriteFailure(e);
     }
+    // Auto-refresh the visible view so the change shows immediately (no manual refresh).
+    // Debounced + skips while you're typing in a field, so it won't disrupt editing.
+    try { if (typeof _scheduleLiveRerender === 'function') _scheduleLiveRerender(); } catch(e) {}
     return true;
   },
 
@@ -6017,6 +6020,8 @@ const DB = {
       _writeHealthy = false;
       _reportWriteFailure(e);
     }
+    // Auto-refresh the visible view so the deletion shows immediately (no manual refresh).
+    try { if (typeof _scheduleLiveRerender === 'function') _scheduleLiveRerender(); } catch(e) {}
     return true;
   }
 };
@@ -8395,18 +8400,39 @@ function _renderFinalizedPaper(saved) {
     var items = sec.fields || sec.items || [];
     var secRows = '';
     items.forEach(function(it){
+      // _glass keys are sub-selections (e.g. which glass for an added door). We don't render
+      // them as their own top-level row; instead we attach them under their parent door below.
       if ((it.key||'').indexOf('_glass') > -1) return;
       var val = sel[it.key];
       if (val === undefined || val === '' || val === null) return;
       var disp = val === 'yes' ? 'YES' : (val === 'no' ? 'No' : val);
       var priceTxt = (it.price && (val==='yes' || (val && val!=='no'))) ? (' &nbsp;<span style="color:#9a7d2e;">+$' + Number(it.price).toLocaleString() + '</span>') : '';
       secRows += '<tr><td style="padding:7px 12px;border-bottom:1px solid #eee;font-size:13px;color:#222;">' + _esc(it.name||it.key) + priceTxt + '</td>' +
-                 '<td style="padding:7px 12px;border-bottom:1px solid #eee;font-weight:700;text-align:right;font-size:13px;color:#1a2b4a;">' + _esc(disp) + '</td></tr>';
+                 '<td style="padding:7px 12px;border-bottom:1px solid #eee;font-weight:700;text-align:right;font-size:13px;color:#1a2b4a;white-space:nowrap;">' + _esc(disp) + '</td></tr>';
+      // If this item is a 'yes' door with a glass sub-choice, show that glass selection too.
+      if (val === 'yes') {
+        var gKey = it.glassKey || ((it.key||'') + '_glass');
+        var gVal = sel[gKey];
+        if (gVal !== undefined && gVal !== '' && gVal !== null && String(gVal).toUpperCase() !== 'N/A') {
+          secRows += '<tr><td style="padding:6px 12px 6px 26px;border-bottom:1px solid #eee;font-size:12px;color:#666;">↳ Glass</td>' +
+                     '<td style="padding:6px 12px;border-bottom:1px solid #eee;font-weight:600;text-align:right;font-size:12px;color:#1a2b4a;white-space:nowrap;">' + _esc(gVal) + '</td></tr>';
+        }
+      }
     });
     if (secRows) {
       rowsHtml += '<tr><td colspan="2" style="background:#1a2b4a;color:#fff;padding:8px 12px;font-weight:700;letter-spacing:1px;font-size:12px;">' + _esc(title.toUpperCase()) + '</td></tr>' + secRows;
     }
   });
+
+  // Paint color is stored as a top-level field (saved.paintColor), separate from the
+  // selections object the loop above walks — so add it as its own row here, rendered on a
+  // single clean line just like the YES/No answers, instead of being dropped.
+  var paintColor = (saved && saved.paintColor) ? String(saved.paintColor).trim() : '';
+  if (paintColor && paintColor.toLowerCase() !== 'not selected') {
+    rowsHtml += '<tr><td colspan="2" style="background:#1a2b4a;color:#fff;padding:8px 12px;font-weight:700;letter-spacing:1px;font-size:12px;">PAINT COLOR</td></tr>' +
+                '<tr><td style="padding:7px 12px;border-bottom:1px solid #eee;font-size:13px;color:#222;white-space:nowrap;">Selected color</td>' +
+                '<td style="padding:7px 12px;border-bottom:1px solid #eee;font-weight:700;text-align:right;font-size:13px;color:#1a2b4a;white-space:nowrap;">' + _esc(paintColor) + '</td></tr>';
+  }
 
   var totalTxt = saved && saved.upgradeTotal ? saved.upgradeTotal : '';
   var sigImg = saved && saved.signature ? '<img src="' + saved.signature + '" style="height:50px;">' : '';
