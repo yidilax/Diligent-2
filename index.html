@@ -9,10 +9,13 @@
 <style>
 /* ===== Disable Android text-selection on tap; keep inputs selectable ===== */
 * { -webkit-tap-highlight-color: transparent; }
+*, *::before, *::after { box-sizing: border-box; }
 html, body {
   -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
   -webkit-touch-callout: none;
+  overflow-x: hidden; max-width: 100%;
 }
+img, video, canvas, svg { max-width: 100%; height: auto; }
 input, textarea, select, [contenteditable="true"] {
   -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text;
 }
@@ -270,15 +273,17 @@ body { font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; background: var(--
 /* TOPBAR */
 .office-topbar {
   background: var(--navy);
-  padding: 0 20px;
+  padding: 0 16px;
   display: flex;
   align-items: center;
   height: 56px;
-  gap: 14px;
+  gap: 12px;
   position: sticky;
   top: 0;
   z-index: 200;
   flex-shrink: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 .office-hamburger {
   background: none;
@@ -642,7 +647,7 @@ body { font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; background: var(--
   .tab-empty-icon { font-size:44px; margin-bottom:12px; }
   .tab-empty-title { font-family:'Archivo',sans-serif;font-weight:800; font-size:22px; letter-spacing:2px; color:var(--navy); margin-bottom:6px; }
   .tab-empty-desc { font-size:13px; line-height:1.6; max-width:280px; margin:0 auto 20px; }
-  .tab-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px; }
+  .tab-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px; flex-wrap:wrap; max-width:100%; }
   .tab-title { font-family:'Archivo',sans-serif;font-weight:800; font-size:24px; letter-spacing:2px; color:var(--navy); line-height:1; }
   .tab-count { font-size:11px; color:var(--muted); font-weight:600; letter-spacing:1px; text-transform:uppercase; margin-top:3px; }
   .proj-card { background:white; border-radius:14px; border:1px solid var(--border); margin-bottom:14px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.05); transition:box-shadow 0.18s; }
@@ -684,7 +689,7 @@ body { font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; background: var(--
   .upg-row:last-child { border-bottom:none; }
   .upg-row-name { font-size:13px; font-weight:600; color:var(--navy); flex:1; }
   .upg-row-meta { font-size:11px; color:var(--muted); }
-  .icon-btn { padding:7px 12px; border-radius:8px; border:1.5px solid var(--border); background:white; font-size:12px; font-family:'Plus Jakarta Sans','Inter',sans-serif; font-weight:600; cursor:pointer; color:var(--navy); transition:all 0.15s; display:inline-flex; align-items:center; gap:5px; }
+  .icon-btn { padding:7px 12px; border-radius:8px; border:1.5px solid var(--border); background:white; font-size:12px; font-family:'Plus Jakarta Sans','Inter',sans-serif; font-weight:600; cursor:pointer; color:var(--navy); transition:all 0.15s; display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
   .icon-btn:hover { background:var(--offwhite); border-color:var(--navy); }
   .icon-btn-danger { color:#DC2626; border-color:#FECACA; }
   .icon-btn-danger:hover { background:#FFF5F5; border-color:#DC2626; }
@@ -719,11 +724,11 @@ body { font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; background: var(--
   .ue-section-actions { padding:12px 18px; display:flex; gap:8px; border-top:1px solid #F0EDE8; }
   .cust-detail-card { background:white; border-radius:14px; border:1px solid var(--border); margin-bottom:14px; overflow:hidden; }
   .cust-detail-hdr { padding:14px 18px; background:var(--offwhite); border-bottom:1px solid var(--border); font-family:'Archivo',sans-serif;font-weight:800; font-size:15px; letter-spacing:1px; color:var(--navy); }
-  .cust-detail-grid { display:grid; grid-template-columns:1fr 1fr; }
-  .cust-detail-cell { padding:12px 18px; border-bottom:1px solid #F5F0E8; border-right:1px solid #F5F0E8; }
+  .cust-detail-grid { display:grid; grid-template-columns:1fr 1fr; max-width:100%; }
+  .cust-detail-cell { padding:12px 18px; border-bottom:1px solid #F5F0E8; border-right:1px solid #F5F0E8; min-width:0; overflow-wrap:anywhere; word-break:break-word; }
   .cust-detail-cell:nth-child(2n) { border-right:none; }
   .cust-detail-label { font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.8px; }
-  .cust-detail-value { font-size:13px; font-weight:600; color:var(--navy); margin-top:3px; }
+  .cust-detail-value { font-size:13px; font-weight:600; color:var(--navy); margin-top:3px; overflow-wrap:anywhere; word-break:break-word; }
 
 
   /* ── HOUSE SPECS ── */
@@ -2444,9 +2449,9 @@ body { font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; background: var(--
 
 
 /* === NOTIFICATIONS / INBOX / MENTIONS === */
-.notif-bell { position:relative; background:transparent; border:0; color:#fff; font-size:20px; cursor:pointer; width:40px; height:40px; border-radius:10px; display:grid; place-items:center; margin-left:auto; margin-right:4px; }
+.notif-bell { position:relative; background:transparent; border:0; color:#fff; font-size:20px; cursor:pointer; width:40px; height:40px; border-radius:10px; display:grid; place-items:center; margin-left:auto; margin-right:2px; flex-shrink:0; }
 .notif-bell:active { background:rgba(255,255,255,.15); }
-.notif-badge { position:absolute; top:4px; right:4px; min-width:18px; height:18px; padding:0 5px; background:#E5484D; color:#fff; font-size:10px; font-weight:700; border-radius:9px; display:flex; align-items:center; justify-content:center; border:2px solid var(--navy); }
+.notif-badge { position:absolute; top:2px; right:2px; min-width:18px; height:18px; padding:0 5px; background:#E5484D; color:#fff; font-size:10px; font-weight:700; border-radius:9px; display:flex; align-items:center; justify-content:center; border:2px solid var(--navy); }
 
 .inbox-overlay { position:fixed; inset:0; z-index:500; background:rgba(13,31,60,.4); display:flex; justify-content:flex-end; }
 .inbox-sheet { width:100%; max-width:420px; height:100%; background:var(--cream); display:flex; flex-direction:column; box-shadow:-4px 0 20px rgba(0,0,0,.2); animation:inboxIn .22s ease; }
@@ -4469,7 +4474,7 @@ div[style*="position:fixed"][style*="inset:0"] {
         <button class="lp-btn-gold" onclick="showPage('customerAuthPage')">
           <div class="lp-icon-box" style="background:rgba(13,31,60,0.15);">🏠</div>
           <div style="flex:1;">
-            <div class="lp-btn-label" style="color:#0D1F3C;">Make My Selections</div>
+            <div class="lp-btn-label" style="color:#0D1F3C;">Customers</div>
             <div class="lp-btn-sub" style="color:rgba(13,31,60,0.55);">Select your home upgrades</div>
           </div>
           <div style="font-size:24px;color:rgba(13,31,60,0.35);line-height:1;">›</div>
@@ -4537,7 +4542,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v241</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v245</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4947,7 +4952,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v241</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v245</div>
     </div>
   </div>
 
@@ -4959,7 +4964,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </button>
     <div class="office-logo">Diligent Developers</div>
     <button id="topbarSearchBtn" onclick="openGlobalSearch()" aria-label="Search" style="margin-left:auto;background:rgba(255,255,255,0.12);border:none;color:#fff;width:36px;height:36px;border-radius:9px;cursor:pointer;font-size:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;">🔍</button>
-    <span id="topbarGreeting" class="topbar-greeting" style="padding-left:10px;font-family:'Plus Jakarta Sans','Inter',sans-serif;font-size:13px;font-weight:600;color:rgba(255,255,255,0.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></span>
+    <span id="topbarGreeting" class="topbar-greeting" style="padding-left:6px;font-family:'Plus Jakarta Sans','Inter',sans-serif;font-size:13px;font-weight:600;color:rgba(255,255,255,0.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;"></span>
     <button class="office-user" onclick="openProfileModal()" aria-label="My profile" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:0;flex-shrink:0;">
       <span id="topbarAvatar" style="width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-weight:800;font-size:16px;color:#fff;background-size:cover;background-position:center;"></span>
     </button>
@@ -5328,7 +5333,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     <div id="tab-upgrades" class="office-tab" style="display:none;">
       <div class="tab-header">
         <div class="tab-title">Upgrades</div>
-        <div style="display:flex;gap:8px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button onclick="refreshUpgradesNow()" class="icon-btn" style="font-size:13px;">↻ Refresh</button>
           <button onclick="openUpgradesCompare()" class="icon-btn" style="font-size:13px;">⇄ Compare Units</button>
         </div>
@@ -5781,7 +5786,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v241';
+<script>var APP_VERSION = 'v245';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -6054,7 +6059,7 @@ async function _rerenderCurrentView() {
       if (window._openProjectId && document.querySelector('.ppg-hero')) { await openProjectPage(window._openProjectId); }
       else { await renderProjects(); }
     }
-    else if (tab === 'customers') { await renderCustomers(); }
+    else if (tab === 'customers') { window._custDrillProject = null; await renderCustomers(); }
     else if (tab === 'employees') { await renderEmployees(); }
     else if (tab === 'custUpdates') { await renderCustUpdates(); }
     else if (tab === 'subs') { await renderSubs(); }
@@ -15962,7 +15967,8 @@ function _schedWeekBars(y, m, startDow, weekIdx, daysInMonth){
         var ev = seg.ev;
         var contStart = ev.date < _schedFmt(new Date(y,m,(weekIdx*7-startDow+1))) ; // continues from prev week
         var label = _esc(ev.title||'Event');
-        rowsHtml += '<button onclick="_schedEdit(\''+ev.id+'\')" style="grid-column:span '+span+';background:'+(ev.color||'#3B6FB0')+';color:#fff;border:none;border-radius:5px;padding:3px 6px;font-size:10px;font-weight:700;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;text-align:left;min-height:18px;">'+(ev.time&&seg.startCol>=0?'':'')+label+'</button>';
+        var addrLine = ev.address ? ('<span style="display:block;font-size:8px;font-weight:600;opacity:0.85;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + _esc(ev.address) + '</span>') : '';
+        rowsHtml += '<button onclick="_schedEdit(\''+ev.id+'\')" style="grid-column:span '+span+';background:'+(ev.color||'#3B6FB0')+';color:#fff;border:none;border-radius:5px;padding:3px 6px;font-size:10px;font-weight:700;cursor:pointer;overflow:hidden;text-align:left;min-height:18px;line-height:1.15;"><span style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+label+'</span>'+addrLine+'</button>';
         col = seg.endCol+1;
       } else {
         rowsHtml += '<div></div>';
@@ -16706,47 +16712,126 @@ async function saveCustomer() {
 // ============================================================
 // GLOBAL SEARCH \u2014 find any customer/unit fast + one-tap contact
 async function renderCustomers() {
-  var keys = await DB.list('customer:');
+  // New structure: Customers are organised by PROJECT. The tab first shows a list of
+  // projects; tapping one opens that project's customers (grouped by house + unit), where
+  // you can add or edit customers for that project.
   var listEl = document.getElementById('customersList');
   var countEl = document.getElementById('cust-count');
-  if (keys.length === 0) {
-    listEl.innerHTML = '<div class="tab-empty"><div class="tab-empty-icon">👥</div><div class="tab-empty-title">No Customers Yet</div><div class="tab-empty-desc">Add your first customer to track their contact info and property.</div><button class="tab-empty-btn" onclick="showCustomerForm()">+ Add Customer</button></div>';
-    if (countEl) countEl.textContent = '0 customers';
+  if (!listEl) return;
+
+  // Load projects + customers.
+  var projKeys = await DB.list('project:');
+  var projects = (await Promise.all(projKeys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+  projects.sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); });
+  var custKeys = await DB.list('customer:');
+  var customers = (await Promise.all(custKeys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+  window._allCustomersCache = customers;
+  window._projectsForCustomers = projects;
+
+  if (window._custDrillProject) {
+    _renderCustomersForProject(window._custDrillProject);
     return;
   }
-  var all = (await Promise.all(keys.map(function(k) { return DB.get(k); }))).filter(Boolean);
-  var customers = all.sort(function(a,b) { return (a.name||'').localeCompare(b.name||''); });
-  if (countEl) countEl.textContent = customers.length + ' customer' + (customers.length!==1?'s':'');
-  if (customers.length === 0) {
-    listEl.innerHTML = '<div class="tab-empty"><div class="tab-empty-icon">👥</div><div class="tab-empty-title">No Customers Visible</div></div>';
+
+  // ---- PROJECT LIST VIEW ----
+  if (countEl) countEl.textContent = projects.length + ' project' + (projects.length!==1?'s':'');
+  if (!projects.length) {
+    listEl.innerHTML = '<div class="tab-empty"><div class="tab-empty-icon">🏗️</div><div class="tab-empty-title">No Projects Yet</div><div class="tab-empty-desc">Create a project first, then add customers to it.</div></div>';
     return;
   }
-  listEl.innerHTML = customers.map(function(c) {
-    var initial = (c.name||'?')[0].toUpperCase();
-    var phones = [c.phoneHome, c.phoneCell1, c.phoneCell2].filter(Boolean).join(' · ');
-    var canEditThis = canEdit(c);
-    return '<div class="cust-card">' +
-      '<div class="cust-card-inner">' +
-        '<div class="cust-avatar">' + initial + '</div>' +
-        '<div style="flex:1;min-width:0;">' +
-          '<div style="display:flex;align-items:center;gap:6px;">' +
-            '<div class="cust-card-name">' + (c.name||'Unknown') + '</div>' +
-            visBadge(c) +
-          '</div>' +
-          '<div class="cust-card-meta">' +
-            (c.projectName ? c.projectName + ' · ' : '') + 'Unit ' + (c.unit||'—') + ' · ' + (c.houseAddress||c.address||'') +
-            (phones ? '<br>' + phones : '') +
-            '<br><span style="color:var(--navy);font-size:10px;font-weight:700;">by ' + (c.ownerName||c.createdBy||'Admin') + '</span>' +
+  var unassigned = customers.filter(function(c){ return !c.projectId; });
+  listEl.innerHTML = projects.map(function(p){
+    var count = customers.filter(function(c){ return c.projectId === p.id; }).length;
+    var houses = (p.houses||[]).length;
+    return '<button onclick="_custOpenProject(\'' + p.id + '\')" style="width:100%;text-align:left;background:#fff;border:1px solid var(--border);border-radius:13px;padding:15px 16px;margin-bottom:11px;cursor:pointer;display:flex;align-items:center;gap:13px;">' +
+      '<div style="width:44px;height:44px;border-radius:11px;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🏗️</div>' +
+      '<div style="flex:1;min-width:0;">' +
+        '<div style="font-weight:800;color:var(--navy);font-size:15px;">' + _esc(p.name||'Project') + '</div>' +
+        '<div style="font-size:12px;color:var(--muted);margin-top:2px;">' + count + ' customer' + (count!==1?'s':'') + (houses?(' \u00b7 ' + houses + ' house' + (houses!==1?'s':'')):'') + '</div>' +
+      '</div>' +
+      '<span style="color:var(--muted);font-size:20px;">\u203A</span>' +
+    '</button>';
+  }).join('') + (unassigned.length ? (
+    '<button onclick="_custOpenProject(\'__none__\')" style="width:100%;text-align:left;background:#fff;border:1px dashed var(--border);border-radius:13px;padding:15px 16px;margin-bottom:11px;cursor:pointer;display:flex;align-items:center;gap:13px;">' +
+      '<div style="width:44px;height:44px;border-radius:11px;background:var(--cream);color:var(--navy);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">\u2753</div>' +
+      '<div style="flex:1;"><div style="font-weight:800;color:var(--navy);font-size:15px;">No project assigned</div>' +
+      '<div style="font-size:12px;color:var(--muted);margin-top:2px;">' + unassigned.length + ' customer' + (unassigned.length!==1?'s':'') + '</div></div>' +
+      '<span style="color:var(--muted);font-size:20px;">\u203A</span>' +
+    '</button>'
+  ) : '');
+}
+
+function _custOpenProject(pid){ window._custDrillProject = pid; renderCustomers(); }
+function _custBackToProjects(){ window._custDrillProject = null; renderCustomers(); }
+
+// ---- PROJECT DETAIL VIEW: customers in this project, grouped by house + unit ----
+function _renderCustomersForProject(pid){
+  var listEl = document.getElementById('customersList');
+  var countEl = document.getElementById('cust-count');
+  var projects = window._projectsForCustomers || [];
+  var customers = window._allCustomersCache || [];
+  var proj = (pid === '__none__') ? { id:'__none__', name:'No project assigned', houses:[] } : projects.filter(function(p){ return p.id===pid; })[0];
+  if (!proj) { _custBackToProjects(); return; }
+
+  var mine = customers.filter(function(c){ return (pid==='__none__') ? !c.projectId : c.projectId===pid; });
+  if (countEl) countEl.textContent = mine.length + ' customer' + (mine.length!==1?'s':'') + ' in ' + (proj.name||'project');
+
+  var header = '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">' +
+    '<button onclick="_custBackToProjects()" style="background:var(--cream);border:none;border-radius:9px;padding:8px 12px;font-size:13px;font-weight:700;color:var(--navy);cursor:pointer;">\u2039 Projects</button>' +
+    '<div style="font-family:\'Archivo\',sans-serif;font-weight:800;font-size:18px;color:var(--navy);">' + _esc(proj.name||'Project') + '</div>' +
+    '<button onclick="_custAddToProject(\'' + pid + '\')" style="margin-left:auto;background:var(--navy);color:#fff;border:none;border-radius:9px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">+ Add customer</button>' +
+  '</div>';
+
+  if (!mine.length){
+    listEl.innerHTML = header + '<div class="tab-empty"><div class="tab-empty-icon">👥</div><div class="tab-empty-title">No customers in this project</div><div class="tab-empty-desc">Tap \u201c+ Add customer\u201d to add one.</div></div>';
+    return;
+  }
+
+  // Group by house address, then list each customer (with unit).
+  var byHouse = {};
+  mine.forEach(function(c){
+    var h = c.houseAddress || c.address || 'No address';
+    (byHouse[h] = byHouse[h] || []).push(c);
+  });
+  var houseNames = Object.keys(byHouse).sort();
+  var body = houseNames.map(function(h){
+    var custs = byHouse[h].sort(function(a,b){ return String(a.unit||'').localeCompare(String(b.unit||'')); });
+    var rows = custs.map(function(c){
+      var initial = (c.name||'?')[0].toUpperCase();
+      var phones = [c.phoneHome, c.phoneCell1, c.phoneCell2].filter(Boolean).join(' \u00b7 ');
+      var canEditThis = (typeof canEdit==='function') ? canEdit(c) : true;
+      return '<div class="cust-card" style="margin-bottom:9px;">' +
+        '<div class="cust-card-inner">' +
+          '<div class="cust-avatar">' + initial + '</div>' +
+          '<div style="flex:1;min-width:0;">' +
+            '<div class="cust-card-name">' + _esc(c.name||'Unknown') + '</div>' +
+            '<div class="cust-card-meta">' + (c.unit?('Unit ' + _esc(c.unit)):'No unit') + (phones?('<br>' + _esc(phones)):'') + '</div>' +
           '</div>' +
         '</div>' +
-        '<span class="cust-card-arrow">›</span>' +
-      '</div>' +
-      (canEditThis ? '<div class="cust-card-actions">' +
-        '<button class="icon-btn" onclick="showCustomerForm(\'' + c.id + '\')">✏️ Edit</button>' +
-        '<button class="icon-btn icon-btn-danger" onclick="deleteCustomer(\'' + c.id + '\')">🗑 Delete</button>' +
-      '</div>' : '') +
+        (canEditThis ? '<div class="cust-card-actions">' +
+          '<button class="icon-btn" onclick="showCustomerForm(\'' + c.id + '\')">✏️ Edit</button>' +
+          '<button class="icon-btn icon-btn-danger" onclick="deleteCustomer(\'' + c.id + '\')">🗑 Delete</button>' +
+        '</div>' : '') +
+      '</div>';
+    }).join('');
+    return '<div style="margin-bottom:16px;">' +
+      '<div style="font-size:12px;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">🏠 ' + _esc(h) + '</div>' +
+      rows +
     '</div>';
   }).join('');
+
+  listEl.innerHTML = header + body;
+}
+
+// Add a customer pre-scoped to a project (opens the existing form, then selects the project).
+async function _custAddToProject(pid){
+  await showCustomerForm();
+  if (pid && pid !== '__none__') {
+    setTimeout(function(){
+      var sel = document.getElementById('cust-project');
+      if (sel) { sel.value = pid; try { sel.dispatchEvent(new Event('change')); } catch(e){} }
+    }, 150);
+  }
 }
 
 // ===================== CUSTOMER UPDATES =====================
@@ -21392,8 +21477,7 @@ function showCustomerDetail(idx) {
 
   // Info card
   window._officeDetailSub = s;
-  var html = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px;">' +
-    '<button onclick="closeCustomerDetail()" style="background:none;border:none;font-size:13px;font-weight:700;color:var(--navy);cursor:pointer;font-family:Inter,sans-serif;padding:0;">← Back</button>' +
+  var html = '<div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:16px;gap:10px;flex-wrap:wrap;">' +
     '<button onclick="_officeViewPdf()" style="background:var(--gold);color:var(--navy);border:none;border-radius:8px;padding:9px 16px;font-family:Inter,sans-serif;font-weight:700;font-size:13px;cursor:pointer;">📄 View / Save PDF</button>' +
   '</div>' +
     '<div class="cust-detail-card">' +
