@@ -4537,7 +4537,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v235</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v237</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4947,7 +4947,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v235</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v237</div>
     </div>
   </div>
 
@@ -5769,49 +5769,11 @@ div[style*="position:fixed"][style*="inset:0"] {
     <div class="tab-header">
       <div>
         <h2 class="tab-title">Schedule</h2>
-        <div class="tab-count">Everyone&#39;s projects, all in one place</div>
+        <div class="tab-count">All events in one place</div>
       </div>
-      <button class="btn-primary" onclick="_calOpenForm(null,null)">+ New event</button>
+      <button class="btn-primary" onclick="schedOpenForm(null,null)">+ New event</button>
     </div>
-
-    <!-- Calendar / Phases toggle -->
-    <div style="display:flex;gap:6px;background:var(--cream);border-radius:11px;padding:4px;margin-bottom:14px;">
-      <button id="schedModeCalBtn" onclick="_schedSetViewMode('calendar')" style="flex:1;padding:9px;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;background:var(--navy);color:#fff;">📅 Calendar</button>
-      <button id="schedModePhaseBtn" onclick="_schedSetViewMode('phases')" style="flex:1;padding:9px;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;background:none;color:var(--muted);">📊 Phase timeline</button>
-    </div>
-
-    <!-- NEW calendar event view -->
-    <div id="calNewContent"></div>
-
-    <!-- NEW shared schedule view (phases) -->
-    <div id="schedNewContent"></div>
-
-    <!-- Collapsible editor for setting phase dates -->
-    <button onclick="_schedToggleEditor()" id="schedEditorToggle" class="sched-editor-toggle">✎ Edit phases &amp; dates</button>
-    <div id="schedEditorWrap" style="display:none;">
-
-    <div class="task-scope-row">
-      <button class="sched-scope-btn task-scope-btn active" data-scope="mine" onclick="setSchedScope('mine')">My Schedules</button>
-      <button class="sched-scope-btn task-scope-btn" data-scope="following" onclick="setSchedScope('following')">Following</button>
-    </div>
-
-    <div id="schedLookahead" class="sched-lookahead"></div>
-    <div class="task-toolbar">
-      <div class="task-views" style="margin-bottom:10px">
-        <button class="sched-view-btn task-view-btn active" data-view="list" onclick="setSchedView('list')">&#9776; List</button>
-        <button class="sched-view-btn task-view-btn" data-view="gantt" onclick="setSchedView('gantt')">&#128202; Gantt</button>
-        <button class="sched-view-btn task-view-btn" data-view="calendar" onclick="setSchedView('calendar')">&#128197; Calendar</button>
-        <button class="sched-view-btn task-view-btn" data-view="all" onclick="setSchedView('all')">&#127968; All Schedules</button>
-      </div>
-      <div id="sched-house-row">
-        <select id="sched-house-sel" class="tf-input" onchange="schedLoadHouse()" style="width:100%"></select>
-        <div id="sched-unit-bar" class="sched-unit-bar"></div>
-      </div>
-    </div>
-
-    <div id="gcalSettingsBox" class="gcal-box"></div>
-    <div id="schedContent"></div>
-    </div><!-- /schedEditorWrap -->
+    <div id="schedRoot"></div>
   </div>
 
 
@@ -5819,7 +5781,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v235';
+<script>var APP_VERSION = 'v237';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -6098,7 +6060,7 @@ async function _rerenderCurrentView() {
     else if (tab === 'subs') { await renderSubs(); }
     else if (tab === 'punchlist') { renderPunchList(); }
     else if (tab === 'tasks') { renderTasks(); }
-    else if (tab === 'scheduling') { renderScheduleTab(); }
+    else if (tab === 'scheduling') { schedRender(); }
     else if (tab === 'specs') { renderSpecs(); }
     else if (tab === 'inspections') { renderInspections(true); }
   } catch(e) {}
@@ -15750,6 +15712,326 @@ function _delivToggleEmbed(id, carrier, raw) {
   }
 }
 
+
+// ============================================================
+// SCHEDULE \u2014 fully rebuilt, Google-Calendar style (v236)
+// Events with start+end dates, multi-day spanning bars in month view,
+// agenda view, add/edit form. Stored under 'calevent:<id>'. Self-contained.
+// ============================================================
+var SCHED_COLORS = ['#3B6FB0','#2D7A4F','#B03A2E','#BFA055','#7A5BA8','#C97A2C'];
+var _schedViewMode = 'month';     // 'month' | 'agenda'
+var _schedCursor = new Date();    // month being shown
+var _schedEditId = null;
+var _schedPickedColor = SCHED_COLORS[0];
+var _schedEvents = [];
+var _schedFilterProj = '';   // '' = all projects; otherwise a projectId
+
+function _schedFmt(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function _schedParse(s){ var p=String(s||'').split('-'); return new Date(parseInt(p[0],10), parseInt(p[1],10)-1, parseInt(p[2],10)); }
+function _schedTime12(t){ if(!t) return ''; var p=t.split(':'); var h=parseInt(p[0],10); var m=p[1]||'00'; var ap=h>=12?'PM':'AM'; var h12=h%12||12; return h12+':'+m+' '+ap; }
+function _schedDayDiff(a,b){ return Math.round((_schedParse(b)-_schedParse(a))/86400000); }
+
+async function _schedLoad(){
+  try {
+    var keys = await DB.list('calevent:');
+    var evs = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+    // normalise: ensure end >= start
+    evs.forEach(function(e){ if(!e.endDate) e.endDate = e.date; if(e.endDate < e.date) e.endDate = e.date; });
+    return evs;
+  } catch(e){ return []; }
+}
+async function _schedProjectOptions(sel){
+  try {
+    var keys = await DB.list('project:');
+    var projs = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+    var opts = '<option value="">No project</option>';
+    projs.forEach(function(p){
+      (p.houses||[]).forEach(function(h){
+        var val = p.id+'||'+h.address;
+        opts += '<option value="'+_esc(val)+'"'+(sel===val?' selected':'')+'>'+_esc(p.name)+' \u2014 '+_esc(h.address)+'</option>';
+      });
+      if(!(p.houses||[]).length){ var v2=p.id+'||'; opts += '<option value="'+_esc(v2)+'"'+(sel===v2?' selected':'')+'>'+_esc(p.name)+'</option>'; }
+    });
+    return opts;
+  } catch(e){ return '<option value="">No project</option>'; }
+}
+
+// ---- Top render: view toggle + chosen view ----
+async function _schedFilterOptions(){
+  try {
+    var keys = await DB.list('project:');
+    var projs = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+    var opts = '<option value="">All projects</option>';
+    projs.forEach(function(p){ opts += '<option value="'+_esc(p.id)+'"'+(_schedFilterProj===p.id?' selected':'')+'>'+_esc(p.name)+'</option>'; });
+    return opts;
+  } catch(e){ return '<option value="">All projects</option>'; }
+}
+function _schedSetFilter(pid){ _schedFilterProj = pid; schedRender(); }
+function _schedVisibleEvents(){
+  if(!_schedFilterProj) return _schedEvents;
+  return _schedEvents.filter(function(ev){ return ev.projectId === _schedFilterProj; });
+}
+async function _schedGcalConnect(){
+  try { if (typeof connectGoogleCalendar === 'function') await connectGoogleCalendar(); } catch(e){}
+  schedRender();
+}
+async function schedRender(){
+  var root = document.getElementById('schedRoot');
+  if(!root) return;
+  root.innerHTML = '<div style="text-align:center;color:var(--muted);padding:18px;">Loading\u2026</div>';
+  _schedEvents = await _schedLoad();
+  // Filter row: one project at a time + Google Calendar connect status.
+  var connected = false;
+  try { if (typeof isGcalConnected === 'function') connected = await isGcalConnected(); } catch(e){}
+  var filterRow = '<div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">' +
+    '<select onchange="_schedSetFilter(this.value)" style="flex:1;min-width:150px;background:#fff;border:1.5px solid var(--border);border-radius:9px;padding:9px 11px;font-size:13px;font-weight:600;color:var(--navy);">' + (await _schedFilterOptions()) + '</select>' +
+    (connected
+      ? '<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(45,122,79,0.12);color:#2D7A4F;border-radius:9px;padding:8px 11px;font-size:12px;font-weight:700;">\u2713 Google Calendar</span>'
+      : '<button onclick="_schedGcalConnect()" style="background:var(--navy);color:#fff;border:none;border-radius:9px;padding:9px 13px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">\ud83d\udcc6 Connect Google</button>'
+    ) +
+  '</div>';
+  var toggle = filterRow + '<div style="display:flex;gap:6px;background:var(--cream);border-radius:11px;padding:4px;margin-bottom:14px;">' +
+    '<button onclick="_schedSetView(\'month\')" style="flex:1;padding:9px;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;'+(_schedViewMode==='month'?'background:var(--navy);color:#fff;':'background:none;color:var(--muted);')+'">\ud83d\udcc5 Month</button>' +
+    '<button onclick="_schedSetView(\'agenda\')" style="flex:1;padding:9px;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;'+(_schedViewMode==='agenda'?'background:var(--navy);color:#fff;':'background:none;color:var(--muted);')+'">\ud83d\udccb Agenda</button>' +
+  '</div>';
+  root.innerHTML = toggle + '<div id="schedBody"></div>';
+  if(_schedViewMode==='month') _schedRenderMonth();
+  else _schedRenderAgenda();
+}
+function _schedSetView(v){ _schedViewMode=v; schedRender(); }
+function _schedMonthStep(n){ _schedCursor = new Date(_schedCursor.getFullYear(), _schedCursor.getMonth()+n, 1); _schedRenderMonth(); }
+
+// ---- MONTH view with multi-day spanning bars ----
+function _schedRenderMonth(){
+  var body = document.getElementById('schedBody'); if(!body) return;
+  var y=_schedCursor.getFullYear(), m=_schedCursor.getMonth();
+  var first=new Date(y,m,1), startDow=first.getDay();
+  var daysInMonth=new Date(y,m+1,0).getDate();
+  var monthName=_schedCursor.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  var todayStr=_schedFmt(new Date());
+
+  // Build a grid of weeks (each week = 7 day-cells). Determine total cells.
+  var totalCells = startDow + daysInMonth;
+  var weeks = Math.ceil(totalCells/7);
+
+  var html = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">' +
+    '<button onclick="_schedMonthStep(-1)" style="background:var(--cream);border:none;border-radius:8px;width:36px;height:36px;font-size:16px;cursor:pointer;color:var(--navy);">\u2039</button>' +
+    '<div style="font-family:\'Archivo\',sans-serif;font-weight:800;font-size:18px;color:var(--navy);">'+monthName+'</div>' +
+    '<button onclick="_schedMonthStep(1)" style="background:var(--cream);border:none;border-radius:8px;width:36px;height:36px;font-size:16px;cursor:pointer;color:var(--navy);">\u203a</button>' +
+  '</div>';
+  // weekday header
+  html += '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:2px;">';
+  ['S','M','T','W','T','F','S'].forEach(function(d){ html += '<div style="text-align:center;font-size:10px;font-weight:800;color:var(--muted);">'+d+'</div>'; });
+  html += '</div>';
+
+  // For each week, render the day-number row, then the event bars for that week.
+  for(var w=0; w<weeks; w++){
+    // day-number cells
+    html += '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;">';
+    for(var dow=0; dow<7; dow++){
+      var cellIndex = w*7+dow;
+      var dayNum = cellIndex - startDow + 1;
+      if(dayNum<1 || dayNum>daysInMonth){
+        html += '<div style="min-height:22px;"></div>';
+      } else {
+        var ds = y+'-'+String(m+1).padStart(2,'0')+'-'+String(dayNum).padStart(2,'0');
+        var isToday = ds===todayStr;
+        html += '<button onclick="_schedOpenDay(\''+ds+'\')" style="border:none;background:none;cursor:pointer;text-align:center;padding:2px 0;min-height:22px;">' +
+          '<span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-size:12px;font-weight:'+(isToday?'800':'600')+';'+(isToday?'background:var(--gold);color:#1a1407;':'color:var(--navy);')+'">'+dayNum+'</span>' +
+        '</button>';
+      }
+    }
+    html += '</div>';
+
+    // event bars for this week
+    html += _schedWeekBars(y, m, startDow, w, daysInMonth);
+  }
+
+  html += '<div style="text-align:center;margin-top:14px;"><button onclick="_schedAddOnDay(\''+todayStr+'\')" style="background:var(--gold);color:#1a1407;border:none;border-radius:9px;padding:11px 20px;font-weight:800;font-size:14px;cursor:pointer;">\uff0b Add event</button></div>';
+  body.innerHTML = html;
+}
+
+// Render the spanning event bars for one week row.
+function _schedWeekBars(y, m, startDow, weekIdx, daysInMonth){
+  // date range of this week's columns
+  var weekStartDayNum = weekIdx*7 - startDow + 1;
+  // collect events overlapping this week, assign to lanes
+  var weekStart = new Date(y, m, weekStartDayNum);
+  var weekEnd = new Date(y, m, weekStartDayNum+6);
+  var weekStartStr = _schedFmt(weekStart), weekEndStr = _schedFmt(weekEnd);
+
+  var inWeek = _schedVisibleEvents().filter(function(ev){
+    return ev.date <= weekEndStr && (ev.endDate||ev.date) >= weekStartStr;
+  }).sort(function(a,b){ return a.date.localeCompare(b.date) || ((b.endDate||b.date).localeCompare(a.endDate||a.date)); });
+
+  if(!inWeek.length) return '<div style="height:4px;"></div>';
+
+  // lane assignment so overlapping bars stack
+  var lanes = []; // each lane is array of {startCol,endCol}
+  var placed = inWeek.map(function(ev){
+    var s = _schedParse(ev.date), e = _schedParse(ev.endDate||ev.date);
+    var startCol = Math.max(0, _schedDayDiff(weekStartStr, ev.date));
+    var endCol = Math.min(6, _schedDayDiff(weekStartStr, ev.endDate||ev.date));
+    if(startCol<0) startCol=0; if(endCol>6) endCol=6;
+    // find a free lane
+    var laneIdx=0;
+    for(;;laneIdx++){
+      if(!lanes[laneIdx]){ lanes[laneIdx]=[]; }
+      var clash = lanes[laneIdx].some(function(seg){ return !(endCol<seg.startCol || startCol>seg.endCol); });
+      if(!clash){ lanes[laneIdx].push({startCol:startCol,endCol:endCol}); break; }
+    }
+    return { ev:ev, startCol:startCol, endCol:endCol, lane:laneIdx };
+  });
+  var maxLane = lanes.length;
+  var rowsHtml = '';
+  for(var l=0; l<maxLane; l++){
+    rowsHtml += '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:2px;">';
+    // build cells for this lane
+    var col=0;
+    var segs = placed.filter(function(p){ return p.lane===l; }).sort(function(a,b){ return a.startCol-b.startCol; });
+    var segByStart={}; segs.forEach(function(s){ segByStart[s.startCol]=s; });
+    while(col<7){
+      var seg = segByStart[col];
+      if(seg){
+        var span = seg.endCol-seg.startCol+1;
+        var ev = seg.ev;
+        var contStart = ev.date < _schedFmt(new Date(y,m,(weekIdx*7-startDow+1))) ; // continues from prev week
+        var label = _esc(ev.title||'Event');
+        rowsHtml += '<button onclick="_schedEdit(\''+ev.id+'\')" style="grid-column:span '+span+';background:'+(ev.color||'#3B6FB0')+';color:#fff;border:none;border-radius:5px;padding:3px 6px;font-size:10px;font-weight:700;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;text-align:left;min-height:18px;">'+(ev.time&&seg.startCol>=0?'':'')+label+'</button>';
+        col = seg.endCol+1;
+      } else {
+        rowsHtml += '<div></div>';
+        col++;
+      }
+    }
+    rowsHtml += '</div>';
+  }
+  return rowsHtml;
+}
+
+// ---- AGENDA view ----
+function _schedRenderAgenda(){
+  var body=document.getElementById('schedBody'); if(!body) return;
+  var todayStr=_schedFmt(new Date());
+  var upcoming=_schedVisibleEvents().filter(function(ev){ return (ev.endDate||ev.date) >= todayStr; })
+    .sort(function(a,b){ return a.date.localeCompare(b.date) || (a.time||'').localeCompare(b.time||''); });
+  if(!upcoming.length){
+    body.innerHTML = '<div style="text-align:center;color:var(--muted);padding:30px;"><div style="font-size:40px;">\ud83d\udcc5</div><div style="font-weight:700;color:var(--navy);margin-top:8px;">Nothing scheduled yet</div><div style="font-size:13px;margin-top:4px;">Tap \u201cAdd event\u201d to get started.</div></div>' +
+      '<div style="text-align:center;margin-top:14px;"><button onclick="_schedAddOnDay(\''+todayStr+'\')" style="background:var(--gold);color:#1a1407;border:none;border-radius:9px;padding:11px 20px;font-weight:800;font-size:14px;cursor:pointer;">\uff0b Add event</button></div>';
+    return;
+  }
+  var html = '<div style="text-align:right;margin-bottom:10px;"><button onclick="_schedAddOnDay(\''+todayStr+'\')" style="background:var(--gold);color:#1a1407;border:none;border-radius:8px;padding:8px 15px;font-weight:800;font-size:13px;cursor:pointer;">\uff0b Add event</button></div>';
+  var lastDate='';
+  upcoming.forEach(function(ev){
+    if(ev.date!==lastDate){
+      lastDate=ev.date;
+      var d=_schedParse(ev.date);
+      html += '<div style="font-family:\'Archivo\',sans-serif;font-weight:800;font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:0.5px;margin:14px 0 7px;">'+d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})+'</div>';
+    }
+    var span = (ev.endDate && ev.endDate!==ev.date) ? (' \u2192 '+_schedParse(ev.endDate).toLocaleDateString('en-US',{month:'short',day:'numeric'})) : '';
+    html += '<button onclick="_schedEdit(\''+ev.id+'\')" style="width:100%;text-align:left;display:flex;align-items:stretch;gap:0;background:#fff;border:1px solid var(--border);border-radius:11px;margin-bottom:8px;cursor:pointer;overflow:hidden;">' +
+      '<span style="width:5px;background:'+(ev.color||'#3B6FB0')+';flex-shrink:0;"></span>' +
+      '<span style="flex:1;padding:12px 14px;min-width:0;">' +
+        '<span style="display:block;font-weight:700;color:var(--navy);font-size:14px;">'+_esc(ev.title||'Event')+span+'</span>' +
+        '<span style="display:block;font-size:12px;color:var(--muted);margin-top:2px;">'+(ev.time?_esc(_schedTime12(ev.time))+' \u00b7 ':'')+_esc(ev.projectName||'')+(ev.address?(' \u00b7 '+_esc(ev.address)):'')+'</span>' +
+        (ev.notes?'<span style="display:block;font-size:12px;color:#5a5750;margin-top:4px;">'+_esc(ev.notes)+'</span>':'') +
+      '</span>' +
+    '</button>';
+  });
+  body.innerHTML = html;
+}
+
+// ---- Day view (tap a day) ----
+function _schedOpenDay(ds){
+  var evs=_schedVisibleEvents().filter(function(ev){ return ev.date<=ds && (ev.endDate||ev.date)>=ds; })
+    .sort(function(a,b){ return (a.time||'').localeCompare(b.time||''); });
+  var d=_schedParse(ds);
+  document.getElementById('sched-day-title').textContent = d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  var list = evs.length ? evs.map(function(ev){
+    return '<button onclick="_schedEdit(\''+ev.id+'\')" style="width:100%;text-align:left;display:flex;gap:10px;align-items:center;background:#fff;border:1px solid var(--border);border-radius:10px;padding:11px 13px;margin-bottom:8px;cursor:pointer;">' +
+      '<span style="width:10px;height:10px;border-radius:50%;background:'+(ev.color||'#3B6FB0')+';flex-shrink:0;"></span>' +
+      '<span style="flex:1;"><span style="display:block;font-weight:700;color:var(--navy);font-size:14px;">'+_esc(ev.title||'Event')+'</span>' +
+      '<span style="font-size:12px;color:var(--muted);">'+(ev.time?_esc(_schedTime12(ev.time)):'All day')+(ev.projectName?(' \u00b7 '+_esc(ev.projectName)):'')+'</span></span>' +
+    '</button>';
+  }).join('') : '<div style="text-align:center;color:var(--muted);padding:16px;font-size:13px;">No events this day.</div>';
+  document.getElementById('sched-day-list').innerHTML = list;
+  document.getElementById('sched-day-add').setAttribute('onclick', "_schedAddOnDay('"+ds+"')");
+  document.getElementById('modal-sched-day').classList.add('open');
+}
+function _schedAddOnDay(ds){
+  var m=document.getElementById('modal-sched-day'); if(m) m.classList.remove('open');
+  schedOpenForm(null, ds);
+}
+
+// ---- Add / edit form ----
+async function schedOpenForm(id, presetDate){
+  _schedEditId = id;
+  if(!_schedEvents.length){ _schedEvents = await _schedLoad(); }
+  var ev = id ? _schedEvents.filter(function(e){return e.id===id;})[0] : null;
+  document.getElementById('sched-f-title').value = ev ? (ev.title||'') : '';
+  document.getElementById('sched-f-start').value = ev ? (ev.date||'') : (presetDate||_schedFmt(new Date()));
+  document.getElementById('sched-f-end').value = ev ? (ev.endDate||ev.date||'') : (presetDate||_schedFmt(new Date()));
+  document.getElementById('sched-f-time').value = ev ? (ev.time||'') : '';
+  document.getElementById('sched-f-notes').value = ev ? (ev.notes||'') : '';
+  document.getElementById('sched-f-project').innerHTML = await _schedProjectOptions(ev?(ev.projKey||''):'');
+  var cur = ev ? (ev.color||SCHED_COLORS[0]) : SCHED_COLORS[0];
+  _schedPickedColor = cur;
+  document.getElementById('sched-f-colors').innerHTML = SCHED_COLORS.map(function(c){
+    return '<button type="button" onclick="_schedPickColor(\''+c+'\')" data-color="'+c+'" style="width:30px;height:30px;border-radius:50%;background:'+c+';border:3px solid '+(c===cur?'#1a2b4a':'transparent')+';cursor:pointer;"></button>';
+  }).join('');
+  document.getElementById('sched-form-title').textContent = id ? 'Edit event' : 'New event';
+  document.getElementById('sched-delete-btn').style.display = id ? 'block' : 'none';
+  document.getElementById('modal-sched-form').classList.add('open');
+}
+function _schedPickColor(c){
+  _schedPickedColor=c;
+  document.querySelectorAll('#sched-f-colors button').forEach(function(b){ b.style.border=(b.getAttribute('data-color')===c?'3px solid #1a2b4a':'3px solid transparent'); });
+}
+function _schedEdit(id){ schedOpenForm(id,null); }
+function _schedCloseForm(){ document.getElementById('modal-sched-form').classList.remove('open'); }
+
+async function _schedSaveEvent(){
+  var title=document.getElementById('sched-f-title').value.trim();
+  if(!title){ try{ddToast('Add a title');}catch(e){} return; }
+  var start=document.getElementById('sched-f-start').value;
+  if(!start){ try{ddToast('Pick a start date');}catch(e){} return; }
+  var end=document.getElementById('sched-f-end').value || start;
+  if(end<start) end=start;
+  var projKey=document.getElementById('sched-f-project').value;
+  var projId='',address='',projName='';
+  if(projKey){ var parts=projKey.split('||'); projId=parts[0]; address=parts[1]||''; try{ var pp=await DB.get('project:'+projId); projName=pp?(pp.name||''):''; }catch(e){} }
+  var id=_schedEditId || ('cal_'+Date.now()+'_'+Math.random().toString(36).slice(2,7));
+  var rec={ id:id, title:title, date:start, endDate:end, time:document.getElementById('sched-f-time').value,
+    notes:document.getElementById('sched-f-notes').value.trim(), projKey:projKey, projectId:projId, projectName:projName, address:address,
+    color:_schedPickedColor||SCHED_COLORS[0], _updatedAt:Date.now(), createdBy:(currentUser&&currentUser.name)||'Office' };
+  await DB.set('calevent:'+id, rec);
+  // Sync to THIS user's own Google Calendar only. gcalAddEvent writes to whoever is connected
+  // on this device, so each person's own events go to their own calendar; everyone's events
+  // still live in-app via Firestore.
+  try {
+    if (typeof gcalAddEvent === 'function') {
+      var _gcalRes = await gcalAddEvent({
+        title: rec.title,
+        description: (rec.projectName ? (rec.projectName + (rec.address ? (' \u2014 ' + rec.address) : '')) : '') + (rec.notes ? ('\n' + rec.notes) : ''),
+        start: rec.date,
+        end: rec.endDate || rec.date,
+        allDay: true
+      });
+      if (_gcalRes && _gcalRes.id && typeof _gcalRememberEvent === 'function') {
+        await _gcalRememberEvent('calevent:'+id, _gcalRes.id);
+      }
+    }
+  } catch(e) {}
+  _schedCloseForm();
+  try{ ddToast('Saved \u2713'); }catch(e){}
+  await schedRender();
+}
+async function _schedDeleteEvent(){
+  if(!_schedEditId) return;
+  var doDel=async function(){ await DB.delete('calevent:'+_schedEditId); _schedCloseForm(); try{ddToast('Deleted');}catch(e){} await schedRender(); };
+  try { ddConfirm('Delete this event?', doDel); } catch(e){ doDel(); }
+}
+
 async function renderDeliveries(){
   var host=document.getElementById('deliveriesList'); if(!host)return;
   host.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;">Loading…</div>';
@@ -24389,6 +24671,32 @@ if (document.readyState === 'loading') {
 </div>
 
 <!-- DELIVERY MODAL -->
+<div class="modal-overlay" id="modal-sched-day">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-header"><div class="modal-title" id="sched-day-title">Day</div><button class="modal-close" onclick="document.getElementById('modal-sched-day').classList.remove('open')">✕</button></div>
+    <div class="modal-body" style="max-height:60vh;overflow-y:auto;">
+      <div id="sched-day-list"></div>
+      <button id="sched-day-add" onclick="" class="btn-primary" style="width:100%;margin-top:10px;">＋ Add event this day</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-sched-form">
+  <div class="modal-box" style="max-width:430px;">
+    <div class="modal-header"><div class="modal-title" id="sched-form-title">New event</div><button class="modal-close" onclick="_schedCloseForm()">✕</button></div>
+    <div class="modal-body" style="max-height:74vh;overflow-y:auto;">
+      <div class="form-group"><label class="form-label">Title</label><input class="form-input" id="sched-f-title" type="text" placeholder="e.g. Framing inspection"></div>
+      <div class="form-group" style="display:flex;gap:10px;"><div style="flex:1;"><label class="form-label">Start date</label><input class="form-input" id="sched-f-start" type="date"></div><div style="flex:1;"><label class="form-label">End date</label><input class="form-input" id="sched-f-end" type="date"></div></div>
+      <div class="form-group"><label class="form-label">Time (optional)</label><input class="form-input" id="sched-f-time" type="time"></div>
+      <div class="form-group"><label class="form-label">Project / house</label><select class="form-input" id="sched-f-project"></select></div>
+      <div class="form-group"><label class="form-label">Color</label><div id="sched-f-colors" style="display:flex;gap:10px;flex-wrap:wrap;"></div></div>
+      <div class="form-group"><label class="form-label">Notes (optional)</label><textarea class="form-input" id="sched-f-notes" rows="2" placeholder="Anything to remember"></textarea></div>
+      <button onclick="_schedSaveEvent()" class="btn-primary" style="width:100%;">Save event</button>
+      <button id="sched-delete-btn" onclick="_schedDeleteEvent()" style="display:none;width:100%;margin-top:8px;background:rgba(176,58,46,0.1);color:#B03A2E;border:none;border-radius:9px;padding:11px;font-weight:700;cursor:pointer;">Delete event</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-delivery">
   <div class="modal-box" style="max-width:440px;">
     <div class="modal-header"><div class="modal-title">📦 Delivery</div><button class="modal-close" onclick="closeDeliveryModal()">✕</button></div>
