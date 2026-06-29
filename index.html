@@ -19,7 +19,7 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
 /* ===== Schedule Month grid (Google-Calendar-style day cells) ===== */
 .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; width: 100%; max-width: 100%; box-sizing: border-box; }
 .cal-day { min-height: 84px; background:#fff; border:1px solid var(--border); border-radius:8px; padding:4px;
-  display:flex; flex-direction:column; gap:3px; overflow:hidden; box-sizing:border-box; min-width:0; }
+  display:flex; flex-direction:column; gap:3px; overflow:visible; box-sizing:border-box; min-width:0; }
 .cal-day--empty { background:transparent; border:none; min-height:0; }
 .cal-day--today { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; }
 .cal-day__num-btn { background:none; border:none; padding:0; cursor:pointer; align-self:flex-start; line-height:1; }
@@ -29,6 +29,14 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
 .cal-chip { display:block; width:100%; box-sizing:border-box; font-size:11px; line-height:1.3; padding:2px 6px; border-radius:5px;
   color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; }
 .cal-chip--more { background:#e7e2d6; color:#1a2b4a; font-weight:600; }
+/* Multi-day connecting bars: chips live inside each cell but bleed across the 4px grid gap
+   so adjacent days touch and read as one continuous bar. No absolute positioning. */
+.cal-chip--start { width:auto; align-self:stretch; border-top-right-radius:0; border-bottom-right-radius:0; margin-right:-7px; padding-right:6px; position:relative; z-index:1; }
+.cal-chip--mid   { width:auto; align-self:stretch; border-radius:0; margin-left:-7px; margin-right:-7px; padding-left:6px; padding-right:6px; position:relative; z-index:1; }
+.cal-chip--end   { width:auto; align-self:stretch; border-top-left-radius:0; border-bottom-left-radius:0; margin-left:-7px; padding-left:6px; position:relative; z-index:1; }
+/* Empty lane spacer keeps events aligned to the same row across days without showing a bar. */
+.cal-chip--spacer { background:transparent !important; cursor:default; pointer-events:none; }
+
 input, textarea, select, [contenteditable="true"] {
   -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text;
 }
@@ -4562,7 +4570,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v255</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v256</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4972,7 +4980,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v255</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v256</div>
     </div>
   </div>
 
@@ -5819,7 +5827,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v255';
+<script>var APP_VERSION = 'v256';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -15970,22 +15978,64 @@ function _schedRenderMonth(){
 
   var totalCells = startDow + daysInMonth;
   var weeks = Math.ceil(totalCells/7);
+  var events = _schedVisibleEvents();
 
-  // Bucket events by each day they cover. A multi-day event lands in every day's bucket,
-  // so it shows as a normal chip inside each cell (no spanning, no absolute positioning).
-  var byDay = {};
-  _schedVisibleEvents().forEach(function(ev){
-    var s = ev.date, e = ev.endDate || ev.date;
-    if(!s) return;
-    var d = _schedParse(s), end = _schedParse(e);
-    var guard = 0;
-    while(d <= end && guard < 400){
-      var ds = _schedFmt(d);
-      (byDay[ds] = byDay[ds] || []).push(ev);
-      d.setDate(d.getDate()+1);
-      guard++;
-    }
-  });
+  // Assign each event a stable "lane" (row position) so a multi-day event sits at the SAME
+  // vertical height in every cell it covers -> the chips line up and read as one continuous band.
+  // Lanes are computed per week so packing stays tight, but an event keeps the lowest free lane
+  // it can across the days it touches that week.
+  function dsOf(yy,mm,dd){ return yy+'-'+String(mm+1).padStart(2,'0')+'-'+String(dd).padStart(2,'0'); }
+
+  // Pre-compute, for every day cell, the ordered list of {ev, lane, isStart, isEnd, isToday}.
+  // We do lane assignment week-by-week.
+  var cellData = {}; // ds -> array indexed by lane (may have gaps -> null)
+  for(var w=0; w<weeks; w++){
+    var weekStartNum = w*7 - startDow + 1;
+    var weekStart = new Date(y, m, weekStartNum);
+    var weekEnd = new Date(y, m, weekStartNum+6);
+    var weekStartStr = _schedFmt(weekStart), weekEndStr = _schedFmt(weekEnd);
+
+    // events overlapping this week, clamped to columns, longest-first for tidy packing
+    var segs = events.filter(function(ev){
+      var s = ev.date, e = ev.endDate || ev.date;
+      return s && s <= weekEndStr && e >= weekStartStr;
+    }).map(function(ev){
+      var s = _schedParse(ev.date), e = _schedParse(ev.endDate || ev.date);
+      var startCol = Math.max(0, Math.round((s - weekStart)/86400000));
+      var endCol = Math.min(6, Math.round((e - weekStart)/86400000));
+      return { ev:ev, startCol:startCol, endCol:endCol };
+    }).sort(function(a,b){
+      var la=a.endCol-a.startCol, lb=b.endCol-b.startCol;
+      if(lb!==la) return lb-la;            // longer spans first
+      return a.startCol-b.startCol;
+    });
+
+    // lane assignment: lanes[laneIndex] = array of occupied {startCol,endCol}
+    var lanes = [];
+    segs.forEach(function(seg){
+      var placed=false;
+      for(var li=0; li<lanes.length; li++){
+        var clash = lanes[li].some(function(o){ return !(seg.endCol<o.startCol || seg.startCol>o.endCol); });
+        if(!clash){ lanes[li].push(seg); seg.lane=li; placed=true; break; }
+      }
+      if(!placed){ seg.lane=lanes.length; lanes.push([seg]); }
+    });
+
+    // write per-cell lane slots for this week
+    segs.forEach(function(seg){
+      for(var col=seg.startCol; col<=seg.endCol; col++){
+        var dnum = weekStartNum + col;
+        if(dnum<1 || dnum>daysInMonth) continue;
+        var ds = dsOf(y,m,dnum);
+        if(!cellData[ds]) cellData[ds]=[];
+        cellData[ds][seg.lane] = {
+          ev: seg.ev,
+          isStart: (col===seg.startCol),
+          isEnd: (col===seg.endCol)
+        };
+      }
+    });
+  }
 
   var html = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">' +
     '<button onclick="_schedMonthStep(-1)" style="background:var(--cream);border:none;border-radius:8px;width:36px;height:36px;font-size:16px;cursor:pointer;color:var(--navy);">\u2039</button>' +
@@ -15993,14 +16043,13 @@ function _schedRenderMonth(){
     '<button onclick="_schedMonthStep(1)" style="background:var(--cream);border:none;border-radius:8px;width:36px;height:36px;font-size:16px;cursor:pointer;color:var(--navy);">\u203a</button>' +
   '</div>';
 
-  // Weekday header row (matching 7-col grid so columns line up with the day cells).
   html += '<div class="cal-grid" style="margin-bottom:4px;">';
   ['S','M','T','W','T','F','S'].forEach(function(d){
     html += '<div style="text-align:center;font-size:10px;font-weight:800;color:var(--muted);padding:2px 0;">'+d+'</div>';
   });
   html += '</div>';
 
-  // One continuous 7-col grid of day cells; weeks flow as rows.
+  var CAP = 3; // max lanes shown before "+N more"
   html += '<div class="cal-grid">';
   for(var cellIndex=0; cellIndex<weeks*7; cellIndex++){
     var dayNum = cellIndex - startDow + 1;
@@ -16010,26 +16059,51 @@ function _schedRenderMonth(){
     }
     var ds = y+'-'+String(m+1).padStart(2,'0')+'-'+String(dayNum).padStart(2,'0');
     var isToday = ds===todayStr;
-    var evs = (byDay[ds] || []);
+    var slots = cellData[ds] || [];
 
     html += '<div class="cal-day'+(isToday?' cal-day--today':'')+'">';
     html += '<button class="cal-day__num-btn" onclick="_schedOpenDay(\''+ds+'\')">' +
       '<span class="cal-day__num'+(isToday?' cal-day__num--today':'')+'">'+dayNum+'</span></button>';
 
-    var CAP = 3;
-    var shown = evs.slice(0, CAP);
-    shown.forEach(function(ev){
+    // count how many real events are in this cell (for +more)
+    var realCount = 0;
+    for(var li=0; li<slots.length; li++){ if(slots[li]) realCount++; }
+
+    // render lanes up to CAP; keep lane gaps as spacers so events stay aligned across days
+    var shownLanes = Math.min(slots.length, CAP);
+    for(var lane=0; lane<shownLanes; lane++){
+      var slot = slots[lane];
+      if(!slot){
+        // empty lane spacer (keeps alignment when a lower lane is occupied)
+        html += '<span class="cal-chip cal-chip--spacer"></span>';
+        continue;
+      }
+      var ev = slot.ev;
       var c = ev.color || '#3B6FB0';
       var title = _esc(ev.title || 'Event');
       var addr = ev.address ? _esc(ev.address) : '';
       var label = title + (addr ? ' \u00b7 ' + addr : '');
-      var inner = '<span style="font-weight:600;">' + title + '</span>' +
-                  (addr ? '<span style="opacity:0.85;"> \u00b7 ' + addr + '</span>' : '');
-      html += '<span class="cal-chip" style="background:'+c+';" title="'+label+'" onclick="event.stopPropagation();_schedEdit(\''+ev.id+'\')">'+inner+'</span>';
-    });
-    if(evs.length > CAP){
-      var more = evs.length - CAP;
-      html += '<span class="cal-chip cal-chip--more" onclick="event.stopPropagation();_schedOpenDay(\''+ds+'\')">+'+more+' more</span>';
+      // Position classes drive corners + edge-bleed so adjacent days visually connect.
+      var posCls = ' cal-chip--mid';
+      if(slot.isStart && slot.isEnd) posCls = ''; // single-day -> normal rounded chip
+      else if(slot.isStart) posCls = ' cal-chip--start';
+      else if(slot.isEnd) posCls = ' cal-chip--end';
+      // Only show text on the START segment (and single-day). Continuation cells stay blank
+      // so the band reads as one bar, not the title repeated.
+      var inner = '';
+      if(slot.isStart || (slot.isStart && slot.isEnd)){
+        inner = '<span style="font-weight:600;">' + title + '</span>' +
+                (addr ? '<span style="opacity:0.85;"> \u00b7 ' + addr + '</span>' : '');
+      } else {
+        inner = '\u00a0';
+      }
+      html += '<span class="cal-chip'+posCls+'" style="background:'+c+';" title="'+label+'" onclick="event.stopPropagation();_schedEdit(\''+ev.id+'\')">'+inner+'</span>';
+    }
+    if(realCount > shownLanes || slots.length > CAP){
+      var more = realCount - (function(){ var n=0; for(var li=0; li<shownLanes; li++){ if(slots[li]) n++; } return n; })();
+      if(more > 0){
+        html += '<span class="cal-chip cal-chip--more" onclick="event.stopPropagation();_schedOpenDay(\''+ds+'\')">+'+more+' more</span>';
+      }
     }
     html += '</div>';
   }
