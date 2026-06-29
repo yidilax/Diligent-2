@@ -4581,7 +4581,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v263</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v265</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4991,7 +4991,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v263</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v265</div>
     </div>
   </div>
 
@@ -5838,7 +5838,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v263';
+<script>var APP_VERSION = 'v265';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -6398,6 +6398,24 @@ async function init() {
   // routes the UI — it never triggers sign-in (that happens solely from the button click).
   auth.onAuthStateChanged(async function(fbUser) {
     if (_handled && !fbUser) return;
+    if (fbUser && fbUser.isAnonymous) {
+      // Anonymous = a portal visitor (sub or customer) who signed in via their code/PIN.
+      // They are NOT office staff, so we must NOT run the office router for them (doing so
+      // wrongly created an 'employee' account and dropped them into the office view).
+      // Their live login (subLogin/customerAccess) and the boot session-restore both navigate
+      // on their own. If neither has shown a page yet (e.g. Firebase restored a leftover
+      // anonymous session but there's no saved portal session), fall back to the landing page
+      // so they can re-enter — never leave them on a blank screen or in the office view.
+      _settleBoot();
+      _hideLoader();
+      try {
+        var _shown = false;
+        document.querySelectorAll('.page').forEach(function(p){ if (getComputedStyle(p).display !== 'none') _shown = true; });
+        var _onPortal = ['subPortalPage','customerDashboardPage','customerGalleryPage','customerPortalPage','customerPunchPage','customerUpdatesPage','customerAuthPage','subAuthPage'].some(function(id){ var e=document.getElementById(id); return e && getComputedStyle(e).display !== 'none'; });
+        if (!_shown && !_onPortal && typeof showPage === 'function') { showPage('landingPage'); }
+      } catch(e) {}
+      return;
+    }
     if (fbUser) {
       _handled = true;
       _firstNullGrace = false;
@@ -8852,6 +8870,28 @@ function _genSubCode() { return String(Math.floor(1000 + Math.random()*9000)); }
 
 // All subs
 async function _getAllSubs() {
+  // Subs log in on their OWN device with NO office login, so the local cache is empty and
+  // DB.list (cache-only) would find nothing — meaning their 4-digit code wouldn't be
+  // recognized. Read the subcontractor records straight from Firebase ('pub' collection,
+  // which is readable) so sub login works on any device. Fall back to the local cache.
+  try {
+    var fs = (typeof _getFirestore === 'function') ? _getFirestore() : null;
+    if (fs) {
+      var snap = await fs.collection('pub').get();
+      var subs = [];
+      snap.forEach(function(doc){
+        var d = doc.data();
+        if (!d || typeof d.k !== 'string') return;
+        if (d.k.indexOf('subcontractor:') !== 0) return;
+        try {
+          var rec = JSON.parse(d.v);
+          if (rec) { subs.push(rec); try { _store[d.k] = d.v; } catch(e) {} }
+        } catch(e) {}
+      });
+      if (subs.length) { try { _saveToLS(); } catch(e) {} return subs; }
+    }
+  } catch(e) { console.warn('_getAllSubs Firebase fetch failed:', e); }
+  // Fallback: local cache (office context).
   var keys = await DB.list('subcontractor:');
   return (await Promise.all(keys.map(function(k){return DB.get(k);}))).filter(Boolean);
 }
@@ -24520,7 +24560,14 @@ function _withTimeout(promise, ms, fallback) {
 
 async function handleAuthedUser(fbUser) {
   if (!fbUser) return;
+  // Anonymous users are portal visitors (subs/customers), not office staff. Never route them
+  // through office login or fabricate an employee account for them. They have no email; their
+  // access is governed entirely by subLogin / customerAccess.
+  if (fbUser.isAnonymous) return;
   var email = (fbUser.email || '').toLowerCase();
+  // Safety: an authenticated office user must have an email. If somehow there's no email,
+  // do NOT fall through to creating an 'employee' account — that's the default-to-office bug.
+  if (!email) return;
   var ADMIN_EMAILS = ['shmily@diligentdevelopersny.com'];
 
   function _showAuthErr(t) {
