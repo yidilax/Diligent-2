@@ -4537,7 +4537,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v237</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v241</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4947,7 +4947,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v237</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v241</div>
     </div>
   </div>
 
@@ -5781,7 +5781,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v237';
+<script>var APP_VERSION = 'v241';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -7619,14 +7619,7 @@ async function _loadWalkSlots(address, unit) {
   var host = document.getElementById('cdWalkCta');
   if (!host) return;
   try {
-    var keys = await DB.list('walkreq:');
-    var reqs = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
-    var hasActive = reqs.some(function(r){
-      return (r.address||'').toLowerCase().trim() === (address||'').toLowerCase().trim() &&
-             String(r.unit||'').toLowerCase().trim() === String(unit||'').toLowerCase().trim() &&
-             (r.status === 'requested' || r.status === 'proposed' || r.status === 'confirmed');
-    });
-    if (hasActive) { host.innerHTML = ''; return; }
+    // Customers can request multiple walkthroughs — the button always shows.
     var cfg = await DB.get('walkavail:config');
     var btnStyle = 'background:var(--navy);color:#fff;border:none;border-radius:10px;padding:13px 16px;font-size:14px;font-weight:700;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;';
     if (!cfg || !(cfg.days||[]).length) {
@@ -7919,7 +7912,16 @@ async function _loadPortalConfig(address, unit) {
         '<div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">🏁 Est. Completion</div>' +
         '<div style="font-size:15px;font-weight:700;color:var(--navy);margin-top:3px;">' + _fmtDate(cfg.dateCompletion) + '</div></div>');
     }
-    if (cfg && cfg.dateNext) {
+    // Next Milestone: prefer the live schedule for this house (auto-advances as events are
+    // marked done); fall back to the manually-typed milestone if no schedule events exist.
+    var _milestone = null;
+    try { _milestone = await _schedNextMilestoneForHouse(address); } catch(e) {}
+    if (_milestone) {
+      cards.push('<div style="flex:1;min-width:130px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:13px;">' +
+        '<div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">📅 Next Milestone</div>' +
+        '<div style="font-size:15px;font-weight:700;color:var(--navy);margin-top:3px;">' + _esc(_milestone.title || '') + '</div>' +
+        '<div style="font-size:12px;color:var(--muted);margin-top:2px;">' + _fmtDate(_milestone.date) + (_milestone.time ? (' \u00b7 ' + _esc(_milestone.time)) : '') + '</div></div>');
+    } else if (cfg && cfg.dateNext) {
       cards.push('<div style="flex:1;min-width:130px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:13px;">' +
         '<div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">📅 ' + _esc(cfg.dateNextLabel || 'Next Milestone') + '</div>' +
         '<div style="font-size:15px;font-weight:700;color:var(--navy);margin-top:3px;">' + _fmtDate(cfg.dateNext) + '</div></div>');
@@ -12607,7 +12609,7 @@ async function connectGoogleCalendar() {
           await DB.set(_gcalUserKey(), { connected: true, connectedAt: Date.now(), userId: currentUser ? currentUser.id : null });
           try { localStorage.setItem('dd_gcalAuto', '1'); } catch(e) {}
           try { ddToast('Google Calendar connected \u2713'); } catch(e) {}
-          try { renderScheduleNew(); } catch(e) {}
+          try { if (typeof schedRender === 'function') schedRender(); } catch(e) {}
           if (typeof renderSettings === 'function') renderSettings();
         } else {
           try { ddToast('Calendar not connected'); } catch(e) {}
@@ -13477,7 +13479,7 @@ async function switchTab(tab) {
   if (tab === 'upgradeEditor') initUpgradeEditor();
   if (tab === 'punchlist') renderPunchList();
   if (tab === 'tasks') { _toggleTabChrome('tab-tasks', true); _populateTaskProjectFilter(); renderTasks(); }
-  if (tab === 'scheduling') { _toggleTabChrome('tab-scheduling', true); renderScheduleNew(true); }
+  if (tab === 'scheduling') { _toggleTabChrome('tab-scheduling', true); schedRender(); }
   if (tab === 'specs') renderSpecs();
   try { _openNavGroupForTab(tab); } catch(e) {}
   try { if (tab === 'custReports') { _renderOfficeCustomerIssues(); } } catch(e) {}
@@ -15772,9 +15774,73 @@ function _schedVisibleEvents(){
   return _schedEvents.filter(function(ev){ return ev.projectId === _schedFilterProj; });
 }
 async function _schedGcalConnect(){
+  // If no Client ID is configured yet, show the one-time setup (owners only); otherwise
+  // run the normal Google sign-in/authorize flow.
+  var configured = false;
+  try { configured = (typeof _gcalConfigured === 'function') ? _gcalConfigured() : false; } catch(e){}
+  if (!configured) {
+    var isOwner = (currentUser && (currentUser.isOwner || currentUser.role === 'admin'));
+    if (!isOwner) { try { ddToast('Calendar sync isn\'t set up yet \u2014 ask the office to enable it.'); } catch(e){} return; }
+    _schedGcalOpenSetup();
+    return;
+  }
   try { if (typeof connectGoogleCalendar === 'function') await connectGoogleCalendar(); } catch(e){}
-  schedRender();
+  setTimeout(function(){ schedRender(); }, 400);
 }
+// One-time setup modal: paste a free Google OAuth Client ID.
+function _schedGcalOpenSetup(){
+  var cur = '';
+  try { cur = localStorage.getItem('dd_gcal_client_id') || ''; } catch(e){}
+  var inp = document.getElementById('sched-gcal-clientid');
+  if (inp) inp.value = cur;
+  document.getElementById('modal-sched-gcal').classList.add('open');
+}
+function _schedGcalCloseSetup(){ var m=document.getElementById('modal-sched-gcal'); if(m) m.classList.remove('open'); }
+async function _schedGcalSaveAndConnect(){
+  var inp = document.getElementById('sched-gcal-clientid');
+  var v = inp ? inp.value.trim() : '';
+  if (!v) { try{ ddToast('Paste your Client ID first'); }catch(e){} return; }
+  try { localStorage.setItem('dd_gcal_client_id', v); } catch(e){}
+  try { GOOGLE_CLIENT_ID = v; } catch(e){}
+  _schedGcalCloseSetup();
+  try { ddToast('Saved \u2014 connecting\u2026'); } catch(e){}
+  // Now run the real authorize flow.
+  try { if (typeof connectGoogleCalendar === 'function') await connectGoogleCalendar(); } catch(e){}
+  setTimeout(function(){ schedRender(); }, 600);
+}
+
+// ---- Customer-facing milestone: the next not-done event for a house ----
+// Returns the single upcoming/active event for this house address that customers should see.
+// "Next" = the earliest event that isn't marked done (by start date). When the office marks
+// one done, the following event automatically becomes the next one shown.
+async function _schedNextMilestoneForHouse(address) {
+  try {
+    var addr = (address||'').toLowerCase().trim();
+    if (!addr) return null;
+    var keys = await DB.list('calevent:');
+    var evs = (await Promise.all(keys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+    var mine = evs.filter(function(ev){
+      return (ev.address||'').toLowerCase().trim() === addr && !ev.done;
+    }).sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
+    return mine.length ? mine[0] : null;
+  } catch(e) { return null; }
+}
+
+function _schedDoneFromForm(id){ _schedCloseForm(); _schedToggleDone(id); }
+
+async function _schedToggleDone(id) {
+  try {
+    var rec = await DB.get('calevent:'+id);
+    if (!rec) return;
+    rec.done = !rec.done;
+    rec.doneAt = rec.done ? Date.now() : null;
+    rec._updatedAt = Date.now();
+    await DB.set('calevent:'+id, rec);
+    try { ddToast(rec.done ? 'Marked done \u2014 next milestone is now live for the customer' : 'Marked not done'); } catch(e){}
+    await schedRender();
+  } catch(e){}
+}
+
 async function schedRender(){
   var root = document.getElementById('schedRoot');
   if(!root) return;
@@ -15847,7 +15913,6 @@ function _schedRenderMonth(){
     html += _schedWeekBars(y, m, startDow, w, daysInMonth);
   }
 
-  html += '<div style="text-align:center;margin-top:14px;"><button onclick="_schedAddOnDay(\''+todayStr+'\')" style="background:var(--gold);color:#1a1407;border:none;border-radius:9px;padding:11px 20px;font-weight:800;font-size:14px;cursor:pointer;">\uff0b Add event</button></div>';
   body.innerHTML = html;
 }
 
@@ -15981,6 +16046,18 @@ async function schedOpenForm(id, presetDate){
   }).join('');
   document.getElementById('sched-form-title').textContent = id ? 'Edit event' : 'New event';
   document.getElementById('sched-delete-btn').style.display = id ? 'block' : 'none';
+  // Mark-done button (only for existing events). Marking done advances the customer's
+  // "Next Milestone" to the following event for that house.
+  var doneBtn = document.getElementById('sched-done-btn');
+  if (doneBtn) {
+    if (id && ev) {
+      doneBtn.style.display = 'block';
+      doneBtn.textContent = ev.done ? '\u21a9 Mark not done' : '\u2713 Mark done (advances customer milestone)';
+      doneBtn.setAttribute('onclick', "_schedDoneFromForm('" + id + "')");
+    } else {
+      doneBtn.style.display = 'none';
+    }
+  }
   document.getElementById('modal-sched-form').classList.add('open');
 }
 function _schedPickColor(c){
@@ -16050,19 +16127,17 @@ async function renderDeliveries(){
         '<span style="background:'+col+';color:#fff;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;text-transform:capitalize;flex-shrink:0;">'+_esc(it.status||'')+'</span>' +
       '</div>' +
       (it.notes?'<div style="font-size:12px;color:#3a3730;margin-top:6px;line-height:1.45;">'+_esc(it.notes)+'</div>':'') +
-      (it.tracking ? (
-        '<div style="margin-top:9px;padding-top:9px;border-top:1px solid #f0ece2;">' +
+      (it.tracking ? (function(){
+        var _u = _delivTrackingUrl(it.carrier||'unknown', it.tracking);
+        var _su = _u.split('\"').join('&quot;');
+        return '<div style="margin-top:9px;padding-top:9px;border-top:1px solid #f0ece2;">' +
           '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
             '<span style="background:var(--cream);color:var(--navy);border-radius:6px;padding:3px 9px;font-size:11px;font-weight:800;">\ud83d\ude9a ' + _esc(_delivCarrierLabel(it.carrier||'unknown')) + '</span>' +
             '<span style="font-size:11px;color:var(--muted);font-family:monospace;">' + _esc(it.tracking.length>28?(it.tracking.slice(0,28)+'\u2026'):it.tracking) + '</span>' +
           '</div>' +
-          '<div style="display:flex;gap:8px;margin-top:8px;">' +
-            '<button onclick="_delivOpenById(\'' + it.id + '\')" style="flex:1;background:var(--navy);color:#fff;border:none;border-radius:7px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;">\ud83d\udce6 Open tracking</button>' +
-            '<button onclick="_delivEmbedById(\'' + it.id + '\')" style="flex:1;background:#fff;color:var(--navy);border:1.5px solid var(--border);border-radius:7px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;">\ud83d\udc41 View live here</button>' +
-          '</div>' +
-          '<div id="deliv-embed-' + it.id + '" style="display:none;"></div>' +
-        '</div>'
-      ) : '') +
+          '<a href="' + _su + '" target="_blank" rel="noopener noreferrer" style="display:block;text-align:center;background:var(--navy);color:#fff;text-decoration:none;border-radius:7px;padding:11px;font-size:13px;font-weight:700;margin-top:8px;">\ud83d\udce6 Track this package</a>' +
+        '</div>';
+      })() : '') +
       '<div style="display:flex;gap:8px;margin-top:8px;">' +
         '<button onclick="_delivSetStatus(\''+it.id+'\',\'arrived\')" style="font-size:11px;padding:4px 10px;border-radius:6px;border:none;background:rgba(58,125,93,0.15);color:#3a7d5d;font-weight:700;cursor:pointer;">Mark Arrived</button>' +
         '<button onclick="_lbDelete(\'delivery:'+it.id+'\',renderDeliveries)" style="font-size:11px;padding:4px 10px;border-radius:6px;border:none;background:rgba(0,0,0,0.05);color:#888;cursor:pointer;margin-left:auto;">Delete</button>' +
@@ -17623,19 +17698,14 @@ async function _renderSubWalkView() {
   var host = document.getElementById('subPortalContent');
   host.innerHTML = '<div style="text-align:center;color:#9a9484;padding:30px;">Loading\u2026</div>';
   var hdr = '<div class="spv-head"><button class="spv-back" onclick="_subBack()">\u2039 Back</button><div class="spv-title">\ud83d\udeb6 Walkthroughs</div></div>';
-  var walks = [];
-  try {
-    var wk = await DB.list('walkreq:');
-    walks = (await Promise.all(wk.map(function(k){ return DB.get(k); }))).filter(Boolean);
-    walks = walks.filter(function(w){ return w.status === 'confirmed' || w.status === 'proposed'; });
-    walks.sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
-  } catch(e) {}
+  // Customer walkthrough REQUESTS are office-only and never shown to subs.
+  // The sub portal shows ONLY visits the office scheduled for this sub.
   // Office-scheduled visits for this sub.
   var visits = [];
   try {
     if (_currentSub && _currentSub.id) { visits = _visitsForSub(_currentSub.id); }
   } catch(e) {}
-  if (!walks.length && !visits.length) {
+  if (!visits.length) {
     host.innerHTML = hdr + '<div class="tab-empty" style="background:#fff;border-radius:14px;padding:28px 20px;"><div class="tab-empty-icon">\ud83d\udeb6</div><div class="tab-empty-title">No walkthroughs scheduled</div><div class="tab-empty-desc">Upcoming walkthrough visits will show here.</div></div>';
     return;
   }
@@ -17660,13 +17730,7 @@ async function _renderSubWalkView() {
       statusHtml + actionsHtml +
     '</div>';
   }).join('');
-  host.innerHTML = hdr + '<div class="spv-walks">' + visitsHtml + walks.map(function(w){
-    var d = w.date ? new Date(w.date + 'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) : '';
-    return '<div class="spv-walk"><div class="spv-walk-date">' + d + (w.time?(' \u00b7 ' + _esc(w.time)):'') + '</div>' +
-      '<div class="spv-walk-addr">' + _esc(w.address||'') + (w.unit?(' \u00b7 Unit ' + _esc(w.unit)):'') + '</div>' +
-      '<div class="spv-walk-status spv-' + w.status + '">' + (w.status==='confirmed'?'Confirmed':'Proposed') + '</div>' +
-    '</div>';
-  }).join('') + '</div>';
+  host.innerHTML = hdr + '<div class="spv-walks">' + visitsHtml + '</div>';
 }
 
 async function _renderSubPunchView() {
@@ -20619,6 +20683,25 @@ function goBackToHomeAndReset() {
     });
   }
   if (typeof clearSig === 'function') clearSig();
+  // Restore sub-option "what type" dropdowns and any dropdown values directly from the raw
+  // selections map (keys like 'hardwood_type'). These were previously dropped on prefill,
+  // which is why the chosen type vanished after the edit window. Now they persist always.
+  try {
+    var rawSel = r.selections || {};
+    Object.keys(rawSel).forEach(function(key){
+      var val = rawSel[key];
+      if (val === undefined || val === null || val === '') return;
+      // Match the select by its name (sub-options use '<item>_type'; dropdowns use the item key).
+      var sel = document.querySelector('select[name="' + key + '"]');
+      if (sel) {
+        sel.value = val;
+        // If it's a sub-option inside a hidden box, reveal the box so the value is visible.
+        var box = sel.closest('.suboption-box');
+        if (box) box.style.display = 'block';
+        try { sel.dispatchEvent(new Event('change')); } catch(e){}
+      }
+    });
+  } catch(e) {}
   if (typeof updateProgress === 'function') updateProgress();
 }
 
@@ -24681,6 +24764,29 @@ if (document.readyState === 'loading') {
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-sched-gcal">
+  <div class="modal-box" style="max-width:440px;">
+    <div class="modal-header"><div class="modal-title">📆 Connect Google Calendar</div><button class="modal-close" onclick="_schedGcalCloseSetup()">✕</button></div>
+    <div class="modal-body" style="max-height:76vh;overflow-y:auto;">
+      <div style="font-size:13px;color:#5a5750;line-height:1.55;margin-bottom:12px;">
+        To sync events to your Google Calendar, the office needs a free Google <b>Client ID</b> (one-time setup for the whole company). Once it\'s entered here, everyone just taps “Connect Google” and signs in — no codes after that.
+      </div>
+      <div style="background:var(--cream);border-radius:10px;padding:12px;font-size:12px;color:#4a4636;line-height:1.6;margin-bottom:14px;">
+        <b>How to get the Client ID (5 min, once):</b><br>
+        1. Go to <span style="color:var(--navy);font-weight:700;">console.cloud.google.com</span><br>
+        2. Create a project → APIs &amp; Services → Credentials<br>
+        3. Enable the <b>Google Calendar API</b><br>
+        4. Create an <b>OAuth Client ID</b> (type: Web application)<br>
+        5. Under “Authorized JavaScript origins” add: <span style="color:var(--navy);font-weight:700;">https://diligentdevelopers.app</span><br>
+        6. Copy the Client ID and paste it below.
+      </div>
+      <div class="form-group"><label class="form-label">Google Client ID</label><input class="form-input" id="sched-gcal-clientid" type="text" placeholder="xxxxxxxx.apps.googleusercontent.com"></div>
+      <button onclick="_schedGcalSaveAndConnect()" class="btn-primary" style="width:100%;">Save &amp; connect</button>
+      <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px;">This is stored on this device and shared setup for the office.</div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-sched-form">
   <div class="modal-box" style="max-width:430px;">
     <div class="modal-header"><div class="modal-title" id="sched-form-title">New event</div><button class="modal-close" onclick="_schedCloseForm()">✕</button></div>
@@ -24692,6 +24798,7 @@ if (document.readyState === 'loading') {
       <div class="form-group"><label class="form-label">Color</label><div id="sched-f-colors" style="display:flex;gap:10px;flex-wrap:wrap;"></div></div>
       <div class="form-group"><label class="form-label">Notes (optional)</label><textarea class="form-input" id="sched-f-notes" rows="2" placeholder="Anything to remember"></textarea></div>
       <button onclick="_schedSaveEvent()" class="btn-primary" style="width:100%;">Save event</button>
+      <button id="sched-done-btn" onclick="" style="display:none;width:100%;margin-top:8px;background:rgba(45,122,79,0.12);color:#2D7A4F;border:none;border-radius:9px;padding:11px;font-weight:700;cursor:pointer;">✓ Mark done</button>
       <button id="sched-delete-btn" onclick="_schedDeleteEvent()" style="display:none;width:100%;margin-top:8px;background:rgba(176,58,46,0.1);color:#B03A2E;border:none;border-radius:9px;padding:11px;font-weight:700;cursor:pointer;">Delete event</button>
     </div>
   </div>
