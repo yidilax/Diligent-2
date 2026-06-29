@@ -4581,7 +4581,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v262</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v263</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4991,7 +4991,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v262</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v263</div>
     </div>
   </div>
 
@@ -5838,7 +5838,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v262';
+<script>var APP_VERSION = 'v263';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -6532,18 +6532,103 @@ async function _syncAllPublicAddresses() {
   } catch(e) {}
 }
 
+// Lists records by key prefix by reading Firestore DIRECTLY (not the local cache, which is
+// empty on a customer's own device that never ran the office warmCache). Returns parsed
+// values and also warms the local cache for subsequent instant reads. Routes to the right
+// collection: pub-prefixed keys live in 'pub', everything else in 'dd' (reads are allowed).
+async function _fsListByPrefix(prefix) {
+  var out = [];
+  try {
+    var fs = (typeof _getFirestore === 'function') ? _getFirestore() : null;
+    if (!fs) return out;
+    var coll = (typeof _fsCol === 'function') ? _fsCol(prefix) : 'dd';
+    var snap = await fs.collection(coll).get();
+    snap.forEach(function(doc){
+      var d = doc.data();
+      if (!d || typeof d.k !== 'string') return;
+      if (d.k.indexOf(prefix) !== 0) return;
+      try {
+        var rec = JSON.parse(d.v);
+        if (rec !== undefined && rec !== null) {
+          out.push(rec);
+          try { _store[d.k] = d.v; } catch(e) {}
+        }
+      } catch(e) {}
+    });
+    try { _saveToLS(); } catch(e) {}
+  } catch(e) { console.warn('_fsListByPrefix(' + prefix + ') failed:', e); }
+  return out;
+}
+
 async function loadProjectsForCustomer() {
-  // Customers read the public address book (works without office login on any device).
-  var pubKeys = await DB.list('pubaddr:');
-  var pub = (await Promise.all(pubKeys.map(function(k){return DB.get(k);}))).filter(Boolean);
-  if (pub.length) {
-    _allProjects = pub.map(function(p){ return { id: p.id, name: p.name, houses: p.houses || [] }; });
-    return;
-  }
-  // Fallback (e.g. office user browsing): try the full project records.
-  var keys = await DB.list('project:');
-  var projects = (await Promise.all(keys.map(function(k){return DB.get(k);}))).filter(Boolean);
-  _allProjects = projects.filter(Boolean);
+  // Customers sign in on their OWN device with NO office login, so the local cache is empty.
+  // We must read straight from Firebase. We try the public address book first (pubaddr:), and
+  // if that's empty/stale we fall back to reading the project records directly from Firebase
+  // (reads are allowed by the rules). This guarantees the address list shows on a fresh device
+  // even if the office hasn't published the public addresses yet.
+  var fs = (typeof _getFirestore === 'function') ? _getFirestore() : null;
+
+  // 1) Try the published public address book (pubaddr: in the 'pub' collection).
+  try {
+    if (fs) {
+      var snap = await fs.collection('pub').get();
+      var pub = [];
+      snap.forEach(function(doc){
+        var d = doc.data();
+        if (!d || typeof d.k !== 'string') return;
+        if (d.k.indexOf('pubaddr:') !== 0) return;
+        try {
+          var rec = JSON.parse(d.v);
+          if (rec) { pub.push(rec); try { _store[d.k] = d.v; } catch(e) {} }
+        } catch(e) {}
+      });
+      if (pub.length) {
+        _allProjects = pub.map(function(p){ return { id: p.id, name: p.name, houses: p.houses || [] }; });
+        try { _saveToLS(); } catch(e) {}
+        return;
+      }
+    }
+  } catch(e) { console.warn('loadProjectsForCustomer pubaddr fetch failed:', e); }
+
+  // 2) Fallback: read the project records DIRECTLY from Firebase (the 'dd' collection).
+  //    Reads are open in the rules, so this works with no office login. We only expose
+  //    non-private projects' addresses to customers, mirroring the publish logic.
+  try {
+    if (fs) {
+      var dsnap = await fs.collection('dd').get();
+      var projs = [];
+      dsnap.forEach(function(doc){
+        var d = doc.data();
+        if (!d || typeof d.k !== 'string') return;
+        if (d.k.indexOf('project:') !== 0) return;
+        try {
+          var p = JSON.parse(d.v);
+          if (!p || !p.id) return;
+          if (p.visibility && p.visibility === 'private') return;   // don't expose private projects
+          projs.push({ id: p.id, name: p.name, houses: p.houses || [] });
+          try { _store[d.k] = d.v; } catch(e) {}
+        } catch(e) {}
+      });
+      if (projs.length) {
+        _allProjects = projs;
+        try { _saveToLS(); } catch(e) {}
+        return;
+      }
+    }
+  } catch(e) { console.warn('loadProjectsForCustomer project fetch failed:', e); }
+
+  // 3) Last resort: whatever is already in the local cache (office user browsing).
+  try {
+    var pubKeys = await DB.list('pubaddr:');
+    var pubC = (await Promise.all(pubKeys.map(function(k){return DB.get(k);}))).filter(Boolean);
+    if (pubC.length) {
+      _allProjects = pubC.map(function(p){ return { id: p.id, name: p.name, houses: p.houses || [] }; });
+      return;
+    }
+    var keys = await DB.list('project:');
+    var projects = (await Promise.all(keys.map(function(k){return DB.get(k);}))).filter(Boolean);
+    _allProjects = projects.filter(Boolean);
+  } catch(e) { _allProjects = _allProjects || []; }
 }
 
 async function onCustAddressInput() {
@@ -6731,8 +6816,9 @@ async function customerAccess() {
   var enteredPhoneRaw = (document.getElementById('custPhoneVerify') ? document.getElementById('custPhoneVerify').value : '') || '';
   var enteredPhone = enteredPhoneRaw.replace(/\D/g, ''); // digits only
   // Find customer record(s) matching this address + unit.
-  var custKeys = await DB.list('customer:');
-  var custs = (await Promise.all(custKeys.map(function(k){ return DB.get(k); }))).filter(Boolean);
+  // Read customer records DIRECTLY from Firestore so phone verification works on the
+  // customer's own device (the local cache is empty there).
+  var custs = await _fsListByPrefix('customer:');
   var matchAddr = address.toLowerCase().trim();
   var matchUnit = (finalUnit === 'Main' ? '' : finalUnit).toLowerCase().trim();
   var unitCustomers = custs.filter(function(c){
