@@ -4581,7 +4581,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v260</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v262</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4991,7 +4991,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v260</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v262</div>
     </div>
   </div>
 
@@ -5838,7 +5838,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v260';
+<script>var APP_VERSION = 'v262';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -6085,12 +6085,26 @@ function _scheduleLiveRerender() {
 
 // Re-render whatever the user is currently looking at, without disrupting typing.
 async function _rerenderCurrentView() {
-  // Don't repaint while the user is editing a field (would lose focus/caret).
+  // Don't repaint while the user is TYPING in a text field (would lose focus/caret).
+  // IMPORTANT: a checkbox/radio is also an <input>, so we must NOT bail for those — doing so
+  // meant ticking a box left it focused and the rerender bailed forever (the change only
+  // appeared after a manual refresh). Only skip for genuine text entry.
   try {
     var ae = document.activeElement;
-    if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.tagName === 'SELECT')) {
-      _scheduleLiveRerender(); // try again shortly
-      return;
+    if (ae) {
+      var tag = ae.tagName;
+      var typeAttr = (ae.getAttribute && (ae.getAttribute('type') || '')).toLowerCase();
+      var isTextEntry =
+        tag === 'TEXTAREA' ||
+        tag === 'SELECT' ||
+        ae.isContentEditable === true ||
+        (tag === 'INPUT' && typeAttr !== 'checkbox' && typeAttr !== 'radio' &&
+         typeAttr !== 'button' && typeAttr !== 'submit' && typeAttr !== 'reset' &&
+         typeAttr !== 'range' && typeAttr !== 'file' && typeAttr !== 'color');
+      if (isTextEntry) {
+        _scheduleLiveRerender(); // a real text field is focused — try again shortly
+        return;
+      }
     }
   } catch(e) {}
 
@@ -6293,6 +6307,7 @@ async function init() {
       var _sub = await _findSubByCode(_subCode);
       if (_sub) {
         var l0 = document.getElementById('bootLoader'); if (l0) l0.style.display = 'none';
+        await _ensureAnonAuth();   // re-attach auth token so the returning sub can still save
         _currentSub = _sub;
         document.getElementById('subPortalName').textContent = _sub.name || 'Subcontractor';
         document.getElementById('subPortalTrade').textContent = _sub.trade || '';
@@ -6618,6 +6633,7 @@ async function _submitPinGate() {
   var errEl = document.getElementById('pinGateError');
   if (_pendingAccess.existing._pin && entered === _pendingAccess.existing._pin) {
     _closePinGate();
+    await _ensureAnonAuth();   // correct PIN -> attach auth token so the resident can save
     var a = _pendingAccess; _pendingAccess = null;
     openCustomerDashboard(a.name, a.address, a.unit, a.saveKey, a.existing);
   } else {
@@ -6763,6 +6779,8 @@ async function customerAccess() {
   // First-time resident: have them CREATE a PIN right away (before anything else).
   var newPin = await _promptForPin();
   if (!newPin) { return; } // they cancelled
+  // Attach a real Firebase auth token so the resident's saves are allowed by the rules.
+  await _ensureAnonAuth();
   var rec = existing || {};
   rec._pin = newPin;
   rec.name = name; rec.address = address; rec.unit = finalUnit;
@@ -17816,6 +17834,29 @@ async function _collectSubPunchItems(sub) {
 }
 
 // ===== Subcontractor portal (their login + screen) =====
+// Signs the visitor into Firebase anonymously so the security rules see an authenticated
+// user (request.auth != null) and allow portal writes. This is what makes the 4-digit code
+// behave like a real, secure login: the code gates entry, and a successful entry attaches a
+// genuine Firebase auth token to every save. Anonymous users still cannot touch office data
+// in any way the rules don't allow; this only lets the portals write what they need.
+// Idempotent: if already signed in (anon or office), it does nothing.
+async function _ensureAnonAuth() {
+  try {
+    var auth = (typeof _getAuth === 'function') ? _getAuth() : (firebase && firebase.auth ? firebase.auth() : null);
+    if (!auth) return false;
+    if (auth.currentUser) return true;                 // already authenticated
+    try { if (_authPersistencePromise) await _authPersistencePromise; } catch(e) {}
+    if (auth.currentUser) return true;
+    if (typeof auth.signInAnonymously === 'function') {
+      await auth.signInAnonymously();
+      return true;
+    }
+  } catch(e) {
+    console.warn('anon auth failed:', e);
+  }
+  return false;
+}
+
 async function subLogin() {
   var code = (document.getElementById('subCodeInput').value || '').trim();
   var err = document.getElementById('subAuthError');
@@ -17823,6 +17864,8 @@ async function subLogin() {
   if (!/^\d{4}$/.test(code)) { err.textContent = 'Enter your 4-digit code.'; err.style.display='block'; return; }
   var sub = await _findSubByCode(code);
   if (!sub) { err.textContent = 'Code not recognized. Check with the office.'; err.style.display='block'; return; }
+  // Code is valid -> attach a real Firebase auth token so saves are allowed by the rules.
+  await _ensureAnonAuth();
   _currentSub = sub;
   document.getElementById('subPortalName').textContent = sub.name || 'Subcontractor';
   document.getElementById('subPortalTrade').textContent = sub.trade || '';
