@@ -26,8 +26,8 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
 .cal-day__num { display:inline-flex; align-items:center; justify-content:center; min-width:20px; height:20px; padding:0 4px;
   font-size:12px; font-weight:600; color:#1a2b4a; border-radius:50%; }
 .cal-day__num--today { background:var(--gold); color:#1a1407; font-weight:800; }
-.cal-chip { font-size:11px; line-height:1.3; padding:2px 6px; border-radius:5px;
-  color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; max-width:100%; box-sizing:border-box; }
+.cal-chip { display:block; width:100%; box-sizing:border-box; font-size:11px; line-height:1.3; padding:2px 6px; border-radius:5px;
+  color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; }
 .cal-chip--more { background:#e7e2d6; color:#1a2b4a; font-weight:600; }
 input, textarea, select, [contenteditable="true"] {
   -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text;
@@ -4562,7 +4562,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v254</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v255</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4972,7 +4972,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v254</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v255</div>
     </div>
   </div>
 
@@ -5819,7 +5819,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v254';
+<script>var APP_VERSION = 'v255';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -15970,7 +15970,22 @@ function _schedRenderMonth(){
 
   var totalCells = startDow + daysInMonth;
   var weeks = Math.ceil(totalCells/7);
-  var events = _schedVisibleEvents();
+
+  // Bucket events by each day they cover. A multi-day event lands in every day's bucket,
+  // so it shows as a normal chip inside each cell (no spanning, no absolute positioning).
+  var byDay = {};
+  _schedVisibleEvents().forEach(function(ev){
+    var s = ev.date, e = ev.endDate || ev.date;
+    if(!s) return;
+    var d = _schedParse(s), end = _schedParse(e);
+    var guard = 0;
+    while(d <= end && guard < 400){
+      var ds = _schedFmt(d);
+      (byDay[ds] = byDay[ds] || []).push(ev);
+      d.setDate(d.getDate()+1);
+      guard++;
+    }
+  });
 
   var html = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">' +
     '<button onclick="_schedMonthStep(-1)" style="background:var(--cream);border:none;border-radius:8px;width:36px;height:36px;font-size:16px;cursor:pointer;color:var(--navy);">\u2039</button>' +
@@ -15978,128 +15993,47 @@ function _schedRenderMonth(){
     '<button onclick="_schedMonthStep(1)" style="background:var(--cream);border:none;border-radius:8px;width:36px;height:36px;font-size:16px;cursor:pointer;color:var(--navy);">\u203a</button>' +
   '</div>';
 
-  // Weekday header row (matching 7-col grid).
+  // Weekday header row (matching 7-col grid so columns line up with the day cells).
   html += '<div class="cal-grid" style="margin-bottom:4px;">';
   ['S','M','T','W','T','F','S'].forEach(function(d){
     html += '<div style="text-align:center;font-size:10px;font-weight:800;color:var(--muted);padding:2px 0;">'+d+'</div>';
   });
   html += '</div>';
 
-  var CAP = 3;            // max event rows shown per week before "+N more"
-  var BAR_H = 18;         // px height of one event bar
-  var BAR_GAP = 3;        // px gap between stacked bars
-
-  // Render WEEK BY WEEK so multi-day events can be one continuous bar spanning columns.
-  for(var w=0; w<weeks; w++){
-    // This week's date window.
-    var weekStartNum = w*7 - startDow + 1;          // day-of-month (may be <1 or >daysInMonth)
-    var weekStart = new Date(y, m, weekStartNum);
-    var weekEnd = new Date(y, m, weekStartNum+6);
-    var weekStartStr = _schedFmt(weekStart), weekEndStr = _schedFmt(weekEnd);
-
-    // Collect events overlapping this week and clamp them to the week's columns.
-    var segs = events.filter(function(ev){
-      var s = ev.date, e = ev.endDate || ev.date;
-      return s && s <= weekEndStr && e >= weekStartStr;
-    }).map(function(ev){
-      var s = _schedParse(ev.date), e = _schedParse(ev.endDate || ev.date);
-      var startCol = Math.max(0, Math.round((s - weekStart) / 86400000));
-      var endCol = Math.min(6, Math.round((e - weekStart) / 86400000));
-      if(startCol < 0) startCol = 0;
-      if(endCol > 6) endCol = 6;
-      return { ev: ev, startCol: startCol, endCol: endCol,
-               isStart: ev.date >= weekStartStr,                 // true bar start falls in this week
-               isEnd: (ev.endDate || ev.date) <= weekEndStr };
-    }).sort(function(a,b){
-      // longer/earlier first so lanes pack tightly
-      if(a.startCol !== b.startCol) return a.startCol - b.startCol;
-      return (b.endCol - b.startCol) - (a.endCol - a.startCol);
-    });
-
-    // Lane assignment: place each segment in the first lane where its columns are free.
-    var lanes = []; // lanes[laneIndex] = array of {startCol,endCol}
-    segs.forEach(function(seg){
-      var placed = false;
-      for(var li=0; li<lanes.length; li++){
-        var clash = lanes[li].some(function(o){ return !(seg.endCol < o.startCol || seg.startCol > o.endCol); });
-        if(!clash){ lanes[li].push(seg); seg.lane = li; placed = true; break; }
-      }
-      if(!placed){ seg.lane = lanes.length; lanes.push([seg]); }
-    });
-
-    // How many lanes can we show? Beyond CAP we collapse to a "+N more" row.
-    var laneCount = lanes.length;
-    var shownLanes = Math.min(laneCount, CAP);
-    var barsAreaH = shownLanes*BAR_H + (shownLanes>0?(shownLanes-1)*BAR_GAP:0)
-                    + (laneCount>shownLanes ? (BAR_H+BAR_GAP) : 0);
-
-    // --- day-number cells for this week ---
-    html += '<div style="position:relative;">';
-    html += '<div class="cal-grid">';
-    for(var dow=0; dow<7; dow++){
-      var dnum = weekStartNum + dow;
-      if(dnum<1 || dnum>daysInMonth){
-        html += '<div class="cal-day cal-day--empty" style="min-height:'+(28+barsAreaH)+'px;"></div>';
-        continue;
-      }
-      var ds = y+'-'+String(m+1).padStart(2,'0')+'-'+String(dnum).padStart(2,'0');
-      var isToday = ds===todayStr;
-      html += '<div class="cal-day'+(isToday?' cal-day--today':'')+'" style="min-height:'+(28+barsAreaH)+'px;">' +
-        '<button class="cal-day__num-btn" onclick="_schedOpenDay(\''+ds+'\')">' +
-        '<span class="cal-day__num'+(isToday?' cal-day__num--today':'')+'">'+dnum+'</span></button>' +
-      '</div>';
+  // One continuous 7-col grid of day cells; weeks flow as rows.
+  html += '<div class="cal-grid">';
+  for(var cellIndex=0; cellIndex<weeks*7; cellIndex++){
+    var dayNum = cellIndex - startDow + 1;
+    if(dayNum<1 || dayNum>daysInMonth){
+      html += '<div class="cal-day cal-day--empty"></div>';
+      continue;
     }
-    html += '</div>';
+    var ds = y+'-'+String(m+1).padStart(2,'0')+'-'+String(dayNum).padStart(2,'0');
+    var isToday = ds===todayStr;
+    var evs = (byDay[ds] || []);
 
-    // --- overlay: continuous event bars positioned over the cells ---
-    // The bars layer is a 7-col grid too, so each bar uses grid-column start/span to line up.
-    html += '<div style="position:absolute;left:0;right:0;top:26px;display:grid;grid-template-columns:repeat(7,1fr);gap:4px;pointer-events:none;">';
-    segs.forEach(function(seg){
-      if(seg.lane >= shownLanes) return; // collapsed into +more
-      var ev = seg.ev;
+    html += '<div class="cal-day'+(isToday?' cal-day--today':'')+'">';
+    html += '<button class="cal-day__num-btn" onclick="_schedOpenDay(\''+ds+'\')">' +
+      '<span class="cal-day__num'+(isToday?' cal-day__num--today':'')+'">'+dayNum+'</span></button>';
+
+    var CAP = 3;
+    var shown = evs.slice(0, CAP);
+    shown.forEach(function(ev){
       var c = ev.color || '#3B6FB0';
       var title = _esc(ev.title || 'Event');
       var addr = ev.address ? _esc(ev.address) : '';
-      // rounded corners only where the real bar starts/ends
-      var radL = seg.isStart ? '5px' : '0';
-      var radR = seg.isEnd ? '5px' : '0';
-      var topPx = seg.lane*(BAR_H+BAR_GAP);
       var label = title + (addr ? ' \u00b7 ' + addr : '');
-      var inner = '\u00a0';
-      if (seg.isStart) {
-        inner = '<span style="font-weight:600;">' + title + '</span>';
-        if (addr) inner += '<span style="opacity:0.85;font-size:10px;"> \u00b7 ' + addr + '</span>';
-      }
-      html += '<div onclick="event.stopPropagation();_schedEdit(\''+ev.id+'\')" title="'+label+'" ' +
-        'style="pointer-events:auto;cursor:pointer;grid-column:'+(seg.startCol+1)+' / span '+(seg.endCol-seg.startCol+1)+';' +
-        'margin-top:'+topPx+'px;height:'+BAR_H+'px;background:'+c+';color:#fff;border-radius:'+radL+' '+radR+' '+radR+' '+radL+';' +
-        'font-size:11px;line-height:'+BAR_H+'px;padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-sizing:border-box;">' +
-        inner +
-        '</div>';
+      var inner = '<span style="font-weight:600;">' + title + '</span>' +
+                  (addr ? '<span style="opacity:0.85;"> \u00b7 ' + addr + '</span>' : '');
+      html += '<span class="cal-chip" style="background:'+c+';" title="'+label+'" onclick="event.stopPropagation();_schedEdit(\''+ev.id+'\')">'+inner+'</span>';
     });
-    // "+N more" row if this week has more lanes than we showed
-    if(laneCount > shownLanes){
-      // Put the "+N more" under the first day that actually has hidden events.
-      var hiddenByCol = {};
-      segs.forEach(function(seg){
-        if(seg.lane < shownLanes) return;
-        for(var col=seg.startCol; col<=seg.endCol; col++){ hiddenByCol[col] = (hiddenByCol[col]||0)+1; }
-      });
-      Object.keys(hiddenByCol).forEach(function(col){
-        col = parseInt(col,10);
-        var dnum = weekStartNum + col;
-        if(dnum<1 || dnum>daysInMonth) return;
-        var ds = y+'-'+String(m+1).padStart(2,'0')+'-'+String(dnum).padStart(2,'0');
-        var topPx = shownLanes*(BAR_H+BAR_GAP);
-        html += '<div onclick="event.stopPropagation();_schedOpenDay(\''+ds+'\')" ' +
-          'style="pointer-events:auto;cursor:pointer;grid-column:'+(col+1)+' / span 1;margin-top:'+topPx+'px;height:'+BAR_H+'px;' +
-          'background:#e7e2d6;color:#1a2b4a;border-radius:5px;font-size:10px;font-weight:600;line-height:'+BAR_H+'px;padding:0 4px;' +
-          'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-sizing:border-box;">+'+hiddenByCol[col]+'</div>';
-      });
+    if(evs.length > CAP){
+      var more = evs.length - CAP;
+      html += '<span class="cal-chip cal-chip--more" onclick="event.stopPropagation();_schedOpenDay(\''+ds+'\')">+'+more+' more</span>';
     }
-    html += '</div>'; // end overlay
-    html += '</div>'; // end week wrapper
+    html += '</div>';
   }
+  html += '</div>';
 
   body.innerHTML = html;
 }
