@@ -16,6 +16,19 @@ html, body {
   overflow-x: hidden; max-width: 100%;
 }
 img, video, canvas, svg { max-width: 100%; height: auto; }
+/* ===== Schedule Month grid (Google-Calendar-style day cells) ===== */
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; width: 100%; max-width: 100%; box-sizing: border-box; }
+.cal-day { min-height: 84px; background:#fff; border:1px solid var(--border); border-radius:8px; padding:4px;
+  display:flex; flex-direction:column; gap:3px; overflow:hidden; box-sizing:border-box; min-width:0; }
+.cal-day--empty { background:transparent; border:none; min-height:0; }
+.cal-day--today { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; }
+.cal-day__num-btn { background:none; border:none; padding:0; cursor:pointer; align-self:flex-start; line-height:1; }
+.cal-day__num { display:inline-flex; align-items:center; justify-content:center; min-width:20px; height:20px; padding:0 4px;
+  font-size:12px; font-weight:600; color:#1a2b4a; border-radius:50%; }
+.cal-day__num--today { background:var(--gold); color:#1a1407; font-weight:800; }
+.cal-chip { font-size:11px; line-height:1.3; padding:2px 6px; border-radius:5px;
+  color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; max-width:100%; box-sizing:border-box; }
+.cal-chip--more { background:#e7e2d6; color:#1a2b4a; font-weight:600; }
 input, textarea, select, [contenteditable="true"] {
   -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text;
 }
@@ -4549,7 +4562,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v247</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v254</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4959,7 +4972,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v247</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v254</div>
     </div>
   </div>
 
@@ -5288,6 +5301,19 @@ div[style*="position:fixed"][style*="inset:0"] {
         <button class="btn-primary" onclick="showCustomerForm()">+ New Customer</button>
       </div>
       <div id="customersList"></div>
+      <div id="modal-viewCustomer" class="modal-overlay" style="display:none;">
+        <div class="modal-box">
+          <div class="modal-header">
+            <div class="modal-title" id="viewCustTitle">Customer Details</div>
+            <button class="modal-close" onclick="closeViewCustomer()" aria-label="Close">×</button>
+          </div>
+          <div id="viewCustBody" style="padding:4px 2px;"></div>
+          <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);flex-wrap:wrap;">
+            <button class="btn-logout" onclick="closeViewCustomer()">Close</button>
+            <button class="btn-primary" id="viewCustEditBtn" onclick="_viewCustEdit()">✏️ Edit</button>
+          </div>
+        </div>
+      </div>
       <div id="modal-addCustomer" class="modal-overlay" style="display:none;">
         <div class="modal-box">
           <div class="modal-header">
@@ -5297,7 +5323,7 @@ div[style*="position:fixed"][style*="inset:0"] {
           <div class="modal-body cust-form">
             <div class="cust-form-sec">Contact</div>
             <div class="form-group"><label class="form-label">Full name <span class="req">*</span></label><input class="form-input" id="cust-name" placeholder="e.g. Sam Cohen"></div>
-            <div class="form-group"><label class="form-label">Email <span class="req">*</span></label><input class="form-input" type="email" id="cust-email" placeholder="email@example.com"></div>
+            <div class="form-group"><label class="form-label">Email <span class="req">*</span></label><input class="form-input" type="email" id="cust-email" placeholder="email@example.com" style="margin-bottom:8px;"><div id="cust-extra-emails"></div><button type="button" onclick="_custAddEmailRow()" style="background:none;border:none;color:var(--gold);font-size:13px;font-weight:700;cursor:pointer;padding:2px 0;">+ Add another email</button></div>
             <div class="cust-form-grid">
               <div class="form-group"><label class="form-label">Home phone</label><input class="form-input" type="tel" id="cust-phone-home" placeholder="845-000-0000"></div>
               <div class="form-group"><label class="form-label">Cell 1</label><input class="form-input" type="tel" id="cust-phone-cell1" placeholder="845-000-0000"></div>
@@ -5793,7 +5819,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v247';
+<script>var APP_VERSION = 'v254';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -12627,6 +12653,11 @@ async function connectGoogleCalendar() {
   }
   try {
     await _loadScript('https://accounts.google.com/gsi/client');
+    // Make sure the GSI library actually loaded and exposes the oauth2 API.
+    if (!(window.google && google.accounts && google.accounts.oauth2)) {
+      try { ddToast('Google sign-in library did not load. Check your connection and try again.'); } catch(e) {}
+      return;
+    }
     // One tap -> Google's own account-picker + consent (like Asana). No codes to type.
     var tokenClient = google.accounts.oauth2.initTokenClient({
       client_id: GOOGLE_CLIENT_ID,
@@ -12635,19 +12666,35 @@ async function connectGoogleCalendar() {
       callback: async function(resp) {
         if (resp && resp.access_token) {
           _gcalToken = resp.access_token;
-          await DB.set(_gcalUserKey(), { connected: true, connectedAt: Date.now(), userId: currentUser ? currentUser.id : null });
+          try { await DB.set(_gcalUserKey(), { connected: true, connectedAt: Date.now(), userId: currentUser ? currentUser.id : null }); } catch(e) {}
           try { localStorage.setItem('dd_gcalAuto', '1'); } catch(e) {}
           try { ddToast('Google Calendar connected \u2713'); } catch(e) {}
           try { if (typeof schedRender === 'function') schedRender(); } catch(e) {}
           if (typeof renderSettings === 'function') renderSettings();
+        } else if (resp && resp.error) {
+          // Google rejected the token request itself (rare path).
+          try { ddToast('Google declined: ' + (resp.error_description || resp.error)); } catch(e) {}
         } else {
           try { ddToast('Calendar not connected'); } catch(e) {}
         }
+      },
+      // This fires when Google blocks the request BEFORE asking the user \u2014 almost always an
+      // origin/config mismatch. Without it, a rejected request fails silently (\u201cnothing happens\u201d).
+      error_callback: function(err) {
+        var type = err && (err.type || err.message) || 'unknown';
+        var msg;
+        if (String(type).indexOf('popup') > -1) {
+          msg = 'The Google popup was blocked or closed. Allow pop-ups for this site and try again.';
+        } else {
+          msg = 'Google blocked the connection (' + type + '). In Google Cloud, make sure this exact site address is listed under the OAuth client\'s \u201cAuthorized JavaScript origins\u201d: ' + window.location.origin;
+        }
+        try { ddToast(msg); } catch(e) { try { alert(msg); } catch(e2) {} }
       }
     });
     tokenClient.requestAccessToken();
   } catch (e) {
-    try { ddToast('Could not reach Google. Try again.'); } catch(e) { alert('Could not connect to Google Calendar.'); }
+    var detail = (e && e.message) ? (' (' + e.message + ')') : '';
+    try { ddToast('Could not start Google sign-in' + detail + '. Try again.'); } catch(e2) { alert('Could not connect to Google Calendar.'); }
   }
 }
 
@@ -14876,16 +14923,18 @@ async function runGlobalSearch() {
           var contact = '';
           var phoneRaw = r.phone || r.phoneCell1 || r.phoneHome || r.phoneCell2 || r.contact || '';
           var pd = String(phoneRaw).replace(/\D/g,'');
-          var email = r.email || '';
-          if (pd || email) {
+          var emailList = (Array.isArray(r.emails) && r.emails.length) ? r.emails : (r.email ? [r.email] : []);
+          var email = emailList.length ? emailList[0] : '';
+          if (pd || emailList.length) {
             contact = '<div style="display:flex;gap:6px;margin-top:8px;">';
             if (pd) {
               contact += '<a href="tel:' + pd + '" onclick="event.stopPropagation();" style="flex:1;text-align:center;background:#2D7A4F;color:#fff;text-decoration:none;border-radius:7px;padding:7px;font-size:12px;font-weight:700;">\ud83d\udcde Call</a>';
               contact += '<a href="sms:' + pd + '" onclick="event.stopPropagation();" style="flex:1;text-align:center;background:var(--navy);color:#fff;text-decoration:none;border-radius:7px;padding:7px;font-size:12px;font-weight:700;">\ud83d\udcac Text</a>';
             }
-            if (email) {
-              contact += '<a href="mailto:' + _esc(email) + '" onclick="event.stopPropagation();" style="flex:1;text-align:center;background:var(--gold);color:#1a1407;text-decoration:none;border-radius:7px;padding:7px;font-size:12px;font-weight:700;">\u2709\ufe0f Email</a>';
-            }
+            emailList.forEach(function(em, _ei){
+              var lbl = emailList.length > 1 ? ('\u2709\ufe0f Email ' + (_ei + 1)) : '\u2709\ufe0f Email';
+              contact += '<a href="mailto:' + _esc(em) + '" onclick="event.stopPropagation();" style="flex:1;text-align:center;background:var(--gold);color:#1a1407;text-decoration:none;border-radius:7px;padding:7px;font-size:12px;font-weight:700;">' + lbl + '</a>';
+            });
             contact += '</div>';
           }
           return '<div onclick="_gsGo(\''+grp.tab+'\')" style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:9px 12px;margin-bottom:6px;cursor:pointer;">' +
@@ -15831,6 +15880,11 @@ function _schedGcalOpenSetup(){
   try { cur = localStorage.getItem('dd_gcal_client_id') || ''; } catch(e){}
   var inp = document.getElementById('sched-gcal-clientid');
   if (inp) inp.value = cur;
+  // Show the EXACT origin this app is running on, so it matches what Google expects.
+  try {
+    var oSpan = document.getElementById('sched-gcal-origin');
+    if (oSpan) oSpan.textContent = window.location.origin;
+  } catch(e){}
   document.getElementById('modal-sched-gcal').classList.add('open');
 }
 function _schedGcalCloseSetup(){ var m=document.getElementById('modal-sched-gcal'); if(m) m.classList.remove('open'); }
@@ -15914,41 +15968,137 @@ function _schedRenderMonth(){
   var monthName=_schedCursor.toLocaleDateString('en-US',{month:'long',year:'numeric'});
   var todayStr=_schedFmt(new Date());
 
-  // Build a grid of weeks (each week = 7 day-cells). Determine total cells.
   var totalCells = startDow + daysInMonth;
   var weeks = Math.ceil(totalCells/7);
+  var events = _schedVisibleEvents();
 
   var html = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">' +
     '<button onclick="_schedMonthStep(-1)" style="background:var(--cream);border:none;border-radius:8px;width:36px;height:36px;font-size:16px;cursor:pointer;color:var(--navy);">\u2039</button>' +
     '<div style="font-family:\'Archivo\',sans-serif;font-weight:800;font-size:18px;color:var(--navy);">'+monthName+'</div>' +
     '<button onclick="_schedMonthStep(1)" style="background:var(--cream);border:none;border-radius:8px;width:36px;height:36px;font-size:16px;cursor:pointer;color:var(--navy);">\u203a</button>' +
   '</div>';
-  // weekday header
-  html += '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:2px;">';
-  ['S','M','T','W','T','F','S'].forEach(function(d){ html += '<div style="text-align:center;font-size:10px;font-weight:800;color:var(--muted);">'+d+'</div>'; });
+
+  // Weekday header row (matching 7-col grid).
+  html += '<div class="cal-grid" style="margin-bottom:4px;">';
+  ['S','M','T','W','T','F','S'].forEach(function(d){
+    html += '<div style="text-align:center;font-size:10px;font-weight:800;color:var(--muted);padding:2px 0;">'+d+'</div>';
+  });
   html += '</div>';
 
-  // For each week, render the day-number row, then the event bars for that week.
+  var CAP = 3;            // max event rows shown per week before "+N more"
+  var BAR_H = 18;         // px height of one event bar
+  var BAR_GAP = 3;        // px gap between stacked bars
+
+  // Render WEEK BY WEEK so multi-day events can be one continuous bar spanning columns.
   for(var w=0; w<weeks; w++){
-    // day-number cells
-    html += '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;">';
-    for(var dow=0; dow<7; dow++){
-      var cellIndex = w*7+dow;
-      var dayNum = cellIndex - startDow + 1;
-      if(dayNum<1 || dayNum>daysInMonth){
-        html += '<div style="min-height:22px;"></div>';
-      } else {
-        var ds = y+'-'+String(m+1).padStart(2,'0')+'-'+String(dayNum).padStart(2,'0');
-        var isToday = ds===todayStr;
-        html += '<button onclick="_schedOpenDay(\''+ds+'\')" style="border:none;background:none;cursor:pointer;text-align:center;padding:2px 0;min-height:22px;">' +
-          '<span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-size:12px;font-weight:'+(isToday?'800':'600')+';'+(isToday?'background:var(--gold);color:#1a1407;':'color:var(--navy);')+'">'+dayNum+'</span>' +
-        '</button>';
+    // This week's date window.
+    var weekStartNum = w*7 - startDow + 1;          // day-of-month (may be <1 or >daysInMonth)
+    var weekStart = new Date(y, m, weekStartNum);
+    var weekEnd = new Date(y, m, weekStartNum+6);
+    var weekStartStr = _schedFmt(weekStart), weekEndStr = _schedFmt(weekEnd);
+
+    // Collect events overlapping this week and clamp them to the week's columns.
+    var segs = events.filter(function(ev){
+      var s = ev.date, e = ev.endDate || ev.date;
+      return s && s <= weekEndStr && e >= weekStartStr;
+    }).map(function(ev){
+      var s = _schedParse(ev.date), e = _schedParse(ev.endDate || ev.date);
+      var startCol = Math.max(0, Math.round((s - weekStart) / 86400000));
+      var endCol = Math.min(6, Math.round((e - weekStart) / 86400000));
+      if(startCol < 0) startCol = 0;
+      if(endCol > 6) endCol = 6;
+      return { ev: ev, startCol: startCol, endCol: endCol,
+               isStart: ev.date >= weekStartStr,                 // true bar start falls in this week
+               isEnd: (ev.endDate || ev.date) <= weekEndStr };
+    }).sort(function(a,b){
+      // longer/earlier first so lanes pack tightly
+      if(a.startCol !== b.startCol) return a.startCol - b.startCol;
+      return (b.endCol - b.startCol) - (a.endCol - a.startCol);
+    });
+
+    // Lane assignment: place each segment in the first lane where its columns are free.
+    var lanes = []; // lanes[laneIndex] = array of {startCol,endCol}
+    segs.forEach(function(seg){
+      var placed = false;
+      for(var li=0; li<lanes.length; li++){
+        var clash = lanes[li].some(function(o){ return !(seg.endCol < o.startCol || seg.startCol > o.endCol); });
+        if(!clash){ lanes[li].push(seg); seg.lane = li; placed = true; break; }
       }
+      if(!placed){ seg.lane = lanes.length; lanes.push([seg]); }
+    });
+
+    // How many lanes can we show? Beyond CAP we collapse to a "+N more" row.
+    var laneCount = lanes.length;
+    var shownLanes = Math.min(laneCount, CAP);
+    var barsAreaH = shownLanes*BAR_H + (shownLanes>0?(shownLanes-1)*BAR_GAP:0)
+                    + (laneCount>shownLanes ? (BAR_H+BAR_GAP) : 0);
+
+    // --- day-number cells for this week ---
+    html += '<div style="position:relative;">';
+    html += '<div class="cal-grid">';
+    for(var dow=0; dow<7; dow++){
+      var dnum = weekStartNum + dow;
+      if(dnum<1 || dnum>daysInMonth){
+        html += '<div class="cal-day cal-day--empty" style="min-height:'+(28+barsAreaH)+'px;"></div>';
+        continue;
+      }
+      var ds = y+'-'+String(m+1).padStart(2,'0')+'-'+String(dnum).padStart(2,'0');
+      var isToday = ds===todayStr;
+      html += '<div class="cal-day'+(isToday?' cal-day--today':'')+'" style="min-height:'+(28+barsAreaH)+'px;">' +
+        '<button class="cal-day__num-btn" onclick="_schedOpenDay(\''+ds+'\')">' +
+        '<span class="cal-day__num'+(isToday?' cal-day__num--today':'')+'">'+dnum+'</span></button>' +
+      '</div>';
     }
     html += '</div>';
 
-    // event bars for this week
-    html += _schedWeekBars(y, m, startDow, w, daysInMonth);
+    // --- overlay: continuous event bars positioned over the cells ---
+    // The bars layer is a 7-col grid too, so each bar uses grid-column start/span to line up.
+    html += '<div style="position:absolute;left:0;right:0;top:26px;display:grid;grid-template-columns:repeat(7,1fr);gap:4px;pointer-events:none;">';
+    segs.forEach(function(seg){
+      if(seg.lane >= shownLanes) return; // collapsed into +more
+      var ev = seg.ev;
+      var c = ev.color || '#3B6FB0';
+      var title = _esc(ev.title || 'Event');
+      var addr = ev.address ? _esc(ev.address) : '';
+      // rounded corners only where the real bar starts/ends
+      var radL = seg.isStart ? '5px' : '0';
+      var radR = seg.isEnd ? '5px' : '0';
+      var topPx = seg.lane*(BAR_H+BAR_GAP);
+      var label = title + (addr ? ' \u00b7 ' + addr : '');
+      var inner = '\u00a0';
+      if (seg.isStart) {
+        inner = '<span style="font-weight:600;">' + title + '</span>';
+        if (addr) inner += '<span style="opacity:0.85;font-size:10px;"> \u00b7 ' + addr + '</span>';
+      }
+      html += '<div onclick="event.stopPropagation();_schedEdit(\''+ev.id+'\')" title="'+label+'" ' +
+        'style="pointer-events:auto;cursor:pointer;grid-column:'+(seg.startCol+1)+' / span '+(seg.endCol-seg.startCol+1)+';' +
+        'margin-top:'+topPx+'px;height:'+BAR_H+'px;background:'+c+';color:#fff;border-radius:'+radL+' '+radR+' '+radR+' '+radL+';' +
+        'font-size:11px;line-height:'+BAR_H+'px;padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-sizing:border-box;">' +
+        inner +
+        '</div>';
+    });
+    // "+N more" row if this week has more lanes than we showed
+    if(laneCount > shownLanes){
+      // Put the "+N more" under the first day that actually has hidden events.
+      var hiddenByCol = {};
+      segs.forEach(function(seg){
+        if(seg.lane < shownLanes) return;
+        for(var col=seg.startCol; col<=seg.endCol; col++){ hiddenByCol[col] = (hiddenByCol[col]||0)+1; }
+      });
+      Object.keys(hiddenByCol).forEach(function(col){
+        col = parseInt(col,10);
+        var dnum = weekStartNum + col;
+        if(dnum<1 || dnum>daysInMonth) return;
+        var ds = y+'-'+String(m+1).padStart(2,'0')+'-'+String(dnum).padStart(2,'0');
+        var topPx = shownLanes*(BAR_H+BAR_GAP);
+        html += '<div onclick="event.stopPropagation();_schedOpenDay(\''+ds+'\')" ' +
+          'style="pointer-events:auto;cursor:pointer;grid-column:'+(col+1)+' / span 1;margin-top:'+topPx+'px;height:'+BAR_H+'px;' +
+          'background:#e7e2d6;color:#1a2b4a;border-radius:5px;font-size:10px;font-weight:600;line-height:'+BAR_H+'px;padding:0 4px;' +
+          'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-sizing:border-box;">+'+hiddenByCol[col]+'</div>';
+      });
+    }
+    html += '</div>'; // end overlay
+    html += '</div>'; // end week wrapper
   }
 
   body.innerHTML = html;
@@ -16701,12 +16851,52 @@ async function editCustomer(id) {
   openModal('addCustomer');
 }
 
+
+// ---- Multiple emails per customer (office form) ----
+// The first email lives in #cust-email; additional ones are rows inside #cust-extra-emails.
+function _custAddEmailRow(value) {
+  var host = document.getElementById('cust-extra-emails');
+  if (!host) return;
+  var row = document.createElement('div');
+  row.className = 'cust-email-row';
+  row.style.cssText = 'display:flex;gap:6px;align-items:center;margin-bottom:8px;';
+  row.innerHTML =
+    '<input class="form-input cust-extra-email" type="email" placeholder="email@example.com" style="flex:1;min-width:0;margin:0;" value="' + (value ? String(value).replace(/"/g,'&quot;') : '') + '">' +
+    '<button type="button" onclick="this.closest(\'.cust-email-row\').remove()" aria-label="Remove email" style="background:rgba(176,58,46,0.1);color:#B03A2E;border:none;border-radius:8px;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;">\u00d7</button>';
+  host.appendChild(row);
+}
+// Collect all emails (main + extras), trimmed, de-duplicated, in order.
+function _custCollectEmails() {
+  var out = [];
+  var main = (document.getElementById('cust-email') || {}).value || '';
+  if (main.trim()) out.push(main.trim());
+  document.querySelectorAll('#cust-extra-emails .cust-extra-email').forEach(function(inp){
+    var v = (inp.value || '').trim();
+    if (v) out.push(v);
+  });
+  // de-dupe case-insensitively, keep first occurrence
+  var seen = {}, dedup = [];
+  out.forEach(function(e){ var k = e.toLowerCase(); if (!seen[k]) { seen[k] = 1; dedup.push(e); } });
+  return dedup;
+}
+// Reset the extra-email rows and fill from a customer's stored emails.
+function _custFillEmails(cust) {
+  var host = document.getElementById('cust-extra-emails');
+  if (host) host.innerHTML = '';
+  var list = (cust && Array.isArray(cust.emails) && cust.emails.length) ? cust.emails.slice()
+           : (cust && cust.email ? [cust.email] : []);
+  var mainEl = document.getElementById('cust-email');
+  if (mainEl) mainEl.value = list.length ? list[0] : '';
+  for (var i = 1; i < list.length; i++) _custAddEmailRow(list[i]);
+}
+
 async function saveCustomer() {
   const name = document.getElementById('cust-name').value.trim();
-  const email = document.getElementById('cust-email').value.trim();
-  const phoneHome = document.getElementById('cust-phone-home').value.trim();
-  const phoneCell1 = document.getElementById('cust-phone-cell1').value.trim();
-  const phoneCell2 = document.getElementById('cust-phone-cell2').value.trim();
+  var emails = _custCollectEmails();
+  const email = emails.length ? emails[0] : '';
+  const phoneHome = (typeof formatPhone === 'function') ? formatPhone(document.getElementById('cust-phone-home').value.trim()) : document.getElementById('cust-phone-home').value.trim();
+  const phoneCell1 = (typeof formatPhone === 'function') ? formatPhone(document.getElementById('cust-phone-cell1').value.trim()) : document.getElementById('cust-phone-cell1').value.trim();
+  const phoneCell2 = (typeof formatPhone === 'function') ? formatPhone(document.getElementById('cust-phone-cell2').value.trim()) : document.getElementById('cust-phone-cell2').value.trim();
   const projectId = document.getElementById('cust-project').value;
   var houseSelVal = document.getElementById('cust-house').value;
   var unitSelVal = document.getElementById('cust-unit').value;
@@ -16729,7 +16919,7 @@ async function saveCustomer() {
   if (_editingCustomerId) {
     const existing = await DB.get('customer:' + _editingCustomerId);
     const updated = Object.assign({}, existing, {
-      name, email, phoneHome, phoneCell1, phoneCell2,
+      name, email, emails, phoneHome, phoneCell1, phoneCell2,
       projectId, projectName, houseAddress, unit, notes,
       visibility: 'public',
       updatedAt: new Date().toISOString(),
@@ -16740,7 +16930,7 @@ async function saveCustomer() {
   } else {
     const customer = {
       id: 'customer_' + Date.now(),
-      name, email, phoneHome, phoneCell1, phoneCell2,
+      name, email, emails, phoneHome, phoneCell1, phoneCell2,
       projectId, projectName, houseAddress, unit, notes,
       visibility: 'public',
       ownerId: currentUser ? currentUser.id : 'admin',
@@ -16854,17 +17044,19 @@ function _renderCustomersForProject(pid){
       var phones = [c.phoneHome, c.phoneCell1, c.phoneCell2].filter(Boolean).join(' \u00b7 ');
       var canEditThis = (typeof canEdit==='function') ? canEdit(c) : true;
       return '<div class="cust-card" style="margin-bottom:9px;">' +
-        '<div class="cust-card-inner">' +
+        '<div class="cust-card-inner" role="button" tabindex="0" onclick="viewCustomerDetails(\'' + c.id + '\')" style="cursor:pointer;">' +
           '<div class="cust-avatar">' + initial + '</div>' +
           '<div style="flex:1;min-width:0;">' +
             '<div class="cust-card-name">' + _esc(c.name||'Unknown') + '</div>' +
             '<div class="cust-card-meta">' + (c.unit?('Unit ' + _esc(c.unit)):'No unit') + (phones?('<br>' + _esc(phones)):'') + '</div>' +
           '</div>' +
+          '<span class="cust-card-arrow" style="color:var(--muted);font-size:20px;">\u203a</span>' +
         '</div>' +
-        (canEditThis ? '<div class="cust-card-actions">' +
-          '<button class="icon-btn" onclick="showCustomerForm(\'' + c.id + '\')">✏️ Edit</button>' +
-          '<button class="icon-btn icon-btn-danger" onclick="deleteCustomer(\'' + c.id + '\')">🗑 Delete</button>' +
-        '</div>' : '') +
+        '<div class="cust-card-actions">' +
+          '<button class="icon-btn" onclick="viewCustomerDetails(\'' + c.id + '\')">\ud83d\udc41 View</button>' +
+          (canEditThis ? '<button class="icon-btn" onclick="showCustomerForm(\'' + c.id + '\')">✏️ Edit</button>' +
+          '<button class="icon-btn icon-btn-danger" onclick="deleteCustomer(\'' + c.id + '\')">🗑 Delete</button>' : '') +
+        '</div>' +
       '</div>';
     }).join('');
     return '<div style="margin-bottom:16px;">' +
@@ -20087,6 +20279,59 @@ function closeProjectModal() {
 // ════════════════════════════════════════════
 // CUSTOMERS
 // ════════════════════════════════════════════
+
+// ---- Read-only customer details view ----
+var _viewingCustomerId = null;
+async function viewCustomerDetails(id) {
+  _viewingCustomerId = id;
+  var c = await DB.get('customer:' + id);
+  if (!c) { try { ddToast('Customer not found'); } catch(e){} return; }
+  document.getElementById('viewCustTitle').textContent = c.name || 'Customer Details';
+
+  function row(label, value) {
+    if (!value) return '';
+    return '<div style="padding:11px 0;border-bottom:1px solid var(--border);">' +
+      '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">' + _esc(label) + '</div>' +
+      '<div style="font-size:14px;font-weight:600;color:var(--navy);overflow-wrap:anywhere;">' + value + '</div></div>';
+  }
+  // Emails: support multiple, each as a tappable mailto link.
+  var emailList = (Array.isArray(c.emails) && c.emails.length) ? c.emails : (c.email ? [c.email] : []);
+  var emailHtml = emailList.map(function(e){
+    return '<a href="mailto:' + _esc(e) + '" style="color:var(--navy);text-decoration:underline;">' + _esc(e) + '</a>';
+  }).join('<br>');
+  // Phones: each labelled + tappable to call.
+  var phoneRows = [];
+  if (c.phoneHome)  phoneRows.push('Home: <a href="tel:' + _esc(String(c.phoneHome).replace(/[^\d+]/g,'')) + '" style="color:var(--navy);text-decoration:underline;">' + _esc(c.phoneHome) + '</a>');
+  if (c.phoneCell1) phoneRows.push('Cell 1: <a href="tel:' + _esc(String(c.phoneCell1).replace(/[^\d+]/g,'')) + '" style="color:var(--navy);text-decoration:underline;">' + _esc(c.phoneCell1) + '</a>');
+  if (c.phoneCell2) phoneRows.push('Cell 2: <a href="tel:' + _esc(String(c.phoneCell2).replace(/[^\d+]/g,'')) + '" style="color:var(--navy);text-decoration:underline;">' + _esc(c.phoneCell2) + '</a>');
+
+  var body = row('Name', _esc(c.name || '')) +
+    row('Email', emailHtml) +
+    row('Phone', phoneRows.join('<br>')) +
+    row('Project', _esc(c.projectName || '')) +
+    row('House / Address', _esc(c.houseAddress || '')) +
+    row('Unit', _esc(c.unit || '')) +
+    row('Notes', c.notes ? _esc(c.notes).split('\n').join('<br>') : '');
+  if (!body) body = '<div style="color:var(--muted);padding:16px 0;">No details on file.</div>';
+  document.getElementById('viewCustBody').innerHTML = body;
+
+  // Hide the Edit button if this user can't edit this customer.
+  var editBtn = document.getElementById('viewCustEditBtn');
+  if (editBtn) editBtn.style.display = (typeof canEdit === 'function' && !canEdit(c)) ? 'none' : '';
+
+  document.getElementById('modal-viewCustomer').style.display = 'flex';
+  document.getElementById('modal-viewCustomer').classList.add('open');
+}
+function closeViewCustomer() {
+  var m = document.getElementById('modal-viewCustomer');
+  if (m) { m.style.display = 'none'; m.classList.remove('open'); }
+}
+function _viewCustEdit() {
+  var id = _viewingCustomerId;
+  closeViewCustomer();
+  if (id) showCustomerForm(id);
+}
+
 async function showCustomerForm(customerId) {
   _editingCustomerId = customerId || null;
 
@@ -20106,6 +20351,7 @@ async function showCustomerForm(customerId) {
   ['cust-name','cust-email','cust-phone-home','cust-phone-cell1','cust-phone-cell2','cust-notes'].forEach(function(id) {
     document.getElementById(id).value = '';
   });
+  var _eeHost = document.getElementById('cust-extra-emails'); if (_eeHost) _eeHost.innerHTML = '';
   document.getElementById('custModalTitle').textContent = customerId ? 'Edit Customer' : 'Add Customer';
   document.getElementById('custSaveBtn').textContent = customerId ? 'Update Customer' : 'Save Customer';
 
@@ -20113,7 +20359,7 @@ async function showCustomerForm(customerId) {
     var cust = await DB.get('customer:' + customerId);
     if (cust) {
       document.getElementById('cust-name').value = cust.name || '';
-      document.getElementById('cust-email').value = cust.email || '';
+      _custFillEmails(cust);
       document.getElementById('cust-phone-home').value = cust.phoneHome || '';
       document.getElementById('cust-phone-cell1').value = cust.phoneCell1 || '';
       document.getElementById('cust-phone-cell2').value = cust.phoneCell2 || '';
@@ -21324,6 +21570,9 @@ function getStoredSubmissions() {
         unit: unit,
         email: d.email || '',
         phone: d.phone || '',
+        phoneHome: d.phoneHome || d.phone || '',
+        phoneCell1: d.phoneCell1 || '',
+        phoneCell2: d.phoneCell2 || '',
         selections: sel,
         paintColor: d.paintColor || sel.paintColor || sel.paint || '',
         signature: d.signature || '',
@@ -21536,6 +21785,11 @@ function showCustomerDetail(idx) {
         if (fresh.selections) s.selections = fresh.selections;
         if (fresh._updatedAt) s._updatedAt = fresh._updatedAt;
         if (fresh.upgradeTotal !== undefined) s.upgradeTotal = fresh.upgradeTotal;
+        if (fresh.phoneHome !== undefined) s.phoneHome = fresh.phoneHome;
+        if (fresh.phoneCell1 !== undefined) s.phoneCell1 = fresh.phoneCell1;
+        if (fresh.phoneCell2 !== undefined) s.phoneCell2 = fresh.phoneCell2;
+        if (fresh.phone !== undefined) s.phone = fresh.phone;
+        if (fresh.email !== undefined) s.email = fresh.email;
         if (fresh.signature !== undefined) s.signature = fresh.signature;
         if (fresh.specialUpgrades !== undefined) s.specialUpgrades = fresh.specialUpgrades;
         // Also refresh the sheet snapshot — without this, the office would render the
@@ -21736,8 +21990,9 @@ function renderUpgradeTab() {
         yes.forEach(function(s) {
           var sel = s.selections || {};
           var glass = (f.glassKey && sel[f.glassKey]) ? ' <span style="font-size:10px;color:var(--gold);font-weight:700;">(' + sel[f.glassKey] + ')</span>' : '';
+          var subType = sel[f.key + '_type'] ? ' <span style="font-size:10px;color:var(--gold);font-weight:700;">\u2192 ' + sel[f.key + '_type'] + '</span>' : '';
           html += '<div class="upg-row">' +
-            '<div class="upg-row-name">' + (s.name||'Unknown') + glass + '</div>' +
+            '<div class="upg-row-name">' + (s.name||'Unknown') + glass + subType + '</div>' +
             '<div class="upg-row-meta">Unit ' + (s.unit||'—') + ' · ' + (s.address||'—') + '</div>' +
             '</div>';
         });
@@ -24932,7 +25187,7 @@ if (document.readyState === 'loading') {
         2. Create a project → APIs &amp; Services → Credentials<br>
         3. Enable the <b>Google Calendar API</b><br>
         4. Create an <b>OAuth Client ID</b> (type: Web application)<br>
-        5. Under “Authorized JavaScript origins” add: <span style="color:var(--navy);font-weight:700;">https://diligentdevelopers.app</span><br>
+        5. Under “Authorized JavaScript origins” add this <b>exact</b> address: <span id="sched-gcal-origin" style="color:var(--navy);font-weight:700;">https://diligentdevelopers.app</span><br>
         6. Copy the Client ID and paste it below.
       </div>
       <div class="form-group"><label class="form-label">Google Client ID</label><input class="form-input" id="sched-gcal-clientid" type="text" placeholder="xxxxxxxx.apps.googleusercontent.com"></div>
