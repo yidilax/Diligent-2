@@ -3880,6 +3880,13 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
 .pjl-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
 .pjl-name { flex:1; font-size:15.5px; font-weight:600; color:#1d2940; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .pjl-arrow-go { color:rgba(0,0,0,0.25); font-size:20px; flex-shrink:0; }
+.pjl-row-rich { align-items:flex-start; padding:14px; }
+.pjl-main { flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
+.pjl-row-rich .pjl-name { flex:none; }
+.pjl-row-rich .pjl-dot { margin-top:6px; }
+.pjl-meta { font-size:12px; color:var(--muted); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pjl-milestone { font-size:12px; color:var(--navy); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:1px; }
+.pjl-row-rich .pjl-arrow-go { margin-top:4px; }
 .pjl-reorder { display:flex; flex-direction:column; gap:1px; flex-shrink:0; }
 .pjl-arrow { background:none; border:none; color:#b5ae9c; font-size:13px; line-height:1; cursor:pointer; padding:1px 4px; }
 .pjl-arrow:disabled { opacity:0.25; }
@@ -4542,7 +4549,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v245</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v247</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4952,7 +4959,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v245</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v247</div>
     </div>
   </div>
 
@@ -5786,7 +5793,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v245';
+<script>var APP_VERSION = 'v247';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -10166,6 +10173,23 @@ async function renderTasks() {
   var countEl = document.getElementById('tasks-count');
   if (countEl) countEl.textContent = openCount + ' open task' + (openCount !== 1 ? 's' : '');
 
+  // If "My tasks" is empty but the team has open tasks elsewhere, explain why instead of
+  // showing a bare "No tasks" — otherwise tasks assigned to others look like they vanished.
+  if (filtered.length === 0 && _taskScope === 'mine') {
+    var teamOpen = 0;
+    try {
+      var _tk = await DB.list('task:');
+      var _tall = (await Promise.all(_tk.map(function(k){ return DB.get(k); }))).filter(Boolean);
+      teamOpen = _tall.filter(function(t){ return t.status !== 'done'; }).length;
+    } catch(e) {}
+    if (teamOpen > 0) {
+      host.innerHTML = '<div class="tab-empty"><div class="tab-empty-icon">\u2705</div>' +
+        '<div class="tab-empty-title">Nothing assigned to you</div>' +
+        '<div class="tab-empty-desc">You have no open tasks right now. ' + (teamOpen === 1 ? 'There is 1 open task' : ('There are ' + teamOpen + ' open tasks')) + ' across the team \u2014 each person sees the ones assigned to them here.</div>' +
+        '<button class="tab-empty-btn" onclick="openTaskForm()">+ New task</button></div>';
+      return;
+    }
+  }
   if (_taskView === 'list')      { host.innerHTML = _renderTaskAsana(filtered); setTimeout(_wireTaskSwipe, 30); }
   else if (_taskView === 'board') host.innerHTML = _renderTaskBoardNew(filtered);
   else if (_taskView === 'calendar') host.innerHTML = _renderTaskCalendar(filtered);
@@ -13720,6 +13744,13 @@ async function saveDashCustomize() {
 }
 
 async function refreshDashboard() {
+  // Fallback so the activity area never stays stuck on "Loading\u2026" if anything below throws.
+  try {
+    var _ra = document.getElementById('recentActivity');
+    if (_ra && _ra.textContent.indexOf('Loading') > -1) {
+      _ra.innerHTML = '<div style="text-align:center;padding:32px 20px;color:var(--muted);"><div style="font-size:32px;margin-bottom:8px;">\ud83d\udccb</div><div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:4px;">No recent activity</div><div style="font-size:12px;">Your actions will show up here.</div></div>';
+    }
+  } catch(e) {}
   // Dashboard identity: avatar + tag
   (function(){
     if (!currentUser) return;
@@ -13775,11 +13806,13 @@ async function refreshDashboard() {
   document.getElementById('statProjects').textContent = allProj.length;
   document.getElementById('statCustomers').textContent = allCust.length;
   document.getElementById('statUpgrades').textContent = subs.length;
-  // Task count for the effective user
+  // Open Tasks = ALL open tasks across the team (this is a shared office overview, so it
+  // should not be limited to just the current user's tasks).
   try {
-    var myTasks = await _loadAllTasks();
+    var taskKeys = await DB.list('task:');
+    var allTasks = (await Promise.all(taskKeys.map(function(k){ return DB.get(k); }))).filter(Boolean).filter(_vis);
     var stTasksEl = document.getElementById('statTasks');
-    if (stTasksEl) stTasksEl.textContent = myTasks.filter(function(t){return t.status!=='done';}).length;
+    if (stTasksEl) stTasksEl.textContent = allTasks.filter(function(t){ return t.status !== 'done'; }).length;
   } catch(e) {}
 
   if (currentUser && currentUser.role === 'admin') {
@@ -16390,6 +16423,11 @@ async function renderProjects() {
   });
   window._projectOrder = projects.map(function(p){ return p.id; });
   if (countEl) countEl.textContent = projects.length + ' project' + (projects.length !== 1 ? 's' : '');
+  // Pre-load customers + schedule events once so each card can show useful context.
+  var _pjCusts = [], _pjEvents = [];
+  try { var _ck = await DB.list('customer:'); _pjCusts = (await Promise.all(_ck.map(function(k){ return DB.get(k); }))).filter(Boolean); } catch(e) {}
+  try { var _ek = await DB.list('calevent:'); _pjEvents = (await Promise.all(_ek.map(function(k){ return DB.get(k); }))).filter(Boolean); } catch(e) {}
+  var _todayStr = (function(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); })();
   if (projects.length === 0) {
     listEl.innerHTML = '<div class="tab-empty"><div class="tab-empty-icon">\ud83c\udfd7\ufe0f</div><div class="tab-empty-title">No Projects Visible</div><div class="tab-empty-desc">No public projects or projects you own yet.</div></div>';
     return;
@@ -16403,10 +16441,25 @@ async function renderProjects() {
       '<button class="pjl-arrow" ' + (idx===0?'disabled':'') + ' onclick="event.stopPropagation();_moveProject(\'' + p.id + '\',-1)">\u25b4</button>' +
       '<button class="pjl-arrow" ' + (idx===projects.length-1?'disabled':'') + ' onclick="event.stopPropagation();_moveProject(\'' + p.id + '\',1)">\u25be</button>' +
     '</div>' : '';
-    return '<div class="pjl-row" role="button" tabindex="0" onclick="openProjectPage(\'' + p.id + '\')">' +
+    var _hc = (p.houses||[]).length;
+    var _cc = _pjCusts.filter(function(c){ return c.projectId === p.id; }).length;
+    // Next milestone = earliest not-done event for any of this project's houses.
+    var _addrs = (p.houses||[]).map(function(h){ return (h.address||'').toLowerCase().trim(); });
+    var _next = _pjEvents.filter(function(ev){
+      return ev && !ev.done && ev.date && (ev.projectId === p.id || _addrs.indexOf((ev.address||'').toLowerCase().trim()) > -1);
+    }).sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); })[0];
+    var metaBits = [];
+    metaBits.push(_hc + ' house' + (_hc!==1?'s':''));
+    metaBits.push(_cc + ' customer' + (_cc!==1?'s':''));
+    var metaLine = '<span class="pjl-meta">' + _esc(metaBits.join('  \u00b7  ')) + '</span>';
+    var milestoneLine = _next ? ('<span class="pjl-milestone">\ud83d\udccd Next: ' + _esc(_next.title||'') + '</span>') : '';
+    return '<div class="pjl-row pjl-row-rich" role="button" tabindex="0" onclick="openProjectPage(\'' + p.id + '\')">' +
       reorder +
       '<span class="pjl-dot" style="background:' + sCol + ';" title="' + (sl[p.status]||'Active') + '"></span>' +
-      '<span class="pjl-name">' + _esc(p.name) + '</span>' +
+      '<span class="pjl-main">' +
+        '<span class="pjl-name">' + _esc(p.name) + '</span>' +
+        metaLine + milestoneLine +
+      '</span>' +
       '<span class="pjl-arrow-go">\u203a</span>' +
     '</div>';
   }).join('');
@@ -19783,17 +19836,25 @@ async function submitUpgrades() {
   var cdPhoneEl = document.getElementById('cust-detail-phone');
   var cdPhone = cdPhoneEl ? formatPhone(cdPhoneEl.value) : '';
   if (cdPhoneEl) cdPhoneEl.value = cdPhone;
+  var cdCell1El = document.getElementById('cust-detail-cell1');
+  var cdCell1 = cdCell1El ? formatPhone(cdCell1El.value) : '';
+  if (cdCell1El) cdCell1El.value = cdCell1;
+  var cdCell2El = document.getElementById('cust-detail-cell2');
+  var cdCell2 = cdCell2El ? formatPhone(cdCell2El.value) : '';
+  if (cdCell2El) cdCell2El.value = cdCell2;
   var cdAddress = (document.getElementById('cust-detail-address') || {}).value || '';
   var cdUnit = (document.getElementById('cust-detail-unit') || {}).value || '';
   var cdMissing = [];
-  [['name',cdName,'cust-detail-name'],['email',cdEmail,'cust-detail-email'],['phone',cdPhone,'cust-detail-phone'],['address',cdAddress,'cust-detail-address'],['unit',cdUnit,'cust-detail-unit']].forEach(function(p){
+  [['name',cdName,'cust-detail-name'],['email',cdEmail,'cust-detail-email'],['home phone',cdPhone,'cust-detail-phone'],['cell 1',cdCell1,'cust-detail-cell1'],['cell 2',cdCell2,'cust-detail-cell2'],['address',cdAddress,'cust-detail-address'],['unit',cdUnit,'cust-detail-unit']].forEach(function(p){
     var el = document.getElementById(p[2]);
     if (el) el.classList.remove('cd-error');
     if (!String(p[1]).trim()) { cdMissing.push(p[0]); if (el) el.classList.add('cd-error'); }
   });
-  // basic email + phone sanity
+  // basic email + phone sanity (all three phones must be valid 10-digit numbers)
   if (cdEmail && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(cdEmail)) { cdMissing.push('valid email'); var ee=document.getElementById('cust-detail-email'); if(ee)ee.classList.add('cd-error'); }
-  if (cdPhone && cdPhone.replace(/\D/g,'').length !== 10) { cdMissing.push('valid phone'); if(cdPhoneEl)cdPhoneEl.classList.add('cd-error'); }
+  if (cdPhone && cdPhone.replace(/\D/g,'').length !== 10) { cdMissing.push('valid home phone'); if(cdPhoneEl)cdPhoneEl.classList.add('cd-error'); }
+  if (cdCell1 && cdCell1.replace(/\D/g,'').length !== 10) { cdMissing.push('valid cell 1'); if(cdCell1El)cdCell1El.classList.add('cd-error'); }
+  if (cdCell2 && cdCell2.replace(/\D/g,'').length !== 10) { cdMissing.push('valid cell 2'); if(cdCell2El)cdCell2El.classList.add('cd-error'); }
   if (cdMissing.length) {
     msgEl.textContent = 'Please complete Customer Details: ' + cdMissing.join(', ') + '.';
     msgEl.style.background = '#FEE2E2'; msgEl.style.color = '#B91C1C'; msgEl.style.display = 'block';
@@ -19805,6 +19866,9 @@ async function submitUpgrades() {
   window._custName = cdName.trim();
   window._custEmail = cdEmail.trim();
   window._custPhone = cdPhone;
+  window._custPhoneHome = cdPhone;
+  window._custPhoneCell1 = cdCell1;
+  window._custPhoneCell2 = cdCell2;
   window._custAddress = cdAddress.trim();
   window._custUnit = cdUnit.trim();
 
@@ -19921,6 +19985,9 @@ async function submitUpgrades() {
     name: window._custName || '',
     email: window._custEmail || '',
     phone: window._custPhone || '',
+    phoneHome: window._custPhoneHome || window._custPhone || '',
+    phoneCell1: window._custPhoneCell1 || '',
+    phoneCell2: window._custPhoneCell2 || '',
     address: window._custAddress || '',
     unit: window._custUnit || '',
     selections: selections,
@@ -20265,8 +20332,12 @@ function buildUpgradeSheet(sections) {
         '<input type="text" id="cust-detail-name" class="cd-input" placeholder="Full name" value="' + (window._custName ? String(window._custName).replace(/"/g,"&quot;") : "") + '"></div>' +
       '<div class="cd-field"><label class="cd-label">Email <span class="cd-req">*</span></label>' +
         '<input type="email" id="cust-detail-email" class="cd-input" placeholder="you@example.com" value="' + (window._custEmail ? String(window._custEmail).replace(/"/g,"&quot;") : "") + '"></div>' +
-      '<div class="cd-field"><label class="cd-label">Phone Number <span class="cd-req">*</span></label>' +
-        '<input type="tel" id="cust-detail-phone" class="cd-input" placeholder="845-000-0000" inputmode="numeric" value="' + (window._custPhone ? formatPhone(String(window._custPhone)) : "") + '"></div>' +
+      '<div class="cd-field"><label class="cd-label">Home Phone <span class="cd-req">*</span></label>' +
+        '<input type="tel" id="cust-detail-phone" class="cd-input" placeholder="845-000-0000" inputmode="numeric" value="' + (window._custPhoneHome ? formatPhone(String(window._custPhoneHome)) : (window._custPhone ? formatPhone(String(window._custPhone)) : "")) + '"></div>' +
+      '<div class="cd-field"><label class="cd-label">Cell 1 <span class="cd-req">*</span></label>' +
+        '<input type="tel" id="cust-detail-cell1" class="cd-input" placeholder="845-000-0000" inputmode="numeric" value="' + (window._custPhoneCell1 ? formatPhone(String(window._custPhoneCell1)) : "") + '"></div>' +
+      '<div class="cd-field"><label class="cd-label">Cell 2 <span class="cd-req">*</span></label>' +
+        '<input type="tel" id="cust-detail-cell2" class="cd-input" placeholder="845-000-0000" inputmode="numeric" value="' + (window._custPhoneCell2 ? formatPhone(String(window._custPhoneCell2)) : "") + '"></div>' +
       '<div class="cd-field"><label class="cd-label">Property Address <span class="cd-req">*</span></label>' +
         '<input type="text" id="cust-detail-address" class="cd-input" placeholder="Street address" value="' + (window._custAddress ? String(window._custAddress).replace(/"/g,"&quot;") : "") + '"></div>' +
       '<div class="cd-field"><label class="cd-label">Unit Number <span class="cd-req">*</span></label>' +
@@ -21485,7 +21556,7 @@ function showCustomerDetail(idx) {
       '<div class="cust-detail-grid">' +
         '<div class="cust-detail-cell"><div class="cust-detail-label">Name</div><div class="cust-detail-value">' + (s.name||'—') + '</div></div>' +
         '<div class="cust-detail-cell"><div class="cust-detail-label">Email</div><div class="cust-detail-value">' + (s.email||'—') + '</div></div>' +
-        '<div class="cust-detail-cell"><div class="cust-detail-label">Phone</div><div class="cust-detail-value">' + (s.phone||'—') + '</div></div>' +
+        '<div class="cust-detail-cell"><div class="cust-detail-label">Phone</div><div class="cust-detail-value">' + (function(){ var parts=[]; if(s.phoneHome) parts.push('Home: '+s.phoneHome); if(s.phoneCell1) parts.push('Cell 1: '+s.phoneCell1); if(s.phoneCell2) parts.push('Cell 2: '+s.phoneCell2); if(parts.length) return parts.join('<br>'); return s.phone||'—'; })() + '</div></div>' +
         '<div class="cust-detail-cell"><div class="cust-detail-label">Access PIN' + (s._pinResetRequested ? ' <span style="color:#c0392b;">(reset requested)</span>' : '') + '</div><div class="cust-detail-value">' + (s._pin ? ('<b>' + s._pin + '</b> <button onclick="resetCustomerPin(\'' + (s._key||'').replace(/'/g,"") + '\')" style="margin-left:8px;font-size:11px;padding:3px 8px;border:1px solid var(--navy);border-radius:6px;background:#fff;cursor:pointer;">Reset</button>') : '—') + '</div></div>' +
         '<div class="cust-detail-cell"><div class="cust-detail-label">Unit</div><div class="cust-detail-value">' + (s.unit||'—') + '</div></div>' +
         '<div class="cust-detail-cell" style="grid-column:1/-1"><div class="cust-detail-label">Address</div><div class="cust-detail-value">' + (s.address||'—') + '</div></div>' +
