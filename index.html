@@ -4586,7 +4586,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v267</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v268</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -5037,7 +5037,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v267</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v268</div>
     </div>
   </div>
 
@@ -5904,7 +5904,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v267';
+<script>var APP_VERSION = 'v268';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -8384,30 +8384,35 @@ async function _cdSwitchHome(addrEnc, unitEnc) {
 // ===== AI features (#52 ask 24/7, #59 explain terms) — DORMANT until the proxy is set up =====
 // When you have a Cloudflare Worker (or other) proxy holding the API key, put its URL here and
 // the buttons light up automatically. Until then they show a friendly "coming soon" message.
-var DD_AI_PROXY_URL = ''; // e.g. 'https://your-worker.workers.dev'
+var DD_AI_PROXY_URL = 'https://dd-ai-proxy.yidilax.workers.dev/'; // e.g. 'https://your-worker.workers.dev'
 
 function _aiReady() { return !!(DD_AI_PROXY_URL && DD_AI_PROXY_URL.indexOf('http') === 0); }
 
 // #52: ask about your home. Dormant placeholder until proxy exists.
 async function cdAskAI() {
   if (!_aiReady()) {
-    try {
-      ddToast('AI answers are coming soon!');
-    } catch(e) {}
+    try { ddToast('AI answers are coming soon!'); } catch(e) {}
     alert('This feature is coming soon!\n\nSoon you\'ll be able to ask questions about your home, your selections, and your timeline and get instant answers here.');
     return;
   }
-  // (Live path — runs once DD_AI_PROXY_URL is set. Gathers this resident\'s data + question.)
   var q = prompt('Ask a question about your home:');
   if (!q) return;
   try {
-    var ctx = { address: window._custAddress, unit: window._custUnit };
+    // Gather what we know about this resident so the assistant can answer from real data.
+    var ctxLines = [];
+    if (window._custName) ctxLines.push('Customer: ' + window._custName);
+    if (window._custAddress) ctxLines.push('Home: ' + window._custAddress + (window._custUnit && window._custUnit !== 'Main' ? (', Unit ' + window._custUnit) : ''));
+    try {
+      var sk = window._custSaveKey;
+      if (sk) { var rec = await DB.get(sk); if (rec) { if (rec.projectName) ctxLines.push('Project: ' + rec.projectName); if (rec.selections) ctxLines.push('Selections on file: ' + JSON.stringify(rec.selections).slice(0,800)); } }
+    } catch(e) {}
+    var sys = 'You are a friendly assistant for a home construction company\'s customer portal. Answer the customer\'s question using ONLY the information provided below. If you do not have the answer in this information, say so warmly and suggest they contact the office. Keep answers short and clear.\n\nInformation about this customer and their home:\n' + (ctxLines.join('\n') || 'No specific details on file.');
     var resp = await fetch(DD_AI_PROXY_URL, {
       method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ kind: 'customer_qa', question: q, context: ctx })
+      body: JSON.stringify({ kind: 'ai', system: sys, prompt: q })
     });
     var data = await resp.json();
-    alert((data && (data.answer || data.text)) || 'Sorry, no answer right now.');
+    alert((data && data.text) || 'Sorry, no answer right now. Please contact the office.');
   } catch(e) { alert('Could not reach the assistant right now. Please try again later.'); }
 }
 
@@ -8418,12 +8423,13 @@ async function cdExplainTerm(term) {
     return;
   }
   try {
+    var sys = 'You explain home-construction terms to homeowners in plain, friendly language. Give a 1-2 sentence explanation a non-expert can understand. No jargon.';
     var resp = await fetch(DD_AI_PROXY_URL, {
       method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ kind: 'explain_term', term: term })
+      body: JSON.stringify({ kind: 'ai', system: sys, prompt: 'Explain this construction term: ' + term })
     });
     var data = await resp.json();
-    alert((data && (data.answer || data.text)) || term);
+    alert((data && data.text) || term);
   } catch(e) { alert('Could not load an explanation right now.'); }
 }
 
@@ -16590,14 +16596,57 @@ function _schedActionBar(){
 }
 function _schedToggleCompact(){ _schedCompact = !_schedCompact; schedRender(); }
 // #16 weather — dormant until a weather service/proxy is configured.
-function _schedWeatherDormant(){
-  try { ddToast('Weather is coming soon!'); } catch(e) {}
-  alert('Weather on the calendar is coming soon!\n\nOnce set up, each upcoming day will show the forecast so you can plan pours, roofing, and exterior work around it.');
+async function _schedWeatherDormant(){
+  if (!(typeof DD_AI_PROXY_URL !== 'undefined' && DD_AI_PROXY_URL && DD_AI_PROXY_URL.indexOf('http') === 0)) {
+    alert('Weather isn\'t set up yet.'); return;
+  }
+  function wxText(code){
+    var map = {0:'\u2600\ufe0f Clear',1:'\ud83c\udf24\ufe0f Mainly clear',2:'\u26c5 Partly cloudy',3:'\u2601\ufe0f Overcast',45:'\ud83c\udf2b\ufe0f Fog',48:'\ud83c\udf2b\ufe0f Fog',51:'\ud83c\udf26\ufe0f Drizzle',53:'\ud83c\udf26\ufe0f Drizzle',55:'\ud83c\udf26\ufe0f Drizzle',61:'\ud83c\udf27\ufe0f Rain',63:'\ud83c\udf27\ufe0f Rain',65:'\ud83c\udf27\ufe0f Heavy rain',71:'\u2744\ufe0f Snow',73:'\u2744\ufe0f Snow',75:'\u2744\ufe0f Heavy snow',80:'\ud83c\udf26\ufe0f Showers',81:'\ud83c\udf26\ufe0f Showers',82:'\u26c8\ufe0f Heavy showers',95:'\u26c8\ufe0f Thunderstorm',96:'\u26c8\ufe0f Thunderstorm',99:'\u26c8\ufe0f Thunderstorm'};
+    return map[code] || '\ud83c\udf24\ufe0f';
+  }
+  function show(lat, lon){
+    try { ddToast('Loading weather\u2026'); } catch(e) {}
+    fetch(DD_AI_PROXY_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ kind:'weather', lat:lat, lon:lon }) })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if (!data || !data.daily || !data.daily.time) { alert('Could not load the forecast right now.'); return; }
+        var d = data.daily; var lines = [];
+        for (var i=0; i<Math.min(7, d.time.length); i++){
+          var dt = new Date(d.time[i] + 'T00:00:00');
+          var dayName = dt.toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'});
+          lines.push(dayName + ': ' + wxText(d.weather_code[i]) + '  ' + Math.round(d.temperature_2m_max[i]) + '\u00b0/' + Math.round(d.temperature_2m_min[i]) + '\u00b0');
+        }
+        alert('7-day forecast:\n\n' + lines.join('\n'));
+      })
+      .catch(function(){ alert('Could not load the forecast right now.'); });
+  }
+  // Use the device location if allowed; otherwise fall back to a default (NYC area).
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function(pos){ show(pos.coords.latitude, pos.coords.longitude); },
+      function(){ show(40.7128, -74.0060); },
+      { timeout: 8000 }
+    );
+  } else { show(40.7128, -74.0060); }
 }
 // #42 voice add — dormant until speech-to-text is wired through the proxy.
 function _schedVoiceDormant(){
-  try { ddToast('Voice add is coming soon!'); } catch(e) {}
-  alert('Voice scheduling is coming soon!\n\nYou\'ll be able to tap the mic and say something like \u201cPlumbing inspection at 14 Oak next Tuesday at 10\u201d and have the form fill itself.');
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert('Voice input isn\'t supported on this device/browser. Try Chrome on Android.'); return; }
+  var rec = new SR();
+  rec.lang = 'en-US'; rec.interimResults = false; rec.maxAlternatives = 1;
+  try { ddToast('\ud83c\udfa4 Listening\u2026 say the event'); } catch(e) {}
+  rec.onresult = function(e){
+    var said = (e.results[0][0].transcript || '').trim();
+    if (!said) return;
+    // Open the new-event form and drop the spoken text into the title for the user to confirm/adjust.
+    try {
+      schedOpenForm(null, null);
+      setTimeout(function(){ var t = document.getElementById('sched-f-title'); if (t) { t.value = said.charAt(0).toUpperCase() + said.slice(1); } }, 150);
+    } catch(err) {}
+  };
+  rec.onerror = function(ev){ try { ddToast('Didn\'t catch that'); } catch(e) {} };
+  try { rec.start(); } catch(e) { alert('Could not start the microphone.'); }
 }
 
 // #15 export / print the current (filtered) schedule as a clean printable sheet.
