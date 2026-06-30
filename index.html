@@ -36,6 +36,11 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
 .cal-chip--end   { width:auto; align-self:stretch; border-top-left-radius:0; border-bottom-left-radius:0; margin-left:-7px; padding-left:6px; position:relative; z-index:1; }
 /* Empty lane spacer keeps events aligned to the same row across days without showing a bar. */
 .cal-chip--spacer { background:transparent !important; cursor:default; pointer-events:none; }
+.cal-day--draghover { background:rgba(191,160,85,0.18) !important; outline:2px dashed var(--gold); outline-offset:-2px; }
+.sched-compact .cal-day { min-height:46px !important; padding:2px !important; }
+.sched-compact .cal-chip { font-size:9px !important; padding:1px 3px !important; }
+.sched-compact .cal-daynum, .sched-compact .cal-day > button { font-size:11px !important; }
+.cal-chip[draggable="true"]:active { cursor:grabbing; }
 /* Multi-day bar labels: the start label overflows across the connected cells (Google-style)
    instead of being clipped inside one narrow day cell, so the full title + address shows. */
 .cal-chip__lbl { white-space:nowrap; }
@@ -4581,7 +4586,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v265</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v267</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4635,6 +4640,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 
     <div id="cdWelcomeBanner"></div>
     <div id="cdStatusLine"></div>
+    <div id="cdHomeSwitcher"></div>
 
     <!-- Primary actions -->
     <div style="margin-bottom:8px;">
@@ -4667,6 +4673,27 @@ div[style*="position:fixed"][style*="inset:0"] {
           <div style="font-size:12px;color:var(--muted);margin-top:2px;">Report issues with photos <span id="cdPunchCount" style="display:none;background:var(--gold);color:#1a1407;border-radius:10px;padding:1px 7px;font-weight:700;font-size:11px;margin-left:4px;"></span></div>
         </div>
         <div style="font-size:22px;color:var(--gold);flex-shrink:0;">›</div>
+      </button>
+    </div>
+
+    <div style="margin-bottom:8px;">
+      <button onclick="cdOpenMessages()" style="width:100%;background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px 18px;cursor:pointer;text-align:left;box-shadow:0 2px 12px rgba(13,31,60,0.07);display:flex;align-items:center;gap:14px;">
+        <div style="font-size:30px;flex-shrink:0;">💬</div>
+        <div style="flex:1;">
+          <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:19px;letter-spacing:0.5px;color:var(--navy);">Message the Office<span id="cdMsgBadge" style="display:none;margin-left:8px;background:var(--red);color:#fff;font-size:11px;font-weight:800;border-radius:10px;padding:1px 7px;vertical-align:middle;">new</span></div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">Ask a question or send us a note</div>
+        </div>
+        <div style="font-size:22px;color:var(--navy);flex-shrink:0;">›</div>
+      </button>
+    </div>
+
+    <div style="margin-bottom:8px;">
+      <button onclick="cdAskAI()" style="width:100%;background:linear-gradient(135deg,#fbf8f0,#f4eede);border:1px solid rgba(191,160,85,0.4);border-radius:14px;padding:18px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:14px;">
+        <div style="font-size:28px;flex-shrink:0;">✦</div>
+        <div style="flex:1;">
+          <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:17px;color:#8a6d1f;">Ask about my home<span style="margin-left:8px;background:rgba(138,109,31,0.15);color:#8a6d1f;font-size:9px;font-weight:800;border-radius:8px;padding:2px 7px;vertical-align:middle;">SOON</span></div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">Get instant answers about your project & selections</div>
+        </div>
       </button>
     </div>
 
@@ -4722,6 +4749,25 @@ div[style*="position:fixed"][style*="inset:0"] {
   </div>
   <div style="max-width:720px;margin:0 auto;padding:18px 16px 40px;">
     <div id="cuPageFeed"></div>
+  </div>
+</div>
+
+<div class="page" id="customerMessagesPage" style="background:var(--offwhite);">
+  <div style="background:linear-gradient(160deg,#16294A 0%,#233D63 100%);padding:16px 20px 22px;position:sticky;top:0;z-index:100;border-bottom:2px solid var(--gold);">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;">
+      <button onclick="showPage('customerDashboardPage')" style="background:rgba(255,255,255,0.12);color:#fff;border:none;border-radius:8px;padding:7px 13px;font-size:12px;font-weight:600;cursor:pointer;">‹ Back</button>
+    </div>
+    <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:24px;color:#fff;letter-spacing:0.5px;">Message the Office</div>
+    <div style="font-size:12px;color:var(--gold);margin-top:3px;">We'll get back to you here</div>
+  </div>
+  <div style="max-width:720px;margin:0 auto;padding:18px 16px 16px;">
+    <div id="cmThread" style="display:flex;flex-direction:column;gap:10px;min-height:120px;"></div>
+  </div>
+  <div style="position:sticky;bottom:0;background:#fff;border-top:1px solid var(--border);padding:12px 16px;max-width:720px;margin:0 auto;">
+    <div style="display:flex;gap:8px;align-items:flex-end;">
+      <textarea id="cmInput" rows="1" placeholder="Type your message…" style="flex:1;border:1px solid var(--border);border-radius:12px;padding:11px 14px;font-size:14px;font-family:inherit;resize:none;max-height:120px;"></textarea>
+      <button onclick="cmSend()" style="background:var(--navy);color:#fff;border:none;border-radius:12px;padding:11px 18px;font-weight:700;font-size:14px;cursor:pointer;flex-shrink:0;">Send</button>
+    </div>
   </div>
 </div>
 
@@ -4991,7 +5037,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v265</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v267</div>
     </div>
   </div>
 
@@ -5069,6 +5115,12 @@ div[style*="position:fixed"][style*="inset:0"] {
         </div>
         <div id="dashQuickActions" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;"></div>
       </div>
+
+      <!-- Needs attention (customer messages, etc) -->
+      <div id="dashNeedsAttention"></div>
+
+      <!-- Today's schedule widget (#34) -->
+      <div id="dashTodaySchedule"></div>
 
       <!-- Recent activity -->
       <div>
@@ -5318,6 +5370,20 @@ div[style*="position:fixed"][style*="inset:0"] {
           <div class="tab-count" id="cust-count"></div>
         </div>
         <button class="btn-primary" onclick="showCustomerForm()">+ New Customer</button>
+      </div>
+      <div id="customerSummaryPanel"></div>
+      <div id="officeMsgModal" class="modal-overlay" style="display:none;">
+        <div class="modal-box" style="max-width:520px;display:flex;flex-direction:column;max-height:80vh;">
+          <div class="modal-header">
+            <div class="modal-title">💬 <span id="officeMsgWho">Customer</span></div>
+            <button class="modal-close" onclick="_closeOfficeMsg()" aria-label="Close">×</button>
+          </div>
+          <div id="officeMsgThread" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:8px 2px;min-height:120px;"></div>
+          <div style="display:flex;gap:8px;align-items:flex-end;border-top:1px solid var(--border);padding-top:10px;margin-top:8px;">
+            <textarea id="officeMsgInput" rows="1" placeholder="Type a reply…" style="flex:1;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;resize:none;max-height:100px;"></textarea>
+            <button onclick="_officeMsgSend()" class="btn-primary" style="flex-shrink:0;">Send</button>
+          </div>
+        </div>
       </div>
       <div id="customersList"></div>
       <div id="modal-viewCustomer" class="modal-overlay" style="display:none;">
@@ -5838,7 +5904,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v265';
+<script>var APP_VERSION = 'v267';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -5889,7 +5955,7 @@ async function checkSyncStatus() {
 }
 function _firebaseSelfTest() { return !!_getFirestore(); }
 
-const _PUBLIC_PREFIXES = ['calevent:', 'upgrades:', 'submission:', 'upgrade_sections', 'upgrade_sections_proj:', 'custupdate:', 'subcontractor:', 'subpunch:', 'pubaddr:', 'pubpunch:', 'pubfiles:', 'custpunch:', 'pubprogress:', 'pubnotif:', 'pubportalcfg:', 'walkreq:', 'pubchangeorder:', 'subvisit:', 'pushsub:'];
+const _PUBLIC_PREFIXES = ['calevent:', 'upgrades:', 'submission:', 'upgrade_sections', 'upgrade_sections_proj:', 'custupdate:', 'subcontractor:', 'subpunch:', 'pubaddr:', 'pubpunch:', 'pubfiles:', 'custpunch:', 'pubprogress:', 'pubnotif:', 'pubportalcfg:', 'walkreq:', 'pubchangeorder:', 'subvisit:', 'pushsub:', 'custmsg:'];
 function _fsCol(key) {
   for (var i = 0; i < _PUBLIC_PREFIXES.length; i++) {
     if (String(key).indexOf(_PUBLIC_PREFIXES[i]) === 0) return 'pub';
@@ -8057,6 +8123,7 @@ function cdBackToDashboard() {
     }
   } catch(e) {}
   showPage('customerDashboardPage');
+  try { _cdUpdateMsgBadge(); } catch(e) {}
 }
 
 
@@ -8261,6 +8328,195 @@ async function _cdUpdatesCount(address, unit) {
   } catch(e) {}
 }
 
+// ===== #43 Multi-home: if this resident's name/phone matches more than one unit, let them
+// switch between their homes from the portal. =====
+async function _cdRenderHomeSwitcher() {
+  var host = document.getElementById('cdHomeSwitcher');
+  if (!host) return;
+  host.innerHTML = '';
+  try {
+    var nameKey = (window._custName || '').toLowerCase().trim();
+    var phoneDigits = (window._custPhone || '').replace(/\D/g, '');
+    if (!nameKey && !phoneDigits) return;
+    // Read customers straight from Firebase so it works on the resident's own device.
+    var custs = await _fsListByPrefix('customer:');
+    var mine = custs.filter(function(c){
+      var nm = (c.name || '').toLowerCase().trim();
+      var phones = [c.phoneHome, c.phoneCell1, c.phoneCell2].map(function(p){ return (p||'').replace(/\D/g,''); });
+      var nameMatch = nameKey && nm === nameKey;
+      var phoneMatch = phoneDigits && phones.some(function(p){ return p && p.slice(-10) === phoneDigits.slice(-10); });
+      return (nameMatch || phoneMatch) && c.houseAddress;
+    });
+    // unique by address+unit
+    var seen = {}, homes = [];
+    mine.forEach(function(c){
+      var key = (c.houseAddress||'') + '|' + (c.unit||'Main');
+      if (!seen[key]) { seen[key] = true; homes.push({ address: c.houseAddress, unit: c.unit || 'Main', name: c.name }); }
+    });
+    if (homes.length < 2) return; // only show the switcher if they really have multiple homes
+    var cur = (window._custAddress||'') + '|' + (window._custUnit||'Main');
+    host.innerHTML = '<div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:14px;">' +
+      '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Your homes</div>' +
+      homes.map(function(h){
+        var isCur = ((h.address||'') + '|' + (h.unit||'Main')) === cur;
+        var label = h.address + (h.unit && h.unit !== 'Main' ? (' · ' + h.unit) : '');
+        return '<button onclick="_cdSwitchHome(\'' + encodeURIComponent(h.address) + '\',\'' + encodeURIComponent(h.unit||'Main') + '\')" ' +
+          'style="width:100%;text-align:left;background:' + (isCur ? 'var(--navy)' : 'var(--offwhite)') + ';color:' + (isCur ? '#fff' : 'var(--navy)') + ';border:1px solid var(--border);border-radius:10px;padding:11px 13px;margin-bottom:6px;cursor:pointer;display:flex;align-items:center;gap:8px;">' +
+          '<span style="font-size:15px;">🏠</span><span style="flex:1;font-weight:700;font-size:13px;">' + _esc(label) + '</span>' +
+          (isCur ? '<span style="font-size:11px;opacity:0.8;">current</span>' : '<span style="font-size:16px;opacity:0.5;">›</span>') + '</button>';
+      }).join('') + '</div>';
+  } catch(e) { console.warn('home switcher failed', e); }
+}
+async function _cdSwitchHome(addrEnc, unitEnc) {
+  var address = decodeURIComponent(addrEnc), unit = decodeURIComponent(unitEnc);
+  if (address === window._custAddress && unit === (window._custUnit||'Main')) return;
+  var saveKey = 'upgrades:' + btoa(unescape(encodeURIComponent(address + '|' + unit))).replace(/=/g,'');
+  var existing = await DB.get(saveKey) || {};
+  // update the saved session to the newly selected home
+  try {
+    var sess = JSON.parse(localStorage.getItem('dd_custSession') || '{}');
+    sess.address = address; sess.unit = unit; sess.saveKey = saveKey;
+    localStorage.setItem('dd_custSession', JSON.stringify(sess));
+  } catch(e) {}
+  openCustomerDashboard(window._custName, address, unit, saveKey, existing);
+}
+
+// ===== AI features (#52 ask 24/7, #59 explain terms) — DORMANT until the proxy is set up =====
+// When you have a Cloudflare Worker (or other) proxy holding the API key, put its URL here and
+// the buttons light up automatically. Until then they show a friendly "coming soon" message.
+var DD_AI_PROXY_URL = ''; // e.g. 'https://your-worker.workers.dev'
+
+function _aiReady() { return !!(DD_AI_PROXY_URL && DD_AI_PROXY_URL.indexOf('http') === 0); }
+
+// #52: ask about your home. Dormant placeholder until proxy exists.
+async function cdAskAI() {
+  if (!_aiReady()) {
+    try {
+      ddToast('AI answers are coming soon!');
+    } catch(e) {}
+    alert('This feature is coming soon!\n\nSoon you\'ll be able to ask questions about your home, your selections, and your timeline and get instant answers here.');
+    return;
+  }
+  // (Live path — runs once DD_AI_PROXY_URL is set. Gathers this resident\'s data + question.)
+  var q = prompt('Ask a question about your home:');
+  if (!q) return;
+  try {
+    var ctx = { address: window._custAddress, unit: window._custUnit };
+    var resp = await fetch(DD_AI_PROXY_URL, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ kind: 'customer_qa', question: q, context: ctx })
+    });
+    var data = await resp.json();
+    alert((data && (data.answer || data.text)) || 'Sorry, no answer right now.');
+  } catch(e) { alert('Could not reach the assistant right now. Please try again later.'); }
+}
+
+// #59: explain a construction term. Dormant placeholder until proxy exists.
+async function cdExplainTerm(term) {
+  if (!_aiReady()) {
+    alert('Term explanations are coming soon!');
+    return;
+  }
+  try {
+    var resp = await fetch(DD_AI_PROXY_URL, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ kind: 'explain_term', term: term })
+    });
+    var data = await resp.json();
+    alert((data && (data.answer || data.text)) || term);
+  } catch(e) { alert('Could not load an explanation right now.'); }
+}
+
+// ===== Customer <-> Office messaging (#33) =====
+// Stored per unit as custmsg:<base64(address|unit)> = { thread:[ {from, text, t} ] }.
+// custmsg: routes to the public collection, so anonymously-authed customers can write it.
+function _custMsgKey(address, unit) {
+  return 'custmsg:' + btoa(unescape(encodeURIComponent((address||'') + '|' + (unit||'Main')))).replace(/=/g,'');
+}
+async function _custMsgGet(address, unit) {
+  try { var rec = await DB.get(_custMsgKey(address, unit)); return (rec && Array.isArray(rec.thread)) ? rec : { thread: [] }; }
+  catch(e) { return { thread: [] }; }
+}
+async function _custMsgSend(address, unit, from, text) {
+  text = (text || '').trim();
+  if (!text) return false;
+  var rec = await _custMsgGet(address, unit);
+  rec.thread.push({ from: from, text: text, t: Date.now() });
+  rec.address = address; rec.unit = unit;
+  rec.lastFrom = from; rec.lastAt = Date.now();
+  if (from === 'customer') rec.unreadForOffice = true;
+  if (from === 'office') rec.unreadForCustomer = true;
+  await DB.set(_custMsgKey(address, unit), rec);
+  return true;
+}
+// List all message threads (office side) — read straight from Firebase so it works without
+// the office cache being warm, and so newly-arrived customer messages show up.
+async function _custMsgListAll() {
+  var out = [];
+  try {
+    var fs = (typeof _getFirestore === 'function') ? _getFirestore() : null;
+    if (fs) {
+      var snap = await fs.collection('pub').get();
+      snap.forEach(function(doc){
+        var d = doc.data();
+        if (!d || typeof d.k !== 'string' || d.k.indexOf('custmsg:') !== 0) return;
+        try { var rec = JSON.parse(d.v); if (rec && Array.isArray(rec.thread) && rec.thread.length) { rec._key = d.k; out.push(rec); _store[d.k] = d.v; } } catch(e) {}
+      });
+    }
+  } catch(e) { console.warn('_custMsgListAll failed:', e); }
+  out.sort(function(a,b){ return (b.lastAt||0) - (a.lastAt||0); });
+  return out;
+}
+
+// Customer-side: open the message thread, render it, send a message.
+async function cdOpenMessages() {
+  showPage('customerMessagesPage');
+  await _cmRender();
+  // mark office->customer messages as read
+  try {
+    var rec = await _custMsgGet(window._custAddress, window._custUnit);
+    if (rec.unreadForCustomer) { rec.unreadForCustomer = false; await DB.set(_custMsgKey(window._custAddress, window._custUnit), rec); }
+  } catch(e) {}
+  _cdUpdateMsgBadge();
+}
+async function _cmRender() {
+  var host = document.getElementById('cmThread');
+  if (!host) return;
+  var rec = await _custMsgGet(window._custAddress, window._custUnit);
+  if (!rec.thread.length) {
+    host.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:30px 10px;">No messages yet. Send us a note and we\'ll reply here.</div>';
+    return;
+  }
+  host.innerHTML = rec.thread.map(function(m){
+    var mine = m.from === 'customer';
+    var when = '';
+    try { var d = new Date(m.t); when = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}); } catch(e) {}
+    var bubble = mine
+      ? 'align-self:flex-end;background:var(--navy);color:#fff;border-radius:14px 14px 4px 14px;'
+      : 'align-self:flex-start;background:#fff;color:var(--text);border:1px solid var(--border);border-radius:14px 14px 14px 4px;';
+    return '<div style="max-width:80%;' + bubble + 'padding:10px 13px;">' +
+           '<div style="font-size:14px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere;">' + _esc(m.text) + '</div>' +
+           '<div style="font-size:10px;opacity:0.6;margin-top:4px;">' + (mine ? 'You' : 'Office') + ' · ' + when + '</div></div>';
+  }).join('');
+  try { host.scrollTop = host.scrollHeight; var sc = host.parentElement; if (sc) window.scrollTo(0, document.body.scrollHeight); } catch(e) {}
+}
+async function cmSend() {
+  var inp = document.getElementById('cmInput');
+  var text = (inp.value || '').trim();
+  if (!text) return;
+  inp.value = '';
+  await _ensureAnonAuth();
+  await _custMsgSend(window._custAddress, window._custUnit, 'customer', text);
+  await _cmRender();
+}
+async function _cdUpdateMsgBadge() {
+  try {
+    var rec = await _custMsgGet(window._custAddress, window._custUnit);
+    var b = document.getElementById('cdMsgBadge');
+    if (b) b.style.display = rec.unreadForCustomer ? 'inline-block' : 'none';
+  } catch(e) {}
+}
+
 async function openCustomerDashboard(name, address, unit, saveKey, existing) {
   window._custName = name; window._custAddress = address; window._custUnit = unit; _custSaveKey = saveKey;
   var first = (name || '').split(' ')[0] || 'there';
@@ -8274,6 +8530,17 @@ async function openCustomerDashboard(name, address, unit, saveKey, existing) {
   if (ui) ui.textContent = address + (unit && unit !== 'Main' ? (' \u00b7 Unit ' + unit) : '');
   showPage('customerDashboardPage');
   window.scrollTo(0,0);
+  try { _cdUpdateMsgBadge(); } catch(e) {}
+  // Engagement tracking (#48): record that this resident viewed their portal.
+  try {
+    if (saveKey) {
+      var _vrec = existing || (await DB.get(saveKey)) || {};
+      _vrec._lastViewedAt = Date.now();
+      _vrec._viewCount = (_vrec._viewCount || 0) + 1;
+      await DB.set(saveKey, _vrec);
+    }
+  } catch(e) {}
+  try { _cdRenderHomeSwitcher(); } catch(e) {}
   // load the dynamic pieces into the dashboard slots
   try { await _loadPortalConfig(address, unit); } catch(e) {}
   try { await _loadCustomerProgress(address, unit, 'cdProgress'); } catch(e) {}
@@ -14001,7 +14268,86 @@ async function saveDashCustomize() {
   await renderQuickActions();
 }
 
+// Dashboard needs-attention: surface unread customer messages (#33) so the office sees them
+// right on the home screen, not only in the Customers tab.
+async function _refreshDashboardNeedsAttention() {
+  var host = document.getElementById('dashNeedsAttention');
+  if (!host) return;
+  var msgs = [];
+  try { msgs = await _custMsgListAll(); } catch(e) {}
+  var unread = msgs.filter(function(m){ return m.unreadForOffice; });
+  if (!unread.length) { host.innerHTML = ''; return; }
+  var rows = unread.slice(0, 5).map(function(m){
+    var last = m.thread[m.thread.length - 1] || {};
+    var who = (m.unit && m.unit !== 'Main') ? (m.address + ' · ' + m.unit) : m.address;
+    return '<button onclick="switchTab(\'customers\'); setTimeout(function(){ _officeOpenMsg(\'' + encodeURIComponent(m.address) + '\',\'' + encodeURIComponent(m.unit||'Main') + '\'); }, 250);" style="width:100%;text-align:left;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:6px;cursor:pointer;">' +
+      '<div style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0;"></span>' +
+      '<span style="font-weight:700;color:var(--navy);font-size:13px;">' + _esc(who||'Customer') + '</span>' +
+      '<span style="margin-left:auto;font-size:10px;color:var(--muted);">' + (typeof _timeAgo==='function'?_timeAgo(m.lastAt):'') + '</span></div>' +
+      '<div style="font-size:12px;color:var(--muted);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + _esc(last.text||'') + '</div></button>';
+  }).join('');
+  host.innerHTML = '<div style="margin-bottom:18px;"><div class="dash-section-label" style="color:var(--red);">Needs Attention</div>' +
+    '<div style="background:#FDF3F1;border:1px solid rgba(176,58,46,0.2);border-radius:14px;padding:12px;">' +
+    '<div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:8px;">' + unread.length + ' unread customer message' + (unread.length!==1?'s':'') + '</div>' +
+    rows + '</div></div>';
+}
+
+// ---- #34 Today's schedule widget + #20 overdue surfacing, on the dashboard ----
+async function _refreshDashTodaySchedule(){
+  var host = document.getElementById('dashTodaySchedule'); if(!host) return;
+  var evs = [];
+  try { evs = await _schedLoad(); } catch(e) { evs = []; }
+  function pd(s){ var p=String(s||'').split('-'); return p.length===3 ? new Date(+p[0],+p[1]-1,+p[2]) : null; }
+  function ds(d){ var m=String(d.getMonth()+1), day=String(d.getDate()); return d.getFullYear()+'-'+(m.length<2?'0'+m:m)+'-'+(day.length<2?'0'+day:day); }
+  var todayStr = ds(new Date());
+  // Today's events (today falls within start..end), excluding cancelled.
+  var today = evs.filter(function(e){
+    if((e.status||'')==='cancelled') return false;
+    var s=e.date, en=e.endDate||e.date; return s<=todayStr && en>=todayStr;
+  }).sort(function(a,b){ return (a.time||'').localeCompare(b.time||''); });
+  // Overdue: ended before today, not done, not cancelled.
+  var overdue = evs.filter(function(e){
+    var en=e.endDate||e.date; var done=(e.status==='done')||e.done; var canc=(e.status==='cancelled');
+    return en < todayStr && !done && !canc;
+  }).sort(function(a,b){ return (b.endDate||b.date).localeCompare(a.endDate||a.date); });
+
+  var html = '';
+  if(overdue.length){
+    html += '<div style="background:#FDF3F1;border:1px solid rgba(176,58,46,0.3);border-radius:12px;padding:12px;margin-bottom:12px;">' +
+      '<div style="font-size:11px;font-weight:800;color:#B03A2E;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">\u23f0 '+overdue.length+' overdue</div>' +
+      overdue.slice(0,4).map(function(e){
+        return '<button onclick="switchTab(\'scheduling\');setTimeout(function(){_schedEdit(\''+e.id+'\');},250);" style="width:100%;text-align:left;background:none;border:none;border-bottom:1px solid rgba(176,58,46,0.12);padding:7px 0;cursor:pointer;font-size:13px;color:var(--navy);">' +
+          '<span style="font-weight:700;">'+_esc(e.title||'Event')+'</span> <span style="color:#B03A2E;font-size:11px;">'+(e.endDate||e.date)+'</span>' +
+        '</button>';
+      }).join('') + '</div>';
+  }
+  html += '<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px;">' +
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">' +
+      '<div class="dash-section-label" style="margin:0;">\ud83d\udcc5 Today</div>' +
+      '<button onclick="switchTab(\'scheduling\')" style="background:none;border:none;color:var(--gold);font-weight:700;font-size:12px;cursor:pointer;">Open schedule \u203a</button>' +
+    '</div>';
+  if(!today.length){
+    html += '<div style="color:var(--muted);font-size:13px;padding:6px 0;">Nothing scheduled today.</div>';
+  } else {
+    html += today.map(function(e){
+      var ty = e.type && SCHED_TYPES[e.type] ? SCHED_TYPES[e.type] : null;
+      var icon = ty ? (ty.icon+' ') : '';
+      var t12 = '';
+      if(e.time){ var hp=e.time.split(':'); if(hp.length>=2){ var h=+hp[0]; var ap=h<12?'AM':'PM'; var h12=h%12; if(h12===0)h12=12; t12=h12+':'+hp[1]+' '+ap; } }
+      return '<button onclick="switchTab(\'scheduling\');setTimeout(function(){_schedEdit(\''+e.id+'\');},250);" style="width:100%;text-align:left;display:flex;align-items:center;gap:10px;background:none;border:none;border-top:1px solid var(--border);padding:9px 0;cursor:pointer;">' +
+        '<span style="width:4px;align-self:stretch;border-radius:3px;background:'+(e.color||'#3B6FB0')+';"></span>' +
+        '<span style="flex:1;min-width:0;"><span style="display:block;font-weight:700;color:var(--navy);font-size:13px;">'+icon+_esc(e.title||'Event')+'</span>' +
+        (t12||e.address?'<span style="display:block;font-size:11px;color:var(--muted);margin-top:1px;">'+(t12?_esc(t12):'')+(t12&&e.address?' \u00b7 ':'')+_esc(e.address||'')+'</span>':'')+'</span>' +
+      '</button>';
+    }).join('');
+  }
+  html += '</div>';
+  host.innerHTML = html;
+}
+
 async function refreshDashboard() {
+  try { _refreshDashboardNeedsAttention(); } catch(e) {}
+  try { await _refreshDashTodaySchedule(); } catch(e) {}
   // Fallback so the activity area never stays stuck on "Loading\u2026" if anything below throws.
   try {
     var _ra = document.getElementById('recentActivity');
@@ -16067,9 +16413,36 @@ async function _schedFilterOptions(){
   } catch(e){ return '<option value="">All projects</option>'; }
 }
 function _schedSetFilter(pid){ _schedFilterProj = pid; schedRender(); }
+var _schedChipFilters = { type:'', house:'', mine:false, week:false, keyOnly:false, hideCancelled:false };
 function _schedVisibleEvents(){
-  if(!_schedFilterProj) return _schedEvents;
-  return _schedEvents.filter(function(ev){ return ev.projectId === _schedFilterProj; });
+  var list = _schedEvents || [];
+  if(_schedFilterProj){ list = list.filter(function(ev){ return ev.projectId === _schedFilterProj; }); }
+  var f = _schedChipFilters || {};
+  if(f.type){ list = list.filter(function(ev){ return (ev.type||'') === f.type; }); }
+  if(f.house){ list = list.filter(function(ev){ return (ev.address||'') === f.house; }); }
+  if(f.keyOnly){ list = list.filter(function(ev){ return !!ev.pinned; }); }
+  if(f.hideCancelled){ list = list.filter(function(ev){ return (ev.status||'') !== 'cancelled'; }); }
+  if(f.mine){
+    var me = ((currentUser&&currentUser.name)||'').toLowerCase();
+    list = list.filter(function(ev){
+      if((ev.createdBy||'').toLowerCase() === me) return true;
+      return (ev.assignees||[]).some(function(a){ return (a||'').toLowerCase().indexOf(me)>-1 && me; });
+    });
+  }
+  if(f.week){
+    var now = new Date(); var day = now.getDay();
+    var monday = new Date(now); monday.setDate(now.getDate() - ((day+6)%7)); monday.setHours(0,0,0,0);
+    var sunday = new Date(monday); sunday.setDate(monday.getDate()+6); sunday.setHours(23,59,59,999);
+    var ms = _schedDateToStr(monday), su = _schedDateToStr(sunday);
+    list = list.filter(function(ev){ var s=ev.date, e=ev.endDate||ev.date; return s<=su && e>=ms; });
+  }
+  return list;
+}
+// Unique house addresses across events, for the house filter.
+function _schedHouseList(){
+  var seen={}, out=[];
+  (_schedEvents||[]).forEach(function(ev){ if(ev.address && !seen[ev.address]){ seen[ev.address]=true; out.push(ev.address); } });
+  return out.sort();
 }
 async function _schedGcalConnect(){
   // If no Client ID is configured yet, show the one-time setup (owners only); otherwise
@@ -16163,14 +16536,197 @@ async function schedRender(){
     '<button onclick="_schedSetView(\'month\')" style="flex:1;padding:9px;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;'+(_schedViewMode==='month'?'background:var(--navy);color:#fff;':'background:none;color:var(--muted);')+'">\ud83d\udcc5 Month</button>' +
     '<button onclick="_schedSetView(\'agenda\')" style="flex:1;padding:9px;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;'+(_schedViewMode==='agenda'?'background:var(--navy);color:#fff;':'background:none;color:var(--muted);')+'">\ud83d\udccb Agenda</button>' +
   '</div>';
-  root.innerHTML = toggle + '<div id="schedBody"></div>';
+  root.className = _schedCompact ? 'sched-compact' : '';
+  root.innerHTML = toggle + _schedChipBar() + _schedActionBar() + _schedLegend() + '<div id="schedBody"></div>';
   if(_schedViewMode==='month') _schedRenderMonth();
+  else if(_schedViewMode==='workload') _schedRenderWorkload();
   else _schedRenderAgenda();
+}
+
+// ---- #23 workload / capacity view: how booked each of the next 14 days is ----
+function _schedRenderWorkload(){
+  var body=document.getElementById('schedBody'); if(!body) return;
+  function ds(d){ var m=String(d.getMonth()+1), day=String(d.getDate()); return d.getFullYear()+'-'+(m.length<2?'0'+m:m)+'-'+(day.length<2?'0'+day:day); }
+  var evs = _schedVisibleEvents().filter(function(e){ return (e.status||'')!=='cancelled'; });
+  var days = [];
+  var start = new Date(); start.setHours(0,0,0,0);
+  for(var i=0;i<14;i++){
+    var d = new Date(start); d.setDate(start.getDate()+i);
+    var dStr = ds(d);
+    var count = evs.filter(function(e){ var s=e.date, en=e.endDate||e.date; return s<=dStr && en>=dStr; }).length;
+    days.push({ date:d, dStr:dStr, count:count });
+  }
+  var maxCount = Math.max(1, days.reduce(function(m,x){ return Math.max(m,x.count); },0));
+  function level(c){ if(c===0) return {label:'Open', color:'#9aa0a6', bg:'#f3f3f1'}; if(c<=2) return {label:'Light', color:'#2D7A4F', bg:'#EAF3EE'}; if(c<=4) return {label:'Busy', color:'#8a6d1f', bg:'#FBF4E2'}; return {label:'Heavy', color:'#B03A2E', bg:'#FCEDEA'}; }
+  var html = '<div style="font-size:12px;color:var(--muted);margin-bottom:10px;">How booked the next two weeks are (tap a day to add an event).</div>';
+  days.forEach(function(x){
+    var lv = level(x.count);
+    var pct = Math.round((x.count/maxCount)*100);
+    var dn = x.date.toLocaleDateString('en-US',{weekday:'short'});
+    var dm = x.date.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    html += '<button onclick="_schedAddOnDay(\''+x.dStr+'\')" style="width:100%;text-align:left;display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:6px;cursor:pointer;">' +
+      '<span style="width:46px;flex-shrink:0;"><span style="display:block;font-weight:800;color:var(--navy);font-size:13px;">'+dn+'</span><span style="display:block;font-size:11px;color:var(--muted);">'+dm+'</span></span>' +
+      '<span style="flex:1;height:10px;background:#f0efea;border-radius:6px;overflow:hidden;"><span style="display:block;height:100%;width:'+pct+'%;background:'+lv.color+';"></span></span>' +
+      '<span style="flex-shrink:0;background:'+lv.bg+';color:'+lv.color+';border-radius:20px;padding:3px 10px;font-size:11px;font-weight:800;min-width:60px;text-align:center;">'+lv.label+'</span>' +
+      '<span style="flex-shrink:0;font-size:12px;color:var(--muted);width:20px;text-align:right;">'+x.count+'</span>' +
+    '</button>';
+  });
+  body.innerHTML = html;
+}
+
+// ---- Schedule action bar: export/print, compact, workload, weather (dormant), voice (dormant) ----
+var _schedCompact = false;
+function _schedActionBar(){
+  function btn(label, onclick, extra){
+    return '<button onclick="'+onclick+'" style="white-space:nowrap;background:#fff;border:1.5px solid var(--border);border-radius:9px;padding:7px 11px;font-size:12px;font-weight:700;color:var(--navy);cursor:pointer;'+(extra||'')+'">'+label+'</button>';
+  }
+  return '<div style="display:flex;gap:7px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px;-webkit-overflow-scrolling:touch;">' +
+    btn('\ud83d\udcc4 Export / Print', '_schedExport()') +
+    btn((_schedViewMode==='workload'?'\ud83d\udcca Workload \u2713':'\ud83d\udcca Workload'), "_schedSetView('workload')", (_schedViewMode==='workload'?'background:var(--navy);color:#fff;border-color:var(--navy);':'')) +
+    btn((_schedCompact?'\u25a4 Compact \u2713':'\u25a4 Compact'), '_schedToggleCompact()', (_schedCompact?'background:var(--navy);color:#fff;border-color:var(--navy);':'')) +
+    btn('\ud83c\udf24\ufe0f Weather', '_schedWeatherDormant()') +
+    btn('\ud83c\udfa4 Voice add', '_schedVoiceDormant()') +
+  '</div>';
+}
+function _schedToggleCompact(){ _schedCompact = !_schedCompact; schedRender(); }
+// #16 weather — dormant until a weather service/proxy is configured.
+function _schedWeatherDormant(){
+  try { ddToast('Weather is coming soon!'); } catch(e) {}
+  alert('Weather on the calendar is coming soon!\n\nOnce set up, each upcoming day will show the forecast so you can plan pours, roofing, and exterior work around it.');
+}
+// #42 voice add — dormant until speech-to-text is wired through the proxy.
+function _schedVoiceDormant(){
+  try { ddToast('Voice add is coming soon!'); } catch(e) {}
+  alert('Voice scheduling is coming soon!\n\nYou\'ll be able to tap the mic and say something like \u201cPlumbing inspection at 14 Oak next Tuesday at 10\u201d and have the form fill itself.');
+}
+
+// #15 export / print the current (filtered) schedule as a clean printable sheet.
+function _schedExport(){
+  var evs = _schedVisibleEvents().slice().sort(function(a,b){ return (a.date||'').localeCompare(b.date||'') || (a.time||'').localeCompare(b.time||''); });
+  var rowsHtml = evs.map(function(e){
+    var ty = e.type && SCHED_TYPES[e.type] ? (SCHED_TYPES[e.type].icon+' '+SCHED_TYPES[e.type].label) : '';
+    var dateTxt = e.date + (e.endDate && e.endDate!==e.date ? (' \u2192 '+e.endDate) : '');
+    var status = (e.status==='done')?'Done':(e.status==='cancelled'?'Cancelled':'Scheduled');
+    var who = (e.assignees||[]).join(', ');
+    return '<tr>' +
+      '<td style="padding:7px 10px;border-bottom:1px solid #e5e2da;font-size:12px;white-space:nowrap;">'+dateTxt+(e.time?('<br><span style="color:#888;">'+e.time+'</span>'):'')+'</td>' +
+      '<td style="padding:7px 10px;border-bottom:1px solid #e5e2da;font-size:12px;"><b>'+_esc(e.title||'Event')+'</b>'+(ty?('<br><span style="color:#666;">'+ty+'</span>'):'')+'</td>' +
+      '<td style="padding:7px 10px;border-bottom:1px solid #e5e2da;font-size:12px;">'+_esc(e.address||e.projectName||'')+'</td>' +
+      '<td style="padding:7px 10px;border-bottom:1px solid #e5e2da;font-size:12px;">'+_esc(who)+'</td>' +
+      '<td style="padding:7px 10px;border-bottom:1px solid #e5e2da;font-size:12px;">'+status+'</td>' +
+    '</tr>';
+  }).join('');
+  var win = window.open('', '_blank');
+  if(!win){ try{ ddToast('Allow pop-ups to print'); }catch(e){} return; }
+  win.document.write('<html><head><title>Schedule</title></head><body style="font-family:Arial,sans-serif;padding:24px;color:#1a2b4a;">' +
+    '<h2 style="margin:0 0 4px;">Schedule</h2>' +
+    '<div style="color:#666;font-size:12px;margin-bottom:16px;">'+evs.length+' events \u00b7 printed '+new Date().toLocaleDateString()+'</div>' +
+    '<table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#1a2b4a;color:#fff;">' +
+    '<th style="padding:8px 10px;text-align:left;font-size:11px;">Date</th><th style="padding:8px 10px;text-align:left;font-size:11px;">Event</th><th style="padding:8px 10px;text-align:left;font-size:11px;">Location</th><th style="padding:8px 10px;text-align:left;font-size:11px;">Assigned</th><th style="padding:8px 10px;text-align:left;font-size:11px;">Status</th>' +
+    '</tr></thead><tbody>'+ (rowsHtml||'<tr><td colspan="5" style="padding:20px;text-align:center;color:#888;">No events</td></tr>') +'</tbody></table>' +
+    '<script>setTimeout(function(){window.print();},300);<\/script>' +
+    '</body></html>');
+  win.document.close();
+}
+
+// ---- #48 filter chips bar + #14 house filter ----
+function _schedChipBar(){
+  var f = _schedChipFilters || {};
+  function chip(active, label, onclick){
+    return '<button onclick="'+onclick+'" style="white-space:nowrap;border:1.5px solid '+(active?'var(--navy)':'var(--border)')+';background:'+(active?'var(--navy)':'#fff')+';color:'+(active?'#fff':'var(--navy)')+';border-radius:20px;padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer;">'+label+'</button>';
+  }
+  var chips = '';
+  chips += chip(f.mine, '\ud83d\udc64 Only mine', "_schedToggleChip('mine')");
+  chips += chip(f.week, '\ud83d\udcc6 This week', "_schedToggleChip('week')");
+  chips += chip(f.keyOnly, '\u2b50 Key dates', "_schedToggleChip('keyOnly')");
+  chips += chip(f.hideCancelled, 'Hide cancelled', "_schedToggleChip('hideCancelled')");
+  // type filter
+  Object.keys(SCHED_TYPES).forEach(function(k){
+    chips += chip(f.type===k, SCHED_TYPES[k].icon + ' ' + SCHED_TYPES[k].label, "_schedSetTypeFilter('"+k+"')");
+  });
+  // house filter dropdown (only if there are addresses)
+  var houses = _schedHouseList();
+  var houseSel = '';
+  if(houses.length){
+    houseSel = '<select onchange="_schedSetHouseFilter(this.value)" style="white-space:nowrap;border:1.5px solid '+(f.house?'var(--navy)':'var(--border)')+';background:'+(f.house?'var(--navy)':'#fff')+';color:'+(f.house?'#fff':'var(--navy)')+';border-radius:20px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer;">' +
+      '<option value="">\ud83c\udfe0 All houses</option>' +
+      houses.map(function(h){ return '<option value="'+_esc(h)+'" '+(f.house===h?'selected':'')+'>'+_esc(h)+'</option>'; }).join('') +
+    '</select>';
+  }
+  var anyActive = f.mine||f.week||f.keyOnly||f.hideCancelled||f.type||f.house;
+  var clearBtn = anyActive ? '<button onclick="_schedClearChips()" style="white-space:nowrap;border:none;background:rgba(176,58,46,0.1);color:#B03A2E;border-radius:20px;padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer;">\u2715 Clear</button>' : '';
+  return '<div style="display:flex;gap:7px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px;-webkit-overflow-scrolling:touch;">' + chips + houseSel + clearBtn + '</div>';
+}
+function _schedToggleChip(key){ _schedChipFilters[key] = !_schedChipFilters[key]; schedRender(); }
+function _schedSetTypeFilter(k){ _schedChipFilters.type = (_schedChipFilters.type===k ? '' : k); schedRender(); }
+function _schedSetHouseFilter(v){ _schedChipFilters.house = v; schedRender(); }
+function _schedClearChips(){ _schedChipFilters = { type:'', house:'', mine:false, week:false, keyOnly:false, hideCancelled:false }; schedRender(); }
+
+// ---- #9 color + type legend ----
+function _schedLegend(){
+  var items = Object.keys(SCHED_TYPES).map(function(k){
+    var t = SCHED_TYPES[k];
+    return '<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);"><span style="width:11px;height:11px;border-radius:3px;background:'+t.color+';display:inline-block;"></span>'+t.icon+' '+t.label+'</span>';
+  }).join('');
+  return '<details style="margin-bottom:12px;"><summary style="cursor:pointer;font-size:12px;color:var(--navy);font-weight:700;list-style:none;">\ud83c\udfa8 Color key</summary>' +
+    '<div style="display:flex;flex-wrap:wrap;gap:10px 16px;padding:10px 2px 2px;">' + items + '</div></details>';
 }
 function _schedSetView(v){ _schedViewMode=v; schedRender(); }
 function _schedMonthStep(n){ _schedCursor = new Date(_schedCursor.getFullYear(), _schedCursor.getMonth()+n, 1); _schedRenderMonth(); }
 
 // ---- MONTH view with multi-day spanning bars ----
+// ---- #7 drag-to-reschedule + #47 drag edge to resize (desktop; tap-to-edit on mobile) ----
+var _schedDragState = null;
+function _schedAttachDrag(){
+  var body = document.getElementById('schedBody'); if(!body) return;
+  var chips = body.querySelectorAll('.cal-chip[data-evid]');
+  chips.forEach(function(chip){
+    chip.setAttribute('draggable','true');
+    chip.style.cursor = 'grab';
+    chip.addEventListener('dragstart', function(e){
+      var id = chip.getAttribute('data-evid');
+      _schedDragState = { id:id, mode:'move' };
+      try { e.dataTransfer.setData('text/plain', id); e.dataTransfer.effectAllowed='move'; } catch(err){}
+    });
+    chip.addEventListener('dragend', function(){ _schedDragState=null; body.querySelectorAll('.cal-day--draghover').forEach(function(c){c.classList.remove('cal-day--draghover');}); });
+  });
+  var cells = body.querySelectorAll('.cal-day[data-date]');
+  cells.forEach(function(cell){
+    cell.addEventListener('dragover', function(e){ if(_schedDragState){ e.preventDefault(); try{e.dataTransfer.dropEffect='move';}catch(err){} cell.classList.add('cal-day--draghover'); } });
+    cell.addEventListener('dragleave', function(){ cell.classList.remove('cal-day--draghover'); });
+    cell.addEventListener('drop', async function(e){
+      e.preventDefault(); cell.classList.remove('cal-day--draghover');
+      if(!_schedDragState) return;
+      var id = _schedDragState.id; _schedDragState=null;
+      var newDate = cell.getAttribute('data-date');
+      await _schedMoveEventTo(id, newDate);
+    });
+  });
+}
+// Move an event's start to newDate, preserving its duration; shift dependents; record undo.
+async function _schedMoveEventTo(id, newDate){
+  var ev = (_schedEvents||[]).filter(function(e){return e.id===id;})[0];
+  if(!ev || !newDate || ev.date===newDate) return;
+  var pre = (_schedEvents||[]).map(function(e){ return JSON.parse(JSON.stringify(e)); });
+  var before = JSON.parse(JSON.stringify(ev));
+  var dur = ev.endDate ? _schedDaysBetween(ev.date, ev.endDate) : 0;
+  var delta = _schedDaysBetween(ev.date, newDate);
+  ev.date = newDate;
+  ev.endDate = dur ? _schedAddDays(newDate, dur) : newDate;
+  ev._updatedAt = Date.now();
+  await DB.set('calevent:'+id, ev);
+  _schedEvents = await _schedLoad();
+  var changed = [];
+  try { changed = await _schedApplyDependencyShift(id, delta); } catch(e){}
+  // undo snapshot
+  try {
+    var recs = [{ id:id, before:before }];
+    changed.forEach(function(dc){ var prior = pre.filter(function(e){return e.id===dc.id;})[0]; recs.push({ id:dc.id, before: prior?JSON.parse(JSON.stringify(prior)):null }); });
+    _schedPushUndo({ label:'Event moved' + (changed.length?(' (+'+changed.length+' shifted)'):''), records:recs });
+  } catch(e){}
+  try { await schedRender(); } catch(e){}
+}
+
 function _schedRenderMonth(){
   var body = document.getElementById('schedBody'); if(!body) return;
   var y=_schedCursor.getFullYear(), m=_schedCursor.getMonth();
@@ -16265,7 +16821,7 @@ function _schedRenderMonth(){
     var isToday = ds===todayStr;
     var slots = cellData[ds] || [];
 
-    html += '<div class="cal-day'+(isToday?' cal-day--today':'')+'">';
+    html += '<div class="cal-day'+(isToday?' cal-day--today':'')+'" data-date="'+ds+'">';
     html += '<button class="cal-day__num-btn" onclick="_schedOpenDay(\''+ds+'\')">' +
       '<span class="cal-day__num'+(isToday?' cal-day__num--today':'')+'">'+dayNum+'</span></button>';
 
@@ -16315,7 +16871,7 @@ function _schedRenderMonth(){
       } else {
         inner = '\u00a0';
       }
-      html += '<span class="cal-chip'+posCls+'" style="background:'+c+';" title="'+label+'" onclick="event.stopPropagation();_schedEdit(\''+ev.id+'\')">'+inner+'</span>';
+      html += '<span class="cal-chip'+posCls+'" data-evid="'+ev.id+'" style="background:'+c+';" title="'+label+'" onclick="event.stopPropagation();_schedEdit(\''+ev.id+'\')">'+inner+'</span>';
     }
     if(realCount > shownLanes || slots.length > CAP){
       var more = realCount - (function(){ var n=0; for(var li=0; li<shownLanes; li++){ if(slots[li]) n++; } return n; })();
@@ -16328,6 +16884,7 @@ function _schedRenderMonth(){
   html += '</div>';
 
   body.innerHTML = html;
+  try { _schedAttachDrag(); } catch(e) {}
 }
 
 // Render the spanning event bars for one week row.
@@ -16409,10 +16966,26 @@ function _schedRenderAgenda(){
       html += '<div style="font-family:\'Archivo\',sans-serif;font-weight:800;font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:0.5px;margin:14px 0 7px;">'+d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})+'</div>';
     }
     var span = (ev.endDate && ev.endDate!==ev.date) ? (' \u2192 '+_schedParse(ev.endDate).toLocaleDateString('en-US',{month:'short',day:'numeric'})) : '';
-    html += '<button onclick="_schedEdit(\''+ev.id+'\')" style="width:100%;text-align:left;display:flex;align-items:stretch;gap:0;background:#fff;border:1px solid var(--border);border-radius:11px;margin-bottom:8px;cursor:pointer;overflow:hidden;">' +
+    var _ty = ev.type && SCHED_TYPES[ev.type] ? SCHED_TYPES[ev.type] : null;
+    var _icon = _ty ? (_ty.icon + ' ') : '';
+    var _pin = ev.pinned ? '\u2b50 ' : '';
+    var _isDone = (ev.status==='done') || ev.done;
+    var _isCancel = (ev.status==='cancelled');
+    var _titleStyle = _isCancel ? 'text-decoration:line-through;color:var(--muted);' : (_isDone ? 'color:var(--muted);' : 'color:var(--navy);');
+    var _rowOpacity = (_isDone||_isCancel) ? 'opacity:0.65;' : '';
+    var _statusBadge = _isDone ? '<span style="color:#2D7A4F;font-weight:800;">\u2713 </span>' : (_isCancel ? '<span style="color:#B03A2E;font-weight:800;">\u2715 </span>' : '');
+    // meta chips: assignees, checklist progress, files, dependency
+    var _meta = [];
+    if((ev.assignees||[]).length) _meta.push('\ud83d\udc65 ' + _esc(ev.assignees.join(', ')));
+    if((ev.checklist||[]).length){ var _dn=ev.checklist.filter(function(c){return c.done;}).length; _meta.push('\u2611\ufe0f ' + _dn + '/' + ev.checklist.length); }
+    if((ev.files||[]).length) _meta.push('\ud83d\udcce ' + ev.files.length);
+    if(ev.dependsOn) _meta.push('\ud83d\udd17 linked');
+    var _metaLine = _meta.length ? ('<span style="display:block;font-size:11px;color:#8a8a82;margin-top:4px;">' + _meta.join(' \u00b7 ') + '</span>') : '';
+    html += '<button onclick="_schedEdit(\''+ev.id+'\')" style="width:100%;text-align:left;display:flex;align-items:stretch;gap:0;background:#fff;border:1px solid var(--border);border-radius:11px;margin-bottom:8px;cursor:pointer;overflow:hidden;'+_rowOpacity+'">' +
       '<span style="width:5px;background:'+(ev.color||'#3B6FB0')+';flex-shrink:0;"></span>' +
       '<span style="flex:1;padding:12px 14px;min-width:0;">' +
-        '<span style="display:block;font-weight:700;color:var(--navy);font-size:14px;">'+_esc(ev.title||'Event')+span+'</span>' +
+        '<span style="display:block;font-weight:700;font-size:14px;'+_titleStyle+'">'+_statusBadge+_pin+_icon+_esc(ev.title||'Event')+span+'</span>' +
+        _metaLine +
         '<span style="display:block;font-size:12px;color:var(--muted);margin-top:2px;">'+(ev.time?_esc(_schedTime12(ev.time))+' \u00b7 ':'')+_esc(ev.projectName||'')+(ev.address?(' \u00b7 '+_esc(ev.address)):'')+'</span>' +
         (ev.notes?'<span style="display:block;font-size:12px;color:#5a5750;margin-top:4px;">'+_esc(ev.notes)+'</span>':'') +
       '</span>' +
@@ -16454,6 +17027,17 @@ async function schedOpenForm(id, presetDate){
   document.getElementById('sched-f-time').value = ev ? (ev.time||'') : '';
   document.getElementById('sched-f-notes').value = ev ? (ev.notes||'') : '';
   document.getElementById('sched-f-project').innerHTML = await _schedProjectOptions(ev?(ev.projKey||''):'');
+  // New fields: type, status, assignees, checklist, files, dependency, pin.
+  var _tEl = document.getElementById('sched-f-type'); if(_tEl) _tEl.value = ev ? (ev.type||'') : '';
+  var _sEl = document.getElementById('sched-f-status'); if(_sEl) _sEl.value = ev ? (ev.status || (ev.done?'done':'scheduled')) : 'scheduled';
+  var _aEl = document.getElementById('sched-f-assignees'); if(_aEl) _aEl.value = ev ? ((ev.assignees||[]).join(', ')) : '';
+  _schedFormChecklist = ev && ev.checklist ? JSON.parse(JSON.stringify(ev.checklist)) : [];
+  _schedFormFiles = ev && ev.files ? JSON.parse(JSON.stringify(ev.files)) : [];
+  _schedRenderFormChecklist();
+  _schedRenderFormFiles();
+  _schedFillDependsOptions(id, ev ? (ev.dependsOn||'') : '');
+  var _pEl = document.getElementById('sched-f-pinned'); if(_pEl) _pEl.checked = ev ? !!ev.pinned : false;
+  var _caEl = document.getElementById('sched-f-checkadd'); if(_caEl) _caEl.value='';
   var cur = ev ? (ev.color||SCHED_COLORS[0]) : SCHED_COLORS[0];
   _schedPickedColor = cur;
   document.getElementById('sched-f-colors').innerHTML = SCHED_COLORS.map(function(c){
@@ -16482,7 +17066,144 @@ function _schedPickColor(c){
 function _schedEdit(id){ schedOpenForm(id,null); }
 function _schedCloseForm(){ document.getElementById('modal-sched-form').classList.remove('open'); }
 
+// ===== Schedule date helpers, dependency auto-shift, and undo =====
+function _schedParseDate(s){ if(!s) return null; var p=String(s).split('-'); if(p.length!==3) return null; return new Date(+p[0], +p[1]-1, +p[2]); }
+function _schedDateToStr(d){ if(!d) return ''; var m=String(d.getMonth()+1); var day=String(d.getDate()); return d.getFullYear()+'-'+(m.length<2?'0'+m:m)+'-'+(day.length<2?'0'+day:day); }
+function _schedDaysBetween(a,b){ var d1=_schedParseDate(a), d2=_schedParseDate(b); if(!d1||!d2) return 0; return Math.round((d2-d1)/86400000); }
+function _schedAddDays(s, n){ var d=_schedParseDate(s); if(!d) return s; d.setDate(d.getDate()+n); return _schedDateToStr(d); }
+
+// When an event moves, shift every event that depends on it (directly or transitively) by the
+// same number of days, preserving each dependent's gap and its own duration. Guards against
+// dependency loops. Returns the list of records that were changed (already written to DB).
+async function _schedApplyDependencyShift(movedId, dayDelta){
+  if(!dayDelta) return [];
+  var changed = [];
+  var visited = {};
+  async function shiftDependentsOf(parentId){
+    var deps = (_schedEvents||[]).filter(function(e){ return e.dependsOn === parentId; });
+    for(var i=0;i<deps.length;i++){
+      var dep = deps[i];
+      if(visited[dep.id]) continue;       // loop guard
+      visited[dep.id] = true;
+      var dur = dep.endDate ? _schedDaysBetween(dep.date, dep.endDate) : 0;
+      dep.date = _schedAddDays(dep.date, dayDelta);
+      dep.endDate = dur ? _schedAddDays(dep.date, dur) : dep.date;
+      dep._updatedAt = Date.now();
+      await DB.set('calevent:' + dep.id, dep);
+      changed.push(dep);
+      await shiftDependentsOf(dep.id);    // cascade
+    }
+  }
+  visited[movedId] = true;
+  await shiftDependentsOf(movedId);
+  return changed;
+}
+
+// ---- Undo: snapshot the last schedule mutation so a mistaken move/delete/edit can be reverted ----
+var _schedUndoStack = [];
+function _schedPushUndo(snapshot){
+  // snapshot: { label, records:[{id, before|null}] }  (before=null means it was newly created)
+  _schedUndoStack.push(snapshot);
+  if(_schedUndoStack.length > 20) _schedUndoStack.shift();
+  _schedShowUndoToast(snapshot.label);
+}
+function _schedShowUndoToast(label){
+  var existing = document.getElementById('schedUndoToast'); if(existing) existing.remove();
+  var t = document.createElement('div');
+  t.id = 'schedUndoToast';
+  t.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:24px;z-index:99999;background:#1a2b4a;color:#fff;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:14px;box-shadow:0 6px 24px rgba(0,0,0,0.25);font-size:13px;max-width:90vw;';
+  t.innerHTML = '<span>' + _esc(label || 'Change made') + '</span>' +
+    '<button onclick="_schedUndo()" style="background:var(--gold);color:#1a1407;border:none;border-radius:8px;padding:7px 14px;font-weight:800;cursor:pointer;">Undo</button>';
+  document.body.appendChild(t);
+  setTimeout(function(){ var e=document.getElementById('schedUndoToast'); if(e) e.remove(); }, 6000);
+}
+async function _schedUndo(){
+  var snap = _schedUndoStack.pop();
+  if(!snap){ return; }
+  for(var i=0;i<snap.records.length;i++){
+    var r = snap.records[i];
+    if(r.before === null){ await DB.delete('calevent:' + r.id); }   // was newly created -> remove
+    else { await DB.set('calevent:' + r.id, r.before); }            // restore prior version
+  }
+  var e=document.getElementById('schedUndoToast'); if(e) e.remove();
+  _schedEvents = await _schedLoad();
+  try { await schedRender(); } catch(err) {}
+  try { ddToast('Change undone'); } catch(err) {}
+}
+
+// ===== Schedule feature module (types, status, checklist, files, deps, pins, undo) =====
+var SCHED_TYPES = {
+  inspection:    { icon:'\ud83d\udd0d', label:'Inspection',    color:'#3B6FB0' },
+  delivery:      { icon:'\ud83d\udce6', label:'Delivery',      color:'#C97A2C' },
+  subcontractor: { icon:'\ud83d\udc77', label:'Subcontractor', color:'#2D7A4F' },
+  walkthrough:   { icon:'\ud83d\udeb6', label:'Walkthrough',   color:'#7A5BA8' },
+  milestone:     { icon:'\ud83c\udfc1', label:'Milestone',     color:'#BFA055' },
+  meeting:       { icon:'\ud83d\udccb', label:'Meeting',       color:'#B03A2E' }
+};
+// Working buffers for the event currently open in the form.
+var _schedFormChecklist = [];
+var _schedFormFiles = [];
+
+function _schedRenderFormChecklist(){
+  var host = document.getElementById('sched-f-checklist'); if(!host) return;
+  if(!_schedFormChecklist.length){ host.innerHTML = '<div style="font-size:12px;color:var(--muted);">No items yet.</div>'; return; }
+  host.innerHTML = _schedFormChecklist.map(function(it, i){
+    return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;">' +
+      '<input type="checkbox" ' + (it.done?'checked':'') + ' onchange="_schedToggleCheckItem('+i+')" style="width:16px;height:16px;flex-shrink:0;">' +
+      '<span style="flex:1;font-size:13px;' + (it.done?'text-decoration:line-through;color:var(--muted);':'color:var(--navy);') + '">' + _esc(it.text) + '</span>' +
+      '<button type="button" onclick="_schedRemoveCheckItem('+i+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;line-height:1;">\u00d7</button>' +
+    '</div>';
+  }).join('');
+}
+function _schedAddCheckItem(){
+  var inp = document.getElementById('sched-f-checkadd'); if(!inp) return;
+  var t = (inp.value||'').trim(); if(!t) return;
+  _schedFormChecklist.push({ text:t, done:false }); inp.value=''; _schedRenderFormChecklist();
+}
+function _schedToggleCheckItem(i){ if(_schedFormChecklist[i]){ _schedFormChecklist[i].done = !_schedFormChecklist[i].done; _schedRenderFormChecklist(); } }
+function _schedRemoveCheckItem(i){ _schedFormChecklist.splice(i,1); _schedRenderFormChecklist(); }
+
+function _schedRenderFormFiles(){
+  var host = document.getElementById('sched-f-files'); if(!host) return;
+  if(!_schedFormFiles.length){ host.innerHTML=''; return; }
+  host.innerHTML = _schedFormFiles.map(function(f, i){
+    var isImg = (f.type||'').indexOf('image')===0;
+    var thumb = isImg ? ('<img src="'+f.data+'" style="width:38px;height:38px;border-radius:7px;object-fit:cover;flex-shrink:0;">')
+                      : ('<span style="width:38px;height:38px;border-radius:7px;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">\ud83d\udcc4</span>');
+    return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;">' + thumb +
+      '<span style="flex:1;font-size:12px;color:var(--navy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + _esc(f.name||'file') + '</span>' +
+      '<button type="button" onclick="_schedRemoveFile('+i+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;line-height:1;">\u00d7</button>' +
+    '</div>';
+  }).join('');
+}
+async function _schedAddFiles(fileList){
+  var files = Array.prototype.slice.call(fileList||[]);
+  for(var i=0;i<files.length;i++){
+    var file = files[i];
+    if(file.size > 3*1024*1024){ try{ ddToast(file.name+' is too large (max 3MB)'); }catch(e){} continue; }
+    try{
+      var dataUrl = await new Promise(function(res,rej){ var r=new FileReader(); r.onload=function(){res(r.result);}; r.onerror=rej; r.readAsDataURL(file); });
+      _schedFormFiles.push({ name:file.name, type:file.type, data:dataUrl });
+    }catch(e){ console.warn('file read failed', e); }
+  }
+  _schedRenderFormFiles();
+}
+function _schedRemoveFile(i){ _schedFormFiles.splice(i,1); _schedRenderFormFiles(); }
+
+// Populate the "starts after" dependency dropdown (exclude self).
+function _schedFillDependsOptions(selfId, currentDep){
+  var sel = document.getElementById('sched-f-dependson'); if(!sel) return;
+  var opts = '<option value="">\u2014 None \u2014</option>';
+  (_schedEvents||[]).forEach(function(e){
+    if(e.id === selfId) return;
+    var label = (e.title||'Event') + (e.date ? (' (' + e.date + ')') : '');
+    opts += '<option value="'+e.id+'" ' + (e.id===currentDep?'selected':'') + '>' + _esc(label) + '</option>';
+  });
+  sel.innerHTML = opts;
+}
+
 async function _schedSaveEvent(){
+  var _schedPreSaveSnapshot = (_schedEvents||[]).map(function(e){ return JSON.parse(JSON.stringify(e)); });
   var title=document.getElementById('sched-f-title').value.trim();
   if(!title){ try{ddToast('Add a title');}catch(e){} return; }
   var start=document.getElementById('sched-f-start').value;
@@ -16493,10 +17214,40 @@ async function _schedSaveEvent(){
   var projId='',address='',projName='';
   if(projKey){ var parts=projKey.split('||'); projId=parts[0]; address=parts[1]||''; try{ var pp=await DB.get('project:'+projId); projName=pp?(pp.name||''):''; }catch(e){} }
   var id=_schedEditId || ('cal_'+Date.now()+'_'+Math.random().toString(36).slice(2,7));
+  // Undo snapshot + remember old start date (to detect a move for dependency shifting).
+  var _prevRec = _schedEditId ? (_schedEvents||[]).filter(function(e){return e.id===id;})[0] : null;
+  var _prevBefore = _prevRec ? JSON.parse(JSON.stringify(_prevRec)) : null;
+  var _oldStart = _prevRec ? _prevRec.date : null;
+  var _typeVal = (document.getElementById('sched-f-type')||{}).value || '';
+  var _statusVal = (document.getElementById('sched-f-status')||{}).value || 'scheduled';
+  var _assigneesVal = ((document.getElementById('sched-f-assignees')||{}).value || '').split(',').map(function(s){return s.trim();}).filter(Boolean);
+  var _dependsVal = (document.getElementById('sched-f-dependson')||{}).value || '';
+  var _pinnedVal = !!((document.getElementById('sched-f-pinned')||{}).checked);
   var rec={ id:id, title:title, date:start, endDate:end, time:document.getElementById('sched-f-time').value,
     notes:document.getElementById('sched-f-notes').value.trim(), projKey:projKey, projectId:projId, projectName:projName, address:address,
-    color:_schedPickedColor||SCHED_COLORS[0], _updatedAt:Date.now(), createdBy:(currentUser&&currentUser.name)||'Office' };
+    color:_schedPickedColor||SCHED_COLORS[0], _updatedAt:Date.now(), createdBy:(currentUser&&currentUser.name)||'Office',
+    type:_typeVal, status:_statusVal, done:(_statusVal==='done'), assignees:_assigneesVal, checklist:_schedFormChecklist.slice(), files:_schedFormFiles.slice(), dependsOn:_dependsVal, pinned:_pinnedVal };
   await DB.set('calevent:'+id, rec);
+  // If an existing event's start date moved, shift everything that depends on it.
+  var _depChanged = [];
+  try {
+    if (_oldStart && _oldStart !== rec.date) {
+      // refresh _schedEvents so the shift sees the just-saved record
+      _schedEvents = await _schedLoad();
+      var _delta = _schedDaysBetween(_oldStart, rec.date);
+      _depChanged = await _schedApplyDependencyShift(id, _delta);
+    }
+  } catch(e) { console.warn('dependency shift failed', e); }
+  // Record undo (this event + any dependents that shifted).
+  try {
+    var _undoRecs = [{ id:id, before:_prevBefore }];
+    _depChanged.forEach(function(dc){
+      // find that dependent's prior state from the pre-save snapshot list
+      var prior = (_schedPreSaveSnapshot||[]).filter(function(e){return e.id===dc.id;})[0];
+      _undoRecs.push({ id:dc.id, before: prior ? JSON.parse(JSON.stringify(prior)) : null });
+    });
+    _schedPushUndo({ label: (_prevBefore ? 'Event updated' : 'Event added') + (_depChanged.length ? (' (+' + _depChanged.length + ' shifted)') : ''), records:_undoRecs });
+  } catch(e) {}
   // Sync to THIS user's own Google Calendar only. gcalAddEvent writes to whoever is connected
   // on this device, so each person's own events go to their own calendar; everyone's events
   // still live in-app via Firestore.
@@ -16520,7 +17271,15 @@ async function _schedSaveEvent(){
 }
 async function _schedDeleteEvent(){
   if(!_schedEditId) return;
-  var doDel=async function(){ await DB.delete('calevent:'+_schedEditId); _schedCloseForm(); try{ddToast('Deleted');}catch(e){} await schedRender(); };
+  var _delId = _schedEditId;
+  var doDel=async function(){
+    // Undo snapshot before deleting, so a mistaken delete can be restored.
+    try {
+      var _gone = (_schedEvents||[]).filter(function(e){return e.id===_delId;})[0];
+      if(_gone){ _schedPushUndo({ label:'Event deleted', records:[{ id:_delId, before: JSON.parse(JSON.stringify(_gone)) }] }); }
+    } catch(e) {}
+    await DB.delete('calevent:'+_delId); _schedCloseForm(); try{ddToast('Deleted');}catch(e){} _schedEvents = await _schedLoad(); await schedRender();
+  };
   try { ddConfirm('Delete this event?', doDel); } catch(e){ doDel(); }
 }
 
@@ -17180,6 +17939,194 @@ async function saveCustomer() {
 
 // ============================================================
 // GLOBAL SEARCH \u2014 find any customer/unit fast + one-tap contact
+// ----- Office side: open a customer message thread in a modal and reply -----
+window._officeMsgCtx = null;
+async function _officeOpenMsg(addrEnc, unitEnc) {
+  var address = decodeURIComponent(addrEnc), unit = decodeURIComponent(unitEnc);
+  window._officeMsgCtx = { address: address, unit: unit };
+  // mark read for office
+  try {
+    var rec = await _custMsgGet(address, unit);
+    if (rec.unreadForOffice) { rec.unreadForOffice = false; await DB.set(_custMsgKey(address, unit), rec); }
+  } catch(e) {}
+  var modal = document.getElementById('officeMsgModal');
+  if (modal) modal.style.display = 'flex';
+  document.getElementById('officeMsgWho').textContent = (unit && unit !== 'Main') ? (address + ' · ' + unit) : address;
+  await _officeMsgRender();
+}
+async function _officeMsgRender() {
+  var ctx = window._officeMsgCtx; if (!ctx) return;
+  var host = document.getElementById('officeMsgThread'); if (!host) return;
+  var rec = await _custMsgGet(ctx.address, ctx.unit);
+  if (!rec.thread.length) { host.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px;">No messages yet.</div>'; return; }
+  host.innerHTML = rec.thread.map(function(m){
+    var office = m.from === 'office';
+    var when = ''; try { var d = new Date(m.t); when = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}); } catch(e){}
+    var b = office ? 'align-self:flex-end;background:var(--navy);color:#fff;border-radius:14px 14px 4px 14px;' : 'align-self:flex-start;background:#fff;color:var(--text);border:1px solid var(--border);border-radius:14px 14px 14px 4px;';
+    return '<div style="max-width:80%;' + b + 'padding:9px 12px;"><div style="font-size:13px;line-height:1.4;white-space:pre-wrap;overflow-wrap:anywhere;">' + _esc(m.text) + '</div><div style="font-size:10px;opacity:0.6;margin-top:3px;">' + (office?'You':'Customer') + ' · ' + when + '</div></div>';
+  }).join('');
+  try { host.scrollTop = host.scrollHeight; } catch(e){}
+}
+async function _officeMsgSend() {
+  var ctx = window._officeMsgCtx; if (!ctx) return;
+  var inp = document.getElementById('officeMsgInput'); var text = (inp.value||'').trim(); if (!text) return;
+  inp.value = '';
+  await _custMsgSend(ctx.address, ctx.unit, 'office', text);
+  await _officeMsgRender();
+  try { _renderCustomerSummary(); } catch(e){}
+}
+function _closeOfficeMsg() { var m = document.getElementById('officeMsgModal'); if (m) m.style.display = 'none'; try { _renderCustomerSummary(); _refreshDashboardNeedsAttention(); } catch(e){} }
+
+// ----- Export customers (#49): CSV download or printable list -----
+async function _exportCustomers(mode) {
+  var customers = window._allCustomersCache || [];
+  var projects = window._projectsForCustomers || [];
+  function projName(id){ var p = projects.filter(function(x){return x.id===id;})[0]; return p ? (p.name||'') : ''; }
+  if (mode === 'csv') {
+    var rows = [['Name','Project','Address','Unit','Email','Phone (home)','Phone (cell)','Notes']];
+    customers.forEach(function(c){
+      rows.push([ c.name||'', projName(c.projectId), c.houseAddress||'', c.unit||'', c.email||(Array.isArray(c.emails)?c.emails.join('; '):'')||'', c.phoneHome||'', c.phoneCell1||'', (c.notes||'').replace(/\n/g,' ') ]);
+    });
+    var csv = rows.map(function(r){ return r.map(function(v){ v = String(v==null?'':v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v; }).join(','); }).join('\n');
+    try {
+      var blob = new Blob([csv], {type:'text/csv'});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a'); a.href = url; a.download = 'customers.csv'; document.body.appendChild(a); a.click();
+      setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+      try { ddToast('Customer list exported'); } catch(e){}
+    } catch(e) { try { ddToast('Export failed on this device'); } catch(e2){} }
+  } else {
+    var w = window.open('', '_blank');
+    if (!w) { try { ddToast('Allow pop-ups to print'); } catch(e){} return; }
+    var body = customers.map(function(c){
+      return '<tr><td>' + _esc(c.name||'') + '</td><td>' + _esc(projName(c.projectId)) + '</td><td>' + _esc(c.houseAddress||'') + '</td><td>' + _esc(c.unit||'') + '</td><td>' + _esc(c.email||'') + '</td><td>' + _esc(c.phoneCell1||c.phoneHome||'') + '</td></tr>';
+    }).join('');
+    w.document.write('<html><head><title>Customers</title><style>body{font-family:sans-serif;padding:20px;}h1{font-size:18px;}table{border-collapse:collapse;width:100%;font-size:12px;}th,td{border:1px solid #ccc;padding:6px 8px;text-align:left;}th{background:#16294A;color:#fff;}</style></head><body><h1>Customer List (' + customers.length + ')</h1><table><tr><th>Name</th><th>Project</th><th>Address</th><th>Unit</th><th>Email</th><th>Phone</th></tr>' + body + '</table></body></html>');
+    w.document.close();
+    setTimeout(function(){ try { w.print(); } catch(e){} }, 300);
+  }
+}
+
+// ===== Office Customers summary panel: dashboard (#45), unsigned spotlight (#46),
+// engagement (#48), export (#49), and the customer-message inbox (#33 office side). =====
+async function _loadAllUpgradeRecords() {
+  // Read upgrade submissions straight from Firebase (pub) so it works regardless of cache.
+  var out = [];
+  try {
+    var fs = (typeof _getFirestore === 'function') ? _getFirestore() : null;
+    if (fs) {
+      var snap = await fs.collection('pub').get();
+      snap.forEach(function(doc){
+        var d = doc.data();
+        if (!d || typeof d.k !== 'string' || d.k.indexOf('upgrades:') !== 0) return;
+        try { var rec = JSON.parse(d.v); if (rec) { rec._key = d.k; out.push(rec); } } catch(e) {}
+      });
+    }
+  } catch(e) { console.warn('_loadAllUpgradeRecords failed:', e); }
+  return out;
+}
+function _custIsSigned(rec) {
+  return !!(rec && (rec._submittedAt || rec.submittedAt || rec.signed || rec.signature || rec.sigDate));
+}
+function _timeAgo(ts) {
+  if (!ts) return '';
+  var s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 60) return 'just now';
+  var m = Math.floor(s/60); if (m < 60) return m + 'm ago';
+  var h = Math.floor(m/60); if (h < 24) return h + 'h ago';
+  var d = Math.floor(h/24); if (d < 30) return d + 'd ago';
+  return Math.floor(d/30) + 'mo ago';
+}
+async function _renderCustomerSummary() {
+  var host = document.getElementById('customerSummaryPanel');
+  if (!host) return;
+  var customers = window._allCustomersCache || [];
+  var upgrades = await _loadAllUpgradeRecords();
+  var msgs = await _custMsgListAll();
+
+  // ---- stats (#45) ----
+  var total = customers.length;
+  var withPortal = upgrades.length;                          // residents who set up portal access
+  var signed = upgrades.filter(_custIsSigned).length;
+  var unsigned = upgrades.filter(function(r){ return !_custIsSigned(r); });
+  var unreadMsgs = msgs.filter(function(m){ return m.unreadForOffice; });
+
+  function stat(n, label, color) {
+    return '<div style="flex:1;min-width:0;text-align:center;padding:10px 4px;">' +
+      '<div style="font-family:Archivo,sans-serif;font-weight:800;font-size:22px;color:' + (color||'var(--navy)') + ';">' + n + '</div>' +
+      '<div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-top:2px;">' + label + '</div></div>';
+  }
+  var html = '<div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:6px;margin-bottom:12px;display:flex;">' +
+    stat(total, 'Customers') +
+    stat(signed, 'Signed', 'var(--green)') +
+    stat(unsigned.length, 'Unsigned', unsigned.length ? 'var(--red)' : 'var(--muted)') +
+    stat(unreadMsgs.length, 'Messages', unreadMsgs.length ? 'var(--gold)' : 'var(--muted)') +
+    '</div>';
+
+  // ---- message inbox (#33 office side) ----
+  if (msgs.length) {
+    html += '<div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px;">' +
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="font-size:16px;">💬</span>' +
+      '<span style="font-weight:800;color:var(--navy);font-size:14px;">Customer messages</span>' +
+      (unreadMsgs.length ? '<span style="margin-left:auto;background:var(--red);color:#fff;font-size:11px;font-weight:800;border-radius:10px;padding:1px 8px;">' + unreadMsgs.length + ' new</span>' : '') +
+      '</div>';
+    html += msgs.slice(0, 5).map(function(m){
+      var last = m.thread[m.thread.length - 1] || {};
+      var who = (m.unit && m.unit !== 'Main') ? (m.address + ' · ' + m.unit) : m.address;
+      return '<button onclick="_officeOpenMsg(\'' + encodeURIComponent(m.address) + '\',\'' + encodeURIComponent(m.unit||'Main') + '\')" style="width:100%;text-align:left;background:' + (m.unreadForOffice ? '#FBF7EC' : 'var(--offwhite)') + ';border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:6px;cursor:pointer;">' +
+        '<div style="display:flex;align-items:center;gap:6px;"><span style="font-weight:700;color:var(--navy);font-size:13px;">' + _esc(who||'Customer') + '</span>' +
+        (m.unreadForOffice ? '<span style="width:8px;height:8px;border-radius:50%;background:var(--red);"></span>' : '') +
+        '<span style="margin-left:auto;font-size:10px;color:var(--muted);">' + _timeAgo(m.lastAt) + '</span></div>' +
+        '<div style="font-size:12px;color:var(--muted);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (last.from==='office'?'You: ':'') + _esc(last.text||'') + '</div></button>';
+    }).join('');
+    html += '</div>';
+  }
+
+  // ---- unsigned spotlight (#46) ----
+  if (unsigned.length) {
+    html += '<div style="background:#FDF3F1;border:1px solid rgba(176,58,46,0.25);border-radius:14px;padding:14px;margin-bottom:12px;">' +
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="font-size:16px;">⚠️</span>' +
+      '<span style="font-weight:800;color:var(--red);font-size:14px;">Unsigned upgrades · ' + unsigned.length + '</span></div>';
+    html += unsigned.slice(0, 6).map(function(r){
+      var nm = r.name || (r.address || 'Resident');
+      var loc = (r.unit && r.unit !== 'Main') ? (r.address + ' · ' + r.unit) : (r.address || '');
+      return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(176,58,46,0.12);">' +
+        '<div style="flex:1;min-width:0;"><div style="font-weight:700;color:var(--navy);font-size:13px;">' + _esc(nm) + '</div>' +
+        '<div style="font-size:11px;color:var(--muted);">' + _esc(loc) + '</div></div>' +
+        '<span style="font-size:11px;color:var(--muted);">started ' + _timeAgo(r._createdAt ? new Date(r._createdAt).getTime() : 0) + '</span></div>';
+    }).join('');
+    html += '</div>';
+  }
+
+  // ---- engagement (#48) ----
+  var viewed = upgrades.filter(function(r){ return r._lastViewedAt; });
+  if (viewed.length) {
+    viewed.sort(function(a,b){ return (b._lastViewedAt||0) - (a._lastViewedAt||0); });
+    var quiet = viewed.filter(function(r){ return (Date.now() - r._lastViewedAt) > (14*24*60*60*1000); });
+    html += '<div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px;">' +
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="font-size:16px;">📊</span>' +
+      '<span style="font-weight:800;color:var(--navy);font-size:14px;">Portal engagement</span>' +
+      (quiet.length ? '<span style="margin-left:auto;font-size:11px;color:var(--muted);">' + quiet.length + ' gone quiet</span>' : '') + '</div>';
+    html += viewed.slice(0, 5).map(function(r){
+      var nm = r.name || r.address || 'Resident';
+      var active = (Date.now() - r._lastViewedAt) < (7*24*60*60*1000);
+      return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;">' +
+        '<span style="width:8px;height:8px;border-radius:50%;background:' + (active?'var(--green)':'#ccc') + ';flex-shrink:0;"></span>' +
+        '<span style="flex:1;min-width:0;font-size:13px;color:var(--navy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + _esc(nm) + '</span>' +
+        '<span style="font-size:11px;color:var(--muted);">viewed ' + _timeAgo(r._lastViewedAt) + '</span></div>';
+    }).join('');
+    html += '</div>';
+  }
+
+  // ---- export (#49) ----
+  html += '<div style="display:flex;gap:8px;margin-bottom:12px;">' +
+    '<button onclick="_exportCustomers(\'csv\')" style="flex:1;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px;font-size:12px;font-weight:700;color:var(--navy);cursor:pointer;">⬇ Export CSV</button>' +
+    '<button onclick="_exportCustomers(\'print\')" style="flex:1;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px;font-size:12px;font-weight:700;color:var(--navy);cursor:pointer;">🖨 Print list</button>' +
+    '</div>';
+
+  host.innerHTML = html;
+}
+
 async function renderCustomers() {
   // New structure: Customers are organised by PROJECT. The tab first shows a list of
   // projects; tapping one opens that project's customers (grouped by house + unit), where
@@ -17196,6 +18143,14 @@ async function renderCustomers() {
   var customers = (await Promise.all(custKeys.map(function(k){ return DB.get(k); }))).filter(Boolean);
   window._allCustomersCache = customers;
   window._projectsForCustomers = projects;
+
+  // Render the summary panel (stats, messages, unsigned, engagement, export) on the main view.
+  var _sumHost = document.getElementById('customerSummaryPanel');
+  if (window._custDrillProject) {
+    if (_sumHost) _sumHost.innerHTML = '';
+  } else {
+    try { _renderCustomerSummary(); } catch(e) { console.warn('summary render failed', e); }
+  }
 
   if (window._custDrillProject) {
     _renderCustomersForProject(window._custDrillProject);
@@ -20565,6 +21520,45 @@ async function viewCustomerDetails(id) {
     row('Notes', c.notes ? _esc(c.notes).split('\n').join('<br>') : '');
   if (!body) body = '<div style="color:var(--muted);padding:16px 0;">No details on file.</div>';
   document.getElementById('viewCustBody').innerHTML = body;
+
+  // ---- Profile extras (#1): upgrades status, selections, portal activity, messages ----
+  try {
+    if (c.houseAddress) {
+      var _uKey = 'upgrades:' + btoa(unescape(encodeURIComponent(c.houseAddress + '|' + (c.unit || 'Main')))).replace(/=/g,'');
+      var up = await DB.get(_uKey);
+      var extra = '';
+      if (up) {
+        var isSigned = !!(up._submittedAt || up.submittedAt || up.signed || up.signature || up.sigDate);
+        var statusPill = isSigned
+          ? '<span style="background:#F0F7F2;color:var(--green);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">✓ Signed</span>'
+          : (up._pin ? '<span style="background:#FBF7EC;color:#8a6d1f;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">In progress</span>' : '<span style="background:var(--cream);color:var(--muted);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">Not started</span>');
+        extra += '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">' +
+          '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Upgrades</div>' +
+          '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' + statusPill;
+        if (up.upgradeTotal) extra += '<span style="font-weight:700;color:var(--navy);font-size:14px;">' + _esc(String(up.upgradeTotal)) + '</span>';
+        extra += '</div>';
+        // selection count
+        var selCount = 0;
+        try { if (up.selections) selCount = Object.keys(up.selections).filter(function(k){ var v = up.selections[k]; return v && v !== 'no' && String(k).indexOf('_glass') === -1; }).length; } catch(e) {}
+        if (selCount) extra += '<div style="font-size:12px;color:var(--muted);margin-top:6px;">' + selCount + ' upgrade' + (selCount!==1?'s':'') + ' selected' + (up.paintColor ? ' · paint: ' + _esc(String(up.paintColor)) : '') + '</div>';
+        // portal activity
+        if (up._lastViewedAt) extra += '<div style="font-size:12px;color:var(--muted);margin-top:4px;">Last viewed portal ' + (typeof _timeAgo==='function'?_timeAgo(up._lastViewedAt):'recently') + (up._viewCount ? ' · ' + up._viewCount + ' visits' : '') + '</div>';
+        if (up._createdAt) extra += '<div style="font-size:12px;color:var(--muted);margin-top:4px;">Portal access since ' + _esc(new Date(up._createdAt).toLocaleDateString()) + '</div>';
+        extra += '</div>';
+      } else {
+        extra += '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);"><div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Upgrades</div><div style="font-size:13px;color:var(--muted);">No portal access set up yet.</div></div>';
+      }
+      // messages link
+      try {
+        var mrec = await _custMsgGet(c.houseAddress, c.unit || 'Main');
+        if (mrec.thread && mrec.thread.length) {
+          extra += '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">' +
+            '<button onclick="closeViewCustomer(); _officeOpenMsg(\'' + encodeURIComponent(c.houseAddress) + '\',\'' + encodeURIComponent(c.unit||'Main') + '\');" style="width:100%;background:var(--navy);color:#fff;border:none;border-radius:10px;padding:11px;font-weight:700;font-size:13px;cursor:pointer;">💬 View messages (' + mrec.thread.length + ')' + (mrec.unreadForOffice ? ' · new' : '') + '</button></div>';
+        }
+      } catch(e) {}
+      if (extra) document.getElementById('viewCustBody').innerHTML += extra;
+    }
+  } catch(e) { console.warn('profile extras failed', e); }
 
   // Hide the Edit button if this user can't edit this customer.
   var editBtn = document.getElementById('viewCustEditBtn');
@@ -25463,6 +26457,40 @@ if (document.readyState === 'loading') {
       <div class="form-group" style="display:flex;gap:10px;"><div style="flex:1;"><label class="form-label">Start date</label><input class="form-input" id="sched-f-start" type="date"></div><div style="flex:1;"><label class="form-label">End date</label><input class="form-input" id="sched-f-end" type="date"></div></div>
       <div class="form-group"><label class="form-label">Time (optional)</label><input class="form-input" id="sched-f-time" type="time"></div>
       <div class="form-group"><label class="form-label">Project / house</label><select class="form-input" id="sched-f-project"></select></div>
+      <div class="form-group"><label class="form-label">Type</label><select class="form-input" id="sched-f-type">
+        <option value="">— None —</option>
+        <option value="inspection">🔍 Inspection</option>
+        <option value="delivery">📦 Delivery</option>
+        <option value="subcontractor">👷 Subcontractor</option>
+        <option value="walkthrough">🚶 Walkthrough</option>
+        <option value="milestone">🏁 Milestone</option>
+        <option value="meeting">📋 Meeting</option>
+      </select></div>
+      <div class="form-group"><label class="form-label">Status</label><select class="form-input" id="sched-f-status">
+        <option value="scheduled">Scheduled</option>
+        <option value="done">✓ Done</option>
+        <option value="cancelled">✕ Cancelled</option>
+      </select></div>
+      <div class="form-group"><label class="form-label">Assigned to (crew / people)</label><input class="form-input" id="sched-f-assignees" type="text" placeholder="e.g. Ace Plumbing, Shmily"></div>
+      <div class="form-group"><label class="form-label">Checklist</label>
+        <div id="sched-f-checklist"></div>
+        <div style="display:flex;gap:6px;margin-top:6px;">
+          <input class="form-input" id="sched-f-checkadd" type="text" placeholder="Add a checklist item" style="flex:1;" onkeydown="if(event.key==='Enter'){event.preventDefault();_schedAddCheckItem();}">
+          <button type="button" onclick="_schedAddCheckItem()" style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:0 14px;font-weight:700;cursor:pointer;">Add</button>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Photos &amp; files</label>
+        <div id="sched-f-files"></div>
+        <input type="file" id="sched-f-fileinput" accept="image/*,application/pdf" multiple style="display:none;" onchange="_schedAddFiles(this.files)">
+        <button type="button" onclick="document.getElementById('sched-f-fileinput').click()" style="width:100%;background:var(--offwhite);border:1px dashed var(--border);border-radius:9px;padding:11px;color:var(--navy);font-weight:700;cursor:pointer;margin-top:4px;">📎 Attach photo or PDF</button>
+      </div>
+      <div class="form-group"><label class="form-label">Starts after (dependency)</label><select class="form-input" id="sched-f-dependson"><option value="">— None —</option></select>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">If you move the event this depends on, this one shifts to keep the same gap.</div>
+      </div>
+      <div class="form-group" style="display:flex;align-items:center;gap:8px;">
+        <input type="checkbox" id="sched-f-pinned" style="width:18px;height:18px;">
+        <label for="sched-f-pinned" style="margin:0;cursor:pointer;font-size:14px;color:var(--navy);font-weight:600;">⭐ Pin as a key date</label>
+      </div>
       <div class="form-group"><label class="form-label">Color</label><div id="sched-f-colors" style="display:flex;gap:10px;flex-wrap:wrap;"></div></div>
       <div class="form-group"><label class="form-label">Notes (optional)</label><textarea class="form-input" id="sched-f-notes" rows="2" placeholder="Anything to remember"></textarea></div>
       <button onclick="_schedSaveEvent()" class="btn-primary" style="width:100%;">Save event</button>
