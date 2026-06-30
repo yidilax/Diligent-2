@@ -4586,7 +4586,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v268</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v270</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4691,10 +4691,32 @@ div[style*="position:fixed"][style*="inset:0"] {
       <button onclick="cdAskAI()" style="width:100%;background:linear-gradient(135deg,#fbf8f0,#f4eede);border:1px solid rgba(191,160,85,0.4);border-radius:14px;padding:18px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:14px;">
         <div style="font-size:28px;flex-shrink:0;">✦</div>
         <div style="flex:1;">
-          <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:17px;color:#8a6d1f;">Ask about my home<span style="margin-left:8px;background:rgba(138,109,31,0.15);color:#8a6d1f;font-size:9px;font-weight:800;border-radius:8px;padding:2px 7px;vertical-align:middle;">SOON</span></div>
+          <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:17px;color:#8a6d1f;">Ask about my home</div>
           <div style="font-size:12px;color:var(--muted);margin-top:2px;">Get instant answers about your project & selections</div>
         </div>
       </button>
+
+    <div style="margin-bottom:8px;">
+      <button onclick="cdShowTerms()" style="width:100%;background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:14px;">
+        <div style="font-size:26px;flex-shrink:0;">📖</div>
+
+    <div style="margin-bottom:8px;">
+      <button onclick="cdExplainTerm()" style="width:100%;background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:14px;">
+        <div style="font-size:28px;flex-shrink:0;">📖</div>
+        <div style="flex:1;">
+          <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:17px;color:var(--navy);">Explain a construction term</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">Not sure what a word means? Tap and ask</div>
+        </div>
+        <div style="font-size:22px;color:var(--navy);flex-shrink:0;">›</div>
+      </button>
+    </div>
+        <div style="flex:1;">
+          <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:16px;color:var(--navy);">Construction terms explained</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">Tap any term to get a plain-language explanation</div>
+        </div>
+        <div style="font-size:22px;color:var(--navy);flex-shrink:0;">›</div>
+      </button>
+    </div>
     </div>
 
     <!-- Dynamic sections injected here -->
@@ -5037,7 +5059,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v268</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v270</div>
     </div>
   </div>
 
@@ -5904,7 +5926,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v268';
+<script>var APP_VERSION = 'v270';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -8412,8 +8434,17 @@ async function cdAskAI() {
       body: JSON.stringify({ kind: 'ai', system: sys, prompt: q })
     });
     var data = await resp.json();
-    alert((data && data.text) || 'Sorry, no answer right now. Please contact the office.');
-  } catch(e) { alert('Could not reach the assistant right now. Please try again later.'); }
+    if (data && data.text) { alert(data.text); return; }
+    // No answer text — surface what the server actually said so we can see the cause.
+    var diag = '';
+    try {
+      if (data && data.error) diag = 'Server error: ' + data.error;
+      else if (data && data.raw && data.raw.error) diag = 'AI error: ' + (data.raw.error.message || JSON.stringify(data.raw.error));
+      else if (data && data.raw && data.raw.type === 'error') diag = 'AI error: ' + JSON.stringify(data.raw);
+      else diag = 'Unexpected reply: ' + JSON.stringify(data).slice(0, 400);
+    } catch(e) { diag = 'Could not read the reply.'; }
+    alert(diag);
+  } catch(e) { alert('Could not reach the assistant: ' + (e && e.message ? e.message : e)); }
 }
 
 // #59: explain a construction term. Dormant placeholder until proxy exists.
@@ -8422,6 +8453,9 @@ async function cdExplainTerm(term) {
     alert('Term explanations are coming soon!');
     return;
   }
+  // If no term was passed (tapped from the button), ask the customer what to explain.
+  if (!term) { term = prompt('Which construction term would you like explained?'); }
+  if (!term) return;
   try {
     var sys = 'You explain home-construction terms to homeowners in plain, friendly language. Give a 1-2 sentence explanation a non-expert can understand. No jargon.';
     var resp = await fetch(DD_AI_PROXY_URL, {
@@ -8429,8 +8463,15 @@ async function cdExplainTerm(term) {
       body: JSON.stringify({ kind: 'ai', system: sys, prompt: 'Explain this construction term: ' + term })
     });
     var data = await resp.json();
-    alert((data && data.text) || term);
-  } catch(e) { alert('Could not load an explanation right now.'); }
+    if (data && data.text) { alert(data.text); return; }
+    var diag = '';
+    try {
+      if (data && data.error) diag = 'Server error: ' + data.error;
+      else if (data && data.raw && data.raw.error) diag = 'AI error: ' + (data.raw.error.message || JSON.stringify(data.raw.error));
+      else diag = 'Unexpected reply: ' + JSON.stringify(data).slice(0,400);
+    } catch(e) { diag = 'Could not read the reply.'; }
+    alert(diag);
+  } catch(e) { alert('Could not load an explanation: ' + (e && e.message ? e.message : e)); }
 }
 
 // ===== Customer <-> Office messaging (#33) =====
@@ -21546,19 +21587,19 @@ async function viewCustomerDetails(id) {
   function row(label, value) {
     if (!value) return '';
     return '<div style="padding:11px 0;border-bottom:1px solid var(--border);">' +
-      '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">' + _esc(label) + '</div>' +
-      '<div style="font-size:14px;font-weight:600;color:var(--navy);overflow-wrap:anywhere;">' + value + '</div></div>';
+      '<div style="font-size:11px;font-weight:700;color:#9AA7BD;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">' + _esc(label) + '</div>' +
+      '<div style="font-size:15px;font-weight:600;color:#F5F1E8;overflow-wrap:anywhere;">' + value + '</div></div>';
   }
   // Emails: support multiple, each as a tappable mailto link.
   var emailList = (Array.isArray(c.emails) && c.emails.length) ? c.emails : (c.email ? [c.email] : []);
   var emailHtml = emailList.map(function(e){
-    return '<a href="mailto:' + _esc(e) + '" style="color:var(--navy);text-decoration:underline;">' + _esc(e) + '</a>';
+    return '<a href="mailto:' + _esc(e) + '" style="color:#D4AF37;text-decoration:underline;">' + _esc(e) + '</a>';
   }).join('<br>');
   // Phones: each labelled + tappable to call.
   var phoneRows = [];
-  if (c.phoneHome)  phoneRows.push('Home: <a href="tel:' + _esc(String(c.phoneHome).replace(/[^\d+]/g,'')) + '" style="color:var(--navy);text-decoration:underline;">' + _esc(c.phoneHome) + '</a>');
-  if (c.phoneCell1) phoneRows.push('Cell 1: <a href="tel:' + _esc(String(c.phoneCell1).replace(/[^\d+]/g,'')) + '" style="color:var(--navy);text-decoration:underline;">' + _esc(c.phoneCell1) + '</a>');
-  if (c.phoneCell2) phoneRows.push('Cell 2: <a href="tel:' + _esc(String(c.phoneCell2).replace(/[^\d+]/g,'')) + '" style="color:var(--navy);text-decoration:underline;">' + _esc(c.phoneCell2) + '</a>');
+  if (c.phoneHome)  phoneRows.push('Home: <a href="tel:' + _esc(String(c.phoneHome).replace(/[^\d+]/g,'')) + '" style="color:#D4AF37;text-decoration:underline;">' + _esc(c.phoneHome) + '</a>');
+  if (c.phoneCell1) phoneRows.push('Cell 1: <a href="tel:' + _esc(String(c.phoneCell1).replace(/[^\d+]/g,'')) + '" style="color:#D4AF37;text-decoration:underline;">' + _esc(c.phoneCell1) + '</a>');
+  if (c.phoneCell2) phoneRows.push('Cell 2: <a href="tel:' + _esc(String(c.phoneCell2).replace(/[^\d+]/g,'')) + '" style="color:#D4AF37;text-decoration:underline;">' + _esc(c.phoneCell2) + '</a>');
 
   var body = row('Name', _esc(c.name || '')) +
     row('Email', emailHtml) +
@@ -21567,7 +21608,7 @@ async function viewCustomerDetails(id) {
     row('House / Address', _esc(c.houseAddress || '')) +
     row('Unit', _esc(c.unit || '')) +
     row('Notes', c.notes ? _esc(c.notes).split('\n').join('<br>') : '');
-  if (!body) body = '<div style="color:var(--muted);padding:16px 0;">No details on file.</div>';
+  if (!body) body = '<div style="color:#B8C2D4;padding:16px 0;">No details on file.</div>';
   document.getElementById('viewCustBody').innerHTML = body;
 
   // ---- Profile extras (#1): upgrades status, selections, portal activity, messages ----
@@ -21582,20 +21623,20 @@ async function viewCustomerDetails(id) {
           ? '<span style="background:#F0F7F2;color:var(--green);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">✓ Signed</span>'
           : (up._pin ? '<span style="background:#FBF7EC;color:#8a6d1f;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">In progress</span>' : '<span style="background:var(--cream);color:var(--muted);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">Not started</span>');
         extra += '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">' +
-          '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Upgrades</div>' +
+          '<div style="font-size:11px;font-weight:700;color:#9AA7BD;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Upgrades</div>' +
           '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' + statusPill;
-        if (up.upgradeTotal) extra += '<span style="font-weight:700;color:var(--navy);font-size:14px;">' + _esc(String(up.upgradeTotal)) + '</span>';
+        if (up.upgradeTotal) extra += '<span style="font-weight:700;color:#F5F1E8;font-size:14px;">' + _esc(String(up.upgradeTotal)) + '</span>';
         extra += '</div>';
         // selection count
         var selCount = 0;
         try { if (up.selections) selCount = Object.keys(up.selections).filter(function(k){ var v = up.selections[k]; return v && v !== 'no' && String(k).indexOf('_glass') === -1; }).length; } catch(e) {}
-        if (selCount) extra += '<div style="font-size:12px;color:var(--muted);margin-top:6px;">' + selCount + ' upgrade' + (selCount!==1?'s':'') + ' selected' + (up.paintColor ? ' · paint: ' + _esc(String(up.paintColor)) : '') + '</div>';
+        if (selCount) extra += '<div style="font-size:12px;color:#B8C2D4;margin-top:6px;">' + selCount + ' upgrade' + (selCount!==1?'s':'') + ' selected' + (up.paintColor ? ' · paint: ' + _esc(String(up.paintColor)) : '') + '</div>';
         // portal activity
-        if (up._lastViewedAt) extra += '<div style="font-size:12px;color:var(--muted);margin-top:4px;">Last viewed portal ' + (typeof _timeAgo==='function'?_timeAgo(up._lastViewedAt):'recently') + (up._viewCount ? ' · ' + up._viewCount + ' visits' : '') + '</div>';
-        if (up._createdAt) extra += '<div style="font-size:12px;color:var(--muted);margin-top:4px;">Portal access since ' + _esc(new Date(up._createdAt).toLocaleDateString()) + '</div>';
+        if (up._lastViewedAt) extra += '<div style="font-size:12px;color:#B8C2D4;margin-top:4px;">Last viewed portal ' + (typeof _timeAgo==='function'?_timeAgo(up._lastViewedAt):'recently') + (up._viewCount ? ' · ' + up._viewCount + ' visits' : '') + '</div>';
+        if (up._createdAt) extra += '<div style="font-size:12px;color:#B8C2D4;margin-top:4px;">Portal access since ' + _esc(new Date(up._createdAt).toLocaleDateString()) + '</div>';
         extra += '</div>';
       } else {
-        extra += '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);"><div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Upgrades</div><div style="font-size:13px;color:var(--muted);">No portal access set up yet.</div></div>';
+        extra += '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);"><div style="font-size:11px;font-weight:700;color:#9AA7BD;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Upgrades</div><div style="font-size:13px;color:#B8C2D4;">No portal access set up yet.</div></div>';
       }
       // messages link
       try {
