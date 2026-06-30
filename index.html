@@ -4106,6 +4106,13 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
 /* ===== A3 headline + polish adjustments (v207) ===== */
 /* Archivo is wider than Bebas Neue, so rein in the very large display titles a touch. */
 .tab-title, .ttl, .dash-h2, .page-title, .modal-title { letter-spacing:-0.3px !important; }
+/* Customer detail modal uses the light Option-4 style (not the dark gradient). */
+#modal-viewCustomer .modal-box { background:#FAFAF7 !important; border:1px solid var(--border) !important; }
+#modal-viewCustomer .modal-header { background:#FAFAF7 !important; color:var(--navy) !important; border-bottom:1px solid var(--border); border-radius:18px 18px 0 0; }
+#modal-viewCustomer .modal-title { color:var(--navy) !important; }
+#modal-viewCustomer .modal-close { color:var(--muted) !important; }
+#modal-viewCustomer .modal-body { background:#FAFAF7; }
+#modal-viewCustomer .btn-logout { background:var(--cream) !important; border:1px solid var(--border) !important; color:var(--navy) !important; }
 /* Big display numbers (stats) were sized for condensed Bebas; trim slightly for Archivo. */
 .dash-stat-num { font-size:25px !important; letter-spacing:-0.5px !important; }
 /* Softer, more modern card corners app-wide (A3 character). */
@@ -4586,7 +4593,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v270</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v274</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -4695,10 +4702,6 @@ div[style*="position:fixed"][style*="inset:0"] {
           <div style="font-size:12px;color:var(--muted);margin-top:2px;">Get instant answers about your project & selections</div>
         </div>
       </button>
-
-    <div style="margin-bottom:8px;">
-      <button onclick="cdShowTerms()" style="width:100%;background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:14px;">
-        <div style="font-size:26px;flex-shrink:0;">📖</div>
 
     <div style="margin-bottom:8px;">
       <button onclick="cdExplainTerm()" style="width:100%;background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:14px;">
@@ -5035,6 +5038,7 @@ div[style*="position:fixed"][style*="inset:0"] {
         </button>
       </li>
       <li class="office-nav-group" id="grp-cust" style="display:none;">
+        <button class="office-nav-btn nav-sub" onclick="switchTab('messages');closeSidebar();" id="navbtn-messages"><span class="nav-icon">💬</span> Messages <span id="messagesBadge" style="display:none;background:#e07a6a;color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;margin-left:4px;"></span></button>
         <button class="office-nav-btn nav-sub" onclick="switchTab('customers');closeSidebar();" id="navbtn-customers"><span class="nav-icon">👥</span> Customers</button>
         <button class="office-nav-btn nav-sub" onclick="switchTab('upgrades');closeSidebar();" id="navbtn-upgrades"><span class="nav-icon">📋</span> Upgrades</button>
         <button class="office-nav-btn nav-sub" onclick="switchTab('custUpdates');closeSidebar();" id="navbtn-custUpdates"><span class="nav-icon">📣</span> Customer Updates</button>
@@ -5059,7 +5063,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v270</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v274</div>
     </div>
   </div>
 
@@ -5382,6 +5386,18 @@ div[style*="position:fixed"][style*="inset:0"] {
         <button onclick="_showAllReportsDiag()" style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:9px 14px;font-size:12px;font-weight:700;color:var(--navy);cursor:pointer;">Show all reports (incl. resolved)</button>
       </div>
       <div id="allReportsDiag" style="margin-top:12px;"></div>
+    </div>
+
+    <!-- MESSAGES TAB -->
+    <div id="tab-messages" class="office-tab" style="display:none;">
+      <div class="tab-header">
+        <div class="tab-header-left">
+          <div class="tab-title">Messages</div>
+          <div class="tab-count" id="messages-count"></div>
+        </div>
+        <button class="btn-primary" onclick="renderMessages()" style="background:var(--cream);color:var(--navy);border:1px solid var(--border);">↻ Refresh</button>
+      </div>
+      <div id="messagesList" style="margin-top:8px;"></div>
     </div>
 
     <!-- CUSTOMERS TAB -->
@@ -5926,7 +5942,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v270';
+<script>var APP_VERSION = 'v274';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -8498,6 +8514,60 @@ async function _custMsgSend(address, unit, from, text) {
 }
 // List all message threads (office side) — read straight from Firebase so it works without
 // the office cache being warm, and so newly-arrived customer messages show up.
+// ---- Office Messages inbox: shows ALL customer conversations (read + unread) ----
+async function renderMessages() {
+  var host = document.getElementById('messagesList');
+  var countEl = document.getElementById('messages-count');
+  if (!host) return;
+  host.innerHTML = '<div style="text-align:center;color:var(--muted);padding:24px;">Loading messages\u2026</div>';
+  var threads = [];
+  try { threads = await _custMsgListAll(); } catch(e) { threads = []; }
+  if (countEl) countEl.textContent = threads.length + ' conversation' + (threads.length !== 1 ? 's' : '');
+
+  if (!threads.length) {
+    host.innerHTML = '<div class="tab-empty"><div class="tab-empty-icon">\ud83d\udcac</div><div class="tab-empty-title">No messages yet</div><div class="tab-empty-desc">When a customer sends a message from their portal, it will show up here.</div></div>';
+    return;
+  }
+
+  // Unread first, then by most recent.
+  threads.sort(function(a,b){
+    if (!!b.unreadForOffice !== !!a.unreadForOffice) return (b.unreadForOffice?1:0) - (a.unreadForOffice?1:0);
+    return (b.lastAt||0) - (a.lastAt||0);
+  });
+
+  host.innerHTML = threads.map(function(m){
+    var last = (m.thread && m.thread.length) ? m.thread[m.thread.length-1] : {};
+    var lastText = last.text || '';
+    if (lastText.length > 70) lastText = lastText.slice(0,70) + '\u2026';
+    var fromCust = last.from === 'customer' || last.sender === 'customer';
+    var who = (m.unit && m.unit !== 'Main') ? (m.address + ' \u00b7 ' + m.unit) : (m.address || 'Customer');
+    var when = m.lastAt ? (typeof _timeAgo === 'function' ? _timeAgo(m.lastAt) : new Date(m.lastAt).toLocaleDateString()) : '';
+    var initial = (m.name || m.address || '?')[0].toUpperCase();
+    var unreadDot = m.unreadForOffice ? '<span style="width:9px;height:9px;border-radius:50%;background:#e07a6a;flex-shrink:0;"></span>' : '';
+    return '<button onclick="_officeOpenMsg(\'' + encodeURIComponent(m.address) + '\',\'' + encodeURIComponent(m.unit||'Main') + '\'); setTimeout(renderMessages, 600);" style="width:100%;text-align:left;background:#fff;border:1px solid var(--border);border-radius:13px;padding:14px;margin-bottom:9px;cursor:pointer;display:flex;align-items:center;gap:12px;' + (m.unreadForOffice ? 'box-shadow:0 0 0 1.5px rgba(224,122,106,0.4);' : '') + '">' +
+        '<div style="width:42px;height:42px;border-radius:50%;background:var(--navy);color:var(--gold);font-family:\'Archivo\',sans-serif;font-weight:800;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + initial + '</div>' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="display:flex;align-items:center;gap:7px;"><span style="font-weight:800;color:var(--navy);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + _esc(who) + '</span>' + unreadDot + '</div>' +
+          '<div style="font-size:12.5px;color:' + (m.unreadForOffice ? 'var(--navy)' : 'var(--muted)') + ';font-weight:' + (m.unreadForOffice ? '600' : '400') + ';margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (fromCust ? '' : 'You: ') + _esc(lastText) + '</div>' +
+        '</div>' +
+        '<div style="font-size:11px;color:var(--muted);flex-shrink:0;align-self:flex-start;">' + _esc(when) + '</div>' +
+      '</button>';
+  }).join('');
+}
+
+// Keep the sidebar Messages badge in sync with unread count.
+async function _refreshMessagesBadge() {
+  try {
+    var threads = await _custMsgListAll();
+    var unread = threads.filter(function(m){ return m.unreadForOffice; }).length;
+    var badge = document.getElementById('messagesBadge');
+    if (badge) {
+      if (unread > 0) { badge.textContent = unread; badge.style.display = ''; }
+      else { badge.style.display = 'none'; }
+    }
+  } catch(e) {}
+}
+
 async function _custMsgListAll() {
   var out = [];
   try {
@@ -14073,6 +14143,7 @@ async function switchTab(tab) {
   if (tab === 'dashboard') await refreshDashboard();
   if (tab === 'projects') await renderProjects();
   if (tab === 'customers') await renderCustomers();
+  if (tab === 'messages') await renderMessages();
   if (tab === 'employees') await renderEmployees();
   if (tab === 'upgrades') await renderUpgrades();
   if (tab === 'custUpdates') await renderCustUpdates();
@@ -14394,6 +14465,7 @@ async function _refreshDashTodaySchedule(){
 
 async function refreshDashboard() {
   try { _refreshDashboardNeedsAttention(); } catch(e) {}
+  try { _refreshMessagesBadge(); } catch(e) {}
   try { await _refreshDashTodaySchedule(); } catch(e) {}
   // Fallback so the activity area never stays stuck on "Loading\u2026" if anything below throws.
   try {
@@ -17551,81 +17623,115 @@ async function openProjectPage(projectId) {
   var totalUnits = houses.reduce(function(s,h){ return s+(h.units?h.units.length:0); },0);
   var canEditThis = canEdit(p);
 
-  function section(icon, title, count, bodyHtml, addFn) {
-    var emptyCls = (!count || count === 0) ? ' is-empty' : '';
-    return '<div class="ppg-section' + emptyCls + '">' +
-      '<div class="ppg-sec-head"><span class="ppg-sec-title">' + icon + ' ' + title + '</span>' +
-      '<span class="ppg-sec-count">' + count + '</span></div>' +
-      bodyHtml +
+  // ---- Progress: share of tasks + inspections that are done. If the project is marked
+  // completed, show 100%. If nothing to track yet, hide the bar. ----
+  function isDone(x){ var s = String(x.status||'').toLowerCase(); return x.done === true || s === 'done' || s === 'complete' || s === 'completed' || s === 'passed' || s === 'closed'; }
+  var trackable = tasks.concat(inspections);
+  var doneCount = trackable.filter(isDone).length;
+  var pct = (p.status === 'completed') ? 100 : (trackable.length ? Math.round((doneCount / trackable.length) * 100) : 0);
+  var showProgress = (p.status === 'completed') || trackable.length > 0;
+
+  // Next upcoming milestone (earliest not-done inspection/task with a date).
+  var _addrs = houses.map(function(h){ return (h.address||'').toLowerCase().trim(); });
+  var allEvents = listGet('calevent:').filter(function(ev){
+    return ev && !ev.done && ev.date && (ev.projectId === projectId || _addrs.indexOf((ev.address||'').toLowerCase().trim()) > -1);
+  }).sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
+  var nextEv = allEvents[0];
+
+  // ---- Accordion section. Collapsed by default; tap header to expand. ----
+  var _secIdx = 0;
+  function acc(icon, title, count, accentBg, accentCol, bodyHtml, openByDefault) {
+    var id = 'ppgacc_' + projectId + '_' + (_secIdx++);
+    var isOpen = !!openByDefault;
+    return '<div class="ppg-acc" style="border:1px solid var(--border);border-radius:12px;margin-bottom:9px;overflow:hidden;background:#fff;">' +
+      '<button onclick="_ppgToggle(\'' + id + '\')" style="width:100%;display:flex;align-items:center;gap:11px;padding:13px 14px;background:#fff;border:none;cursor:pointer;text-align:left;">' +
+        '<span style="width:32px;height:32px;border-radius:8px;background:' + accentBg + ';display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">' + icon + '</span>' +
+        '<span style="flex:1;font-weight:700;color:var(--navy);font-size:14px;">' + title + '</span>' +
+        '<span style="background:' + accentBg + ';color:' + accentCol + ';font-size:11px;font-weight:800;padding:2px 9px;border-radius:20px;min-width:24px;text-align:center;">' + count + '</span>' +
+        '<span id="' + id + '_chev" style="color:var(--muted);font-size:13px;transition:transform 0.15s;transform:rotate(' + (isOpen?'90':'0') + 'deg);">\u203a</span>' +
+      '</button>' +
+      '<div id="' + id + '" style="display:' + (isOpen?'block':'none') + ';padding:2px 14px 12px;">' + bodyHtml + '</div>' +
     '</div>';
   }
-  function rows(items, fn){ return items.length ? items.map(fn).join('') : '<div class="ppg-empty">None yet</div>'; }
+  function rows(items, fn){ return items.length ? items.map(fn).join('') : '<div style="font-size:13px;color:var(--muted);padding:8px 0;">None yet</div>'; }
+  function plainRow(main, sub){
+    return '<div style="padding:9px 0;border-bottom:1px solid var(--border);"><div style="font-weight:600;font-size:13.5px;color:var(--navy);">' + main + '</div>' +
+      (sub ? '<div style="font-size:11.5px;color:var(--muted);margin-top:1px;">' + sub + '</div>' : '') + '</div>';
+  }
+  function tapRow(onclick, main, sub){
+    return '<button onclick="' + onclick + '" style="width:100%;text-align:left;background:none;border:none;border-bottom:1px solid var(--border);padding:9px 0;cursor:pointer;"><div style="font-weight:600;font-size:13.5px;color:var(--navy);">' + main + '</div>' +
+      (sub ? '<div style="font-size:11.5px;color:var(--muted);margin-top:1px;">' + sub + '</div>' : '') + '</button>';
+  }
 
   var html = '';
-  // Header
+  // Back button
   html += '<button class="ppg-back" onclick="renderProjects()">\u2039 All projects</button>';
-  html += '<div class="ppg-hero">' +
-    '<div class="ppg-hero-top"><span class="pjl-dot" style="background:' + sCol + ';"></span>' +
-    '<span class="ppg-status" style="color:' + sCol + ';background:' + sCol + '1a;">' + (sl[p.status]||'Active') + '</span>' +
-    (p.visibility==='private' ? '<span class="ppg-vis">\ud83d\udd12 Private</span>' : '') + '</div>' +
-    '<div class="ppg-name">' + _esc(p.name) + '</div>' +
-    '<div class="ppg-substat">' + houses.length + ' address' + (houses.length!==1?'es':'') + ' \u00b7 ' + totalUnits + ' unit' + (totalUnits!==1?'s':'') + '</div>' +
-    (p.notes ? '<div class="ppg-notes">' + _esc(p.notes) + '</div>' : '') +
+
+  // ---- Hero (dark) with status, name, substats, progress bar, and action buttons ----
+  html += '<div style="background:linear-gradient(150deg,#1E3556,#16294A);border-radius:16px;padding:20px;color:#fff;margin-bottom:14px;">' +
+    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">' +
+      '<span style="width:9px;height:9px;border-radius:50%;background:' + sCol + ';"></span>' +
+      '<span style="background:' + sCol + '33;color:#fff;font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:0.3px;">' + (sl[p.status]||'Active').toUpperCase() + '</span>' +
+      (p.visibility==='private' ? '<span style="background:rgba(255,255,255,0.12);color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;">\ud83d\udd12 Private</span>' : '') +
+    '</div>' +
+    '<div style="font-family:\'Archivo\',sans-serif;font-weight:800;font-size:23px;line-height:1.1;">' + _esc(p.name) + '</div>' +
+    '<div style="font-size:12.5px;color:rgba(255,255,255,0.7);margin-top:4px;">' + houses.length + ' address' + (houses.length!==1?'es':'') + ' \u00b7 ' + totalUnits + ' unit' + (totalUnits!==1?'s':'') + '</div>' +
+    (p.notes ? '<div style="font-size:12.5px;color:rgba(255,255,255,0.6);margin-top:8px;line-height:1.5;">' + _esc(p.notes) + '</div>' : '') +
+    // progress bar
+    (showProgress ?
+      '<div style="height:7px;background:rgba(255,255,255,0.15);border-radius:5px;margin-top:15px;overflow:hidden;"><div style="height:100%;width:' + pct + '%;background:var(--gold);border-radius:5px;transition:width 0.3s;"></div></div>' +
+      '<div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:6px;">' + pct + '% complete' + (nextEv ? ('  \u00b7  Next: ' + _esc(nextEv.title||'') + (nextEv.date ? (', ' + _esc(nextEv.date)) : '')) : '') + '</div>'
+      : '') +
+    // action buttons
+    (canEditThis ?
+      '<div style="display:flex;gap:7px;margin-top:15px;">' +
+        '<button onclick="openProjectFiles(\'' + p.id + '\')" style="flex:1;background:rgba(255,255,255,0.12);color:#fff;border:none;border-radius:9px;padding:10px;font-weight:700;font-size:12.5px;cursor:pointer;">\ud83d\udcce Files</button>' +
+        '<button onclick="editProject(\'' + p.id + '\')" style="flex:1;background:rgba(255,255,255,0.12);color:#fff;border:none;border-radius:9px;padding:10px;font-weight:700;font-size:12.5px;cursor:pointer;">\u270f\ufe0f Edit</button>' +
+        '<button onclick="deleteProject(\'' + p.id + '\')" style="background:rgba(192,57,43,0.25);color:#FF9B8E;border:none;border-radius:9px;padding:10px 14px;font-weight:700;font-size:12.5px;cursor:pointer;">\ud83d\uddd1</button>' +
+      '</div>'
+      : '') +
   '</div>';
 
-  // Actions
-  if (canEditThis) {
-    html += '<div class="ppg-actions">' +
-      '<button class="ppg-act" onclick="openProjectFiles(\'' + p.id + '\')">\ud83d\udcce Files</button>' +
-      '<button class="ppg-act" onclick="editProject(\'' + p.id + '\')">\u270f\ufe0f Edit</button>' +
-      '<button class="ppg-act ppg-act-danger" onclick="deleteProject(\'' + p.id + '\')">\ud83d\uddd1 Delete</button>' +
-    '</div>';
-  }
+  // ---- Accordion sections (Addresses open by default) ----
+  html += acc('\ud83d\udccd', 'Addresses', houses.length, '#EAF3EE', '#2D7A4F', rows(houses, function(h){
+    return plainRow(_esc(h.address || 'Address'), (h.units&&h.units.length ? _esc(h.units.join(', ')) : 'No units'));
+  }), true);
 
-  // Addresses & units
-  html += section('\ud83d\udccd', 'Addresses', houses.length, rows(houses, function(h){
-    return '<div class="ppg-item"><div class="ppg-item-main">' + _esc(h.address || 'Address') + '</div>' +
-      '<div class="ppg-item-sub">' + (h.units&&h.units.length ? _esc(h.units.join(', ')) : 'No units') + '</div></div>';
+  html += acc('\ud83d\udd0d', 'Inspections', inspections.length, '#E8F0F9', '#3B6FB0', rows(inspections, function(it){
+    return tapRow('switchTab(\'inspections\');setTimeout(function(){openInspectionDetail(\'' + it.id + '\');},250)', _esc(it.type||'Inspection'), _esc(it.status||''));
   }));
 
-  // Inspections
-  html += section('\ud83d\udd0d', 'Inspections', inspections.length, rows(inspections, function(it){
-    return '<button class="ppg-item ppg-tap" onclick="switchTab(\'inspections\');setTimeout(function(){openInspectionDetail(\'' + it.id + '\');},250)">' +
-      '<div class="ppg-item-main">' + _esc(it.type||'Inspection') + '</div>' +
-      '<div class="ppg-item-sub">' + _esc(it.status||'') + '</div></button>';
+  html += acc('\u2705', 'Tasks', tasks.length, '#FBF4E2', '#C97A2C', rows(tasks, function(t){
+    return plainRow(_esc(t.title||'Task'), _esc(t.status||'') + (t.dueDate?(' \u00b7 due ' + _esc(t.dueDate)):''));
   }));
 
-  // Tasks
-  html += section('\u2705', 'Tasks', tasks.length, rows(tasks, function(t){
-    return '<div class="ppg-item"><div class="ppg-item-main">' + _esc(t.title||'Task') + '</div>' +
-      '<div class="ppg-item-sub">' + _esc(t.status||'') + (t.dueDate?(' \u00b7 due ' + _esc(t.dueDate)):'') + '</div></div>';
+  html += acc('\ud83d\ude9a', 'Deliveries', deliveries.length, '#EAF3EE', '#2D7A4F', rows(deliveries, function(d){
+    return plainRow(_esc(d.item||d.name||'Delivery'), _esc(d.status||d.date||''));
   }));
 
-  // Deliveries
-  html += section('\ud83d\ude9a', 'Deliveries', deliveries.length, rows(deliveries, function(d){
-    return '<div class="ppg-item"><div class="ppg-item-main">' + _esc(d.item||d.name||'Delivery') + '</div>' +
-      '<div class="ppg-item-sub">' + _esc(d.status||d.date||'') + '</div></div>';
+  html += acc('\ud83d\udcdd', 'Change Orders', changeOrders.length, '#F0EBF7', '#7A5BA8', rows(changeOrders, function(c){
+    return plainRow(_esc(c.title||c.desc||'Change order'), _esc(c.status||''));
   }));
 
-  // Change orders
-  html += section('\ud83d\udcdd', 'Change Orders', changeOrders.length, rows(changeOrders, function(c){
-    return '<div class="ppg-item"><div class="ppg-item-main">' + _esc(c.title||c.desc||'Change order') + '</div>' +
-      '<div class="ppg-item-sub">' + _esc(c.status||'') + '</div></div>';
+  html += acc('\ud83d\udc64', 'Customers', customers.length, '#F0EBF7', '#7A5BA8', rows(customers, function(c){
+    return tapRow('viewCustomerDetails(\'' + c.id + '\')', _esc(c.name||'Customer'), _esc(c.houseAddress||c.address||''));
   }));
 
-  // Customers
-  html += section('\ud83d\udc64', 'Customers', customers.length, rows(customers, function(c){
-    return '<div class="ppg-item"><div class="ppg-item-main">' + _esc(c.name||'Customer') + '</div>' +
-      '<div class="ppg-item-sub">' + _esc(c.address||'') + '</div></div>';
-  }));
-
-  // Daily logs
-  html += section('\ud83d\udcd3', 'Daily Logs', siteLogs.length, rows(siteLogs, function(l){
-    return '<div class="ppg-item"><div class="ppg-item-main">' + _esc(l.note||l.notes||'Log entry') + '</div>' +
-      '<div class="ppg-item-sub">' + _esc(l.date||'') + '</div></div>';
+  html += acc('\ud83d\udcd3', 'Daily Logs', siteLogs.length, '#EEEDE8', '#7C7A72', rows(siteLogs, function(l){
+    return plainRow(_esc(l.note||l.notes||'Log entry'), _esc(l.date||''));
   }));
 
   host.innerHTML = html;
+}
+
+// Toggle a project-detail accordion section.
+function _ppgToggle(id){
+  var body = document.getElementById(id);
+  var chev = document.getElementById(id + '_chev');
+  if (!body) return;
+  var open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'block';
+  if (chev) chev.style.transform = 'rotate(' + (open ? '0' : '90') + 'deg)';
 }
 
 async function renderProjects() {
@@ -18312,22 +18418,31 @@ function _renderCustomersForProject(pid){
     var custs = byHouse[h].sort(function(a,b){ return String(a.unit||'').localeCompare(String(b.unit||'')); });
     var rows = custs.map(function(c){
       var initial = (c.name||'?')[0].toUpperCase();
-      var phones = [c.phoneHome, c.phoneCell1, c.phoneCell2].filter(Boolean).join(' \u00b7 ');
-      var canEditThis = (typeof canEdit==='function') ? canEdit(c) : true;
-      return '<div class="cust-card" style="margin-bottom:9px;">' +
-        '<div class="cust-card-inner" role="button" tabindex="0" onclick="viewCustomerDetails(\'' + c.id + '\')" style="cursor:pointer;">' +
+      // Option 2 “action card”: tappable card to open details, plus Call / Text / Email shortcuts.
+      var primaryPhone = (c.phoneCell1 || c.phoneHome || c.phoneCell2 || '').replace(/[^\d+]/g,'');
+      var email = c.email || (c.emails && c.emails[0]) || '';
+      var addrLine = (c.houseAddress || c.address || '') + (c.unit ? (' \u00b7 Unit ' + c.unit) : '');
+      // Build the contact buttons. If a channel has no value, that button is dimmed and inert.
+      function actBtn(enabled, href, icon, label){
+        if (enabled) {
+          return '<a href="' + href + '" onclick="event.stopPropagation();" style="flex:1;background:var(--cream);border-radius:9px;padding:9px 6px;text-align:center;font-size:12px;font-weight:700;color:var(--navy);text-decoration:none;display:block;">' + icon + ' ' + label + '</a>';
+        }
+        return '<span style="flex:1;background:#f4f3ef;border-radius:9px;padding:9px 6px;text-align:center;font-size:12px;font-weight:700;color:#c4c2ba;display:block;">' + icon + ' ' + label + '</span>';
+      }
+      var actions =
+        actBtn(!!primaryPhone, 'tel:' + primaryPhone, '\ud83d\udcde', 'Call') +
+        actBtn(!!primaryPhone, 'sms:' + primaryPhone, '\ud83d\udcac', 'Text') +
+        actBtn(!!email, 'mailto:' + email, '\u2709', 'Email');
+      return '<div class="cust-card" style="margin-bottom:10px;padding:14px;">' +
+        '<div role="button" tabindex="0" onclick="viewCustomerDetails(\'' + c.id + '\')" style="cursor:pointer;display:flex;align-items:center;gap:13px;">' +
           '<div class="cust-avatar">' + initial + '</div>' +
           '<div style="flex:1;min-width:0;">' +
             '<div class="cust-card-name">' + _esc(c.name||'Unknown') + '</div>' +
-            '<div class="cust-card-meta">' + (c.unit?('Unit ' + _esc(c.unit)):'No unit') + (phones?('<br>' + _esc(phones)):'') + '</div>' +
+            '<div class="cust-card-meta" style="margin-top:2px;">' + _esc(addrLine || 'No address') + '</div>' +
           '</div>' +
-          '<span class="cust-card-arrow" style="color:var(--muted);font-size:20px;">\u203a</span>' +
+          '<span style="color:var(--muted);font-size:20px;flex-shrink:0;">\u203a</span>' +
         '</div>' +
-        '<div class="cust-card-actions">' +
-          '<button class="icon-btn" onclick="viewCustomerDetails(\'' + c.id + '\')">\ud83d\udc41 View</button>' +
-          (canEditThis ? '<button class="icon-btn" onclick="showCustomerForm(\'' + c.id + '\')">✏️ Edit</button>' +
-          '<button class="icon-btn icon-btn-danger" onclick="deleteCustomer(\'' + c.id + '\')">🗑 Delete</button>' : '') +
-        '</div>' +
+        '<div style="display:flex;gap:7px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">' + actions + '</div>' +
       '</div>';
     }).join('');
     return '<div style="margin-bottom:16px;">' +
@@ -19818,9 +19933,11 @@ async function cuAiWrite() {
     if (hint) { hint.style.display = 'block'; ta.focus(); }
     return;
   }
-  var aiUrl = _aiUrl();
+  // Use the same proxy as the rest of the app's AI. Falls back to the old per-device
+  // AI URL setting if someone configured one, so nothing breaks for existing setups.
+  var aiUrl = (typeof DD_AI_PROXY_URL !== 'undefined' && DD_AI_PROXY_URL) ? DD_AI_PROXY_URL : _aiUrl();
   if (!aiUrl) {
-    alert('AI writing isn\'t set up yet. Add your AI service URL in your profile under \u201cAI Assistant\u201d.');
+    alert('AI writing isn\'t set up yet.');
     return;
   }
   var projName = '';
@@ -19834,19 +19951,32 @@ async function cuAiWrite() {
   btn.textContent = '\u2728 Writing\u2026';
   btn.disabled = true;
   try {
-    var resp = await fetch(aiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ notes: notes, location: loc, task: 'customer_update' })
-    });
+    var usingProxy = (typeof DD_AI_PROXY_URL !== 'undefined' && DD_AI_PROXY_URL && aiUrl === DD_AI_PROXY_URL);
+    var body;
+    if (usingProxy) {
+      // Format the proxy/Worker understands.
+      var sys = 'You write short, warm, professional progress updates from a home construction company to a homeowner. Turn the rough notes into 2-4 polished sentences the customer will receive. Be friendly and clear, no jargon, no greeting or signature \u2014 just the update text.';
+      var prompt = 'Write a customer update for ' + loc + '. Rough notes from the builder: ' + notes;
+      body = JSON.stringify({ kind: 'ai', system: sys, prompt: prompt });
+    } else {
+      // Legacy custom-backend format.
+      body = JSON.stringify({ notes: notes, location: loc, task: 'customer_update' });
+    }
+    var resp = await fetch(aiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body });
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     var data = await resp.json();
     // accept several shapes: {text}, {result}, or raw Anthropic {content:[...]}
     var text = data.text || data.result ||
       ((data.content || []).map(function(b){ return b.type === 'text' ? b.text : (typeof b === 'string' ? b : ''); }).join('')) || '';
     text = (text || '').trim().replace(/^["\u201c]+|["\u201d]+$/g, '').trim();
-    if (text) ta.value = text;
-    else alert('The AI service returned no text. Check your backend response format.');
+    if (text) { ta.value = text; }
+    else {
+      // surface the real error if the proxy reported one
+      var diag = (data && data.error) ? ('AI error: ' + data.error)
+        : (data && data.raw && data.raw.error) ? ('AI error: ' + (data.raw.error.message || JSON.stringify(data.raw.error)))
+        : 'The AI service returned no text.';
+      alert(diag);
+    }
   } catch (e) {
     alert('Could not reach the AI service (' + e.message + '). You can write the update manually.');
   } finally {
@@ -21584,31 +21714,59 @@ async function viewCustomerDetails(id) {
   if (!c) { try { ddToast('Customer not found'); } catch(e){} return; }
   document.getElementById('viewCustTitle').textContent = c.name || 'Customer Details';
 
-  function row(label, value) {
-    if (!value) return '';
-    return '<div style="padding:11px 0;border-bottom:1px solid var(--border);">' +
-      '<div style="font-size:11px;font-weight:700;color:#9AA7BD;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">' + _esc(label) + '</div>' +
-      '<div style="font-size:15px;font-weight:600;color:#F5F1E8;overflow-wrap:anywhere;">' + value + '</div></div>';
-  }
-  // Emails: support multiple, each as a tappable mailto link.
+  // Option 4 detail: a clean two-column grid of info tiles on a light card.
+  var initial = (c.name || '?')[0].toUpperCase();
+  var primaryPhone = (c.phoneCell1 || c.phoneHome || c.phoneCell2 || '').replace(/[^\d+]/g,'');
   var emailList = (Array.isArray(c.emails) && c.emails.length) ? c.emails : (c.email ? [c.email] : []);
-  var emailHtml = emailList.map(function(e){
-    return '<a href="mailto:' + _esc(e) + '" style="color:#D4AF37;text-decoration:underline;">' + _esc(e) + '</a>';
-  }).join('<br>');
-  // Phones: each labelled + tappable to call.
-  var phoneRows = [];
-  if (c.phoneHome)  phoneRows.push('Home: <a href="tel:' + _esc(String(c.phoneHome).replace(/[^\d+]/g,'')) + '" style="color:#D4AF37;text-decoration:underline;">' + _esc(c.phoneHome) + '</a>');
-  if (c.phoneCell1) phoneRows.push('Cell 1: <a href="tel:' + _esc(String(c.phoneCell1).replace(/[^\d+]/g,'')) + '" style="color:#D4AF37;text-decoration:underline;">' + _esc(c.phoneCell1) + '</a>');
-  if (c.phoneCell2) phoneRows.push('Cell 2: <a href="tel:' + _esc(String(c.phoneCell2).replace(/[^\d+]/g,'')) + '" style="color:#D4AF37;text-decoration:underline;">' + _esc(c.phoneCell2) + '</a>');
+  var primaryEmail = emailList[0] || '';
 
-  var body = row('Name', _esc(c.name || '')) +
-    row('Email', emailHtml) +
-    row('Phone', phoneRows.join('<br>')) +
-    row('Project', _esc(c.projectName || '')) +
-    row('House / Address', _esc(c.houseAddress || '')) +
-    row('Unit', _esc(c.unit || '')) +
-    row('Notes', c.notes ? _esc(c.notes).split('\n').join('<br>') : '');
-  if (!body) body = '<div style="color:#B8C2D4;padding:16px 0;">No details on file.</div>';
+  // A small info tile. `href` (optional) makes the value tappable (call/text/email).
+  function tile(label, value, href, full) {
+    if (!value) return '';
+    var val = href
+      ? '<a href="' + href + '" style="color:var(--navy);text-decoration:none;font-weight:700;">' + value + '</a>'
+      : '<span style="color:var(--navy);font-weight:700;">' + value + '</span>';
+    return '<div style="background:var(--cream);border-radius:11px;padding:11px 12px;' + (full ? 'grid-column:1 / -1;' : '') + '">' +
+      '<div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">' + _esc(label) + '</div>' +
+      '<div style="font-size:14px;margin-top:3px;word-break:break-word;line-height:1.4;">' + val + '</div></div>';
+  }
+
+  // Header: avatar + name + project/unit line.
+  var headerHtml = '<div style="display:flex;align-items:center;gap:13px;margin-bottom:14px;">' +
+      '<div style="width:50px;height:50px;border-radius:13px;background:var(--navy);color:var(--gold);font-family:\'Archivo\',sans-serif;font-weight:800;font-size:21px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + initial + '</div>' +
+      '<div style="flex:1;min-width:0;">' +
+        '<div style="font-family:\'Archivo\',sans-serif;font-weight:800;font-size:18px;color:var(--navy);">' + _esc(c.name || 'Customer') + '</div>' +
+        '<div style="font-size:12px;color:var(--muted);margin-top:1px;">' + _esc(c.projectName || '') + (c.unit ? (' \u00b7 Unit ' + _esc(c.unit)) : '') + '</div>' +
+      '</div></div>';
+
+  // Quick contact buttons row.
+  function cbtn(enabled, href, icon, label){
+    if (enabled) return '<a href="' + href + '" style="flex:1;background:var(--navy);color:#fff;border-radius:10px;padding:11px;text-align:center;font-size:12px;font-weight:700;text-decoration:none;display:block;">' + icon + ' ' + label + '</a>';
+    return '<span style="flex:1;background:#e9e6df;color:#b4b1a8;border-radius:10px;padding:11px;text-align:center;font-size:12px;font-weight:700;display:block;">' + icon + ' ' + label + '</span>';
+  }
+  var contactRow = '<div style="display:flex;gap:8px;margin-bottom:14px;">' +
+    cbtn(!!primaryPhone, 'tel:' + primaryPhone, '\ud83d\udcde', 'Call') +
+    cbtn(!!primaryPhone, 'sms:' + primaryPhone, '\ud83d\udcac', 'Text') +
+    cbtn(!!primaryEmail, 'mailto:' + primaryEmail, '\u2709', 'Email') +
+  '</div>';
+
+  // The info grid.
+  var phoneTiles = '';
+  if (c.phoneCell1) phoneTiles += tile('Cell', c.phoneCell1, 'tel:' + String(c.phoneCell1).replace(/[^\d+]/g,''));
+  if (c.phoneHome)  phoneTiles += tile('Home', c.phoneHome, 'tel:' + String(c.phoneHome).replace(/[^\d+]/g,''));
+  if (c.phoneCell2) phoneTiles += tile('Cell 2', c.phoneCell2, 'tel:' + String(c.phoneCell2).replace(/[^\d+]/g,''));
+  var emailTiles = emailList.map(function(e){ return tile('Email', e, 'mailto:' + e, true); }).join('');
+
+  var grid = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;">' +
+      emailTiles +
+      phoneTiles +
+      tile('Project', _esc(c.projectName || '')) +
+      tile('Unit', _esc(c.unit || '')) +
+      tile('Address', _esc(c.houseAddress || ''), null, true) +
+      (c.notes ? tile('Notes', _esc(c.notes).split('\n').join('<br>'), null, true) : '') +
+    '</div>';
+
+  var body = headerHtml + contactRow + grid;
   document.getElementById('viewCustBody').innerHTML = body;
 
   // ---- Profile extras (#1): upgrades status, selections, portal activity, messages ----
@@ -21623,20 +21781,20 @@ async function viewCustomerDetails(id) {
           ? '<span style="background:#F0F7F2;color:var(--green);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">✓ Signed</span>'
           : (up._pin ? '<span style="background:#FBF7EC;color:#8a6d1f;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">In progress</span>' : '<span style="background:var(--cream);color:var(--muted);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">Not started</span>');
         extra += '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">' +
-          '<div style="font-size:11px;font-weight:700;color:#9AA7BD;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Upgrades</div>' +
+          '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Upgrades</div>' +
           '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' + statusPill;
-        if (up.upgradeTotal) extra += '<span style="font-weight:700;color:#F5F1E8;font-size:14px;">' + _esc(String(up.upgradeTotal)) + '</span>';
+        if (up.upgradeTotal) extra += '<span style="font-weight:700;color:var(--navy);font-size:14px;">' + _esc(String(up.upgradeTotal)) + '</span>';
         extra += '</div>';
         // selection count
         var selCount = 0;
         try { if (up.selections) selCount = Object.keys(up.selections).filter(function(k){ var v = up.selections[k]; return v && v !== 'no' && String(k).indexOf('_glass') === -1; }).length; } catch(e) {}
-        if (selCount) extra += '<div style="font-size:12px;color:#B8C2D4;margin-top:6px;">' + selCount + ' upgrade' + (selCount!==1?'s':'') + ' selected' + (up.paintColor ? ' · paint: ' + _esc(String(up.paintColor)) : '') + '</div>';
+        if (selCount) extra += '<div style="font-size:12px;color:var(--muted);margin-top:6px;">' + selCount + ' upgrade' + (selCount!==1?'s':'') + ' selected' + (up.paintColor ? ' · paint: ' + _esc(String(up.paintColor)) : '') + '</div>';
         // portal activity
-        if (up._lastViewedAt) extra += '<div style="font-size:12px;color:#B8C2D4;margin-top:4px;">Last viewed portal ' + (typeof _timeAgo==='function'?_timeAgo(up._lastViewedAt):'recently') + (up._viewCount ? ' · ' + up._viewCount + ' visits' : '') + '</div>';
-        if (up._createdAt) extra += '<div style="font-size:12px;color:#B8C2D4;margin-top:4px;">Portal access since ' + _esc(new Date(up._createdAt).toLocaleDateString()) + '</div>';
+        if (up._lastViewedAt) extra += '<div style="font-size:12px;color:var(--muted);margin-top:4px;">Last viewed portal ' + (typeof _timeAgo==='function'?_timeAgo(up._lastViewedAt):'recently') + (up._viewCount ? ' · ' + up._viewCount + ' visits' : '') + '</div>';
+        if (up._createdAt) extra += '<div style="font-size:12px;color:var(--muted);margin-top:4px;">Portal access since ' + _esc(new Date(up._createdAt).toLocaleDateString()) + '</div>';
         extra += '</div>';
       } else {
-        extra += '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);"><div style="font-size:11px;font-weight:700;color:#9AA7BD;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Upgrades</div><div style="font-size:13px;color:#B8C2D4;">No portal access set up yet.</div></div>';
+        extra += '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);"><div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Upgrades</div><div style="font-size:13px;color:var(--muted);">No portal access set up yet.</div></div>';
       }
       // messages link
       try {
