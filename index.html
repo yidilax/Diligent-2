@@ -5240,7 +5240,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v297</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v298</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -5663,7 +5663,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v297</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v298</div>
     </div>
   </div>
 
@@ -5855,7 +5855,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 
     <!-- CHANGE ORDERS TAB -->
     <div id="tab-changeOrders" class="office-tab" style="display:none;">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;"><div><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:26px;letter-spacing:1px;color:var(--navy);">Change Orders</div><div style="font-size:13px;color:var(--muted);">Internal record of scope changes and cost impact. Customers don\u2019t see these.</div></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;"><div><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:26px;letter-spacing:1px;color:var(--navy);">Change Orders</div><div style="font-size:13px;color:var(--muted);">Internal record of scope changes and cost impact. Customers don’t see these.</div></div>
         <button onclick="openChangeOrderModal()" style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;">+ New</button>
       </div>
       <div id="changeOrdersList"></div>
@@ -6025,10 +6025,13 @@ div[style*="position:fixed"][style*="inset:0"] {
           <div class="tab-title">Units</div>
           <div class="tab-count" id="units-count"></div>
         </div>
-        <button class="btn-primary" onclick="unitNew()">+ Add Unit</button>
+        <div style="display:flex;gap:7px;flex-wrap:wrap;">
+          <button class="btn-primary" onclick="addressNew()">+ Add Address</button>
+          <button onclick="unitColsManage()" style="background:var(--cream);color:var(--navy);border:1px solid var(--border);border-radius:9px;padding:9px 13px;font-size:13px;font-weight:700;cursor:pointer;">⚙️ Columns</button>
+        </div>
       </div>
       <div style="background:var(--cream);border:1px solid var(--border);border-radius:11px;padding:13px 15px;margin:10px 0 16px;font-size:13px;color:var(--muted);line-height:1.5;">
-        Manage your building units and availability. Brokers see these (availability only) in their portal.
+        Add a property address, then add units under it. Tap <b>Edit</b> on any property to change values inline. Use <b>⚙️ Columns</b> to add your own columns and choose which brokers can see.
       </div>
       <div id="unitsList"></div>
     </div>
@@ -6619,7 +6622,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v297';
+<script>var APP_VERSION = 'v298';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -6670,7 +6673,7 @@ async function checkSyncStatus() {
 }
 function _firebaseSelfTest() { return !!_getFirestore(); }
 
-const _PUBLIC_PREFIXES = ['calevent:', 'upgrades:', 'submission:', 'upgrade_sections', 'upgrade_sections_proj:', 'custupdate:', 'subcontractor:', 'subpunch:', 'pubaddr:', 'pubpunch:', 'pubfiles:', 'custpunch:', 'pubprogress:', 'pubnotif:', 'pubportalcfg:', 'walkreq:', 'pubchangeorder:', 'subvisit:', 'pushsub:', 'custmsg:', 'pubhomeproject:', 'pubcontact:', 'pubhomecontent:', 'pubteam:', 'pubunit:', 'pubplan:'];
+const _PUBLIC_PREFIXES = ['calevent:', 'upgrades:', 'submission:', 'upgrade_sections', 'upgrade_sections_proj:', 'custupdate:', 'subcontractor:', 'subpunch:', 'pubaddr:', 'pubpunch:', 'pubfiles:', 'custpunch:', 'pubprogress:', 'pubnotif:', 'pubportalcfg:', 'walkreq:', 'pubchangeorder:', 'subvisit:', 'pushsub:', 'custmsg:', 'pubhomeproject:', 'pubcontact:', 'pubhomecontent:', 'pubteam:', 'pubunit:', 'pubplan:', 'pubaddress:', 'pubunitcols:'];
 // ===== Firebase Storage upload helper (for large files) =====
 // Uploads a File/Blob to Storage and returns { url, path }. Falls back gracefully.
 var _storageAvailable = null; // null=unknown, true/false once checked
@@ -7720,84 +7723,282 @@ function _brokerBuildModal() {
 }
 
 // ========== OFFICE: Units management (admin data entry) ==========
+var _unitsEditAddr = null;   // which address's table is in edit mode (null = none)
+var _unitsCols = [];         // cached column config
+var _unitsAddrs = [];        // cached addresses
+var _unitsData = [];         // cached units
+
+// Full column list = built-in + custom
+function _allUnitCols() {
+  return _UNIT_BUILTIN_COLS.concat(_unitsCols.map(function(c){
+    return { key:'custom:'+c.id, label:c.label, custom:true, colId:c.id, brokerVisible:!!c.brokerVisible };
+  }));
+}
+function _unitCellValue(u, col) {
+  if (col.custom) { return (u.custom && u.custom[col.colId] != null) ? u.custom[col.colId] : ''; }
+  return (u[col.key] != null) ? u[col.key] : '';
+}
+
 async function renderUnits() {
   var host = document.getElementById('unitsList');
   var countEl = document.getElementById('units-count');
   if (!host) return;
   host.innerHTML = '<div style="text-align:center;color:var(--muted);padding:24px;">Loading\u2026</div>';
-  var units = (await _unitsListAll());
-  if (countEl) countEl.textContent = units.length + ' unit' + (units.length !== 1 ? 's' : '');
+  _unitsCols = await _unitColsGet();
+  _unitsAddrs = await _addressListAll();
+  _unitsData = await _unitsListAll();
+  if (countEl) countEl.textContent = _unitsData.length + ' unit' + (_unitsData.length !== 1 ? 's' : '');
 
-  // Group by address (building field). Keep an "Unassigned" bucket for blank addresses.
-  var groups = {}; var order = [];
-  units.forEach(function(u){
-    var a = (u.building && u.building.trim()) ? u.building.trim() : '(no address)';
-    if (!groups[a]) { groups[a] = []; order.push(a); }
-    groups[a].push(u);
-  });
-  order.sort(function(a,b){ return a.localeCompare(b, undefined, {numeric:true}); });
+  // Group units by address
+  var groups = {};
+  _unitsData.forEach(function(u){ var a=(u.building&&u.building.trim())?u.building.trim():''; (groups[a]=groups[a]||[]).push(u); });
 
-  // sort units within a group: available first, then unit number
-  var sortUnits = function(arr){
-    return arr.sort(function(a,b){
+  // Build the list of address blocks. Show every defined address (even empty),
+  // plus any address that has units but wasn't formally added.
+  var addrNames = _unitsAddrs.map(function(a){ return a.name; });
+  Object.keys(groups).forEach(function(a){ if (a && addrNames.indexOf(a)===-1) addrNames.push(a); });
+
+  if (!addrNames.length) {
+    host.innerHTML = '<div class="tab-empty"><div class="tab-empty-icon">\ud83c\udfe2</div><div class="tab-empty-title">No addresses yet</div><div class="tab-empty-desc">Tap <b>+ Add Address</b> to add your first property, then add units under it.</div></div>';
+    return;
+  }
+
+  var cols = _allUnitCols();
+  host.innerHTML = addrNames.map(function(addr){
+    var units = (groups[addr]||[]).slice().sort(function(a,b){
       var av=(a.status==='available')?0:1, bv=(b.status==='available')?0:1;
-      if (av!==bv) return av-bv;
-      return String(a.unitNumber||'').localeCompare(String(b.unitNumber||''), undefined,{numeric:true});
+      if(av!==bv) return av-bv;
+      return String(a.unitNumber||'').localeCompare(String(b.unitNumber||''),undefined,{numeric:true});
     });
-  };
+    var editing = (_unitsEditAddr === addr);
+    // find the address record (for id, so rename/delete work)
+    var addrRec = _unitsAddrs.filter(function(a){return a.name===addr;})[0];
+    return _renderAddrBlock(addr, addrRec, units, cols, editing);
+  }).join('');
+}
 
-  var statusBadge = function(status){
-    var st = _UNIT_STATUS[status] || _UNIT_STATUS.not_for_sale;
-    return '<span style="display:inline-flex;align-items:center;gap:5px;white-space:nowrap;"><span style="width:8px;height:8px;border-radius:50%;background:'+st.dot+';flex-shrink:0;"></span><span style="color:'+st.fg+';font-weight:700;font-size:12px;">'+st.label+'</span></span>';
-  };
-  var cell = function(v){ return (v===undefined||v===null||v==='') ? '\u2014' : _esc(v); };
-
+function _renderAddrBlock(addr, addrRec, units, cols, editing) {
   var th = 'style="text-align:left;padding:8px 9px;font-size:10px;letter-spacing:0.04em;text-transform:uppercase;color:#fff;font-weight:700;white-space:nowrap;background:var(--navy);"';
-
-  var blocks = order.map(function(addr){
-    var rows = sortUnits(groups[addr]).map(function(u, idx){
-      var rowBg = (idx%2===1)?'#FAFAF7':'#fff';
-      var td = 'style="padding:8px 9px;font-size:13px;color:var(--navy);white-space:nowrap;border-bottom:1px solid var(--border);background:'+rowBg+';"';
-      var tdNotes = 'style="padding:8px 9px;font-size:12px;color:var(--muted);border-bottom:1px solid var(--border);background:'+rowBg+';max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"';
-      var notesVal = u.notes ? _esc(u.notes) : '<span style="color:#bbb;">\u2014</span>';
-      return '<tr>' +
-          '<td style="padding:8px 9px;font-size:13px;font-weight:800;color:var(--navy);white-space:nowrap;border-bottom:1px solid var(--border);background:'+rowBg+';">'+cell(u.unitNumber)+'</td>' +
-          '<td '+td+'>'+cell(u.level)+'</td>' +
-          '<td '+td+'>'+cell(u.unitType)+'</td>' +
-          '<td '+td+'>'+cell(u.sf)+'</td>' +
-          '<td '+td+'>'+cell(u.attic)+'</td>' +
-          '<td '+td+'>'+(u.price?_esc(_fmtPrice(u.price)):'\u2014')+'</td>' +
-          '<td style="padding:8px 9px;border-bottom:1px solid var(--border);background:'+rowBg+';">'+statusBadge(u.status)+'</td>' +
-          '<td '+tdNotes+' title="'+(u.notes?_esc(u.notes):'')+'">'+notesVal+'</td>' +
-          '<td style="padding:6px 8px;border-bottom:1px solid var(--border);background:'+rowBg+';white-space:nowrap;">' +
-            '<button onclick="unitEdit(\''+u.id+'\')" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:6px 10px;font-size:11px;font-weight:700;cursor:pointer;margin-right:4px;">Edit</button>' +
-            '<button onclick="unitDelete(\''+u.id+'\')" style="background:rgba(176,58,46,0.08);color:var(--red);border:none;border-radius:7px;padding:6px 9px;font-size:11px;font-weight:700;cursor:pointer;">\ud83d\uddd1</button>' +
-          '</td>' +
-        '</tr>';
-    }).join('');
-
-    // pass the address to the add function so the new unit prefills it
-    var addrAttr = addr === '(no address)' ? '' : addr;
-    return '<div style="margin-bottom:26px;">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">' +
-          '<div style="font-family:\'Archivo\',sans-serif;font-weight:800;font-size:15px;color:var(--navy);padding-bottom:6px;border-bottom:2px solid var(--gold);display:inline-block;">\ud83d\udccd '+_esc(addr)+'</div>' +
-          '<button onclick="unitNewForAddress(decodeURIComponent(\''+encodeURIComponent(addrAttr)+'\'))" style="background:var(--gold);color:var(--navy);border:none;border-radius:8px;padding:8px 13px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;">+ Add unit here</button>' +
-        '</div>' +
-        '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:12px;">' +
-          '<table style="width:100%;border-collapse:separate;border-spacing:0;min-width:720px;">' +
-            '<thead><tr>' +
-              '<th '+th+'>Unit</th><th '+th+'>Level</th><th '+th+'>Type</th><th '+th+'>SF</th><th '+th+'>Attic</th><th '+th+'>Price</th><th '+th+'>Status</th><th '+th+'>Notes (internal)</th><th '+th+'></th>' +
-            '</tr></thead>' +
-            '<tbody>'+rows+'</tbody>' +
-          '</table>' +
-        '</div>' +
-      '</div>';
+  var headerCells = cols.map(function(c){
+    var eye = (!c.brokerVisible) ? ' \ud83d\udd12' : '';
+    return '<th '+th+' title="'+(c.brokerVisible?'Visible to brokers':'Hidden from brokers')+'">'+_esc(c.label)+eye+'</th>';
   }).join('');
 
-  var emptyHint = units.length ? '' : '<div class="tab-empty"><div class="tab-empty-icon">\ud83c\udfe2</div><div class="tab-empty-title">No units yet</div><div class="tab-empty-desc">Add your first unit \u2014 enter an address to start a group.</div></div>';
+  var body;
+  if (!units.length) {
+    body = '<tr><td colspan="'+(cols.length+1)+'" style="padding:14px;text-align:center;color:var(--muted);font-size:13px;background:#fff;">No units yet \u2014 tap \u201c+ Add unit here\u201d.</td></tr>';
+  } else {
+    body = units.map(function(u, idx){
+      var rowBg=(idx%2===1)?'#FAFAF7':'#fff';
+      var cells = cols.map(function(c){
+        var val = _unitCellValue(u, c);
+        if (editing) {
+          // editable cell
+          if (c.isStatus) {
+            var opts = Object.keys(_UNIT_STATUS).map(function(k){ return '<option value="'+k+'"'+(k===(u.status||'available')?' selected':'')+'>'+_UNIT_STATUS[k].label+'</option>'; }).join('');
+            return '<td style="padding:5px 6px;border-bottom:1px solid var(--border);background:'+rowBg+';"><select data-uid="'+u.id+'" data-col="status" style="border:1px solid var(--border);border-radius:6px;padding:5px;font-size:12px;font-weight:700;">'+opts+'</select></td>';
+          }
+          var dataAttr = c.custom ? ('data-custom="'+c.colId+'"') : ('data-col="'+c.key+'"');
+          return '<td style="padding:4px 5px;border-bottom:1px solid var(--border);background:'+rowBg+';"><input data-uid="'+u.id+'" '+dataAttr+' value="'+_esc(val)+'" style="width:100%;min-width:70px;border:1px solid var(--border);border-radius:6px;padding:6px;font-size:12px;box-sizing:border-box;"></td>';
+        } else {
+          // read-only cell
+          var disp;
+          if (c.isStatus) { var st=_UNIT_STATUS[u.status]||_UNIT_STATUS.not_for_sale; disp='<span style="display:inline-flex;align-items:center;gap:5px;white-space:nowrap;"><span style="width:8px;height:8px;border-radius:50%;background:'+st.dot+';"></span><span style="color:'+st.fg+';font-weight:700;font-size:12px;">'+st.label+'</span></span>'; }
+          else if (c.isPrice) { disp = val!=='' ? _esc(_fmtPrice(val)) : '\u2014'; }
+          else { disp = (val===''||val==null) ? '\u2014' : _esc(val); }
+          var weight = (c.key==='unitNumber')?'font-weight:800;':'';
+          return '<td style="padding:8px 9px;font-size:13px;color:var(--navy);white-space:nowrap;border-bottom:1px solid var(--border);background:'+rowBg+';'+weight+'">'+disp+'</td>';
+        }
+      }).join('');
+      // last cell: delete (edit mode) — read mode has no per-row action
+      var lastCell = editing
+        ? '<td style="padding:5px 7px;border-bottom:1px solid var(--border);background:'+rowBg+';"><button onclick="unitDelete(\''+u.id+'\')" style="background:rgba(176,58,46,0.08);color:var(--red);border:none;border-radius:6px;padding:6px 9px;font-size:11px;font-weight:700;cursor:pointer;">\ud83d\uddd1</button></td>'
+        : '<td style="border-bottom:1px solid var(--border);background:'+rowBg+';"></td>';
+      return '<tr>'+cells+lastCell+'</tr>';
+    }).join('');
+  }
 
-  host.innerHTML = blocks + emptyHint;
+  var addrKey = encodeURIComponent(addr);
+  // header row: address title + edit/done + add-unit + rename/delete
+  var actions;
+  if (editing) {
+    actions = '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
+      '<button onclick="unitsSaveEdits(decodeURIComponent(\''+addrKey+'\'))" style="background:#2E7D32;color:#fff;border:none;border-radius:8px;padding:8px 13px;font-size:12px;font-weight:800;cursor:pointer;">\u2713 Done</button>' +
+      '<button onclick="unitNewForAddress(decodeURIComponent(\''+addrKey+'\'))" style="background:var(--gold);color:var(--navy);border:none;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:800;cursor:pointer;">+ Add unit here</button>' +
+      '</div>';
+  } else {
+    actions = '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
+      '<button onclick="unitsEditAddr(decodeURIComponent(\''+addrKey+'\'))" style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:8px 13px;font-size:12px;font-weight:700;cursor:pointer;">\u270f\ufe0f Edit</button>' +
+      '<button onclick="unitNewForAddress(decodeURIComponent(\''+addrKey+'\'))" style="background:var(--gold);color:var(--navy);border:none;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:800;cursor:pointer;">+ Add unit here</button>' +
+      '</div>';
+  }
+  var addrControls = addrRec ? ('<button onclick="addressRename(\''+addrRec.id+'\')" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;text-decoration:underline;margin-right:8px;">rename</button><button onclick="addressDelete(\''+addrRec.id+'\')" style="background:none;border:none;color:var(--red);font-size:12px;cursor:pointer;text-decoration:underline;">delete</button>') : '';
+
+  return '<div style="margin-bottom:26px;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:4px;flex-wrap:wrap;">' +
+        '<div style="font-family:\'Archivo\',sans-serif;font-weight:800;font-size:15px;color:var(--navy);padding-bottom:6px;border-bottom:2px solid var(--gold);display:inline-block;">\ud83d\udccd '+_esc(addr)+'</div>' +
+        actions +
+      '</div>' +
+      '<div style="margin-bottom:8px;">'+addrControls+'</div>' +
+      '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:12px;">' +
+        '<table style="width:100%;border-collapse:separate;border-spacing:0;min-width:'+Math.max(560,(cols.length+1)*95)+'px;">' +
+          '<thead><tr>'+headerCells+'<th '+th+'></th></tr></thead>' +
+          '<tbody>'+body+'</tbody>' +
+        '</table>' +
+      '</div>' +
+    '</div>';
 }
+
+// Toggle edit mode for an address
+function unitsEditAddr(addr) { _unitsEditAddr = addr; renderUnits(); }
+
+// Save all inline edits for an address's table
+async function unitsSaveEdits(addr) {
+  var host = document.getElementById('unitsList');
+  if (!host) return;
+  // gather all inputs/selects that belong to units (they carry data-uid)
+  var fields = host.querySelectorAll('[data-uid]');
+  var byUnit = {};
+  fields.forEach(function(el){
+    var uid = el.getAttribute('data-uid');
+    byUnit[uid] = byUnit[uid] || {};
+    var col = el.getAttribute('data-col');
+    var custom = el.getAttribute('data-custom');
+    if (custom) { byUnit[uid]['custom:'+custom] = el.value; }
+    else if (col) { byUnit[uid][col] = el.value; }
+  });
+  // apply to each unit record and save
+  var ids = Object.keys(byUnit);
+  for (var i=0;i<ids.length;i++) {
+    var uid = ids[i];
+    var rec = await DB.get('pubunit:'+uid);
+    if (!rec) continue;
+    var changes = byUnit[uid];
+    Object.keys(changes).forEach(function(k){
+      if (k.indexOf('custom:')===0) { rec.custom = rec.custom||{}; rec.custom[k.slice(7)] = changes[k].trim(); }
+      else { rec[k] = changes[k].trim ? changes[k].trim() : changes[k]; }
+    });
+    rec._updatedAt = Date.now();
+    await DB.set('pubunit:'+uid, rec);
+  }
+  _unitsEditAddr = null;
+  try { ddToast('Saved'); } catch(e) {}
+  await renderUnits();
+}
+
+// ===== Add / rename / delete addresses =====
+async function addressNew() {
+  var name = prompt('Property address (e.g. 31 Mangin Road):');
+  if (!name || !name.trim()) return;
+  name = name.trim();
+  var all = await _addressListAll();
+  if (all.some(function(a){ return a.name.toLowerCase()===name.toLowerCase(); })) { alert('That address already exists.'); return; }
+  var id = 'addr_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+  var order = all.length ? (Math.max.apply(null, all.map(function(a){return a.order||0;}))+1) : 0;
+  await DB.set('pubaddress:'+id, { id:id, name:name, order:order, _createdAt:Date.now() });
+  try { ddToast('Address added'); } catch(e) {}
+  await renderUnits();
+}
+async function addressRename(id) {
+  var rec = await DB.get('pubaddress:'+id);
+  if (!rec) return;
+  var newName = prompt('Rename address:', rec.name);
+  if (!newName || !newName.trim() || newName.trim()===rec.name) return;
+  newName = newName.trim();
+  var oldName = rec.name;
+  rec.name = newName; rec._updatedAt = Date.now();
+  await DB.set('pubaddress:'+id, rec);
+  // update all units that referenced the old address
+  var units = await _unitsListAll();
+  for (var i=0;i<units.length;i++){ if (units[i].building===oldName){ var u=units[i]; u.building=newName; await DB.set('pubunit:'+u.id, u); } }
+  if (_unitsEditAddr===oldName) _unitsEditAddr = newName;
+  try { ddToast('Renamed'); } catch(e) {}
+  await renderUnits();
+}
+async function addressDelete(id) {
+  var rec = await DB.get('pubaddress:'+id);
+  if (!rec) return;
+  var units = (await _unitsListAll()).filter(function(u){ return u.building===rec.name; });
+  var msg = units.length ? ('Delete "'+rec.name+'" and its '+units.length+' unit(s)? This cannot be undone.') : ('Delete "'+rec.name+'"?');
+  var go = async function(){
+    for (var i=0;i<units.length;i++){ try{ await DB.delete('pubunit:'+units[i].id); }catch(e){} }
+    try { await DB.delete('pubaddress:'+id); } catch(e){}
+    if (_unitsEditAddr===rec.name) _unitsEditAddr=null;
+    await renderUnits();
+  };
+  try { ddConfirm(msg, go); } catch(e){ if(confirm(msg)) go(); }
+}
+
+// ===== Manage custom columns =====
+async function unitColsManage() {
+  var cols = await _unitColsGet();
+  var modal = document.getElementById('unitColsModal');
+  if (!modal) { _unitColsBuildModal(); modal = document.getElementById('unitColsModal'); }
+  _unitColsRenderList(cols);
+  modal.style.display = 'flex';
+}
+function _unitColsRenderList(cols) {
+  var host = document.getElementById('unitCols-list');
+  if (!host) return;
+  var builtinRows = _UNIT_BUILTIN_COLS.map(function(c){
+    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 11px;background:var(--cream);border-radius:8px;margin-bottom:6px;">' +
+        '<span style="font-weight:700;font-size:13px;color:var(--navy);">'+_esc(c.label)+' <span style="font-size:10px;color:var(--muted);font-weight:600;">(built-in)</span></span>' +
+        '<span style="font-size:11px;color:#2E7D32;font-weight:700;">\u2713 Brokers see</span>' +
+      '</div>';
+  }).join('');
+  var customRows = (cols||[]).map(function(c){
+    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 11px;background:#fff;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;">' +
+        '<span style="font-weight:700;font-size:13px;color:var(--navy);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;">'+_esc(c.label)+'</span>' +
+        '<label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);font-weight:700;white-space:nowrap;cursor:pointer;"><input type="checkbox" '+(c.brokerVisible?'checked':'')+' onchange="_unitColToggleVis(\''+c.id+'\',this.checked)"> Brokers see</label>' +
+        '<button onclick="_unitColDelete(\''+c.id+'\')" style="background:rgba(176,58,46,0.08);color:var(--red);border:none;border-radius:6px;padding:5px 8px;font-size:11px;cursor:pointer;">\ud83d\uddd1</button>' +
+      '</div>';
+  }).join('');
+  host.innerHTML = builtinRows + (customRows || '<div style="font-size:12px;color:var(--muted);text-align:center;padding:8px;">No custom columns yet.</div>');
+}
+async function _unitColAdd() {
+  var name = (document.getElementById('unitCol-newName').value||'').trim();
+  if (!name) { alert('Enter a column name.'); return; }
+  var vis = document.getElementById('unitCol-newVis').checked;
+  var cols = await _unitColsGet();
+  var id = 'c_'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+  cols.push({ id:id, label:name, brokerVisible:vis });
+  await _unitColsSave(cols);
+  document.getElementById('unitCol-newName').value='';
+  _unitColsRenderList(cols);
+  await renderUnits();
+}
+async function _unitColToggleVis(id, checked) {
+  var cols = await _unitColsGet();
+  cols.forEach(function(c){ if(c.id===id) c.brokerVisible = checked; });
+  await _unitColsSave(cols);
+  await renderUnits();
+}
+async function _unitColDelete(id) {
+  var cols = await _unitColsGet();
+  cols = cols.filter(function(c){ return c.id!==id; });
+  await _unitColsSave(cols);
+  _unitColsRenderList(cols);
+  await renderUnits();
+}
+function _unitColsCloseModal(){ var m=document.getElementById('unitColsModal'); if(m) m.style.display='none'; }
+function _unitColsBuildModal() {
+  var div = document.createElement('div');
+  div.id='unitColsModal'; div.className='modal-overlay'; div.style.display='none';
+  div.innerHTML = '<div class="modal-box" style="max-width:440px;">' +
+    '<div class="modal-header"><span class="modal-title">Columns</span><button class="modal-close" onclick="_unitColsCloseModal()">\u00d7</button></div>' +
+    '<div class="modal-body" style="max-height:75vh;overflow-y:auto;">' +
+      '<div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5;">Built-in columns are always shown to brokers. Add your own columns below and choose which brokers can see. \ud83d\udd12 = hidden from brokers.</div>' +
+      '<div id="unitCols-list" style="margin-bottom:16px;"></div>' +
+      '<div style="border-top:1px solid var(--border);padding-top:14px;">' +
+        '<div style="font-weight:700;font-size:13px;color:var(--navy);margin-bottom:8px;">Add a column</div>' +
+        '<input id="unitCol-newName" type="text" placeholder="Column name (e.g. Balcony, Parking, Notes)" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:9px;font-size:13px;box-sizing:border-box;margin-bottom:8px;">' +
+        '<label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--navy);margin-bottom:12px;cursor:pointer;"><input type="checkbox" id="unitCol-newVis"> Brokers can see this column</label>' +
+        '<button class="btn-primary" onclick="_unitColAdd()" style="width:100%;">+ Add Column</button>' +
+      '</div>' +
+    '</div></div>';
+  document.body.appendChild(div);
+}
+
 
 // Add a new unit pre-filled with a specific address
 function unitNewForAddress(addr) {
@@ -7898,6 +8099,38 @@ var _UNIT_STATUS = {
   not_for_sale: { label:'Not for sale', bg:'#EEEEEE', fg:'#616161', dot:'#9E9E9E' },
   sold:         { label:'Sold',        bg:'#FDECEA', fg:'#C0392B', dot:'#E53935' }
 };
+// ===== Addresses (property headers) =====
+async function _addressListAll() {
+  try {
+    var recs = (await _fsListByPrefix('pubaddress:')) || [];
+    recs = recs.filter(Boolean);
+    recs.sort(function(a,b){ return (a.order||0) - (b.order||0) || String(a.name||'').localeCompare(String(b.name||''),undefined,{numeric:true}); });
+    return recs;
+  } catch(e) { return []; }
+}
+// ===== Custom column config (which extra columns exist + broker visibility) =====
+// Built-in columns are fixed; these are user-added extras.
+async function _unitColsGet() {
+  try {
+    var rec = await DB.get('pubunitcols:main');
+    if (rec && Array.isArray(rec.columns)) return rec.columns;
+  } catch(e) {}
+  return [];
+}
+async function _unitColsSave(columns) {
+  await DB.set('pubunitcols:main', { id:'main', columns: columns, _updatedAt: Date.now() });
+}
+// The built-in columns (always present). key matches the unit field.
+var _UNIT_BUILTIN_COLS = [
+  { key:'unitNumber', label:'Unit', builtin:true, brokerVisible:true },
+  { key:'level',      label:'Level', builtin:true, brokerVisible:true },
+  { key:'unitType',   label:'Type', builtin:true, brokerVisible:true },
+  { key:'sf',         label:'SF', builtin:true, brokerVisible:true },
+  { key:'attic',      label:'Attic', builtin:true, brokerVisible:true },
+  { key:'price',      label:'Price', builtin:true, brokerVisible:true, isPrice:true },
+  { key:'status',     label:'Status', builtin:true, brokerVisible:true, isStatus:true }
+];
+
 async function _unitsListAll() {
   try {
     var recs = (await _fsListByPrefix('pubunit:')) || [];
@@ -7925,8 +8158,10 @@ async function renderBrokerUnits() {
   host.innerHTML = '<div style="text-align:center;color:var(--muted);padding:30px;">Loading units\u2026</div>';
   var units = await _unitsListAll();
   var allPlans = await _plansListAll();
+  var customCols = await _unitColsGet();
+  // Broker-visible columns: all built-ins + custom cols flagged brokerVisible
+  var brokerCustom = (customCols||[]).filter(function(c){ return c.brokerVisible; });
 
-  // Populate address filter (once) from the data (still uses the 'building' field, now = address)
   var bf = document.getElementById('brokerBuildingFilter');
   if (bf) {
     var buildings = [];
@@ -7953,19 +8188,19 @@ async function renderBrokerUnits() {
     return;
   }
 
-  // Group by address (the 'building' field)
   var groups = {};
   filtered.forEach(function(u){ var b = u.building || 'Other'; (groups[b] = groups[b] || []).push(u); });
   var buildingNames = Object.keys(groups).sort(function(a,b){ return a.localeCompare(b, undefined, {numeric:true}); });
 
+  var statusCell = function(status){
+    var s = _UNIT_STATUS[status] || _UNIT_STATUS.not_for_sale;
+    return '<span style="display:inline-flex;align-items:center;gap:5px;white-space:nowrap;"><span style="width:8px;height:8px;border-radius:50%;background:' + s.dot + ';flex-shrink:0;"></span><span style="color:' + s.fg + ';font-weight:700;">' + s.label + '</span></span>';
+  };
   var cell = function(v){ return (v === undefined || v === null || v === '') ? '\u2014' : _esc(v); };
 
-  // Interactive status dropdown the broker can change
   var statusSelectCell = function(u){
     var s = _UNIT_STATUS[u.status] || _UNIT_STATUS.not_for_sale;
-    var opts = Object.keys(_UNIT_STATUS).map(function(k){
-      return '<option value="' + k + '"' + (k === u.status ? ' selected' : '') + '>' + _UNIT_STATUS[k].label + '</option>';
-    }).join('');
+    var opts = Object.keys(_UNIT_STATUS).map(function(k){ return '<option value="' + k + '"' + (k === u.status ? ' selected' : '') + '>' + _UNIT_STATUS[k].label + '</option>'; }).join('');
     return '<span style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;">' +
         '<span style="width:8px;height:8px;border-radius:50%;background:' + s.dot + ';flex-shrink:0;"></span>' +
         '<select onchange="_brokerSetStatus(\'' + u.id + '\', this.value)" style="border:1px solid var(--border);border-radius:7px;padding:5px 7px;font-size:12px;font-weight:700;color:' + s.fg + ';background:#fff;cursor:pointer;">' + opts + '</select>' +
@@ -7975,6 +8210,9 @@ async function renderBrokerUnits() {
   var thBase = 'padding:9px 10px;font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:#fff;font-weight:700;white-space:nowrap;text-align:left;';
   var thUnit = 'style="' + thBase + 'position:sticky;left:0;z-index:2;background:var(--navy);"';
   var thNorm = 'style="' + thBase + '"';
+  // header: Unit(frozen) Level Type SF Attic Price Status + custom broker cols
+  var customHeaders = brokerCustom.map(function(c){ return '<th ' + thNorm + '>' + _esc(c.label) + '</th>'; }).join('');
+  var minW = 560 + brokerCustom.length*110;
 
   host.innerHTML = buildingNames.map(function(bname){
     var rows = groups[bname].sort(_unitSort).map(function(u, idx){
@@ -7984,6 +8222,10 @@ async function renderBrokerUnits() {
       var td = 'style="' + tdBase + 'background:' + rowBg + ';"';
       var tdPrice = 'style="' + tdBase + 'font-weight:700;background:' + rowBg + ';"';
       var tdStatus = 'style="padding:7px 10px;font-size:12px;border-bottom:1px solid var(--border);background:' + rowBg + ';"';
+      var customCells = brokerCustom.map(function(c){
+        var v = (u.custom && u.custom[c.id]!=null) ? u.custom[c.id] : '';
+        return '<td ' + td + '>' + cell(v) + '</td>';
+      }).join('');
       return '<tr>' +
         '<td ' + tdUnit + '>' + cell(u.unitNumber) + '</td>' +
         '<td ' + td + '>' + cell(u.level) + '</td>' +
@@ -7992,12 +8234,13 @@ async function renderBrokerUnits() {
         '<td ' + td + '>' + cell(u.attic) + '</td>' +
         '<td ' + tdPrice + '>' + (u.price ? _esc(_fmtPrice(u.price)) : '\u2014') + '</td>' +
         '<td ' + tdStatus + '>' + statusSelectCell(u) + '</td>' +
+        customCells +
       '</tr>';
     }).join('');
     return '<div style="margin-bottom:22px;">' +
         '<div style="font-family:\'Archivo\',sans-serif;font-weight:800;font-size:16px;color:#fff;padding:0 2px 8px;border-bottom:2px solid var(--gold);margin-bottom:10px;display:inline-block;">\ud83d\udccd ' + _esc(bname) + '</div>' +
         '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:12px;">' +
-          '<table style="width:100%;border-collapse:separate;border-spacing:0;min-width:560px;">' +
+          '<table style="width:100%;border-collapse:separate;border-spacing:0;min-width:' + minW + 'px;">' +
             '<thead><tr>' +
               '<th ' + thUnit + '>Unit</th>' +
               '<th ' + thNorm + '>Level</th>' +
@@ -8006,6 +8249,7 @@ async function renderBrokerUnits() {
               '<th ' + thNorm + '>Attic</th>' +
               '<th ' + thNorm + '>Price</th>' +
               '<th ' + thNorm + '>Status</th>' +
+              customHeaders +
             '</tr></thead>' +
             '<tbody>' + rows + '</tbody>' +
           '</table>' +
@@ -8613,7 +8857,7 @@ async function _renderCustomerStatus(projId, address, unit) {
 
   host.innerHTML =
     '<div class="ps-card">' +
-      '<div class="ps-top"><span class="ps-title">Your Home\u2019s Progress</span><span class="ps-pct">' + pct + '%</span></div>' +
+      '<div class="ps-top"><span class="ps-title">Your Home’s Progress</span><span class="ps-pct">' + pct + '%</span></div>' +
       '<div class="ps-bar"><div class="ps-bar-fill" style="width:' + pct + '%"></div></div>' +
       '<div class="ps-line">' + statusLine + '</div>' +
       (next && current ? '<div class="ps-next">Up next: ' + _esc(next.name) + '</div>' : '') +
@@ -9426,7 +9670,7 @@ async function _custDeclineProposedWalk(id) {
   r._updatedAt = Date.now();
   await DB.set('walkreq:' + id, r);
   try { _loadWalkStatus(r.address, r.unit); } catch(e) {}
-  alert('No problem \u2014 we\u2019ve let the office know that time doesn\u2019t work. They\u2019ll suggest another.');
+  alert('No problem \u2014 we’ve let the office know that time doesn’t work. They’ll suggest another.');
 }
 
 async function _loadWalkStatus(address, unit) {
@@ -9456,7 +9700,7 @@ async function _loadWalkStatus(address, unit) {
           (r.proposedNote?'<div style="font-size:11px;color:#3a3730;margin-top:3px;">'+_esc(r.proposedNote)+'</div>':'') +
           '<div style="display:flex;gap:8px;margin-top:9px;">' +
             '<button onclick="_custAcceptProposedWalk(\''+r.id+'\')" style="flex:1;background:#3a7d5d;color:#fff;border:none;border-radius:7px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;">Accept this time</button>' +
-            '<button onclick="_custDeclineProposedWalk(\''+r.id+'\')" style="flex:1;background:rgba(192,57,43,0.1);color:#c0392b;border:none;border-radius:7px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;">Doesn\u2019t work</button>' +
+            '<button onclick="_custDeclineProposedWalk(\''+r.id+'\')" style="flex:1;background:rgba(192,57,43,0.1);color:#c0392b;border:none;border-radius:7px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;">Doesn’t work</button>' +
           '</div>' +
         '</div>';
       }
@@ -9475,7 +9719,7 @@ async function _loadCustStatusLine() {
     if (data.text) {
       host.innerHTML = '<div style="background:linear-gradient(135deg,rgba(201,168,76,0.22),rgba(201,168,76,0.1));border:1px solid rgba(201,168,76,0.45);border-radius:12px;padding:13px 15px;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px;">' +
         '<span style="font-size:17px;flex-shrink:0;">\ud83d\udce2</span>' +
-        '<div><div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:var(--gold);margin-bottom:3px;">What\u2019s happening now</div>' +
+        '<div><div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:var(--gold);margin-bottom:3px;">What’s happening now</div>' +
         '<div style="font-size:13.5px;color:#f3efe6;line-height:1.45;">' + _esc(data.text) + '</div></div>' +
       '</div>';
     } else { host.innerHTML = ''; }
@@ -9661,7 +9905,7 @@ async function _custBookSlot(slotKey, slotMin) {
   try { await _loadWalkStatus(rec.address, rec.unit); } catch(e) {}
   try { await _loadWalkSlots(rec.address, rec.unit); } catch(e) {}
   var t = (typeof _fmt12 === 'function') ? _fmt12(time) : time;
-  alert('Requested! We\u2019ll confirm your walkthrough for ' + new Date(date+'T'+(time||'00:00')).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}) + ' at ' + t + ' shortly.');
+  alert('Requested! We’ll confirm your walkthrough for ' + new Date(date+'T'+(time||'00:00')).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}) + ' at ' + t + ' shortly.');
 }
 
 
@@ -17166,7 +17410,7 @@ function biometricDiagnostic() {
   } else if (!isSetUp) {
     msg += 'Next step: tap \u201cFingerprint / Face ID: Off\u201d to turn it on and register your fingerprint. You must approve the prompt that appears.';
   } else if (!standalone) {
-    msg += 'Next step: you set it up, but you\u2019re NOT in the installed app right now. Close this, open the app from your home-screen icon, and it will lock.';
+    msg += 'Next step: you set it up, but you’re NOT in the installed app right now. Close this, open the app from your home-screen icon, and it will lock.';
   } else {
     msg += 'Something on this device is blocking it \u2014 see the \u274c above.';
   }
@@ -17196,7 +17440,7 @@ function _renderBioToggle() {
 async function testBiometricNow() {
   if (!biometricEnabled()) { alert('Turn on Fingerprint / Face ID first.'); return; }
   var ok = await _biometricVerify();
-  alert(ok ? '✅ Fingerprint / Face ID worked! Your unlock is set up correctly.' : '❌ It didn\u2019t verify. Make sure you approved the prompt, and that a fingerprint or Face ID is enrolled on this phone.');
+  alert(ok ? '✅ Fingerprint / Face ID worked! Your unlock is set up correctly.' : '❌ It didn’t verify. Make sure you approved the prompt, and that a fingerprint or Face ID is enrolled on this phone.');
 }
 
 // ===================== BIOMETRIC APP LOCK (fingerprint / Face ID) =====================
@@ -17222,7 +17466,7 @@ async function enableBiometric() {
   try {
     if (window.PublicKeyCredential && PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable) {
       var avail = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-      if (!avail) { alert('No fingerprint or Face ID is set up on this device. Add one in your phone\u2019s settings, then try again.'); return false; }
+      if (!avail) { alert('No fingerprint or Face ID is set up on this device. Add one in your phone’s settings, then try again.'); return false; }
     }
   } catch(e) {}
   try {
@@ -17246,7 +17490,7 @@ async function enableBiometric() {
     var msg = 'Could not set up biometric unlock.';
     if (e && e.name === 'NotAllowedError') msg = 'Setup was cancelled or timed out. Try again and approve the fingerprint / Face ID prompt.';
     else if (e && e.name === 'SecurityError') msg = 'Security error \u2014 this needs to run on the installed app over https (not a plain browser tab).';
-    else if (e && e.name === 'NotSupportedError') msg = 'This device doesn\u2019t support the kind of biometric unlock the app uses.';
+    else if (e && e.name === 'NotSupportedError') msg = 'This device doesn’t support the kind of biometric unlock the app uses.';
     else if (e && e.message) msg += ' (' + e.message + ')';
     alert(msg);
     return false;
@@ -19629,7 +19873,7 @@ async function renderChangeOrders(){
       '</div>' +
     '</div>';
   }).join('');
-  host.innerHTML=rows||'<div class="tab-empty"><div class="tab-empty-icon">\ud83d\udcdd</div><div class="tab-empty-title">No Change Orders</div><div class="tab-empty-desc">Record your first change order above. These are internal only \u2014 customers don\u2019t see them.</div></div>';
+  host.innerHTML=rows||'<div class="tab-empty"><div class="tab-empty-icon">\ud83d\udcdd</div><div class="tab-empty-title">No Change Orders</div><div class="tab-empty-desc">Record your first change order above. These are internal only \u2014 customers don’t see them.</div></div>';
 }
 async function _coSetStatus(id,status){ var r=await DB.get('changeorder:'+id); if(!r)return; r.status=status; r._updatedAt=Date.now(); await DB.set('changeorder:'+id,r); renderChangeOrders(); }
 function openChangeOrderModal(){
@@ -21618,7 +21862,7 @@ async function _renderSubPunchView() {
   }
 
   if (!items.length) {
-    html += '<div class="tab-empty" style="margin-top:24px;background:#fff;border-radius:14px;padding:32px 20px;"><div class="tab-empty-icon">\u2705</div><div class="tab-empty-title">Nothing assigned yet</div><div class="tab-empty-desc">When the office tags punch items for you, they\u2019ll show here.</div></div>';
+    html += '<div class="tab-empty" style="margin-top:24px;background:#fff;border-radius:14px;padding:32px 20px;"><div class="tab-empty-icon">\u2705</div><div class="tab-empty-title">Nothing assigned yet</div><div class="tab-empty-desc">When the office tags punch items for you, they’ll show here.</div></div>';
     host.innerHTML = html;
     return;
   }
@@ -22765,7 +23009,7 @@ async function ue_switchScope() {
     var override = await DB.get('upgrade_sections_proj:' + _ueScope);
     if (override && override.length) {
       sections = override;
-      if (status) status.textContent = 'Editing this project\u2019s own sheet.';
+      if (status) status.textContent = 'Editing this project’s own sheet.';
     } else {
       sections = await ue_load(); // start from the default as a base
       if (status) status.textContent = 'New project sheet \u2014 starting from the default. Save to create it.';
@@ -22781,7 +23025,7 @@ async function ue_switchScope() {
 }
 async function ue_deleteProjectSheet() {
   if (!_ueScope) return;
-  if (!confirm('Delete this project\u2019s own sheet and go back to using the default?')) return;
+  if (!confirm('Delete this project’s own sheet and go back to using the default?')) return;
   await DB.delete('upgrade_sections_proj:' + _ueScope);
   _ueScope = '';
   await ue_populateScopeSelect();
