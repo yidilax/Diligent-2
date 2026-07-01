@@ -5240,7 +5240,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v300</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v301</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -5663,7 +5663,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v300</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v301</div>
     </div>
   </div>
 
@@ -6179,6 +6179,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div class="upg-view-toggle">
         <button id="view-btn-customers" class="upg-view-btn active" onclick="switchUpgradeView('customers')">By Customer</button>
         <button id="view-btn-upgrades" class="upg-view-btn" onclick="switchUpgradeView('upgrades')">By Upgrade</button>
+        <button id="view-btn-grid" class="upg-view-btn" onclick="switchUpgradeView('grid')">By House (grid)</button>
       </div>
 
       <!-- Customer view -->
@@ -6198,6 +6199,14 @@ div[style*="position:fixed"][style*="inset:0"] {
           </div>
           <div id="customerDetailContent"></div>
         </div>
+      </div>
+
+      <!-- By House grid view (spreadsheet like broker page) -->
+      <div id="panel-grid" style="display:none;">
+        <div style="background:var(--cream);border:1px solid var(--border);border-radius:11px;padding:11px 14px;margin-bottom:14px;font-size:12.5px;color:var(--muted);line-height:1.5;">
+          Every customer's upgrade selections in one spreadsheet, grouped by house. The Unit column stays put while you swipe sideways to see all upgrades.
+        </div>
+        <div id="upgradeGridList"></div>
       </div>
 
       <!-- Upgrade view -->
@@ -6622,7 +6631,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v300';
+<script>var APP_VERSION = 'v301';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -25489,17 +25498,14 @@ function getStoredSubmissions() {
 }
 
 function switchUpgradeView(view) {
-  var custPanel = document.getElementById('panel-customers');
-  var upgPanel = document.getElementById('panel-upgrades');
-  var custBtn = document.getElementById('view-btn-customers');
-  var upgBtn = document.getElementById('view-btn-upgrades');
+  var panels = { customers:'panel-customers', upgrades:'panel-upgrades', grid:'panel-grid' };
+  var btns = { customers:'view-btn-customers', upgrades:'view-btn-upgrades', grid:'view-btn-grid' };
+  Object.keys(panels).forEach(function(k){
+    var p = document.getElementById(panels[k]); if (p) p.style.display = (k===view)?'block':'none';
+    var b = document.getElementById(btns[k]); if (b) { if (k===view) b.classList.add('active'); else b.classList.remove('active'); }
+  });
   if (view === 'customers') {
-    if (custPanel) custPanel.style.display = 'block';
-    if (upgPanel) upgPanel.style.display = 'none';
-    if (custBtn) { custBtn.classList.add('active'); }
-    if (upgBtn) { upgBtn.classList.remove('active'); }
     renderCustomerTab();
-    // Safety: if the local store wasn't ready yet, refresh from DB then re-render.
     (async function(){
       try {
         var before = getStoredSubmissions().length;
@@ -25508,13 +25514,104 @@ function switchUpgradeView(view) {
         if (after !== before || before === 0) renderCustomerTab();
       } catch(e) {}
     })();
+  } else if (view === 'grid') {
+    renderUpgradeGrid();
+    (async function(){
+      try { await _refreshSubmissions(); renderUpgradeGrid(); } catch(e) {}
+    })();
   } else {
-    if (custPanel) custPanel.style.display = 'none';
-    if (upgPanel) upgPanel.style.display = 'block';
-    if (custBtn) { custBtn.classList.remove('active'); }
-    if (upgBtn) { upgBtn.classList.add('active'); }
     renderUpgradeTab();
   }
+}
+
+// ===== By House grid view: spreadsheet of every customer's upgrade selections, grouped by house =====
+function renderUpgradeGrid() {
+  var host = document.getElementById('upgradeGridList');
+  if (!host) return;
+  var subs = getStoredSubmissions();
+  if (!subs || !subs.length) {
+    host.innerHTML = '<div class="tab-empty"><div class="tab-empty-icon">\ud83d\udccb</div><div class="tab-empty-title">No Submissions Yet</div><div class="tab-empty-desc">Customer upgrade selections will appear here once submitted.</div></div>';
+    return;
+  }
+
+  // Build the column list from the upgrade sections (every upgrade field = a column)
+  var sections = (typeof UPGRADE_SECTIONS !== 'undefined' && UPGRADE_SECTIONS) ? UPGRADE_SECTIONS : (window._upgradeSections || []);
+  var upgradeCols = [];
+  sections.forEach(function(sec){
+    (sec.fields||[]).forEach(function(f){ upgradeCols.push({ key:f.key, name:f.name, glassKey:f.glassKey }); });
+  });
+
+  // Group submissions by house (address)
+  var groups = {}; var order = [];
+  subs.forEach(function(s){
+    var a = (s.address && String(s.address).trim()) ? String(s.address).trim() : 'Other';
+    if (!groups[a]) { groups[a]=[]; order.push(a); }
+    groups[a].push(s);
+  });
+  order.sort(function(a,b){ return a.localeCompare(b, undefined, {numeric:true}); });
+
+  var esc = _esc;
+  // value of an upgrade cell for a submission
+  var upgVal = function(s, col){
+    var sel = s.selections || {};
+    var v = sel[col.key];
+    if (v === 'yes') {
+      // include glass/sub-type detail if present
+      var extra = '';
+      if (col.glassKey && sel[col.glassKey]) extra = ' ('+esc(sel[col.glassKey])+')';
+      else if (sel[col.key+'_type']) extra = ' ('+esc(sel[col.key+'_type'])+')';
+      return '<span style="color:#2E7D32;font-weight:700;">\u2713 Yes'+extra+'</span>';
+    }
+    if (v === 'no') return '<span style="color:#bbb;">\u2014</span>';
+    if (v != null && v !== '') return esc(v); // free-text / other value
+    return '<span style="color:#ccc;">\u2013</span>';
+  };
+
+  var thBase = 'padding:9px 10px;font-size:10.5px;letter-spacing:0.03em;text-transform:uppercase;color:#fff;font-weight:700;white-space:nowrap;text-align:left;background:var(--navy);';
+  var minW = 300 + upgradeCols.length*130;
+
+  host.innerHTML = order.map(function(addr){
+    var rows = groups[addr].slice().sort(function(a,b){
+      return String(a.unit||'').localeCompare(String(b.unit||''), undefined,{numeric:true});
+    }).map(function(s, idx){
+      var rowBg = (idx%2===1)?'#FAFAF7':'#fff';
+      var tdBase = 'padding:8px 10px;font-size:12.5px;color:var(--navy);white-space:nowrap;border-bottom:1px solid var(--border);';
+      // frozen first column = Unit (+ customer name under it)
+      var unitLabel = (s.unit ? esc(s.unit) : '\u2014');
+      var frozen = '<td style="'+tdBase+'position:sticky;left:0;z-index:1;background:'+rowBg+';box-shadow:2px 0 0 var(--border);min-width:120px;">' +
+          '<div style="font-weight:800;">'+unitLabel+'</div>' +
+          '<div style="font-size:11px;color:var(--muted);font-weight:600;">'+esc(s.name||'')+'</div>' +
+        '</td>';
+      var upgCells = upgradeCols.map(function(col){
+        return '<td style="'+tdBase+'background:'+rowBg+';">'+upgVal(s, col)+'</td>';
+      }).join('');
+      return '<tr style="cursor:pointer;" onclick="_gridOpenSubmission('+idx+',\''+encodeURIComponent(addr)+'\')">'+frozen+upgCells+'</tr>';
+    }).join('');
+
+    var headerCells = upgradeCols.map(function(col){ return '<th style="'+thBase+'">'+esc(col.name)+'</th>'; }).join('');
+
+    return '<div style="margin-bottom:24px;">' +
+        '<div style="font-family:\'Archivo\',sans-serif;font-weight:800;font-size:15px;color:var(--navy);padding-bottom:6px;border-bottom:2px solid var(--gold);display:inline-block;margin-bottom:10px;">\ud83c\udfe0 '+esc(addr)+' <span style="font-size:12px;color:var(--muted);font-weight:600;">('+groups[addr].length+')</span></div>' +
+        '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:12px;">' +
+          '<table style="width:100%;border-collapse:separate;border-spacing:0;min-width:'+minW+'px;">' +
+            '<thead><tr><th style="'+thBase+'position:sticky;left:0;z-index:2;background:var(--navy);">Unit / Customer</th>'+headerCells+'</tr></thead>' +
+            '<tbody>'+rows+'</tbody>' +
+          '</table>' +
+        '</div>' +
+        '<div style="font-size:11px;color:var(--muted);margin-top:5px;padding-left:2px;">\u2190 swipe to see all upgrades \u2192 \u00b7 tap a row for full details</div>' +
+      '</div>';
+  }).join('');
+}
+
+// tap a grid row -> open that submission's full detail (reuse existing viewer)
+function _gridOpenSubmission(idx, addrEnc) {
+  try {
+    var addr = decodeURIComponent(addrEnc);
+    var subs = getStoredSubmissions().filter(function(s){ return ((s.address&&String(s.address).trim())||'Other')===addr; });
+    subs.sort(function(a,b){ return String(a.unit||'').localeCompare(String(b.unit||''), undefined,{numeric:true}); });
+    var s = subs[idx];
+    var k = s && (s._key || s.key); if (k) { viewSubmission(k); }
+  } catch(e) {}
 }
 
 function renderCustomerTab(filter) {
