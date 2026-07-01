@@ -184,11 +184,21 @@ body { font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; background: var(--
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
-  justify-content: flex-start !important;
+  justify-content: center !important;
   padding: 40px 16px;
   min-height: 100vh;
   width: 100%;
   box-sizing: border-box;
+}
+/* Desktop: auth box sizes to content so it can center vertically (mobile overrides below) */
+@media(min-width:601px){
+  #officeAuthPage.active .auth-box, #customerAuthPage.active .auth-box,
+  #subAuthPage.active .auth-box, #brokerAuthPage.active .auth-box {
+    min-height: 0 !important;
+    height: auto !important;
+    border-radius: 16px;
+    margin: auto;
+  }
 }
 @media(max-width:600px){
   #officeAuthPage, #customerAuthPage, #subAuthPage, #brokerAuthPage { padding: 0; align-items: stretch; }
@@ -4234,6 +4244,95 @@ div[style*="position:fixed"][style*="inset:0"] {
   opacity: 1;
 }
 
+
+/* ========================= ASANA-STYLE NAV (v304) ========================= */
+:root{ --rail-w:66px; --flyout-w:230px; }
+/* Slim always-on icon rail (desktop) */
+#ddRail{ position:fixed; top:0; left:0; bottom:0; width:var(--rail-w); background:var(--navy); z-index:340;
+  display:flex; flex-direction:column; align-items:center; padding:10px 0; gap:3px; border-right:1px solid rgba(255,255,255,0.08); }
+#ddRail .rail-logo{ width:42px;height:42px;border-radius:11px;background:var(--gold);color:var(--navy);
+  display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-weight:800;font-size:18px;margin-bottom:8px;cursor:pointer;}
+.rail-btn{ width:48px;height:48px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  color:rgba(255,255,255,0.72);cursor:pointer;position:relative;transition:background .15s,color .15s;flex-shrink:0;}
+.rail-btn .ic{ font-size:19px;line-height:1;}
+.rail-btn .lbl{ font-size:8px;font-weight:600;letter-spacing:0.2px;}
+.rail-btn:hover{ background:rgba(255,255,255,0.1);color:#fff;}
+.rail-btn.active{ background:rgba(191,160,85,0.22);color:#fff;}
+.rail-btn.active::before{ content:'';position:absolute;left:-10px;top:9px;bottom:9px;width:3px;border-radius:0 3px 3px 0;background:var(--gold);}
+.rail-btn .rail-badge{ position:absolute;top:5px;right:6px;min-width:16px;height:16px;background:var(--red);color:#fff;border-radius:9px;
+  font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--navy);}
+#ddRail .rail-spacer{ flex:1;}
+
+/* Flyout panel (slides over content) */
+#ddFlyout{ position:fixed; top:0; bottom:0; left:var(--rail-w); width:var(--flyout-w); background:#fff; z-index:335;
+  border-right:1px solid var(--border); box-shadow:6px 0 24px rgba(13,31,60,0.12);
+  transform:translateX(-300px); transition:transform .22s cubic-bezier(.4,.1,.2,1); display:flex; flex-direction:column; }
+#ddFlyout.open{ transform:translateX(0); }
+#ddFlyout .fly-head{ padding:16px 16px 12px; border-bottom:1px solid var(--border); display:flex;align-items:center;justify-content:space-between;}
+#ddFlyout .fly-title{ font-family:'Archivo',sans-serif;font-size:16px;font-weight:800;color:var(--navy);}
+#ddFlyout .fly-pin{ font-size:11px;color:var(--muted);cursor:pointer;background:var(--cream);border-radius:7px;padding:5px 9px;font-weight:700;}
+#ddFlyout .fly-pin.on{ background:var(--gold);color:var(--navy);}
+#ddFlyout .fly-body{ padding:10px;overflow-y:auto;flex:1;}
+.fly-item{ display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;font-size:13.5px;cursor:pointer;color:var(--navy);margin-bottom:1px;}
+.fly-item:hover{ background:var(--cream);}
+.fly-item.active{ background:var(--navy);color:#fff;font-weight:700;}
+.fly-item .badge{ margin-left:auto;background:var(--red);color:#fff;font-size:10px;padding:1px 7px;border-radius:10px;font-weight:700;}
+.fly-item .star{ margin-left:auto;opacity:0.35;font-size:13px;cursor:pointer;}
+.fly-item .star.on{ opacity:1;color:var(--gold);}
+.fly-item.active .star{ color:#fff;}
+
+/* Scrim behind flyout (desktop unpinned) */
+#ddScrim{ position:fixed; inset:0 0 0 var(--rail-w); background:rgba(13,31,60,0.22); z-index:334; opacity:0; pointer-events:none; transition:opacity .2s;}
+#ddScrim.show{ opacity:1; pointer-events:auto;}
+
+/* Push office content right of the rail on desktop */
+@media(min-width:768px){
+  #officePage.nav-shell{ padding-left:var(--rail-w); }
+  #officePage.nav-shell.pinned{ padding-left:calc(var(--rail-w) + var(--flyout-w)); }
+  #officePage.nav-shell .office-topbar{ padding-left:16px; }
+  /* hide the old hamburger drawer trigger visuals on desktop (rail replaces it) */
+}
+
+/* ---------- MOBILE: bottom bar + full-screen dashboard ---------- */
+#ddBottomBar{ display:none; }
+@media(max-width:767px){
+  #ddRail{ display:none; }              /* no rail on mobile */
+  #ddFlyout{ display:none; }            /* no flyout on mobile */
+  #ddScrim{ display:none; }
+  #officePage.nav-shell{ padding-left:0; padding-bottom:64px; } /* room for bottom bar */
+  #ddBottomBar{ display:flex; position:fixed; left:0; right:0; bottom:0; height:62px; background:#fff;
+    border-top:1px solid var(--border); z-index:340; box-shadow:0 -3px 16px rgba(13,31,60,0.08);
+    justify-content:space-around; align-items:stretch; padding:6px 2px 8px; }
+  .bbar-btn{ flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    font-size:9.5px;font-weight:600;color:var(--muted);cursor:pointer;position:relative;border:none;background:none;}
+  .bbar-btn .ic{ font-size:20px;line-height:1;}
+  .bbar-btn.active{ color:var(--navy);}
+  .bbar-btn .bb-badge{ position:absolute;top:-2px;right:calc(50% - 20px);min-width:15px;height:15px;background:var(--red);color:#fff;
+    border-radius:8px;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;}
+}
+
+/* Mobile "More" sheet */
+#ddMoreSheet{ position:fixed; left:0;right:0;bottom:0; background:#fff; border-radius:20px 20px 0 0;
+  box-shadow:0 -6px 28px rgba(13,31,60,0.18); z-index:360; transform:translateY(110%); transition:transform .25s cubic-bezier(.4,.1,.2,1);
+  max-height:78vh; display:flex; flex-direction:column; padding:8px 14px calc(env(safe-area-inset-bottom, 12px) + 14px); }
+#ddMoreSheet.open{ transform:translateY(0); }
+#ddMoreSheet .grip{ width:40px;height:4px;background:#ddd;border-radius:3px;margin:4px auto 12px; }
+#ddMoreSheet .more-title{ font-family:'Archivo',sans-serif;font-weight:800;font-size:16px;color:var(--navy);margin-bottom:4px;}
+#ddMoreSheet .more-sub{ font-size:12px;color:var(--muted);margin-bottom:12px;}
+#ddMoreSheet .more-scroll{ overflow-y:auto; }
+.more-group-label{ font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);font-weight:800;margin:12px 4px 8px;}
+.more-grid{ display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px; }
+.more-item{ background:var(--cream);border-radius:12px;padding:12px 6px;text-align:center;font-size:10.5px;font-weight:600;color:var(--navy);
+  cursor:pointer;position:relative;border:1px solid transparent; }
+.more-item:active{ background:#e7e2d6; }
+.more-item .ic{ font-size:21px;display:block;margin-bottom:5px; }
+.more-item .badge{ position:absolute;top:5px;right:8px;background:var(--red);color:#fff;font-size:9px;padding:1px 6px;border-radius:9px;font-weight:700; }
+.more-item .pin-toggle{ position:absolute;top:4px;left:6px;font-size:12px;opacity:0.3; }
+.more-item .pin-toggle.on{ opacity:1;color:var(--gold); }
+#ddMoreScrim{ position:fixed;inset:0;background:rgba(13,31,60,0.35);z-index:355;opacity:0;pointer-events:none;transition:opacity .2s; }
+#ddMoreScrim.show{ opacity:1;pointer-events:auto; }
+.more-customize-hint{ font-size:11px;color:var(--muted);text-align:center;padding:10px 0 2px;line-height:1.5; }
+
 </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -4510,10 +4609,15 @@ div[style*="position:fixed"][style*="inset:0"] {
     border:1px solid rgba(191,157,104,0.2); border-radius:1px;
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     padding:28px 20px; text-align:center;
-  }
+      transform:rotateY(180deg);
+    }
 
   /* Front */
-  .team-card-front { background:rgba(255,255,255,0.04); }
+  .team-card-front {
+      position:absolute; inset:0;
+      backface-visibility:hidden; -webkit-backface-visibility:hidden;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding:28px 20px; text-align:center; background:rgba(255,255,255,0.04); }
   .team-avatar {
     width:80px; height:80px; border-radius:50%;
     background:linear-gradient(135deg,var(--mk-gold),#8a6a38);
@@ -5240,7 +5344,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v302</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v304</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -5536,6 +5640,34 @@ div[style*="position:fixed"][style*="inset:0"] {
 <!-- ══════════════════════════════════════════ -->
 <div class="page" id="officePage">
 
+  <!-- ===== Asana-style nav shell (v304) ===== -->
+  <div id="ddRail">
+    <div class="rail-logo" onclick="switchTab('dashboard');ddFlyClose();" title="Dashboard">D</div>
+    <div id="ddRailBtns"></div>
+    <div class="rail-spacer"></div>
+    <div class="rail-btn" onclick="openProfileMenu()" title="Account"><span class="ic">⚙️</span><span class="lbl">Account</span></div>
+  </div>
+  <div id="ddScrim" onclick="ddFlyClose()"></div>
+  <div id="ddFlyout">
+    <div class="fly-head">
+      <span class="fly-title" id="ddFlyTitle">Menu</span>
+      <span class="fly-pin" id="ddFlyPin" onclick="ddTogglePin()">📌 Pin</span>
+    </div>
+    <div class="fly-body" id="ddFlyBody"></div>
+  </div>
+
+  <!-- Mobile bottom bar + More sheet -->
+  <div id="ddBottomBar"></div>
+  <div id="ddMoreScrim" onclick="ddCloseMore()"></div>
+  <div id="ddMoreSheet">
+    <div class="grip"></div>
+    <div class="more-title">All Sections</div>
+    <div class="more-sub">Tap the ☆ on any item to add it to your bottom bar.</div>
+    <div class="more-scroll" id="ddMoreBody"></div>
+    <div class="more-customize-hint">Your bottom bar holds up to 4 favorites + More.</div>
+  </div>
+
+
   <!-- Sidebar overlay (closes on tap outside) -->
   <div class="office-sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
@@ -5663,7 +5795,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v302</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v304</div>
     </div>
   </div>
 
@@ -6631,7 +6763,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v302';
+<script>var APP_VERSION = 'v304';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -7386,11 +7518,21 @@ async function _loadHomeContent() {
       if (grid) {
         grid.innerHTML = team.map(function(m){
           var initials = (m.name||'?').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
-          return '<div class="team-card" onclick="this.classList.toggle(\'flipped\')"><div class="team-card-inner"><div class="team-card-front">' +
-            '<div class="team-avatar">' + _esc(initials) + '</div>' +
-            '<div class="team-name">' + _esc(m.name||'') + '</div>' +
-            '<div class="team-role">' + _esc(m.role||'') + '</div>' +
-            '</div></div></div>';
+          var _bio = (m.bio||'').trim();
+          var _backInner = _bio
+            ? ('<div class="team-name" style="margin-bottom:8px;">' + _esc(m.name||'') + '</div>' +
+               '<div style="font-size:13px;line-height:1.55;color:rgba(255,255,255,0.85);">' + _esc(_bio) + '</div>')
+            : ('<div class="team-name" style="margin-bottom:6px;">' + _esc(m.name||'') + '</div>' +
+               '<div class="team-role">' + _esc(m.role||'') + '</div>');
+          return '<div class="team-card" onclick="this.classList.toggle(\'flipped\')"><div class="team-card-inner">' +
+            '<div class="team-card-front">' +
+              '<div class="team-avatar">' + _esc(initials) + '</div>' +
+              '<div class="team-name">' + _esc(m.name||'') + '</div>' +
+              '<div class="team-role">' + _esc(m.role||'') + '</div>' +
+              (_bio ? '<div style="font-size:11px;color:var(--mk-gold);margin-top:10px;font-weight:600;letter-spacing:0.3px;">Tap to read more</div>' : '') +
+            '</div>' +
+            '<div class="team-card-back">' + _backInner + '</div>' +
+            '</div></div>';
         }).join('');
       }
     }
@@ -8466,14 +8608,13 @@ function showPage(id) {
   // Auth pages center their box on desktop via flex; others use default block.
   var _authPages = ['officeAuthPage','customerAuthPage','subAuthPage','brokerAuthPage'];
   if (_authPages.indexOf(id) !== -1) {
+    // Centering handled by CSS (#...AuthPage.active). Just ensure it's shown as flex.
     target.style.display = 'flex';
-    target.style.flexDirection = 'column';
-    target.style.alignItems = 'center';
-    target.style.justifyContent = 'flex-start';
   } else {
     target.style.display = '';
   }
   if (id === 'landingPage') { try { _loadHomeContent(); } catch(e) {} try { _loadHomeProjects(); } catch(e) {} }
+  if (id === 'officePage') { try { if (typeof ddInitNavShell === 'function') ddInitNavShell(); } catch(e) {} }
   // Remember where the user is, so a refresh keeps them on this page.
   try {
     localStorage.setItem('dd_lastPage', id);
@@ -10558,6 +10699,7 @@ async function _teamEdit(id) {
   document.getElementById('team-f-id').value = id || '';
   document.getElementById('team-f-name').value = rec ? (rec.name||'') : '';
   document.getElementById('team-f-role').value = rec ? (rec.role||'') : '';
+  document.getElementById('team-f-bio').value = rec ? (rec.bio||'') : '';
   document.getElementById('teamFormTitle').textContent = id ? 'Edit Team Member' : 'Add Team Member';
   modal.style.display = 'flex';
 }
@@ -10566,12 +10708,13 @@ async function _teamSave() {
   var id = document.getElementById('team-f-id').value || ('tm_' + Date.now() + '_' + Math.random().toString(36).slice(2,6));
   var name = document.getElementById('team-f-name').value.trim();
   var role = document.getElementById('team-f-role').value.trim();
+  var bio = document.getElementById('team-f-bio').value.trim();
   if (!name) { alert('Please enter a name.'); return; }
   var existing = document.getElementById('team-f-id').value ? (await DB.get('pubteam:' + id)) : null;
   var order;
   if (existing && typeof existing.order === 'number') order = existing.order;
   else { var all = await _teamListAll(); order = all.length ? (Math.max.apply(null, all.map(function(m){return m.order||0;})) + 1) : 0; }
-  await DB.set('pubteam:' + id, { id:id, name:name, role:role, order:order });
+  await DB.set('pubteam:' + id, { id:id, name:name, role:role, bio:bio, order:order });
   _teamCloseModal(); ddToast('Saved'); await renderHomeContent();
 }
 async function _teamDelete(id) {
@@ -10595,6 +10738,7 @@ function _teamBuildModal() {
       '<input type="hidden" id="team-f-id">' +
       '<div class="form-group"><label class="form-label">Name</label><input class="form-input" id="team-f-name" type="text" placeholder="Full name"></div>' +
       '<div class="form-group"><label class="form-label">Role / title</label><input class="form-input" id="team-f-role" type="text" placeholder="e.g. Site Manager"></div>' +
+      '<div class="form-group"><label class="form-label">Bio / details (shows when visitors tap the card)</label><textarea class="form-input" id="team-f-bio" rows="4" placeholder="e.g. 15 years in residential construction. Oversees framing and finish work across all active sites."></textarea></div>' +
       '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">' +
         '<button class="btn-logout" onclick="_teamCloseModal()" style="background:var(--cream);border:1px solid var(--border);color:var(--navy);">Cancel</button>' +
         '<button class="btn-primary" onclick="_teamSave()">Save</button>' +
@@ -29591,5 +29735,245 @@ if (document.readyState === 'loading') {
           </div>
         </div>
       </div>
+<script>
+/* ============ Asana-style nav shell (v304) ============ */
+// Tab catalog grouped by category. label + icon + tab id (matches switchTab + #tab-<id>).
+var DD_NAV = [
+  { id:'home', icon:'🏠', label:'Home', tabs:[
+    { t:'dashboard', i:'📊', l:'Dashboard' },
+    { t:'reporting', i:'📈', l:'Reports' },
+    { t:'weeklyDigest', i:'🗓️', l:'Weekly Digest' },
+    { t:'teamChat', i:'💬', l:'Team Chat' }
+  ]},
+  { id:'work', icon:'🏗️', label:'Work', tabs:[
+    { t:'projects', i:'🏗️', l:'Projects' },
+    { t:'punchlist', i:'✅', l:'Punch Lists' },
+    { t:'specs', i:'🏠', l:'House Specs' },
+    { t:'tasks', i:'📝', l:'Tasks' },
+    { t:'taskTemplates', i:'📋', l:'Task Templates' },
+    { t:'scheduling', i:'📅', l:'Scheduling' }
+  ]},
+  { id:'log', icon:'📘', label:'Log', tabs:[
+    { t:'photoTimeline', i:'📸', l:'Photo Timeline' },
+    { t:'dailyLog', i:'📓', l:'Daily Site Log' },
+    { t:'inspections', i:'🔍', l:'Inspections' },
+    { t:'deliveries', i:'📦', l:'Deliveries' },
+    { t:'changeOrders', i:'📝', l:'Change Orders' },
+    { t:'messages', i:'💬', l:'Messages' }
+  ]},
+  { id:'cust', icon:'👥', label:'Clients', tabs:[
+    { t:'customers', i:'👥', l:'Customers' },
+    { t:'upgrades', i:'📋', l:'Upgrades' },
+    { t:'custUpdates', i:'📣', l:'Customer Updates' },
+    { t:'custReports', i:'📝', l:'Customer Reports' },
+    { t:'custPortals', i:'🏠', l:'Customer Portals' },
+    { t:'walkthroughs', i:'🚶', l:'Walkthroughs' },
+    { t:'upgradeEditor', i:'✏️', l:'Upgrade Editor' }
+  ]},
+  { id:'web', icon:'🌐', label:'Website', tabs:[
+    { t:'homeContent', i:'📝', l:'Home Page Content' },
+    { t:'units', i:'🏢', l:'Units' },
+    { t:'brokers', i:'🤝', l:'Brokers' },
+    { t:'plans', i:'📐', l:'Design Plans' },
+    { t:'homeProjects', i:'🏗️', l:'Home Page Projects' },
+    { t:'contactMessages', i:'📨', l:'Contact Messages' }
+  ]},
+  { id:'sub', icon:'🔧', label:'Subs', tabs:[
+    { t:'subs', i:'🔧', l:'Subcontractors' },
+    { t:'subCalendar', i:'📅', l:'Sub Calendar' },
+    { t:'vendors', i:'📇', l:'Vendors' },
+    { t:'employees', i:'👤', l:'Employees' }
+  ]}
+];
+
+// Flatten helper: find the catalog entry + category for a tab id
+function _ddFindTab(tabId){
+  for (var c=0;c<DD_NAV.length;c++){ var cat=DD_NAV[c];
+    for (var i=0;i<cat.tabs.length;i++){ if(cat.tabs[i].t===tabId) return {cat:cat, tab:cat.tabs[i]}; } }
+  return null;
+}
+function _ddAllTabs(){ var out=[]; DD_NAV.forEach(function(c){ c.tabs.forEach(function(t){ out.push(t); }); }); return out; }
+
+var _ddPinned = false;          // desktop flyout pinned
+var _ddActiveCat = 'home';      // which category the flyout is showing
+
+// ---- Per-user bottom bar favorites (localStorage) ----
+function _ddFavKey(){
+  var who = '';
+  try { who = (currentUser && (currentUser.email||currentUser.id)) || ''; } catch(e) {}
+  return 'dd_bottomFavs_' + (who || 'default');
+}
+function _ddGetFavs(){
+  try { var v = JSON.parse(localStorage.getItem(_ddFavKey())||'null'); if (Array.isArray(v)) return v.slice(0,4); } catch(e) {}
+  return ['dashboard','projects','customers','units']; // sensible defaults
+}
+function _ddSetFavs(arr){ try { localStorage.setItem(_ddFavKey(), JSON.stringify(arr.slice(0,4))); } catch(e) {} }
+function _ddToggleFav(tabId){
+  var favs = _ddGetFavs();
+  var idx = favs.indexOf(tabId);
+  if (idx>-1) { favs.splice(idx,1); }
+  else { if (favs.length>=4) { try{ddToast('Bottom bar is full (4 max). Remove one first.');}catch(e){} return; } favs.push(tabId); }
+  _ddSetFavs(favs);
+  ddRenderBottomBar(); ddRenderMore();
+}
+
+// ---- Badge counts (reuse existing badge sources where available) ----
+function _ddBadgeFor(tabId){
+  try {
+    if (tabId==='contactMessages'){ var el=document.getElementById('contactMsgBadge'); if(el&&el.textContent) return el.textContent; }
+    if (tabId==='messages'){ var e2=document.getElementById('messagesBadge'); if(e2&&e2.textContent) return e2.textContent; }
+    if (tabId==='walkthroughs'){ var e3=document.getElementById('walkthroughsBadge'); if(e3&&e3.style.display!=='none'&&e3.textContent) return e3.textContent; }
+  } catch(e) {}
+  return '';
+}
+function _ddCatBadge(cat){
+  var sum=0;
+  cat.tabs.forEach(function(t){ var b=parseInt(_ddBadgeFor(t.t),10); if(!isNaN(b)) sum+=b; });
+  return sum>0 ? String(sum) : '';
+}
+
+// ---- Render the rail ----
+function ddRenderRail(){
+  var host=document.getElementById('ddRailBtns'); if(!host) return;
+  host.innerHTML = DD_NAV.map(function(cat){
+    var badge=_ddCatBadge(cat);
+    return '<div class="rail-btn'+(cat.id===_ddActiveCat?' active':'')+'" onclick="ddOpenCat(\''+cat.id+'\')" title="'+cat.label+'">'+
+      '<span class="ic">'+cat.icon+'</span><span class="lbl">'+cat.label+'</span>'+
+      (badge?'<span class="rail-badge">'+badge+'</span>':'')+
+    '</div>';
+  }).join('');
+}
+
+// ---- Render the flyout body for a category ----
+function ddRenderFlyout(catId){
+  var cat=null; DD_NAV.forEach(function(c){ if(c.id===catId) cat=c; });
+  if(!cat) return;
+  document.getElementById('ddFlyTitle').textContent = cat.label;
+  var favs=_ddGetFavs();
+  var cur = window._currentTab;
+  document.getElementById('ddFlyBody').innerHTML = cat.tabs.map(function(t){
+    var badge=_ddBadgeFor(t.t);
+    var isFav=favs.indexOf(t.t)>-1;
+    return '<div class="fly-item'+(t.t===cur?' active':'')+'" onclick="ddNav(\''+t.t+'\')">'+
+      '<span>'+t.i+'</span> '+t.l+
+      (badge?'<span class="badge">'+badge+'</span>':'<span class="star'+(isFav?' on':'')+'" onclick="event.stopPropagation();_ddToggleFav(\''+t.t+'\')" title="Add to bottom bar">'+(isFav?'★':'☆')+'</span>')+
+    '</div>';
+  }).join('');
+}
+
+// ---- Rail icon click: open that category's flyout ----
+function ddOpenCat(catId){
+  _ddActiveCat=catId;
+  ddRenderRail();
+  ddRenderFlyout(catId);
+  document.getElementById('ddFlyout').classList.add('open');
+  if(!_ddPinned) document.getElementById('ddScrim').classList.add('show');
+}
+function ddFlyClose(){
+  if(_ddPinned) return;
+  document.getElementById('ddFlyout').classList.remove('open');
+  document.getElementById('ddScrim').classList.remove('show');
+}
+function ddTogglePin(){
+  _ddPinned=!_ddPinned;
+  var page=document.getElementById('officePage');
+  var pin=document.getElementById('ddFlyPin');
+  if(_ddPinned){
+    page.classList.add('pinned');
+    document.getElementById('ddFlyout').classList.add('open');
+    document.getElementById('ddScrim').classList.remove('show');
+    pin.classList.add('on'); pin.textContent='📌 Pinned';
+    try{ localStorage.setItem('dd_navPinned','1'); }catch(e){}
+  } else {
+    page.classList.remove('pinned');
+    pin.classList.remove('on'); pin.textContent='📌 Pin';
+    try{ localStorage.setItem('dd_navPinned','0'); }catch(e){}
+    ddFlyClose();
+  }
+}
+
+// ---- Navigate to a tab (called from flyout, bottom bar, more sheet) ----
+function ddNav(tabId){
+  try { switchTab(tabId); } catch(e) {}
+  // move the flyout to the tab's category & highlight
+  var found=_ddFindTab(tabId);
+  if(found){ _ddActiveCat=found.cat.id; ddRenderRail(); ddRenderFlyout(found.cat.id); }
+  ddRenderBottomBar();
+  // Asana behavior: picking a tab auto-closes the flyout (unless pinned)
+  setTimeout(ddFlyClose, 100);
+  ddCloseMore();
+}
+
+// ---- Mobile bottom bar ----
+function ddRenderBottomBar(){
+  var host=document.getElementById('ddBottomBar'); if(!host) return;
+  var favs=_ddGetFavs();
+  var cur=window._currentTab;
+  var btns = favs.map(function(tid){
+    var meta=_ddFindTab(tid); if(!meta) return '';
+    var t=meta.tab; var badge=_ddBadgeFor(tid);
+    return '<button class="bbar-btn'+(tid===cur?' active':'')+'" onclick="ddNav(\''+tid+'\')">'+
+      '<span class="ic">'+t.i+'</span>'+t.l+
+      (badge?'<span class="bb-badge">'+badge+'</span>':'')+
+    '</button>';
+  }).join('');
+  // More button always last
+  btns += '<button class="bbar-btn'+((favs.indexOf(cur)===-1)?' active':'')+'" onclick="ddOpenMore()">'+
+      '<span class="ic">•••</span>More</button>';
+  host.innerHTML = btns;
+}
+
+// ---- Mobile "More" sheet (all tabs, grouped, with star to favorite) ----
+function ddRenderMore(){
+  var host=document.getElementById('ddMoreBody'); if(!host) return;
+  var favs=_ddGetFavs();
+  var cur=window._currentTab;
+  host.innerHTML = DD_NAV.map(function(cat){
+    return '<div class="more-group-label">'+cat.icon+' '+cat.label+'</div>'+
+      '<div class="more-grid">'+ cat.tabs.map(function(t){
+        var badge=_ddBadgeFor(t.t);
+        var isFav=favs.indexOf(t.t)>-1;
+        return '<div class="more-item'+(t.t===cur?' active':'')+'" onclick="ddNav(\''+t.t+'\')">'+
+          '<span class="pin-toggle'+(isFav?' on':'')+'" onclick="event.stopPropagation();_ddToggleFav(\''+t.t+'\')" title="Pin to bottom bar">'+(isFav?'★':'☆')+'</span>'+
+          (badge?'<span class="badge">'+badge+'</span>':'')+
+          '<span class="ic">'+t.i+'</span>'+t.l+
+        '</div>';
+      }).join('') + '</div>';
+  }).join('');
+}
+function ddOpenMore(){ ddRenderMore(); document.getElementById('ddMoreSheet').classList.add('open'); document.getElementById('ddMoreScrim').classList.add('show'); }
+function ddCloseMore(){ var s=document.getElementById('ddMoreSheet'); if(s) s.classList.remove('open'); var sc=document.getElementById('ddMoreScrim'); if(sc) sc.classList.remove('show'); }
+
+// ---- Initialize the shell when the office page is shown ----
+function ddInitNavShell(){
+  var page=document.getElementById('officePage');
+  if(!page) return;
+  page.classList.add('nav-shell');
+  // restore pinned state (desktop)
+  try { if(localStorage.getItem('dd_navPinned')==='1' && window.matchMedia('(min-width:768px)').matches){ _ddPinned=false; ddTogglePin(); } } catch(e){}
+  ddRenderRail();
+  ddRenderFlyout(_ddActiveCat);
+  ddRenderBottomBar();
+  ddRenderMore();
+}
+// Re-sync highlights whenever a tab changes (hook after switchTab via a light wrapper)
+(function(){
+  if(window._ddWrappedSwitch) return; window._ddWrappedSwitch=true;
+  var _origSwitch = window.switchTab;
+  if(typeof _origSwitch==='function'){
+    window.switchTab = function(tab){
+      var r = _origSwitch.apply(this, arguments);
+      try {
+        var found=_ddFindTab(tab);
+        if(found){ _ddActiveCat=found.cat.id; }
+        if(document.getElementById('ddRailBtns')){ ddRenderRail(); ddRenderFlyout(_ddActiveCat); ddRenderBottomBar(); }
+      } catch(e){}
+      return r;
+    };
+  }
+})();
+// Boot the shell after load & whenever office page becomes visible
+document.addEventListener('DOMContentLoaded', function(){ setTimeout(function(){ if(document.getElementById('officePage')) ddInitNavShell(); }, 400); });
+</script>
 </body>
 </html>
