@@ -4589,55 +4589,47 @@ div[style*="position:fixed"][style*="inset:0"] {
   #team { background:var(--mk-navy); }
   #team .section-title { color:#fff; }
   #team .section-sub { color:#8899bb; }
-  .team-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:20px; max-width:1400px; margin:0 auto; }
+  .team-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,220px)); gap:20px; max-width:1200px; margin:0 auto; justify-content:center; }
+    .team-avatar {
+      width:74px; height:74px; border-radius:50%;
+      background:linear-gradient(135deg,var(--mk-gold),#8a6a38);
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Playfair Display',serif; font-weight:700; font-size:1.5rem; color:#1b2142;
+      margin-bottom:14px; box-shadow:0 4px 14px rgba(0,0,0,0.3);
+    }
+    .team-card-front, .team-card-back {
+      position:absolute; inset:0;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding:26px 18px; text-align:center; border-radius:6px;
+    }
+    .team-card-front { background:#1f2f57; border:1px solid rgba(191,157,104,0.35); z-index:2; }
+    .team-card-back {
+      background:#243a66; border:1px solid rgba(191,157,104,0.55);
+      justify-content:flex-start; padding-top:30px;
+      opacity:0; visibility:hidden; transition:opacity .35s ease; z-index:1;
+    }
+    .team-card.flipped .team-card-front { opacity:0; visibility:hidden; }
+    .team-card.flipped .team-card-back { opacity:1; visibility:visible; z-index:3; }
+
   @media(max-width:1100px){ .team-grid{ grid-template-columns:repeat(3,1fr); } }
   @media(max-width:640px){ .team-grid{ grid-template-columns:repeat(2,1fr); } }
 
   /* Flip card container */
-  .team-card { height:280px; perspective:1000px; cursor:pointer; }
+  .team-card { height:280px; perspective:1000px; cursor:pointer;
+      background:#1f2f57; border-radius:4px; box-shadow:0 6px 20px rgba(0,0,0,0.25); transition:transform .2s ease, box-shadow .2s ease;
+    }
   .team-card-inner {
     position:relative; width:100%; height:100%;
     transform-style:preserve-3d;
     transition:transform 0.65s cubic-bezier(0.4,0.2,0.2,1);
   }
-  .team-card:hover .team-card-inner, .team-card.flipped .team-card-inner { transform:rotateY(180deg); }
-
-  /* Front & back shared */
-  .team-card-front, .team-card-back {
-    position:absolute; inset:0;
-    backface-visibility:hidden; -webkit-backface-visibility:hidden;
-    border:1px solid rgba(191,157,104,0.2); border-radius:1px;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    padding:28px 20px; text-align:center;
-      transform:rotateY(180deg);
-    }
-
-  /* Front */
-  .team-card-front {
-      position:absolute; inset:0;
-      backface-visibility:hidden; -webkit-backface-visibility:hidden;
-      display:flex; flex-direction:column; align-items:center; justify-content:center;
-      padding:28px 20px; text-align:center; background:rgba(255,255,255,0.04); }
-  .team-avatar {
-    width:80px; height:80px; border-radius:50%;
-    background:linear-gradient(135deg,var(--mk-gold),#8a6a38);
-    display:flex; align-items:center; justify-content:center;
-    margin:0 auto 18px;
-    font-family:'Playfair Display',serif; font-size:1.5rem; color:#fff; font-weight:700;
-    border:2px solid rgba(191,157,104,0.35);
-    flex-shrink:0;
-  }
+  
   .team-name { font-family:'Playfair Display',serif; font-size:1.08rem; color:#fff; font-weight:600; margin-bottom:6px; }
   .team-role { font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; color:var(--mk-gold); }
   .team-hint { font-size:0.68rem; color:rgba(191,157,104,0.5); margin-top:14px; letter-spacing:0.08em; }
 
   /* Back */
-  .team-card-back {
-    background:linear-gradient(145deg,#1e2d5a,#1b2142);
-    border-color:rgba(191,157,104,0.4);
-    transform:rotateY(180deg);
-    justify-content:flex-start; padding:26px 22px;
-  }
+  
   .team-back-role { font-size:0.65rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--mk-gold); margin-bottom:10px; font-weight:700; }
   .team-back-name { font-family:'Playfair Display',serif; font-size:1rem; color:#fff; font-weight:700; margin-bottom:14px; }
   .team-back-divider { width:36px; height:2px; background:var(--mk-gold); margin-bottom:14px; }
@@ -4904,7 +4896,7 @@ div[style*="position:fixed"][style*="inset:0"] {
   }
 
   /* Team cards flip on tap (works on touch). Hover still works on desktop. */
-  @media(hover:none){ .team-card:hover .team-card-inner { transform:none; } .team-card.flipped .team-card-inner { transform:rotateY(180deg); } }
+  @media(hover:none){   }
 
   /* ── Fix: Featured Projects header contrast (dark section bg) ── */
   #projects { background: var(--mk-navy) !important; }
@@ -5344,10 +5336,27 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v304</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v306</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
+      <!-- New vs Returning toggle -->
+      <div style="display:flex;gap:0;background:var(--cream);border-radius:10px;padding:4px;margin-bottom:18px;">
+        <button id="custModeNew" onclick="custSetMode('new')" style="flex:1;padding:10px;border:none;border-radius:8px;font-family:'Archivo',sans-serif;font-weight:800;font-size:13px;cursor:pointer;background:var(--navy);color:#fff;">New Customer</button>
+        <button id="custModeReturning" onclick="custSetMode('returning')" style="flex:1;padding:10px;border:none;border-radius:8px;font-family:'Archivo',sans-serif;font-weight:800;font-size:13px;cursor:pointer;background:transparent;color:var(--muted);">Returning</button>
+      </div>
+      <!-- Returning: code-only login -->
+      <div id="custReturningPanel" style="display:none;">
+        <div class="form-group">
+          <label class="form-label">Your 4-digit code</label>
+          <input class="form-input" type="tel" inputmode="numeric" maxlength="4" id="custReturnCode" placeholder="••••" style="text-align:center;font-size:28px;letter-spacing:12px;font-weight:800;" oninput="this.value=this.value.replace(/\\D/g,'').slice(0,4)">
+          <div style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center;">Enter the code you created when you first signed up.</div>
+        </div>
+        <button class="btn-primary" onclick="customerCodeLogin()" style="margin-top:8px;background:var(--navy);color:#fff;">Enter My Portal</button>
+        <div id="custReturnError" class="auth-error" style="display:none;margin-top:12px;"></div>
+      </div>
+      <!-- New customer: full form (existing fields) -->
+      <div id="custNewPanel">
       <div class="form-group">
         <label class="form-label">Your Name</label>
         <input class="form-input" type="text" id="custName" placeholder="Full name">
@@ -5370,8 +5379,9 @@ div[style*="position:fixed"][style*="inset:0"] {
         <input class="form-input" type="tel" id="custPhoneVerify" placeholder="e.g. 845-555-1234" inputmode="tel">
         <div style="font-size:11px;color:var(--muted);margin-top:5px;">For your security, this must match the number we have on file for your unit.</div>
       </div>
-      <button class="btn-primary" onclick="customerAccess()" style="margin-top:8px;">Make My Selections</button>
+      <button class="btn-primary" onclick="customerAccess()" style="margin-top:8px;background:var(--navy);color:#fff;">Make My Selections</button>
       <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:16px;line-height:1.6;">Enter your address, unit, and the phone number on file to view your upgrade options.</p>
+      </div><!-- /custNewPanel -->
     </div>
   </div>
 </div>
@@ -5409,8 +5419,6 @@ div[style*="position:fixed"][style*="inset:0"] {
       <button onclick="cdOpenUpdates()" style="position:relative;background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px 12px;cursor:pointer;text-align:center;box-shadow:0 2px 10px rgba(13,31,60,0.06);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:104px;"><span id="cdUpdatesCount" style="display:none;position:absolute;top:10px;right:10px;background:var(--red);color:#fff;font-size:10px;font-weight:800;border-radius:10px;padding:1px 7px;">new</span><div style="font-size:28px;line-height:1;">📣</div><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:13.5px;letter-spacing:0.3px;color:var(--navy);line-height:1.2;">What's Happening</div></button>
       <button onclick="cdOpenPunch()" style="position:relative;background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px 12px;cursor:pointer;text-align:center;box-shadow:0 2px 10px rgba(13,31,60,0.06);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:104px;"><span id="cdPunchCount" style="display:none;position:absolute;top:10px;right:10px;background:var(--red);color:#fff;font-size:10px;font-weight:800;border-radius:10px;padding:1px 7px;">new</span><div style="font-size:28px;line-height:1;">📋</div><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:13.5px;letter-spacing:0.3px;color:var(--navy);line-height:1.2;">My Punch List</div></button>
       <button onclick="cdOpenMessages()" style="position:relative;background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px 12px;cursor:pointer;text-align:center;box-shadow:0 2px 10px rgba(13,31,60,0.06);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:104px;"><span id="cdMsgBadge" style="display:none;position:absolute;top:10px;right:10px;background:var(--red);color:#fff;font-size:10px;font-weight:800;border-radius:10px;padding:1px 7px;">new</span><div style="font-size:28px;line-height:1;">💬</div><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:13.5px;letter-spacing:0.3px;color:var(--navy);line-height:1.2;">Message Office</div></button>
-      <button onclick="cdAskAI()" style="position:relative;background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px 12px;cursor:pointer;text-align:center;box-shadow:0 2px 10px rgba(13,31,60,0.06);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:104px;"><div style="font-size:28px;line-height:1;">✨</div><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:13.5px;letter-spacing:0.3px;color:var(--navy);line-height:1.2;">Ask About My Home</div></button>
-      <button onclick="cdExplainTerm()" style="position:relative;background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px 12px;cursor:pointer;text-align:center;box-shadow:0 2px 10px rgba(13,31,60,0.06);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:104px;"><div style="font-size:28px;line-height:1;">📖</div><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:13.5px;letter-spacing:0.3px;color:var(--navy);line-height:1.2;">Explain a Term</div></button>
     </div>
 
     <!-- Dynamic sections injected here -->
@@ -5795,7 +5803,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v304</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v306</div>
     </div>
   </div>
 
@@ -6763,7 +6771,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v304';
+<script>var APP_VERSION = 'v306';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -8945,6 +8953,72 @@ function _confirmSetPin() {
 function _cancelSetPin() {
   document.getElementById('pinSetModal').style.display = 'none';
   if (window._pinSetResolve) { window._pinSetResolve(null); window._pinSetResolve = null; }
+}
+
+async // ===== New vs Returning customer mode toggle =====
+function custSetMode(mode) {
+  var newBtn = document.getElementById('custModeNew');
+  var retBtn = document.getElementById('custModeReturning');
+  var newPanel = document.getElementById('custNewPanel');
+  var retPanel = document.getElementById('custReturningPanel');
+  if (mode === 'returning') {
+    if(newPanel) newPanel.style.display = 'none';
+    if(retPanel) retPanel.style.display = 'block';
+    if(retBtn){ retBtn.style.background='var(--navy)'; retBtn.style.color='#fff'; }
+    if(newBtn){ newBtn.style.background='transparent'; newBtn.style.color='var(--muted)'; }
+    setTimeout(function(){ var c=document.getElementById('custReturnCode'); if(c) c.focus(); }, 80);
+  } else {
+    if(newPanel) newPanel.style.display = 'block';
+    if(retPanel) retPanel.style.display = 'none';
+    if(newBtn){ newBtn.style.background='var(--navy)'; newBtn.style.color='#fff'; }
+    if(retBtn){ retBtn.style.background='transparent'; retBtn.style.color='var(--muted)'; }
+  }
+}
+
+// ===== Returning customer: log in with just the 4-digit code =====
+async function customerCodeLogin() {
+  var errEl = document.getElementById('custReturnError');
+  errEl.style.display = 'none';
+  var code = (document.getElementById('custReturnCode').value || '').trim();
+  if (code.length !== 4) {
+    errEl.textContent = 'Please enter your 4-digit code.';
+    errEl.style.display = 'block'; return;
+  }
+  // Search all customer upgrade records for a matching PIN.
+  // Read directly from Firestore (the customer's device has an empty local cache).
+  var btn = event && event.target ? event.target : null;
+  var origText = btn ? btn.textContent : '';
+  if (btn) { btn.textContent = 'Checking…'; btn.disabled = true; }
+  try {
+    var recs = await _fsListByPrefix('upgrades:');
+    var matches = (recs || []).filter(function(r){ return r && r._pin && String(r._pin) === code; });
+    if (btn) { btn.textContent = origText; btn.disabled = false; }
+    if (matches.length === 0) {
+      errEl.textContent = 'That code was not found. Check the code or sign up as a new customer.';
+      errEl.style.display = 'block'; return;
+    }
+    if (matches.length > 1) {
+      // Rare: same code on multiple units. Ask for address to disambiguate.
+      errEl.textContent = 'That code matches more than one home. Please use the New Customer tab and enter your address.';
+      errEl.style.display = 'block'; return;
+    }
+    var rec = matches[0];
+    // Reconstruct the access session from the record and open the dashboard.
+    await _ensureAnonAuth();
+    var sess = { name: rec.name || rec._name || '', address: rec.address || rec._address || '', unit: rec.unit || rec._unit || 'Main',
+                 saveKey: 'upgrades:' + btoa(unescape(encodeURIComponent((rec.address||rec._address||'') + '|' + (rec.unit||rec._unit||'Main')))).replace(/=/g,'') };
+    try { sessionStorage.setItem('custSession', JSON.stringify(sess)); } catch(e) {}
+    try { localStorage.setItem('custSession', JSON.stringify(sess)); } catch(e) {}
+    if (typeof openCustomerDashboard === 'function') {
+      openCustomerDashboard(sess.name, sess.address, sess.unit);
+    } else if (typeof _openCustomerHome === 'function') {
+      _openCustomerHome(sess);
+    }
+  } catch(e) {
+    if (btn) { btn.textContent = origText; btn.disabled = false; }
+    errEl.textContent = 'Something went wrong. Please try again.';
+    errEl.style.display = 'block';
+  }
 }
 
 async function customerAccess() {
@@ -11219,18 +11293,25 @@ async function openCustomerDashboard(name, address, unit, saveKey, existing) {
   } catch(e) {}
   try { _cdRenderHomeSwitcher(); } catch(e) {}
   // load the dynamic pieces into the dashboard slots
+  // Load all dashboard sections IN PARALLEL (was 13 sequential round-trips = slow login).
+  // Portal config first (others may read its result), then the rest concurrently.
   try { await _loadPortalConfig(address, unit); } catch(e) {}
-  try { await _loadCustomerProgress(address, unit, 'cdProgress'); } catch(e) {}
-  try { await _loadCustomerUpdatesInto(address, unit, 'cdUpdates'); } catch(e) {}
-  try { await _cdUpdatesCount(address, unit); } catch(e) {}
-  try { await _cdPunchCount(); } catch(e) {}
-  try { await _loadCustomerFiles(address, unit, 'cdFiles'); } catch(e) {}
-  try { await _cpRender('cdIssueList'); } catch(e) {}
-  try { await _loadWalkStatus(address, unit); } catch(e) {}
-  try { await _loadWalkSlots(address, unit); } catch(e) {}
-  try { await _loadCustStatusLine(); } catch(e) {}
-  try { await _loadCustFaq(); } catch(e) {}
-  try { await _loadCustomerChangeOrders(address, unit); } catch(e) {}
+  var _cdLoads = [
+    function(){ return _loadCustomerProgress(address, unit, 'cdProgress'); },
+    function(){ return _loadCustomerUpdatesInto(address, unit, 'cdUpdates'); },
+    function(){ return _cdUpdatesCount(address, unit); },
+    function(){ return _cdPunchCount(); },
+    function(){ return _loadCustomerFiles(address, unit, 'cdFiles'); },
+    function(){ return _cpRender('cdIssueList'); },
+    function(){ return _loadWalkStatus(address, unit); },
+    function(){ return _loadWalkSlots(address, unit); },
+    function(){ return _loadCustStatusLine(); },
+    function(){ return _loadCustFaq(); },
+    function(){ return _loadCustomerChangeOrders(address, unit); }
+  ];
+  // Fire them all at once; ignore individual failures. Don't block on them —
+  // the dashboard is already on screen and each section renders as it resolves.
+  Promise.all(_cdLoads.map(function(f){ try { return Promise.resolve(f()).catch(function(){}); } catch(e){ return Promise.resolve(); } }));
 }
 async function cdGoGallery() {
   try {
