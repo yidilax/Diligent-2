@@ -5376,7 +5376,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v321</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v323</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -5843,7 +5843,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v321</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v323</div>
     </div>
   </div>
 
@@ -6811,7 +6811,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v321';
+<script>var APP_VERSION = 'v323';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -14836,7 +14836,9 @@ function _notifyTaskStakeholders(t, opts) {
   if (t.ownerId) targets.push(t.ownerId);
   targets.forEach(function(uid) {
     if (!uid || seen[uid]) return; seen[uid] = 1;
-    createNotification(uid, { type: opts.type, text: opts.text, taskId: opts.taskId });
+    // createNotification now sends the push automatically (universal), so pass a
+    // nice push title based on the task.
+    createNotification(uid, { type: opts.type, text: opts.text, taskId: opts.taskId, pushTitle: (t && t.title) ? t.title : 'Task update' });
   });
 }
 
@@ -16531,6 +16533,15 @@ async function createNotification(recipientId, opts) {
     read: false
   };
   try { await DB.set('notif:' + recipientId + ':' + n.id, n); } catch (e) {}
+  // Universal push: every in-app notification also buzzes the recipient's phone
+  // (if they've enabled push). The self-check + prefs + quiet-hours above already
+  // gate this, so by here we know the recipient should be notified.
+  try {
+    var _pushTitle = (opts && opts.pushTitle) ? opts.pushTitle
+                    : (n.actor ? n.actor : 'Diligent Developers');
+    var _pushBody = n.text || 'You have a new notification';
+    sendPushToOwner(recipientId, _pushTitle, _pushBody, (opts && opts.url) ? opts.url : '/');
+  } catch(e) {}
 }
 
 async function _loadMyNotifications() {
@@ -21788,10 +21799,10 @@ async function saveScheduledVisit() {
   await DB.set('subvisit:' + id, rec);
   // Notify the sub in-app (they'll see it next time they open their portal).
   try { if (typeof createNotification === 'function') {
-    await createNotification(subId, { title:'Visit scheduled',
-      body:'A visit is scheduled for ' + date + (time?(' at ' + time):''), kind:'visit' });
+    await createNotification(subId, { type:'visit',
+      text:'A visit is scheduled for ' + date + (time?(' at ' + time):''),
+      pushTitle:'Visit scheduled' });
   } } catch(e) {}
-  try { await sendPushToOwner(subId, 'Visit scheduled', 'A visit is scheduled for ' + date + (time?(' at ' + time):'')); } catch(e) {}
   try { logActivity('Scheduled a visit with ' + (s?s.name:'a sub')); } catch(e) {}
   try { ddToast('Visit scheduled \u2713'); } catch(e) {}
   closeScheduleVisit();
