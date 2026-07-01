@@ -5240,7 +5240,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v301</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v302</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -5663,7 +5663,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v301</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v302</div>
     </div>
   </div>
 
@@ -6204,7 +6204,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <!-- By House grid view (spreadsheet like broker page) -->
       <div id="panel-grid" style="display:none;">
         <div style="background:var(--cream);border:1px solid var(--border);border-radius:11px;padding:11px 14px;margin-bottom:14px;font-size:12.5px;color:var(--muted);line-height:1.5;">
-          Every customer's upgrade selections in one spreadsheet, grouped by house. The Unit column stays put while you swipe sideways to see all upgrades.
+          Every customer's upgrade selections in one spreadsheet, grouped by house. Upgrades run down the page and each customer is a column — the customer names stay pinned at the top as you scroll down.
         </div>
         <div id="upgradeGridList"></div>
       </div>
@@ -6631,7 +6631,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v301';
+<script>var APP_VERSION = 'v302';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -25534,14 +25534,10 @@ function renderUpgradeGrid() {
     return;
   }
 
-  // Build the column list from the upgrade sections (every upgrade field = a column)
+  // Upgrade fields become ROWS
   var sections = (typeof UPGRADE_SECTIONS !== 'undefined' && UPGRADE_SECTIONS) ? UPGRADE_SECTIONS : (window._upgradeSections || []);
-  var upgradeCols = [];
-  sections.forEach(function(sec){
-    (sec.fields||[]).forEach(function(f){ upgradeCols.push({ key:f.key, name:f.name, glassKey:f.glassKey }); });
-  });
 
-  // Group submissions by house (address)
+  // Group submissions by house (address); customers within a house become COLUMNS
   var groups = {}; var order = [];
   subs.forEach(function(s){
     var a = (s.address && String(s.address).trim()) ? String(s.address).trim() : 'Other';
@@ -25551,56 +25547,76 @@ function renderUpgradeGrid() {
   order.sort(function(a,b){ return a.localeCompare(b, undefined, {numeric:true}); });
 
   var esc = _esc;
-  // value of an upgrade cell for a submission
-  var upgVal = function(s, col){
+  var cellVal = function(s, f){
     var sel = s.selections || {};
-    var v = sel[col.key];
+    var v = sel[f.key];
     if (v === 'yes') {
-      // include glass/sub-type detail if present
       var extra = '';
-      if (col.glassKey && sel[col.glassKey]) extra = ' ('+esc(sel[col.glassKey])+')';
-      else if (sel[col.key+'_type']) extra = ' ('+esc(sel[col.key+'_type'])+')';
-      return '<span style="color:#2E7D32;font-weight:700;">\u2713 Yes'+extra+'</span>';
+      if (f.glassKey && sel[f.glassKey]) extra = '<div style="font-size:10px;color:var(--gold);font-weight:700;">'+esc(sel[f.glassKey])+'</div>';
+      else if (sel[f.key+'_type']) extra = '<div style="font-size:10px;color:var(--gold);font-weight:700;">'+esc(sel[f.key+'_type'])+'</div>';
+      return '<span style="color:#2E7D32;font-weight:800;">\u2713</span>'+extra;
     }
-    if (v === 'no') return '<span style="color:#bbb;">\u2014</span>';
-    if (v != null && v !== '') return esc(v); // free-text / other value
-    return '<span style="color:#ccc;">\u2013</span>';
+    if (v === 'no') return '<span style="color:#ddd;">\u2014</span>';
+    if (v != null && v !== '') return '<span style="font-size:11px;">'+esc(v)+'</span>';
+    return '<span style="color:#ddd;">\u00b7</span>';
   };
 
-  var thBase = 'padding:9px 10px;font-size:10.5px;letter-spacing:0.03em;text-transform:uppercase;color:#fff;font-weight:700;white-space:nowrap;text-align:left;background:var(--navy);';
-  var minW = 300 + upgradeCols.length*130;
-
   host.innerHTML = order.map(function(addr){
-    var rows = groups[addr].slice().sort(function(a,b){
+    var custs = groups[addr].slice().sort(function(a,b){
       return String(a.unit||'').localeCompare(String(b.unit||''), undefined,{numeric:true});
-    }).map(function(s, idx){
-      var rowBg = (idx%2===1)?'#FAFAF7':'#fff';
-      var tdBase = 'padding:8px 10px;font-size:12.5px;color:var(--navy);white-space:nowrap;border-bottom:1px solid var(--border);';
-      // frozen first column = Unit (+ customer name under it)
-      var unitLabel = (s.unit ? esc(s.unit) : '\u2014');
-      var frozen = '<td style="'+tdBase+'position:sticky;left:0;z-index:1;background:'+rowBg+';box-shadow:2px 0 0 var(--border);min-width:120px;">' +
-          '<div style="font-weight:800;">'+unitLabel+'</div>' +
-          '<div style="font-size:11px;color:var(--muted);font-weight:600;">'+esc(s.name||'')+'</div>' +
-        '</td>';
-      var upgCells = upgradeCols.map(function(col){
-        return '<td style="'+tdBase+'background:'+rowBg+';">'+upgVal(s, col)+'</td>';
-      }).join('');
-      return '<tr style="cursor:pointer;" onclick="_gridOpenSubmission('+idx+',\''+encodeURIComponent(addr)+'\')">'+frozen+upgCells+'</tr>';
+    });
+
+    // Header row: first cell "Upgrade" label, then one column per customer (unit + name)
+    // This whole header row is frozen to the top (sticky) so it stays visible when scrolling down.
+    var headTh = 'style="position:sticky;top:0;z-index:3;background:var(--navy);color:#fff;padding:9px 10px;font-size:11px;font-weight:700;text-align:left;white-space:nowrap;border-bottom:2px solid var(--gold);"';
+    // the corner cell (top-left) is sticky both top and left so it never disappears
+    var cornerTh = 'style="position:sticky;top:0;left:0;z-index:4;background:var(--navy);color:#fff;padding:9px 10px;font-size:11px;font-weight:700;text-align:left;white-space:nowrap;border-bottom:2px solid var(--gold);min-width:150px;"';
+    var custHeaders = custs.map(function(s){
+      return '<th ' + headTh.replace('sticky;top:0;','sticky;top:0;') + '>' +
+          '<div style="font-weight:800;font-size:13px;">'+esc(s.unit||'\u2014')+'</div>' +
+          '<div style="font-size:10px;color:rgba(255,255,255,0.7);font-weight:600;">'+esc(s.name||'')+'</div>' +
+        '</th>';
     }).join('');
 
-    var headerCells = upgradeCols.map(function(col){ return '<th style="'+thBase+'">'+esc(col.name)+'</th>'; }).join('');
+    // Body: one row per upgrade field, grouped visually by section
+    var bodyRows = '';
+    sections.forEach(function(sec){
+      // a light section divider row spanning all columns
+      bodyRows += '<tr><td colspan="'+(custs.length+1)+'" style="background:var(--cream);padding:6px 10px;font-size:10px;font-weight:800;letter-spacing:0.05em;text-transform:uppercase;color:var(--navy);border-bottom:1px solid var(--border);position:sticky;left:0;">'+esc(sec.title||sec.name||'')+'</td></tr>';
+      (sec.fields||[]).forEach(function(f, ri){
+        var rowBg = (ri%2===1)?'#FAFAF7':'#fff';
+        // frozen first column = upgrade name (sticky left) so you can read across
+        var nameTd = '<td style="position:sticky;left:0;z-index:1;background:'+rowBg+';padding:8px 10px;font-size:12px;font-weight:700;color:var(--navy);border-bottom:1px solid var(--border);box-shadow:2px 0 0 var(--border);min-width:150px;white-space:normal;">'+esc(f.name)+'</td>';
+        var cells = custs.map(function(s){
+          return '<td style="background:'+rowBg+';padding:8px 10px;font-size:13px;text-align:center;border-bottom:1px solid var(--border);white-space:nowrap;">'+cellVal(s, f)+'</td>';
+        }).join('');
+        bodyRows += '<tr>'+nameTd+cells+'</tr>';
+      });
+    });
 
-    return '<div style="margin-bottom:24px;">' +
-        '<div style="font-family:\'Archivo\',sans-serif;font-weight:800;font-size:15px;color:var(--navy);padding-bottom:6px;border-bottom:2px solid var(--gold);display:inline-block;margin-bottom:10px;">\ud83c\udfe0 '+esc(addr)+' <span style="font-size:12px;color:var(--muted);font-weight:600;">('+groups[addr].length+')</span></div>' +
-        '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:12px;">' +
+    var minW = 150 + custs.length*90;
+    return '<div style="margin-bottom:26px;">' +
+        '<div style="font-family:\'Archivo\',sans-serif;font-weight:800;font-size:15px;color:var(--navy);padding-bottom:6px;border-bottom:2px solid var(--gold);display:inline-block;margin-bottom:10px;">\ud83c\udfe0 '+esc(addr)+' <span style="font-size:12px;color:var(--muted);font-weight:600;">('+custs.length+')</span></div>' +
+        '<div style="max-height:70vh;overflow:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:12px;">' +
           '<table style="width:100%;border-collapse:separate;border-spacing:0;min-width:'+minW+'px;">' +
-            '<thead><tr><th style="'+thBase+'position:sticky;left:0;z-index:2;background:var(--navy);">Unit / Customer</th>'+headerCells+'</tr></thead>' +
-            '<tbody>'+rows+'</tbody>' +
+            '<thead><tr><th ' + cornerTh + '>Upgrade</th>'+custHeaders+'</tr></thead>' +
+            '<tbody>'+bodyRows+'</tbody>' +
           '</table>' +
         '</div>' +
-        '<div style="font-size:11px;color:var(--muted);margin-top:5px;padding-left:2px;">\u2190 swipe to see all upgrades \u2192 \u00b7 tap a row for full details</div>' +
+        '<div style="font-size:11px;color:var(--muted);margin-top:5px;padding-left:2px;">\u2193 scroll down for more upgrades \u00b7 customer names stay pinned at top \u00b7 \u2192 swipe for more customers</div>' +
       '</div>';
   }).join('');
+}
+
+// tap a grid row -> open that submission's full detail (kept for compatibility; vertical grid uses column headers)
+function _gridOpenSubmission(idx, addrEnc) {
+  try {
+    var addr = decodeURIComponent(addrEnc);
+    var subs = getStoredSubmissions().filter(function(s){ return ((s.address&&String(s.address).trim())||'Other')===addr; });
+    subs.sort(function(a,b){ return String(a.unit||'').localeCompare(String(b.unit||''), undefined,{numeric:true}); });
+    var s = subs[idx];
+    var k = s && (s._key || s.key); if (k) { viewSubmission(k); }
+  } catch(e) {}
 }
 
 // tap a grid row -> open that submission's full detail (reuse existing viewer)
