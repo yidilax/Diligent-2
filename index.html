@@ -5376,7 +5376,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v319</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v320</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -5843,7 +5843,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v319</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v320</div>
     </div>
   </div>
 
@@ -6811,7 +6811,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v319';
+<script>var APP_VERSION = 'v320';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -11995,6 +11995,30 @@ function _saveAiUrl() {
   try { ddToast(v ? 'AI service saved \u2713' : 'AI service cleared'); } catch(e) {}
 }
 
+async function _resetPushDevice() {
+  try {
+    var oid = _effectiveUserId();
+    // Wipe ALL stored tokens for this owner (clears stale/dead ones from earlier attempts).
+    await DB.set(_pushSubKey(oid), { ownerId: oid, tokens: [], updatedAt: Date.now() });
+    // Delete the browser's current FCM token so a brand-new one is minted.
+    try {
+      if (typeof firebase !== 'undefined' && firebase.messaging) {
+        var messaging = firebase.messaging();
+        try { await messaging.deleteToken(); } catch(e) {}
+      }
+    } catch(e) {}
+    try { ddToast('Cleared \u2014 re-registering\u2026'); } catch(e){}
+    // Re-register fresh (this mints a new token with the CURRENT vapid key).
+    var ok = await enablePushNotifications(oid, false);
+    if (ok) {
+      alert('Device re-registered with a fresh token. Now tap "Send test notification" again.');
+    }
+    try { _renderPushSetting(); } catch(e){}
+  } catch(e) {
+    alert('Reset failed: ' + String(e));
+  }
+}
+
 async function _sendTestPush() {
   try {
     var sendUrl = _pushSendUrl();
@@ -12028,6 +12052,14 @@ async function _sendTestPush() {
     } else {
       detail += 'raw response: ' + (raw ? raw.slice(0,300) : '(empty)');
     }
+    // Auto-prune dead tokens so they don't keep failing.
+    if (out && out.dead && out.dead.length) {
+      try {
+        rec.tokens = rec.tokens.filter(function(t){ return out.dead.indexOf(t) === -1; });
+        await DB.set(_pushSubKey(oid), rec);
+        detail += '\n(cleared ' + out.dead.length + ' dead token(s) \u2014 tap Reset & re-register, then test again)';
+      } catch(e) {}
+    }
     alert('Push did not deliver. Diagnostic:\n\n' + detail);
   } catch(e) {
     alert('Could not reach the sender URL. Error: ' + String(e));
@@ -12050,6 +12082,7 @@ function _renderPushSetting() {
     }
     if (on) {
       html += '<button class="pm-gcal-connect" style="margin-top:8px;" onclick="_sendTestPush()">Send test notification</button>';
+      html += '<button class="pm-gcal-connect" style="margin-top:6px;background:var(--muted);" onclick="_resetPushDevice()">Reset &amp; re-register this device</button>';
     }
   }
   // Owner-only: configure the push sender URL.
