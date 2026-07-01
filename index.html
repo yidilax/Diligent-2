@@ -5376,7 +5376,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v324</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v325</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -5843,7 +5843,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v324</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v325</div>
     </div>
   </div>
 
@@ -6811,7 +6811,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v324';
+<script>var APP_VERSION = 'v325';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -6862,7 +6862,7 @@ async function checkSyncStatus() {
 }
 function _firebaseSelfTest() { return !!_getFirestore(); }
 
-const _PUBLIC_PREFIXES = ['calevent:', 'upgrades:', 'submission:', 'upgrade_sections', 'upgrade_sections_proj:', 'custupdate:', 'subcontractor:', 'subpunch:', 'pubaddr:', 'pubpunch:', 'pubfiles:', 'custpunch:', 'pubprogress:', 'pubnotif:', 'pubportalcfg:', 'walkreq:', 'pubchangeorder:', 'subvisit:', 'pushsub:', 'custmsg:', 'pubhomeproject:', 'pubcontact:', 'pubhomecontent:', 'pubteam:', 'pubunit:', 'pubplan:', 'pubaddress:', 'pubunitcols:'];
+const _PUBLIC_PREFIXES = ['pubconfig:', 'calevent:', 'upgrades:', 'submission:', 'upgrade_sections', 'upgrade_sections_proj:', 'custupdate:', 'subcontractor:', 'subpunch:', 'pubaddr:', 'pubpunch:', 'pubfiles:', 'custpunch:', 'pubprogress:', 'pubnotif:', 'pubportalcfg:', 'walkreq:', 'pubchangeorder:', 'subvisit:', 'pushsub:', 'custmsg:', 'pubhomeproject:', 'pubcontact:', 'pubhomecontent:', 'pubteam:', 'pubunit:', 'pubplan:', 'pubaddress:', 'pubunitcols:'];
 // ===== Firebase Storage upload helper (for large files) =====
 // Uploads a File/Blob to Storage and returns { url, path }. Falls back gracefully.
 var _storageAvailable = null; // null=unknown, true/false once checked
@@ -12109,11 +12109,13 @@ async function _togglePush(want) {
   else { await disablePushNotifications(); }
 }
 
-function _savePushSendUrl() {
+async function _savePushSendUrl() {
   var el = document.getElementById('pmPushUrl');
   if (!el) return;
   var v = (el.value || '').trim();
   try { localStorage.setItem('dd_pushSendUrl', v); } catch(e) {}
+  // Save centrally so EVERY user's device can send pushes (not just this one).
+  try { await DB.set('pubconfig:pushSendUrl', { url: v, updatedAt: Date.now() }); } catch(e) {}
   try { ddToast(v ? 'Sender URL saved \u2713' : 'Sender URL cleared'); } catch(e) {}
 }
 
@@ -29312,6 +29314,17 @@ function _pushIsOn() {
 async function sendPushToOwner(ownerId, title, body, url) {
   try {
     var sendUrl = _pushSendUrl();
+    // If this device doesn't have the URL cached (e.g. an employee who never set
+    // it), fall back to the central one saved by the owner.
+    if (!sendUrl) {
+      try {
+        var cfg = await DB.get('pubconfig:pushSendUrl');
+        if (cfg && cfg.url) {
+          sendUrl = cfg.url;
+          try { localStorage.setItem('dd_pushSendUrl', sendUrl); } catch(e) {}
+        }
+      } catch(e) {}
+    }
     if (!sendUrl) return; // sender (Cloud Function) not set up yet
     var rec = await DB.get(_pushSubKey(ownerId));
     if (!rec || !rec.tokens || !rec.tokens.length) return;
