@@ -5716,7 +5716,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v293</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v294</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -6119,6 +6119,7 @@ div[style*="position:fixed"][style*="inset:0"] {
         <button class="office-nav-btn nav-sub" onclick="switchTab('homeContent');closeSidebar();" id="navbtn-homeContent"><span class="nav-icon">📝</span> Home Page Content</button>
         <button class="office-nav-btn nav-sub" onclick="switchTab('units');closeSidebar();" id="navbtn-units"><span class="nav-icon">🏢</span> Units</button>
         <button class="office-nav-btn nav-sub" onclick="switchTab('brokers');closeSidebar();" id="navbtn-brokers"><span class="nav-icon">🤝</span> Brokers</button>
+        <button class="office-nav-btn nav-sub" onclick="switchTab('plans');closeSidebar();" id="navbtn-plans"><span class="nav-icon">📐</span> Design Plans</button>
         <button class="office-nav-btn nav-sub" onclick="switchTab('homeProjects');closeSidebar();" id="navbtn-homeProjects"><span class="nav-icon">🏗️</span> Home Page Projects</button>
         <button class="office-nav-btn nav-sub" onclick="switchTab('contactMessages');closeSidebar();" id="navbtn-contactMessages"><span class="nav-icon">📨</span> Contact Messages <span id="contactMessagesBadge" style="display:none;background:#e07a6a;color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;margin-left:4px;"></span></button>
       </li>
@@ -6138,7 +6139,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v293</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v294</div>
     </div>
   </div>
 
@@ -6476,6 +6477,21 @@ div[style*="position:fixed"][style*="inset:0"] {
         Each broker gets their own access code to log into the broker portal and view unit availability. Share their code with them.
       </div>
       <div id="brokersList"></div>
+    </div>
+
+    <!-- DESIGN PLANS TAB (office/admin only) -->
+    <div id="tab-plans" class="office-tab" style="display:none;">
+      <div class="tab-header">
+        <div class="tab-header-left">
+          <div class="tab-title">Design Plans</div>
+          <div class="tab-count" id="plans-count"></div>
+        </div>
+        <button class="btn-primary" onclick="planNew()">+ Add Plan</button>
+      </div>
+      <div style="background:var(--cream);border:1px solid var(--border);border-radius:11px;padding:13px 15px;margin:10px 0 16px;font-size:13px;color:var(--muted);line-height:1.5;">
+        Upload house design plans (PDF or image) for each address. Brokers can view and download them in their portal.
+      </div>
+      <div id="plansList"></div>
     </div>
 
     <!-- UNITS MANAGEMENT TAB (office/admin only) -->
@@ -7079,7 +7095,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v293';
+<script>var APP_VERSION = 'v294';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -7130,7 +7146,7 @@ async function checkSyncStatus() {
 }
 function _firebaseSelfTest() { return !!_getFirestore(); }
 
-const _PUBLIC_PREFIXES = ['calevent:', 'upgrades:', 'submission:', 'upgrade_sections', 'upgrade_sections_proj:', 'custupdate:', 'subcontractor:', 'subpunch:', 'pubaddr:', 'pubpunch:', 'pubfiles:', 'custpunch:', 'pubprogress:', 'pubnotif:', 'pubportalcfg:', 'walkreq:', 'pubchangeorder:', 'subvisit:', 'pushsub:', 'custmsg:', 'pubhomeproject:', 'pubcontact:', 'pubhomecontent:', 'pubteam:', 'pubunit:'];
+const _PUBLIC_PREFIXES = ['calevent:', 'upgrades:', 'submission:', 'upgrade_sections', 'upgrade_sections_proj:', 'custupdate:', 'subcontractor:', 'subpunch:', 'pubaddr:', 'pubpunch:', 'pubfiles:', 'custpunch:', 'pubprogress:', 'pubnotif:', 'pubportalcfg:', 'walkreq:', 'pubchangeorder:', 'subvisit:', 'pushsub:', 'custmsg:', 'pubhomeproject:', 'pubcontact:', 'pubhomecontent:', 'pubteam:', 'pubunit:', 'pubplan:'];
 function _fsCol(key) {
   for (var i = 0; i < _PUBLIC_PREFIXES.length; i++) {
     if (String(key).indexOf(_PUBLIC_PREFIXES[i]) === 0) return 'pub';
@@ -7768,6 +7784,147 @@ function _loginAs(role) {
   else if (role === 'broker') showPage('brokerAuthPage');
 }
 
+// ========== OFFICE: Design Plans management (upload per address) ==========
+async function _plansListAll() {
+  try {
+    var recs = (await _fsListByPrefix('pubplan:')) || [];
+    return recs.filter(Boolean);
+  } catch(e) { return []; }
+}
+
+async function renderPlans() {
+  var host = document.getElementById('plansList');
+  var countEl = document.getElementById('plans-count');
+  if (!host) return;
+  host.innerHTML = '<div style="text-align:center;color:var(--muted);padding:24px;">Loading\u2026</div>';
+  var plans = await _plansListAll();
+  if (countEl) countEl.textContent = plans.length + ' plan' + (plans.length !== 1 ? 's' : '');
+  if (!plans.length) {
+    host.innerHTML = '<div class="tab-empty"><div class="tab-empty-icon">\ud83d\udcd0</div><div class="tab-empty-title">No plans yet</div><div class="tab-empty-desc">Add design plans for an address so brokers can view and download them.</div></div>';
+    return;
+  }
+  // group by address
+  var groups = {};
+  plans.forEach(function(pl){ var a = pl.address || 'Other'; (groups[a] = groups[a] || []).push(pl); });
+  var names = Object.keys(groups).sort(function(a,b){ return a.localeCompare(b, undefined, {numeric:true}); });
+  host.innerHTML = names.map(function(addr){
+    var items = groups[addr].map(function(pl){
+      var isPdf = (pl.fileType||'').indexOf('pdf') > -1;
+      var icon = isPdf ? '\ud83d\udcc4' : '\ud83d\uddbc\ufe0f';
+      return '<div style="display:flex;align-items:center;gap:10px;padding:11px;background:var(--cream);border-radius:9px;margin-bottom:8px;">' +
+          '<div style="font-size:22px;">' + icon + '</div>' +
+          '<div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:13.5px;color:var(--navy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + _esc(pl.name||'Plan') + '</div>' +
+          '<div style="font-size:11px;color:var(--muted);">' + (pl.sizeLabel||'') + '</div></div>' +
+          '<button onclick="_planDownload(\'' + pl.id + '\')" style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;">Download</button>' +
+          '<button onclick="planDelete(\'' + pl.id + '\')" style="background:rgba(176,58,46,0.08);color:var(--red);border:none;border-radius:8px;padding:8px 10px;font-size:12px;cursor:pointer;">\ud83d\uddd1</button>' +
+        '</div>';
+    }).join('');
+    return '<div style="margin-bottom:20px;">' +
+        '<div style="font-family:\'Archivo\',sans-serif;font-weight:800;font-size:14px;color:var(--navy);padding-bottom:6px;border-bottom:2px solid var(--gold);margin-bottom:10px;display:inline-block;">\ud83d\udccd ' + _esc(addr) + '</div>' +
+        items +
+      '</div>';
+  }).join('');
+}
+
+function planNew() {
+  var modal = document.getElementById('planFormModal');
+  if (!modal) { _planBuildModal(); modal = document.getElementById('planFormModal'); }
+  document.getElementById('plan-f-address').value = '';
+  document.getElementById('plan-f-name').value = '';
+  document.getElementById('plan-f-file').value = '';
+  window._planFileData = null; window._planFileType = null; window._planFileSize = null;
+  document.getElementById('plan-f-fileInfo').textContent = '';
+  modal.style.display = 'flex';
+}
+function _planCloseForm(){ var m=document.getElementById('planFormModal'); if(m) m.style.display='none'; }
+
+function _planFileChosen(input) {
+  var file = input.files && input.files[0];
+  if (!file) return;
+  // limit ~4MB (Firestore doc limit is ~1MB per field, base64 adds ~33%; warn if large)
+  var sizeMB = file.size / 1024 / 1024;
+  var info = document.getElementById('plan-f-fileInfo');
+  if (file.size > 700*1024) {
+    info.style.color = 'var(--red)';
+    info.textContent = 'File is ' + sizeMB.toFixed(1) + ' MB. Please use a file under 0.7 MB (larger files may fail to save).';
+    window._planFileData = null;
+    return;
+  }
+  info.style.color = 'var(--muted)';
+  info.textContent = 'Reading\u2026';
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    window._planFileData = e.target.result; // data URL
+    window._planFileType = file.type || '';
+    window._planFileSize = file.size;
+    var kb = Math.round(file.size/1024);
+    info.textContent = file.name + ' \u00b7 ' + (kb>1024 ? (sizeMB.toFixed(1)+' MB') : (kb+' KB'));
+    // auto-fill name if empty
+    var nameEl = document.getElementById('plan-f-name');
+    if (!nameEl.value.trim()) nameEl.value = file.name.replace(/\.[^.]+$/, '');
+  };
+  reader.onerror = function(){ info.style.color='var(--red)'; info.textContent='Could not read file.'; };
+  reader.readAsDataURL(file);
+}
+
+async function planSave() {
+  var address = document.getElementById('plan-f-address').value.trim();
+  var name = document.getElementById('plan-f-name').value.trim();
+  if (!address) { alert('Please enter the address this plan belongs to.'); return; }
+  if (!window._planFileData) { alert('Please choose a file (and wait for it to finish reading).'); return; }
+  var id = 'plan_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+  var sizeMB = (window._planFileSize||0)/1024/1024;
+  var kb = Math.round((window._planFileSize||0)/1024);
+  var rec = {
+    id: id, address: address, name: name || 'Plan',
+    data: window._planFileData, fileType: window._planFileType || '',
+    sizeLabel: (kb>1024 ? sizeMB.toFixed(1)+' MB' : kb+' KB'),
+    _createdAt: Date.now()
+  };
+  try {
+    await DB.set('pubplan:' + id, rec);
+    _planCloseForm(); ddToast('Plan added'); await renderPlans();
+  } catch(e) {
+    alert('Could not save the plan. The file may be too large. Try a smaller file.');
+  }
+}
+async function planDelete(id) {
+  var go = async function(){ try { await DB.delete('pubplan:' + id); } catch(e){} await renderPlans(); };
+  try { ddConfirm('Delete this plan?', go); } catch(e){ go(); }
+}
+// Download works for both office and broker
+async function _planDownload(id) {
+  try {
+    var rec = await DB.get('pubplan:' + id);
+    if (!rec || !rec.data) { alert('File not found.'); return; }
+    var a = document.createElement('a');
+    a.href = rec.data;
+    var ext = (rec.fileType||'').indexOf('pdf')>-1 ? '.pdf' : ((rec.fileType||'').indexOf('png')>-1 ? '.png' : ((rec.fileType||'').indexOf('jpeg')>-1||(rec.fileType||'').indexOf('jpg')>-1 ? '.jpg' : ''));
+    var fname = (rec.name || 'plan');
+    if (ext && fname.indexOf(ext)===-1) fname += ext;
+    a.download = fname;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  } catch(e) { alert('Could not download the file.'); }
+}
+function _planBuildModal() {
+  var div = document.createElement('div');
+  div.id = 'planFormModal'; div.className = 'modal-overlay'; div.style.display = 'none';
+  div.innerHTML = '<div class="modal-box" style="max-width:420px;">' +
+    '<div class="modal-header"><span class="modal-title">Add Design Plan</span><button class="modal-close" onclick="_planCloseForm()">\u00d7</button></div>' +
+    '<div class="modal-body">' +
+      '<div class="form-group"><label class="form-label">Address</label><input class="form-input" id="plan-f-address" type="text" placeholder="e.g. 31 Mangin Road"></div>' +
+      '<div class="form-group"><label class="form-label">Plan name</label><input class="form-input" id="plan-f-name" type="text" placeholder="e.g. First Floor Layout"></div>' +
+      '<div class="form-group"><label class="form-label">File (PDF or image)</label><input class="form-input" id="plan-f-file" type="file" accept="application/pdf,image/*" onchange="_planFileChosen(this)"></div>' +
+      '<div id="plan-f-fileInfo" style="font-size:12px;color:var(--muted);margin:-6px 0 12px;min-height:16px;"></div>' +
+      '<div style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.5;">Tip: keep files under 0.7 MB. For large plans, compress the PDF or upload a reduced-size image.</div>' +
+      '<div style="display:flex;gap:8px;justify-content:flex-end;">' +
+        '<button class="btn-logout" onclick="_planCloseForm()" style="background:var(--cream);border:1px solid var(--border);color:var(--navy);">Cancel</button>' +
+        '<button class="btn-primary" onclick="planSave()">Save Plan</button>' +
+      '</div>' +
+    '</div></div>';
+  document.body.appendChild(div);
+}
+
 // ========== OFFICE: Brokers management (create/manage login codes) ==========
 async function _brokersListAll() {
   try {
@@ -7840,8 +7997,17 @@ function _brokerOpenForm(rec) {
   document.getElementById('broker-f-company').value = rec ? (rec.company||'') : '';
   // show the code (read-only) when editing
   var codeRow = document.getElementById('broker-f-codeRow');
-  if (rec && rec.code) { codeRow.style.display = 'block'; document.getElementById('broker-f-codeDisplay').textContent = rec.code; }
-  else { codeRow.style.display = 'none'; }
+  var customCodeRow = document.getElementById('broker-f-customCodeRow');
+  if (rec && rec.code) {
+    // editing: show existing code (read-only), hide custom-code input
+    codeRow.style.display = 'block'; document.getElementById('broker-f-codeDisplay').textContent = rec.code;
+    if (customCodeRow) customCodeRow.style.display = 'none';
+  } else {
+    // adding: hide the read-only display, show custom-code input (blank)
+    codeRow.style.display = 'none';
+    if (customCodeRow) customCodeRow.style.display = 'block';
+    var cc = document.getElementById('broker-f-customCode'); if (cc) cc.value = '';
+  }
   document.getElementById('brokerFormTitle').textContent = rec ? 'Edit Broker' : 'Add Broker';
   modal.style.display = 'flex';
 }
@@ -7857,9 +8023,21 @@ async function brokerSave() {
     var rec = Object.assign({}, existing, { name:name, company:company });
     await DB.set('pubbroker:' + editingCode, rec);
   } else {
-    // new broker - generate a unique code
+    // new broker - use custom code if provided, else auto-generate
     var all = await _brokersListAll();
-    var code = await _genBrokerCode(all);
+    var customEl = document.getElementById('broker-f-customCode');
+    var custom = customEl ? customEl.value.trim().toUpperCase().replace(/\s+/g,'') : '';
+    var code;
+    if (custom) {
+      if (custom.length < 4) { alert('Custom code must be at least 4 characters.'); return; }
+      if (!/^[A-Z0-9]+$/.test(custom)) { alert('Custom code can only contain letters and numbers.'); return; }
+      // check it's not already taken
+      var existing = await DB.get('pubbroker:' + custom);
+      if (existing) { alert('That code is already in use. Please choose another.'); return; }
+      code = custom;
+    } else {
+      code = await _genBrokerCode(all);
+    }
     await DB.set('pubbroker:' + code, { code:code, name:name, company:company, active:true, _createdAt:Date.now() });
   }
   _brokerCloseForm(); ddToast('Saved'); await renderBrokers();
@@ -7882,6 +8060,7 @@ function _brokerBuildModal() {
       '<div id="broker-f-codeRow" style="display:none;background:var(--cream);border:1px dashed var(--border);border-radius:9px;padding:10px 12px;margin-bottom:14px;"><div style="font-size:10px;letter-spacing:0.05em;text-transform:uppercase;color:var(--muted);">Access code</div><div id="broker-f-codeDisplay" style="font-family:\'Archivo\',sans-serif;font-weight:800;font-size:20px;letter-spacing:3px;color:var(--navy);"></div></div>' +
       '<div class="form-group"><label class="form-label">Broker name</label><input class="form-input" id="broker-f-name" type="text" placeholder="Full name"></div>' +
       '<div class="form-group"><label class="form-label">Company (optional)</label><input class="form-input" id="broker-f-company" type="text" placeholder="e.g. ABC Realty"></div>' +
+      '<div class="form-group" id="broker-f-customCodeRow"><label class="form-label">Custom code (optional)</label><input class="form-input" id="broker-f-customCode" type="text" placeholder="Leave blank to auto-generate" maxlength="12" style="text-transform:uppercase;letter-spacing:2px;font-weight:700;"></div>' +
       '<div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5;">A unique 6-character code is generated automatically when you save. Share it with the broker so they can log in.</div>' +
       '<div style="display:flex;gap:8px;justify-content:flex-end;">' +
         '<button class="btn-logout" onclick="_brokerCloseForm()" style="background:var(--cream);border:1px solid var(--border);color:var(--navy);">Cancel</button>' +
@@ -8039,6 +8218,7 @@ async function renderBrokerUnits() {
   if (!host) return;
   host.innerHTML = '<div style="text-align:center;color:var(--muted);padding:30px;">Loading units\u2026</div>';
   var units = await _unitsListAll();
+  var allPlans = await _plansListAll();
 
   // Populate address filter (once) from the data (still uses the 'building' field, now = address)
   var bf = document.getElementById('brokerBuildingFilter');
@@ -8125,8 +8305,29 @@ async function renderBrokerUnits() {
           '</table>' +
         '</div>' +
         '<div class="broker-swipe-hint" style="font-size:11px;color:var(--muted);margin-top:5px;padding-left:2px;">\u2190 swipe to see more \u2192</div>' +
+        _brokerPlansBlock(bname, allPlans) +
       '</div>';
   }).join('');
+}
+
+// Renders a downloadable plans list for an address (broker side)
+function _brokerPlansBlock(address, allPlans) {
+  var plans = (allPlans||[]).filter(function(pl){ return pl.address === address; });
+  if (!plans.length) return '';
+  var items = plans.map(function(pl){
+    var isPdf = (pl.fileType||'').indexOf('pdf') > -1;
+    var icon = isPdf ? '\ud83d\udcc4' : '\ud83d\uddbc\ufe0f';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1px solid var(--border);border-radius:9px;margin-bottom:7px;">' +
+        '<div style="font-size:20px;">' + icon + '</div>' +
+        '<div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:13px;color:var(--navy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + _esc(pl.name||'Plan') + '</div>' +
+        (pl.sizeLabel ? '<div style="font-size:11px;color:var(--muted);">' + _esc(pl.sizeLabel) + '</div>' : '') + '</div>' +
+        '<button onclick="_planDownload(\'' + pl.id + '\')" style="background:var(--gold);color:var(--navy);border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:800;cursor:pointer;">\u2b07 Download</button>' +
+      '</div>';
+  }).join('');
+  return '<div style="margin-top:12px;">' +
+      '<div style="font-size:12px;font-weight:800;letter-spacing:0.04em;text-transform:uppercase;color:rgba(255,255,255,0.75);margin-bottom:8px;">\ud83d\udcd0 Design Plans</div>' +
+      items +
+    '</div>';
 }
 
 // Broker changes a unit's status (writes to the shared units record)
@@ -16283,6 +16484,7 @@ async function switchTab(tab) {
   if (tab === 'projects') await renderProjects();
   if (tab === 'customers') await renderCustomers();
   if (tab === 'messages') await renderMessages();
+  if (tab === 'plans') await renderPlans();
   if (tab === 'brokers') await renderBrokers();
   if (tab === 'units') await renderUnits();
   if (tab === 'homeContent') await renderHomeContent();
