@@ -5694,7 +5694,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <!-- Filters -->
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
         <select id="brokerBuildingFilter" onchange="renderBrokerUnits()" style="flex:1;min-width:140px;padding:10px 12px;border:1px solid var(--border);border-radius:9px;font-size:13px;font-weight:600;color:var(--navy);background:#fff;box-sizing:border-box;">
-          <option value="">All Buildings</option>
+          <option value="">All Addresses</option>
         </select>
         <select id="brokerStatusFilter" onchange="renderBrokerUnits()" style="flex:1;min-width:140px;padding:10px 12px;border:1px solid var(--border);border-radius:9px;font-size:13px;font-weight:600;color:var(--navy);background:#fff;box-sizing:border-box;">
           <option value="">All Statuses</option>
@@ -5716,7 +5716,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v292</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v293</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -6138,7 +6138,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v292</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v293</div>
     </div>
   </div>
 
@@ -7079,7 +7079,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v292';
+<script>var APP_VERSION = 'v293';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -7916,7 +7916,7 @@ async function renderUnits() {
           _unitStatusBadge(u.status) +
         '</div>' +
         '<div style="font-size:12.5px;color:var(--muted);margin-bottom:12px;">' +
-          [u.level?('Level ' + _esc(u.level)):'', u.unitType?_esc(u.unitType):'', u.sf?(_esc(u.sf)+' SF'):'', u.attic?('Attic: '+_esc(u.attic)):'', u.price?_esc(u.price):''].filter(Boolean).join(' \u00b7 ') +
+          [u.level?('Level ' + _esc(u.level)):'', u.unitType?_esc(u.unitType):'', u.sf?(_esc(u.sf)+' SF'):'', u.attic?('Attic: '+_esc(u.attic)):'', u.price?_esc(_fmtPrice(u.price)):''].filter(Boolean).join(' \u00b7 ') +
         '</div>' +
         '<div style="display:flex;gap:7px;">' +
           '<button onclick="unitEdit(\'' + u.id + '\')" style="flex:1;background:var(--navy);color:#fff;border:none;border-radius:9px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;">\u270f\ufe0f Edit</button>' +
@@ -7976,7 +7976,7 @@ function _unitBuildModal() {
     '<div class="modal-header"><span class="modal-title" id="unitFormTitle">Add Unit</span><button class="modal-close" onclick="_unitCloseForm()">\u00d7</button></div>' +
     '<div class="modal-body" style="max-height:75vh;overflow-y:auto;">' +
       '<input type="hidden" id="unit-f-id">' +
-      '<div class="form-group"><label class="form-label">Building</label><input class="form-input" id="unit-f-building" type="text" placeholder="e.g. Building 1 or 31 Mangin"></div>' +
+      '<div class="form-group"><label class="form-label">Address</label><input class="form-input" id="unit-f-building" type="text" placeholder="e.g. 31 Mangin Road"></div>' +
       '<div class="form-group"><label class="form-label">Unit number</label><input class="form-input" id="unit-f-unitNumber" type="text" placeholder="e.g. 2A"></div>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">' +
         '<div class="form-group"><label class="form-label">Level</label><input class="form-input" id="unit-f-level" type="text" placeholder="e.g. 2"></div>' +
@@ -7996,6 +7996,18 @@ function _unitBuildModal() {
 
 // ===== Units data (shared read) =====
 // Units live at pubunit:<id> and contain ONLY sellable fields — no client/financial data.
+// Format a price value as currency. Accepts "525000", "$525,000", "525,000" etc.
+function _fmtPrice(v) {
+  if (v === undefined || v === null || v === '') return '';
+  var s = String(v).trim();
+  // strip everything except digits and decimal point
+  var num = s.replace(/[^0-9.]/g, '');
+  if (num === '' || isNaN(parseFloat(num))) return s; // not a number, show as-is
+  var n = parseFloat(num);
+  // format with commas, no decimals (round)
+  return '$' + Math.round(n).toLocaleString('en-US');
+}
+
 var _UNIT_STATUS = {
   available:    { label:'Available',   bg:'#E8F5E9', fg:'#2E7D32', dot:'#43A047' },
   not_for_sale: { label:'Not for sale', bg:'#EEEEEE', fg:'#616161', dot:'#9E9E9E' },
@@ -8028,18 +8040,17 @@ async function renderBrokerUnits() {
   host.innerHTML = '<div style="text-align:center;color:var(--muted);padding:30px;">Loading units\u2026</div>';
   var units = await _unitsListAll();
 
-  // Populate building filter (once) from the data
+  // Populate address filter (once) from the data (still uses the 'building' field, now = address)
   var bf = document.getElementById('brokerBuildingFilter');
   if (bf) {
     var buildings = [];
     units.forEach(function(u){ if (u.building && buildings.indexOf(u.building) === -1) buildings.push(u.building); });
     buildings.sort(function(a,b){ return a.localeCompare(b, undefined, {numeric:true}); });
     var cur = bf.value;
-    bf.innerHTML = '<option value="">All Buildings</option>' + buildings.map(function(b){ return '<option value="' + _esc(b) + '">' + _esc(b) + '</option>'; }).join('');
+    bf.innerHTML = '<option value="">All Addresses</option>' + buildings.map(function(b){ return '<option value="' + _esc(b) + '">' + _esc(b) + '</option>'; }).join('');
     if (cur) bf.value = cur;
   }
 
-  // Apply filters
   var buildingSel = bf ? bf.value : '';
   var statusSel = (document.getElementById('brokerStatusFilter')||{}).value || '';
   var filtered = units.filter(function(u){
@@ -8056,21 +8067,26 @@ async function renderBrokerUnits() {
     return;
   }
 
-  // Group by building
+  // Group by address (the 'building' field)
   var groups = {};
   filtered.forEach(function(u){ var b = u.building || 'Other'; (groups[b] = groups[b] || []).push(u); });
   var buildingNames = Object.keys(groups).sort(function(a,b){ return a.localeCompare(b, undefined, {numeric:true}); });
 
-  var statusCell = function(status){
-    var s = _UNIT_STATUS[status] || _UNIT_STATUS.not_for_sale;
-    return '<span style="display:inline-flex;align-items:center;gap:5px;white-space:nowrap;"><span style="width:8px;height:8px;border-radius:50%;background:' + s.dot + ';flex-shrink:0;"></span><span style="color:' + s.fg + ';font-weight:700;">' + s.label + '</span></span>';
-  };
   var cell = function(v){ return (v === undefined || v === null || v === '') ? '\u2014' : _esc(v); };
 
-  // Spreadsheet-style table. The FIRST column (Unit) is frozen (sticky) so it stays
-  // visible while the other columns scroll horizontally on narrow screens.
+  // Interactive status dropdown the broker can change
+  var statusSelectCell = function(u){
+    var s = _UNIT_STATUS[u.status] || _UNIT_STATUS.not_for_sale;
+    var opts = Object.keys(_UNIT_STATUS).map(function(k){
+      return '<option value="' + k + '"' + (k === u.status ? ' selected' : '') + '>' + _UNIT_STATUS[k].label + '</option>';
+    }).join('');
+    return '<span style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;">' +
+        '<span style="width:8px;height:8px;border-radius:50%;background:' + s.dot + ';flex-shrink:0;"></span>' +
+        '<select onchange="_brokerSetStatus(\'' + u.id + '\', this.value)" style="border:1px solid var(--border);border-radius:7px;padding:5px 7px;font-size:12px;font-weight:700;color:' + s.fg + ';background:#fff;cursor:pointer;">' + opts + '</select>' +
+      '</span>';
+  };
+
   var thBase = 'padding:9px 10px;font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:#fff;font-weight:700;white-space:nowrap;text-align:left;';
-  // Frozen Unit header cell (sticky left, navy bg so it hides scrolling cells behind it)
   var thUnit = 'style="' + thBase + 'position:sticky;left:0;z-index:2;background:var(--navy);"';
   var thNorm = 'style="' + thBase + '"';
 
@@ -8078,25 +8094,24 @@ async function renderBrokerUnits() {
     var rows = groups[bname].sort(_unitSort).map(function(u, idx){
       var rowBg = (idx % 2 === 1) ? '#FAFAF7' : '#fff';
       var tdBase = 'padding:9px 10px;font-size:13px;color:var(--navy);white-space:nowrap;border-bottom:1px solid var(--border);';
-      // Frozen Unit cell: sticky left, opaque row-colored bg so scrolling cells slide under it
       var tdUnit = 'style="' + tdBase + 'font-weight:800;position:sticky;left:0;z-index:1;background:' + rowBg + ';box-shadow:2px 0 0 var(--border);"';
       var td = 'style="' + tdBase + 'background:' + rowBg + ';"';
       var tdPrice = 'style="' + tdBase + 'font-weight:700;background:' + rowBg + ';"';
-      var tdStatus = 'style="padding:9px 10px;font-size:12px;border-bottom:1px solid var(--border);background:' + rowBg + ';"';
+      var tdStatus = 'style="padding:7px 10px;font-size:12px;border-bottom:1px solid var(--border);background:' + rowBg + ';"';
       return '<tr>' +
         '<td ' + tdUnit + '>' + cell(u.unitNumber) + '</td>' +
         '<td ' + td + '>' + cell(u.level) + '</td>' +
         '<td ' + td + '>' + cell(u.unitType) + '</td>' +
         '<td ' + td + '>' + cell(u.sf) + '</td>' +
         '<td ' + td + '>' + cell(u.attic) + '</td>' +
-        '<td ' + tdPrice + '>' + cell(u.price) + '</td>' +
-        '<td ' + tdStatus + '>' + statusCell(u.status) + '</td>' +
+        '<td ' + tdPrice + '>' + (u.price ? _esc(_fmtPrice(u.price)) : '\u2014') + '</td>' +
+        '<td ' + tdStatus + '>' + statusSelectCell(u) + '</td>' +
       '</tr>';
     }).join('');
     return '<div style="margin-bottom:22px;">' +
-        '<div style="font-family:\'Archivo\',sans-serif;font-weight:800;font-size:15px;color:var(--navy);padding:0 2px 8px;border-bottom:2px solid var(--gold);margin-bottom:10px;display:inline-block;">' + _esc(bname) + '</div>' +
+        '<div style="font-family:\'Archivo\',sans-serif;font-weight:800;font-size:16px;color:#fff;padding:0 2px 8px;border-bottom:2px solid var(--gold);margin-bottom:10px;display:inline-block;">\ud83d\udccd ' + _esc(bname) + '</div>' +
         '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:12px;">' +
-          '<table style="width:100%;border-collapse:separate;border-spacing:0;min-width:520px;">' +
+          '<table style="width:100%;border-collapse:separate;border-spacing:0;min-width:560px;">' +
             '<thead><tr>' +
               '<th ' + thUnit + '>Unit</th>' +
               '<th ' + thNorm + '>Level</th>' +
@@ -8112,6 +8127,21 @@ async function renderBrokerUnits() {
         '<div class="broker-swipe-hint" style="font-size:11px;color:var(--muted);margin-top:5px;padding-left:2px;">\u2190 swipe to see more \u2192</div>' +
       '</div>';
   }).join('');
+}
+
+// Broker changes a unit's status (writes to the shared units record)
+async function _brokerSetStatus(id, newStatus) {
+  try {
+    var rec = await DB.get('pubunit:' + id);
+    if (!rec) return;
+    rec.status = newStatus;
+    rec._updatedAt = Date.now();
+    await DB.set('pubunit:' + id, rec);
+    try { ddToast('Status updated'); } catch(e) {}
+    await renderBrokerUnits();
+  } catch(e) {
+    try { ddToast('Could not update. Try again.'); } catch(e2) {}
+  }
 }
 
 // ===== Broker portal (basic) =====
