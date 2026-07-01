@@ -4339,6 +4339,7 @@ div[style*="position:fixed"][style*="inset:0"] {
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
   <!-- Google Identity Services (for calendar connect) -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <!-- PWA -->
@@ -4594,10 +4595,26 @@ div[style*="position:fixed"][style*="inset:0"] {
 .units-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .units-scroll > table { min-width: var(--units-minw, 560px); }
 @media(min-width: 900px){
-  .units-scroll { overflow-x: visible; }
-  .units-scroll > table { min-width: 0 !important; width: 100%; table-layout: fixed; }
-  .units-scroll > table th, .units-scroll > table td { overflow: hidden; text-overflow: ellipsis; }
+  /* Units tables break out of the narrow content column to use the big desktop width,
+     and show every column fully (no truncation). Horizontal scroll only if truly needed. */
+  .units-scroll {
+    overflow-x: auto;
+    width: calc(100vw - 130px);
+    max-width: 1600px;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .units-scroll > table { min-width: 0 !important; width: 100%; }
+  .units-scroll > table th, .units-scroll > table td { white-space: nowrap; }
 }
+/* On very wide screens the broker portal content is also narrow; let its units breathe */
+@media(min-width: 900px){
+  #brokerPortalPage .units-scroll { width: calc(100vw - 130px); }
+}
+
+.hp-detail-stage{ height:300px; }
+@media(min-width:900px){ .hp-detail-stage{ height:480px; } }
 .team-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,220px)); gap:20px; max-width:1200px; margin:0 auto; justify-content:center; }
     .team-avatar {
       width:74px; height:74px; border-radius:50%;
@@ -4897,13 +4914,15 @@ div[style*="position:fixed"][style*="inset:0"] {
   .hp-projects-dynamic { max-width:1200px; margin:0 auto; }
   .hp-addr-group { margin-bottom:40px; }
   .hp-addr-header { font-family:'Playfair Display',serif; font-weight:700; font-size:1.15rem; color:#fff; padding-bottom:8px; border-bottom:2px solid var(--mk-gold); margin-bottom:20px; display:inline-block; }
-  .hp-card-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
-  .hp-pcard { background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.15); }
-  .hp-pcard-img { height:180px; background:linear-gradient(135deg,#33407e,#5566a8); position:relative; overflow:hidden; }
-  .hp-pcard-img img { width:100%; height:100%; object-fit:cover; display:block; }
+  .hp-card-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:22px; align-items:stretch; }
+  .hp-pcard{ background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.15); display:flex; flex-direction:column; height:100%; }
+  .hp-pcard-img{ height:220px; background:#1b2142; position:relative; overflow:hidden; flex-shrink:0; }
+  .hp-pcard-img img{ width:100%; height:100%; object-fit:cover; display:block; }
+.hp-pcard-bg{ position:absolute; inset:0; background-size:cover; background-position:center; filter:blur(18px) brightness(0.6); transform:scale(1.1); }
+.hp-pcard-photo{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain !important; z-index:1; }
   .hp-pcard-badge { position:absolute; top:12px; right:12px; background:rgba(255,255,255,0.95); color:var(--mk-navy); font-size:11px; font-weight:700; padding:4px 12px; border-radius:20px; }
   .hp-pcard-badge.sold { background:#ffcdd2; color:#b71c1c; }
-  .hp-pcard-body { padding:16px 18px; }
+  .hp-pcard-body{ padding:16px 18px; flex:1; display:flex; flex-direction:column; }
   .hp-pcard-name { font-weight:700; color:var(--mk-navy); font-size:1.05rem; }
   .hp-pcard-specs { color:#888; font-size:0.85rem; margin-top:4px; }
 .hp-pcard-more{ font-size:12px;font-weight:700;color:var(--mk-gold,#bf9d68);margin-top:8px;letter-spacing:0.3px; }
@@ -5357,7 +5376,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v310</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v316</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -5824,7 +5843,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v310</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v316</div>
     </div>
   </div>
 
@@ -6792,7 +6811,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v310';
+<script>var APP_VERSION = 'v316';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -7505,7 +7524,7 @@ function _hpRenderDetailGallery() {
   }
   if (_hpDetailIdx < 0) _hpDetailIdx = _hpDetailImgs.length - 1;
   if (_hpDetailIdx >= _hpDetailImgs.length) _hpDetailIdx = 0;
-  stage.innerHTML = '<img src="' + _hpDetailImgs[_hpDetailIdx] + '" style="width:100%;height:100%;object-fit:contain;">' +
+  stage.innerHTML = '<img src="' + _hpDetailImgs[_hpDetailIdx] + '" onclick="_hpEnlargeImage(_hpDetailImgs[_hpDetailIdx])" style="width:100%;height:100%;object-fit:contain;cursor:zoom-in;" title="Tap to enlarge">' +
     (_hpDetailImgs.length > 1 ?
       '<button onclick="event.stopPropagation();_hpDetailNav(-1)" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.5);color:#fff;border:none;border-radius:50%;width:38px;height:38px;font-size:20px;cursor:pointer;">\u2039</button>' +
       '<button onclick="event.stopPropagation();_hpDetailNav(1)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.5);color:#fff;border:none;border-radius:50%;width:38px;height:38px;font-size:20px;cursor:pointer;">\u203a</button>'
@@ -7518,6 +7537,23 @@ function _hpRenderDetailGallery() {
 }
 function _hpDetailNav(d) { _hpDetailIdx += d; _hpRenderDetailGallery(); }
 function _hpDetailGo(i) { _hpDetailIdx = i; _hpRenderDetailGallery(); }
+// Full-screen image viewer (tap a gallery image to enlarge)
+function _hpEnlargeImage(src) {
+  if (!src) return;
+  var v = document.getElementById('hpImgViewer');
+  if (!v) {
+    v = document.createElement('div');
+    v.id = 'hpImgViewer';
+    v.style.cssText = 'position:fixed;inset:0;z-index:5000;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;padding:20px;cursor:zoom-out;';
+    v.onclick = function(){ v.style.display = 'none'; };
+    v.innerHTML = '<img id="hpImgViewerImg" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:6px;box-shadow:0 10px 50px rgba(0,0,0,0.6);">' +
+      '<button onclick="event.stopPropagation();document.getElementById(\'hpImgViewer\').style.display=\'none\';" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.15);color:#fff;border:none;border-radius:50%;width:44px;height:44px;font-size:22px;cursor:pointer;">\u00d7</button>';
+    document.body.appendChild(v);
+  }
+  document.getElementById('hpImgViewerImg').src = src;
+  v.style.display = 'flex';
+}
+
 function _hpCloseDetail() { var m = document.getElementById('hpDetailModal'); if (m) m.style.display = 'none'; }
 
 function _hpBuildDetailModal() {
@@ -7525,9 +7561,9 @@ function _hpBuildDetailModal() {
   div.id = 'hpDetailModal';
   div.style.cssText = 'display:none;position:fixed;inset:0;z-index:4000;background:rgba(10,15,30,0.75);align-items:center;justify-content:center;padding:16px;';
   div.onclick = function(e){ if (e.target === div) _hpCloseDetail(); };
-  div.innerHTML = '<div style="background:linear-gradient(160deg,#1e2d5a,#161f3d);border:1px solid rgba(191,157,104,0.4);border-radius:16px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.5);">' +
+  div.innerHTML = '<div style="background:linear-gradient(160deg,#1e2d5a,#161f3d);border:1px solid rgba(191,157,104,0.4);border-radius:16px;max-width:min(880px,95vw);width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.5);">' +
       '<div style="position:relative;">' +
-        '<div id="hpDetailStage" style="position:relative;width:100%;height:280px;background:#0d1428;border-radius:16px 16px 0 0;overflow:hidden;"></div>' +
+        '<div id="hpDetailStage" class="hp-detail-stage" style="position:relative;width:100%;background:#0d1428;border-radius:16px 16px 0 0;overflow:hidden;"></div>' +
         '<button onclick="_hpCloseDetail()" style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.55);color:#fff;border:none;border-radius:50%;width:34px;height:34px;font-size:18px;cursor:pointer;z-index:2;">\u00d7</button>' +
       '</div>' +
       '<div id="hpDetailDots" style="display:flex;gap:6px;justify-content:center;padding:12px 0 0;"></div>' +
@@ -7551,10 +7587,10 @@ async function _loadHomeProjects() {
       grid.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.6);padding:20px;font-size:15px;">Projects coming soon.</div>';
       return;
     }
-    // group by address (fallback to a general bucket if no address)
+    // group by project name (each project is its own group; drop the pin/address header)
     var groups = {}; var order = [];
     projects.forEach(function(p){
-      var a = (p.address && p.address.trim()) ? p.address.trim() : 'Featured';
+      var a = (p.name && p.name.trim()) ? p.name.trim() : 'Featured';
       if (!groups[a]) { groups[a] = []; order.push(a); }
       groups[a].push(p);
     });
@@ -7564,27 +7600,22 @@ async function _loadHomeProjects() {
       var isSold = /sold/i.test(status);
       return '<span class="hp-pcard-badge' + (isSold?' sold':'') + '">' + esc(status) + '</span>';
     };
-    grid.innerHTML = order.map(function(addr){
-      var cards = groups[addr].map(function(p){
-        var pos = (typeof p.imgPos !== 'undefined') ? p.imgPos : 50;
-        var img = p.image ? ('<img src="' + p.image + '" alt="' + esc(p.name||'') + '" style="object-position:center ' + pos + '%;">') : '';
-        var specs = p.specs ? ('<div class="hp-pcard-specs">' + esc(p.specs) + '</div>') : '';
-        var tag = p.tag ? ('<span class="hp-pcard-tag">' + esc(p.tag) + '</span>') : '';
-        var nRender = (p.renderings && p.renderings.length) ? p.renderings.length : 0;
-        var moreHint = (nRender > 0 || (p.houseDetails && p.houseDetails.trim())) ? '<div class="hp-pcard-more">Tap to view \u2192</div>' : '';
-        return '<div class="hp-pcard" onclick="_hpOpenDetail(\'' + p.id + '\')" style="cursor:pointer;">' +
-            '<div class="hp-pcard-img">' + img + badge(p.status) + '</div>' +
-            '<div class="hp-pcard-body">' +
-              '<div class="hp-pcard-name">' + esc(p.name||'Untitled') + '</div>' +
-              specs + tag + moreHint +
-            '</div>' +
-          '</div>';
-      }).join('');
-      return '<div class="hp-addr-group">' +
-          '<div class="hp-addr-header">\ud83d\udccd ' + esc(addr) + '</div>' +
-          '<div class="hp-card-grid">' + cards + '</div>' +
+    var _allCards = projects.map(function(p){
+      var pos = (typeof p.imgPos !== 'undefined') ? p.imgPos : 50;
+      var img = p.image ? ('<div class="hp-pcard-bg" style="background-image:url(' + JSON.stringify(p.image) + ');"></div><img src="' + p.image + '" alt="' + esc(p.name||'') + '" class="hp-pcard-photo" style="object-position:center ' + pos + '%;">') : '';
+      var specs = p.specs ? ('<div class="hp-pcard-specs">' + esc(p.specs) + '</div>') : '';
+      var tag = p.tag ? ('<span class="hp-pcard-tag">' + esc(p.tag) + '</span>') : '';
+      var nRender = (p.renderings && p.renderings.length) ? p.renderings.length : 0;
+      var moreHint = (nRender > 0 || (p.houseDetails && p.houseDetails.trim())) ? '<div class="hp-pcard-more">Tap to view \u2192</div>' : '';
+      return '<div class="hp-pcard" onclick="_hpOpenDetail(\'' + p.id + '\')" style="cursor:pointer;">' +
+          '<div class="hp-pcard-img">' + img + badge(p.status) + '</div>' +
+          '<div class="hp-pcard-body">' +
+            '<div class="hp-pcard-name">' + esc(p.name||'Untitled') + '</div>' +
+            specs + tag + moreHint +
+          '</div>' +
         '</div>';
     }).join('');
+    grid.innerHTML = '<div class="hp-card-grid">' + _allCards + '</div>';
   } catch(e) {
     grid.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.6);padding:20px;">Projects coming soon.</div>';
   }
@@ -8123,11 +8154,12 @@ function _renderAddrBlock(addr, addrRec, units, cols, editing) {
       '<button onclick="unitNewForAddress(decodeURIComponent(\''+addrKey+'\'))" style="background:var(--gold);color:var(--navy);border:none;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:800;cursor:pointer;">+ Add unit here</button>' +
       '</div>';
   }
-  var addrControls = addrRec ? ('<button onclick="addressRename(\''+addrRec.id+'\')" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;text-decoration:underline;margin-right:8px;">rename</button><button onclick="addressDelete(\''+addrRec.id+'\')" style="background:none;border:none;color:var(--red);font-size:12px;cursor:pointer;text-decoration:underline;">delete</button>') : '';
+  var _addrColor = (addrRec && addrRec.color) ? addrRec.color : '';
+  var addrControls = addrRec ? ('<label style="display:inline-flex;align-items:center;gap:4px;margin-right:8px;cursor:pointer;font-size:12px;color:var(--muted);">'+'<span style="width:16px;height:16px;border-radius:4px;border:1px solid var(--border);display:inline-block;background:'+(_addrColor||'#ffffff')+';"></span>'+'color'+'<input type="color" value="'+(_addrColor||'#ffffff')+'" onchange="addressSetColor(\''+addrRec.id+'\',this.value)" style="width:0;height:0;opacity:0;position:absolute;"></label>'+(_addrColor?'<button onclick="addressSetColor(\''+addrRec.id+'\',\'\')" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;text-decoration:underline;margin-right:8px;">clear</button>':'')+'<button onclick="addressRename(\''+addrRec.id+'\')" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;text-decoration:underline;margin-right:8px;">rename</button><button onclick="addressDelete(\''+addrRec.id+'\')" style="background:none;border:none;color:var(--red);font-size:12px;cursor:pointer;text-decoration:underline;">delete</button>') : '';
 
   return '<div style="margin-bottom:26px;">' +
       '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:4px;flex-wrap:wrap;">' +
-        '<div style="font-family:\'Archivo\',sans-serif;font-weight:800;font-size:15px;color:var(--navy);padding-bottom:6px;border-bottom:2px solid var(--gold);display:inline-block;">\ud83d\udccd '+_esc(addr)+'</div>' +
+        '<div style="font-family:\'Archivo\',sans-serif;font-weight:800;font-size:15px;color:var(--navy);padding:4px 10px 6px;border-bottom:3px solid '+(_addrColor||'var(--gold)')+';border-left:'+(_addrColor?('5px solid '+_addrColor):'none')+';background:'+(_addrColor?(_addrColor+'22'):'transparent')+';border-radius:6px 6px 0 0;display:inline-block;">\ud83d\udccd '+_esc(addr)+'</div>' +
         actions +
       '</div>' +
       '<div style="margin-bottom:8px;">'+addrControls+'</div>' +
@@ -8190,6 +8222,17 @@ async function addressNew() {
   try { ddToast('Address added'); } catch(e) {}
   await renderUnits();
 }
+async function addressSetColor(id, color) {
+  var rec = await DB.get('pubaddress:'+id);
+  if (!rec) return;
+  rec.color = color || '';
+  rec._updatedAt = Date.now();
+  await DB.set('pubaddress:'+id, rec);
+  try { ddToast(color ? 'Color updated' : 'Color cleared'); } catch(e) {}
+  try { await renderUnits(); } catch(e) {}
+  try { if (typeof renderBrokerUnits === 'function') await renderBrokerUnits(); } catch(e) {}
+}
+
 async function addressRename(id) {
   var rec = await DB.get('pubaddress:'+id);
   if (!rec) return;
@@ -8511,6 +8554,12 @@ async function renderBrokerUnits() {
   var units = await _unitsListAll();
   var allPlans = await _plansListAll();
   var full = await _unitColsFull();
+  // Address colors (set in office units) — map building name -> color
+  var _addrColors = {};
+  try {
+    var _addrRecs = await _fsListByPrefix('pubaddress:');
+    (_addrRecs||[]).forEach(function(a){ if (a && a.name) _addrColors[a.name] = a.color || ''; });
+  } catch(e) {}
   var customCols = full.columns || [];
   var builtinOv = full.builtins || {};
 
@@ -8583,7 +8632,7 @@ async function renderBrokerUnits() {
       var rowBg = (idx % 2 === 1) ? '#FAFAF7' : '#fff';
       var tdBase = 'padding:9px 10px;font-size:13px;color:var(--navy);white-space:nowrap;border-bottom:1px solid var(--border);';
       var builtinCells = brokerBuiltins.map(function(col, ci){
-        var sticky = (ci===0) ? 'position:sticky;left:0;z-index:1;box-shadow:2px 0 0 var(--border);' : '';
+        var sticky = (ci===0) ? 'position:-webkit-sticky;position:sticky;left:0;z-index:3;box-shadow:2px 0 4px rgba(0,0,0,0.08);' : '';
         var weight = (col.key==='unitNumber'||ci===0) ? 'font-weight:800;' : (col.isPrice?'font-weight:700;':'');
         if (col.isStatus) {
           return '<td style="padding:7px 10px;font-size:12px;border-bottom:1px solid var(--border);background:'+rowBg+';'+sticky+'">'+statusSelectCell(u)+'</td>';
@@ -8599,12 +8648,12 @@ async function renderBrokerUnits() {
     }).join('');
 
     var headerCells = brokerBuiltins.map(function(col, ci){
-      var sticky = (ci===0) ? 'position:sticky;left:0;z-index:2;background:var(--navy);' : '';
+      var sticky = (ci===0) ? 'position:-webkit-sticky;position:sticky;left:0;z-index:4;background:var(--navy);box-shadow:2px 0 4px rgba(0,0,0,0.15);' : '';
       return '<th style="'+thBase+sticky+'">'+_esc(col.label)+'</th>';
     }).join('') + brokerCustom.map(function(c){ return '<th style="'+thBase+'">'+_esc(c.label)+'</th>'; }).join('');
 
     return '<div style="margin-bottom:22px;">' +
-        '<div style="font-family:\'Archivo\',sans-serif;font-weight:800;font-size:16px;color:#fff;padding:0 2px 8px;border-bottom:2px solid var(--gold);margin-bottom:10px;display:inline-block;">\ud83d\udccd ' + _esc(bname) + '</div>' +
+        '<div style="font-family:\'Archivo\',sans-serif;font-weight:800;font-size:16px;color:#fff;padding:4px 10px 8px;border-bottom:3px solid '+(_addrColors[bname]||'var(--gold)')+';border-left:'+(_addrColors[bname]?('5px solid '+_addrColors[bname]):'none')+';background:'+(_addrColors[bname]?(_addrColors[bname]+'33'):'transparent')+';border-radius:6px 6px 0 0;margin-bottom:10px;display:inline-block;">\ud83d\udccd ' + _esc(bname) + '</div>' +
         '<div class="units-scroll" style="border:1px solid var(--border);border-radius:12px;--units-minw:'+minW+'px;">' +
           '<table style="width:100%;border-collapse:separate;border-spacing:0;">' +
             '<thead><tr>' + headerCells + '</tr></thead>' +
@@ -22932,12 +22981,14 @@ async function viewSubmission(key) {
   sections.forEach(function(sec) {
     var secTitle = document.createElement('div');
     secTitle.style.cssText = 'font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);border-bottom:1px solid var(--border);padding-bottom:4px;margin:14px 0 8px;';
-    secTitle.textContent = sec.num + ' — ' + sec.title;
+    secTitle.textContent = (sec.num ? sec.num + ' — ' : '') + (sec.title || sec.label || '');
     box.appendChild(secTitle);
 
-    (sec.items || []).forEach(function(item) {
+    ((sec.items && sec.items.length) ? sec.items : (sec.fields || [])).forEach(function(item) {
       if (item.key.indexOf('_glass') !== -1) return;
-      var val = data[item.key];
+      // Selections may live under data.selections (customer-portal shape) or data[key] (legacy)
+      var _sel = data.selections || {};
+      var val = (_sel[item.key] !== undefined) ? _sel[item.key] : data[item.key];
       var row = document.createElement('div');
       row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #F9F7F4;font-size:13px;';
 
@@ -22964,6 +23015,21 @@ async function viewSubmission(key) {
 
   var closeBtn = document.createElement('button');
   closeBtn.style.cssText = 'margin-top:20px;width:100%;padding:12px;border:none;border-radius:8px;background:var(--navy);color:white;font-family:Archivo,sans-serif;font-size:16px;letter-spacing:1px;cursor:pointer;';
+  // Paint color (stored top-level, not in selections) — show it if present
+  var _pc = (data.paintColor || (data.selections && (data.selections.paintColor || data.selections.paint)) || '').toString().trim();
+  if (_pc && _pc.toLowerCase() !== 'not selected' && _pc !== '') {
+    var pcTitle = document.createElement('div');
+    pcTitle.style.cssText = 'font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);border-bottom:1px solid var(--border);padding-bottom:4px;margin:14px 0 8px;';
+    pcTitle.textContent = 'Paint Color';
+    box.appendChild(pcTitle);
+    var pcRow = document.createElement('div');
+    pcRow.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:13px;';
+    var pcName = document.createElement('span'); pcName.style.color='#374151'; pcName.textContent='Selected color';
+    var pcVal = document.createElement('span'); pcVal.style.cssText='font-weight:700;color:var(--navy);'; pcVal.textContent=_pc;
+    pcRow.appendChild(pcName); pcRow.appendChild(pcVal);
+    box.appendChild(pcRow);
+  }
+
   closeBtn.textContent = 'Close';
   closeBtn.onclick = function() { popup.remove(); };
   box.appendChild(closeBtn);
@@ -25859,7 +25925,13 @@ function getStoredSubmissions() {
     if (!k.startsWith('upgrades:')) return;
     try {
       var d = JSON.parse(_store[k]);
-      if (!d || !d._submittedAt) return; // only show actually-submitted sheets
+      if (!d) return;
+      // Show a record if it has real content, even if _submittedAt wasn't stamped
+      // (older records, or saves that didn't complete the submit step). This fixes the
+      // "By Customer shows nothing" bug where valid selections were being hidden.
+      var _hasSel = d.selections && Object.keys(d.selections).some(function(kk){ var v=d.selections[kk]; return v && v!=='no' && v!==''; });
+      var _hasContent = _hasSel || (d.name && d.name.trim()) || (d.paintColor && d.paintColor.trim()) || d._submittedAt;
+      if (!_hasContent) return;
       // decode address|unit from the key as a fallback
       var addr = d.address || '', unit = d.unit || '';
       if (!addr) {
@@ -29033,7 +29105,7 @@ var _pwaWaitingWorker = null;
 
 // ============ WEB PUSH NOTIFICATIONS (parts 1-3) ============
 // Public VAPID key (safe to expose). The matching PRIVATE key lives only in the Firebase function.
-var _VAPID_PUBLIC_KEY = 'BKCVUGFaGbA9DsUndvq5d9lRKrQRyGjFEOZrFUqJvoC48AJWHnZakBDa2PQx_bqPBQTFKG6eSbWIvWcC3XnOSCs';
+var _VAPID_PUBLIC_KEY = 'BDbyh_mA3qeeWHsWr_oOxyCFKLiok4eFwPy2GFDhXc9Xvy4GcKRTwFdnGdAgahrcydmt83FFjnC-9CG3x5N0gA0';
 // Where the push sender (Firebase function) lives. Set in Profile once deployed.
 function _pushSendUrl() { try { return localStorage.getItem('dd_pushSendUrl') || ''; } catch(e) { return ''; } }
 function _aiUrl() { try { return localStorage.getItem('dd_aiUrl') || ''; } catch(e) { return ''; } }
@@ -29057,26 +29129,33 @@ async function enablePushNotifications(ownerId, silent) {
       if (!silent) { try { ddToast('Push not supported on this device'); } catch(e) {} }
       return false;
     }
+    if (typeof firebase === 'undefined' || !firebase.messaging) {
+      if (!silent) { try { ddToast('Messaging not loaded'); } catch(e) {} }
+      return false;
+    }
     var perm = Notification.permission;
     if (perm === 'default') { perm = await Notification.requestPermission(); }
     if (perm !== 'granted') {
       if (!silent) { try { ddToast('Notifications were not allowed'); } catch(e) {} }
       return false;
     }
-    var reg = await navigator.serviceWorker.ready;
-    var sub = await reg.pushManager.getSubscription();
-    if (!sub) {
-      sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: _urlBase64ToUint8Array(_VAPID_PUBLIC_KEY)
-      });
+    // Register the FCM service worker (separate from the app's sw.js).
+    var swReg = await navigator.serviceWorker.register('./firebase-messaging-sw.js');
+    var messaging = firebase.messaging();
+    // Get an FCM token for this device, tied to our VAPID public key.
+    var token = await messaging.getToken({
+      vapidKey: _VAPID_PUBLIC_KEY,
+      serviceWorkerRegistration: swReg
+    });
+    if (!token) {
+      if (!silent) { try { ddToast('Could not get a push token'); } catch(e) {} }
+      return false;
     }
-    // Store under this owner so the sender knows where to push. Multiple devices => list.
+    // Store the token under this owner. Multiple devices => list of tokens.
     var oid = ownerId || _effectiveUserId();
-    var rec = (await DB.get(_pushSubKey(oid))) || { ownerId: oid, subs: [] };
-    var json = JSON.parse(JSON.stringify(sub));
-    var exists = (rec.subs || []).some(function(s){ return s.endpoint === json.endpoint; });
-    if (!exists) { rec.subs = (rec.subs || []).concat([json]); }
+    var rec = (await DB.get(_pushSubKey(oid))) || { ownerId: oid, tokens: [] };
+    if (!rec.tokens) rec.tokens = [];
+    if (rec.tokens.indexOf(token) === -1) { rec.tokens.push(token); }
     rec.updatedAt = Date.now();
     await DB.set(_pushSubKey(oid), rec);
     if (!silent) { try { ddToast('Push notifications on \u2713'); } catch(e) {} }
@@ -29088,17 +29167,20 @@ async function enablePushNotifications(ownerId, silent) {
 
 async function disablePushNotifications(ownerId) {
   try {
-    var reg = await navigator.serviceWorker.ready;
-    var sub = await reg.pushManager.getSubscription();
     var oid = ownerId || _effectiveUserId();
-    if (sub) {
-      var json = JSON.parse(JSON.stringify(sub));
-      var rec = (await DB.get(_pushSubKey(oid)));
-      if (rec && rec.subs) {
-        rec.subs = rec.subs.filter(function(s){ return s.endpoint !== json.endpoint; });
-        await DB.set(_pushSubKey(oid), rec);
-      }
-      await sub.unsubscribe();
+    if (typeof firebase !== 'undefined' && firebase.messaging) {
+      try {
+        var messaging = firebase.messaging();
+        var swReg = await navigator.serviceWorker.getRegistration('./firebase-messaging-sw.js');
+        var token = await messaging.getToken({ vapidKey: _VAPID_PUBLIC_KEY, serviceWorkerRegistration: swReg });
+        // Remove this device's token from the stored list.
+        var rec = (await DB.get(_pushSubKey(oid)));
+        if (rec && rec.tokens && token) {
+          rec.tokens = rec.tokens.filter(function(t){ return t !== token; });
+          await DB.set(_pushSubKey(oid), rec);
+        }
+        try { await messaging.deleteToken(); } catch(e) {}
+      } catch(e) {}
     }
     try { ddToast('Push notifications off'); } catch(e) {}
     try { _renderPushSetting(); } catch(e) {}
@@ -29115,14 +29197,22 @@ function _pushIsOn() {
 async function sendPushToOwner(ownerId, title, body, url) {
   try {
     var sendUrl = _pushSendUrl();
-    if (!sendUrl) return; // sender not set up yet
+    if (!sendUrl) return; // sender (Cloud Function) not set up yet
     var rec = await DB.get(_pushSubKey(ownerId));
-    if (!rec || !rec.subs || !rec.subs.length) return;
-    await fetch(sendUrl, {
+    if (!rec || !rec.tokens || !rec.tokens.length) return;
+    var resp = await fetch(sendUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ subs: rec.subs, title: title, body: body, url: url || '/' })
+      body: JSON.stringify({ tokens: rec.tokens, title: title, body: body, url: url || '/' })
     });
+    // Prune any dead tokens the sender reports, so we don't keep failing on them.
+    try {
+      var out = await resp.json();
+      if (out && out.dead && out.dead.length) {
+        rec.tokens = rec.tokens.filter(function(t){ return out.dead.indexOf(t) === -1; });
+        await DB.set(_pushSubKey(ownerId), rec);
+      }
+    } catch(e) {}
   } catch(e) {}
 }
 
