@@ -5376,7 +5376,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v316</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v317</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -5843,7 +5843,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v316</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v317</div>
     </div>
   </div>
 
@@ -6811,7 +6811,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v316';
+<script>var APP_VERSION = 'v317';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -11995,6 +11995,37 @@ function _saveAiUrl() {
   try { ddToast(v ? 'AI service saved \u2713' : 'AI service cleared'); } catch(e) {}
 }
 
+async function _sendTestPush() {
+  try {
+    var sendUrl = _pushSendUrl();
+    if (!sendUrl) { try { ddToast('Set the sender URL first'); } catch(e){} alert('Please set the Push sender URL first (the box below), then Save.'); return; }
+    var oid = _effectiveUserId();
+    var rec = await DB.get(_pushSubKey(oid));
+    if (!rec || !rec.tokens || !rec.tokens.length) {
+      try { ddToast('No device registered yet'); } catch(e){}
+      alert('This device is not registered for push yet. Toggle the switch off and on again, and allow notifications when asked.');
+      return;
+    }
+    try { ddToast('Sending test\u2026'); } catch(e){}
+    var resp = await fetch(sendUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tokens: rec.tokens, title: 'Test notification', body: 'If you see this, push is working!', url: '/' })
+    });
+    var out = null;
+    try { out = await resp.json(); } catch(e) {}
+    if (resp.ok && out && out.sent > 0) {
+      try { ddToast('Test sent \u2713'); } catch(e){}
+      alert('Test sent! You should see a notification in a moment. If nothing appears, the issue is on the delivery side (see me for next steps).');
+    } else {
+      var msg = (out && out.error) ? out.error : ('HTTP ' + resp.status);
+      alert('The sender responded but could not send. Details: ' + msg + '\n\nStatus: ' + resp.status);
+    }
+  } catch(e) {
+    alert('Could not reach the sender URL. Check that the URL is correct and saved. Error: ' + String(e));
+  }
+}
+
 function _renderPushSetting() {
   var host = document.getElementById('pmPushBox');
   if (!host) return;
@@ -12008,6 +12039,9 @@ function _renderPushSetting() {
       '<input type="checkbox" ' + (on?'checked':'') + ' onchange="_togglePush(this.checked)"></label>';
     if (Notification.permission === 'denied') {
       html += '<div class="pm-gcal-note">Notifications are blocked in your browser settings. Allow them there to turn this on.</div>';
+    }
+    if (on) {
+      html += '<button class="pm-gcal-connect" style="margin-top:8px;" onclick="_sendTestPush()">Send test notification</button>';
     }
   }
   // Owner-only: configure the push sender URL.
