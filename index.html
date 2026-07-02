@@ -5376,7 +5376,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v325</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v326</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -5843,7 +5843,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v325</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v326</div>
     </div>
   </div>
 
@@ -6811,7 +6811,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v325';
+<script>var APP_VERSION = 'v326';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -14836,11 +14836,21 @@ function _notifyTaskStakeholders(t, opts) {
   if (t.assignee2Id) targets.push(t.assignee2Id);
   (t.followers || []).forEach(function(f) { targets.push(f); });
   if (t.ownerId) targets.push(t.ownerId);
+  var who = (currentUser && currentUser.name) ? currentUser.name : 'Someone';
+  var title = (t && t.title) ? t.title : 'a task';
+  // Build a clear message if the caller didn't provide one.
+  var text = opts.text;
+  if (!text) {
+    if (opts.type === 'assigned') text = who + ' assigned you: ' + title;
+    else if (opts.type === 'created') text = who + ' created a task: ' + title;
+    else if (opts.type === 'comment') text = who + ' commented on: ' + title;
+    else if (opts.type === 'status') text = who + ' updated: ' + title;
+    else if (opts.type === 'due') text = 'Reminder: ' + title;
+    else text = who + ' updated: ' + title;
+  }
   targets.forEach(function(uid) {
     if (!uid || seen[uid]) return; seen[uid] = 1;
-    // createNotification now sends the push automatically (universal), so pass a
-    // nice push title based on the task.
-    createNotification(uid, { type: opts.type, text: opts.text, taskId: opts.taskId, pushTitle: (t && t.title) ? t.title : 'Task update' });
+    createNotification(uid, { type: opts.type, text: text, taskId: opts.taskId, pushTitle: 'Diligent Developers \u2022 ' + title });
   });
 }
 
