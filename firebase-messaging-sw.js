@@ -25,14 +25,16 @@ const messaging = firebase.messaging();
 
 // Background messages (app closed / tab not focused).
 messaging.onBackgroundMessage(function (payload) {
-  const n = payload.notification || {};
+  // We send DATA-ONLY messages from the Cloud Function, so read everything
+  // from payload.data (this guarantees the title/body always appear).
   const d = payload.data || {};
-  const title = n.title || "Diligent Developers";
+  const title = d.title || "Diligent Developers";
   const options = {
-    body: n.body || "",
+    body: d.body || "",
     icon: "/icon-192.png",
     badge: "/icon-192.png",
-    data: { url: d.url || (payload.fcmOptions && payload.fcmOptions.link) || "/" },
+    tag: "dd-" + Date.now(),
+    data: { url: d.url || "/" },
     vibrate: [100, 50, 100],
   };
   return self.registration.showNotification(title, options);
