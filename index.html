@@ -3016,6 +3016,17 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .rte-btn:active { background:#1a2b4a; color:#fff; }
 .rte-sep { width:1px; height:20px; background:#d8d0bd; margin:0 3px; }
 .rte-area { min-height:90px; border-radius:0 0 8px 8px !important; border-top:0 !important; line-height:1.5; overflow-y:auto; max-height:240px; text-align:left; }
+
+.pu-text div, .cu-card-text div { margin:0; min-height:0; }
+.pu-text p, .cu-card-text p { margin:0 0 8px; }
+.pu-text ul, .cu-card-text ul { margin:6px 0; padding-left:22px; list-style:disc; }
+.pu-text ol, .cu-card-text ol { margin:6px 0; padding-left:22px; list-style:decimal; }
+.pu-text b, .pu-text strong, .cu-card-text b, .cu-card-text strong { font-weight:700; }
+.pu-text a, .cu-card-text a { color:#1a2b4a; text-decoration:underline; }
+.rte-big { font-size:1.4em; font-weight:600; }
+.pu-text .rte-big, .cu-card-text .rte-big { font-size:1.4em; font-weight:600; }
+.rte-area .rte-big { font-size:1.4em; font-weight:600; }
+
 .rte-area:empty:before { content:attr(data-ph); color:#a8a290; }
 .rte-area:focus { outline:none; }
 .rte-area ul { margin:6px 0; padding-left:22px; list-style:disc; }
@@ -3281,7 +3292,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .cu-card-actions { display:flex; gap:6px; flex-shrink:0; }
 .cu-mini-btn { font-family:'Plus Jakarta Sans','Inter',sans-serif; font-size:12px; font-weight:600; padding:6px 11px; border-radius:7px; border:1px solid var(--border); background:#fff; color:var(--navy); cursor:pointer; }
 .cu-mini-btn.danger { color:#c0392b; border-color:#f3c6c0; }
-.cu-card-text { font-family:'Plus Jakarta Sans','Inter',sans-serif; font-size:14px; color:#3a3730; line-height:1.5; white-space:pre-wrap; margin-bottom:8px; }
+.cu-card-text { font-family:'Plus Jakarta Sans','Inter',sans-serif; font-size:14px; color:#3a3730; line-height:1.5;  margin-bottom:8px; }
 .cu-photo-row { display:flex; flex-wrap:wrap; gap:8px; }
 .cu-thumb { position:relative; width:72px; height:72px; border-radius:9px; overflow:hidden; border:1px solid var(--border); cursor:pointer; }
 .cu-thumb img { width:100%; height:100%; object-fit:cover; }
@@ -3292,7 +3303,7 @@ details[open] .tsk-filters-toggle::before { content:'\2212 '; }
 .portal-update:empty { display:none; }
 .pu-card { max-width:760px; margin:14px auto 0; padding:16px 18px; background:#fff; border:1px solid #ece6d8; border-left:4px solid var(--gold); border-radius:12px; box-shadow:0 2px 10px rgba(13,31,60,.05); }
 .pu-label { font-family:'Archivo',sans-serif;font-weight:800; font-size:16px; letter-spacing:1px; color:var(--navy); margin-bottom:8px; }
-.pu-text { font-family:'Plus Jakarta Sans','Inter',sans-serif; font-size:14px; color:#3a3730; line-height:1.55; white-space:pre-wrap; margin-bottom:10px; }
+.pu-text { font-family:'Plus Jakarta Sans','Inter',sans-serif; font-size:14px; color:#3a3730; line-height:1.55;  margin-bottom:10px; }
 .pu-photos { display:flex; flex-wrap:wrap; gap:8px; }
 .pu-thumb { width:88px; height:88px; border-radius:9px; overflow:hidden; border:1px solid var(--border); cursor:pointer; }
 .pu-thumb img { width:100%; height:100%; object-fit:cover; }
@@ -5372,7 +5383,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v339</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v340</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -6470,7 +6481,7 @@ div[style*="position:fixed"][style*="inset:0"] {
                 <label class="form-label" style="margin-bottom:0;">Message <span style="font-weight:400;opacity:.6;">(optional)</span></label>
                 <button type="button" class="cu-ai-btn" id="cuAiBtn" onclick="cuAiWrite()">✨ Help me write</button>
               </div>
-              <div class="rte-toolbar" style="margin-top:8px;"><button type="button" class="rte-btn" onmousedown="_rteCmd(event,'bold')"><b>B</b></button><button type="button" class="rte-btn" onmousedown="_rteCmd(event,'italic')"><i>I</i></button><button type="button" class="rte-btn" onmousedown="_rteCmd(event,'underline')"><u>U</u></button><span class="rte-sep"></span><button type="button" class="rte-btn" onmousedown="_rteCmd(event,'insertUnorderedList')">&#8226; List</button><button type="button" class="rte-btn" onmousedown="_rteCmd(event,'insertOrderedList')">1. List</button><button type="button" class="rte-btn" onmousedown="_rteLink(event)">&#128279;</button></div><div class="form-input rte-area" id="cu-text" contenteditable="true" data-ph="e.g. Framing is complete, drywall starts next week." style="min-height:96px;"></div>
+              <div class="rte-toolbar" style="margin-top:8px;"><button type="button" class="rte-btn" onmousedown="_rteCmd(event,'bold')"><b>B</b></button><button type="button" class="rte-btn" onmousedown="_rteCmd(event,'italic')"><i>I</i></button><button type="button" class="rte-btn" onmousedown="_rteCmd(event,'underline')"><u>U</u></button><button type="button" class="rte-btn" onmousedown="_rteBig(event)" title="Bigger text">A<span style="font-size:1.3em;">A</span></button><span class="rte-sep"></span><button type="button" class="rte-btn" onmousedown="_rteCmd(event,'insertUnorderedList')">&#8226; List</button><button type="button" class="rte-btn" onmousedown="_rteCmd(event,'insertOrderedList')">1. List</button><button type="button" class="rte-btn" onmousedown="_rteLink(event)">&#128279;</button></div><div class="form-input rte-area" id="cu-text" contenteditable="true" data-ph="e.g. Framing is complete, drywall starts next week." style="min-height:96px;"></div>
               <div id="cu-ai-hint" style="display:none;font-size:12px;color:var(--gold);margin-top:6px;">✨ Type a few keywords or rough notes above, then tap Help me write to polish it.</div>
             </div>
             <div class="form-group"><label class="form-label">Photos <span style="font-weight:400;opacity:.6;">(optional)</span></label>
@@ -6678,7 +6689,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v339';
+<script>var APP_VERSION = 'v340';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -14023,18 +14034,37 @@ function _rteSanitize(htmlStr) {
   if (!htmlStr) return '';
   var tmp = document.createElement('div');
   tmp.innerHTML = htmlStr;
-  var allowed = { B:1, STRONG:1, I:1, EM:1, U:1, UL:1, OL:1, LI:1, BR:1, DIV:1, P:1, A:1, SPAN:1 };
+  // Tags we keep. Note: SPAN and FONT are UNWRAPPED (they're just styling wrappers that,
+  // when pasted from email/Docs, create messy nested markup). We keep real formatting
+  // (bold/italic/underline/lists/links) and size spans we add ourselves (data-sz).
+  var allowed = { B:1, STRONG:1, I:1, EM:1, U:1, UL:1, OL:1, LI:1, BR:1, DIV:1, P:1, A:1 };
   (function clean(node){
     var children = Array.prototype.slice.call(node.childNodes);
     children.forEach(function(c){
       if (c.nodeType === 1) {
-        if (!allowed[c.tagName]) {
-          // unwrap disallowed element
+        // Keep our own size spans (contain a data-sz marker) — normalize to a class.
+        if (c.tagName === 'SPAN') {
+          var sz = c.getAttribute('data-sz') || (/font-size\s*:\s*(1\.[0-9]+|1[0-9]|2[0-9])/i.test(c.getAttribute('style')||'') ? 'big' : '');
+          if (sz) {
+            // rebuild as a clean big span
+            var span = document.createElement('span');
+            span.setAttribute('data-sz','big');
+            span.className = 'rte-big';
+            while (c.firstChild) span.appendChild(c.firstChild);
+            node.insertBefore(span, c); node.removeChild(c);
+            clean(span);
+            return;
+          }
+          // plain span -> unwrap
           while (c.firstChild) node.insertBefore(c.firstChild, c);
           node.removeChild(c);
           return;
         }
-        // strip all attributes except href on <a>
+        if (!allowed[c.tagName]) {
+          while (c.firstChild) node.insertBefore(c.firstChild, c);
+          node.removeChild(c);
+          return;
+        }
         Array.prototype.slice.call(c.attributes).forEach(function(a){
           if (!(c.tagName === 'A' && a.name === 'href')) c.removeAttribute(a.name);
         });
@@ -14045,6 +14075,14 @@ function _rteSanitize(htmlStr) {
       }
     });
   })(tmp);
+  // Collapse empty DIVs (from pasted content) that only create blank gaps.
+  Array.prototype.slice.call(tmp.querySelectorAll('div')).forEach(function(d){
+    if (!d.textContent.trim() && !d.querySelector('br,ul,ol,img')) {
+      // an empty div = one line break
+      var br = document.createElement('br');
+      d.parentNode.insertBefore(br, d); d.parentNode.removeChild(d);
+    }
+  });
   return tmp.innerHTML;
 }
 
@@ -14052,6 +14090,49 @@ function _rteCmd(ev, cmd) {
   ev.preventDefault();
   document.execCommand(cmd, false, null);
 }
+// Toggle larger text on the current selection.
+// Clean pasted content in any rich-text area so email/Docs paste doesn't bring messy markup.
+document.addEventListener('paste', function(e){
+  try {
+    var el = e.target;
+    while (el && el !== document.body && !(el.classList && el.classList.contains('rte-area'))) el = el.parentNode;
+    if (!el || !el.classList || !el.classList.contains('rte-area')) return;
+    e.preventDefault();
+    var cb = e.clipboardData || window.clipboardData;
+    var htmlData = cb ? cb.getData('text/html') : '';
+    var textData = cb ? cb.getData('text/plain') : '';
+    var toInsert;
+    if (htmlData) { toInsert = _rteSanitize(htmlData); }
+    else { toInsert = _esc(textData).replace(/\n/g,'<br>'); }
+    document.execCommand('insertHTML', false, toInsert);
+    // fire input so the field saves
+    try { el.dispatchEvent(new Event('input', { bubbles:true })); } catch(_){}
+  } catch(err) {}
+}, true);
+
+function _rteBig(ev) {
+  ev.preventDefault();
+  try {
+    var sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0 || sel.isCollapsed) { return; }
+    var range = sel.getRangeAt(0);
+    // If the selection is already inside a big span, unwrap it (toggle off).
+    var anc = sel.anchorNode;
+    var bigParent = null, n = anc;
+    while (n && n.nodeType) { if (n.nodeType===1 && n.getAttribute && n.getAttribute('data-sz')==='big') { bigParent = n; break; } n = n.parentNode; }
+    if (bigParent) {
+      while (bigParent.firstChild) bigParent.parentNode.insertBefore(bigParent.firstChild, bigParent);
+      bigParent.parentNode.removeChild(bigParent);
+      return;
+    }
+    var span = document.createElement('span');
+    span.setAttribute('data-sz','big');
+    span.className = 'rte-big';
+    try { span.appendChild(range.extractContents()); range.insertNode(span); }
+    catch(e) { document.execCommand('fontSize', false, '5'); }
+  } catch(e) {}
+}
+
 function _rteLink(ev) {
   ev.preventDefault();
   var url = prompt('Link URL:', 'https://');
@@ -14125,7 +14206,7 @@ async function openTaskForm(taskId) {
       '<div class="tfa-prop"><span class="tfa-prop-ic">\u25f3</span><select id="tfm-status" class="tfa-select">' + statusOpts + '</select></div>' +
     '</div>' +
     '<div class="tfa-section-label">Description</div>' +
-    '<div class="rte-toolbar">' +'<button type="button" class="rte-btn" onmousedown="_rteCmd(event,\'bold\')"><b>B</b></button>' +'<button type="button" class="rte-btn" onmousedown="_rteCmd(event,\'italic\')"><i>I</i></button>' +'<button type="button" class="rte-btn" onmousedown="_rteCmd(event,\'underline\')"><u>U</u></button>' +'<span class="rte-sep"></span>' +'<button type="button" class="rte-btn" onmousedown="_rteCmd(event,\'insertUnorderedList\')">&#8226; List</button>' +'<button type="button" class="rte-btn" onmousedown="_rteCmd(event,\'insertOrderedList\')">1. List</button>' +'<button type="button" class="rte-btn" onmousedown="_rteLink(event)">&#128279;</button>' +'</div>' +'<div id="tfm-desc" class="tf-input rte-area" contenteditable="true" data-ph="Add details...">' + (t ? (t.description || '') : '') + '</div>' +
+    '<div class="rte-toolbar">' +'<button type="button" class="rte-btn" onmousedown="_rteCmd(event,\'bold\')"><b>B</b></button>' +'<button type="button" class="rte-btn" onmousedown="_rteCmd(event,\'italic\')"><i>I</i></button>' +'<button type="button" class="rte-btn" onmousedown="_rteCmd(event,\'underline\')"><u>U</u></button>' +'<button type="button" class="rte-btn" onmousedown="_rteBig(event)" title="Bigger text">A<span style="font-size:1.3em;">A</span></button>' +'<span class="rte-sep"></span>' +'<button type="button" class="rte-btn" onmousedown="_rteCmd(event,\'insertUnorderedList\')">&#8226; List</button>' +'<button type="button" class="rte-btn" onmousedown="_rteCmd(event,\'insertOrderedList\')">1. List</button>' +'<button type="button" class="rte-btn" onmousedown="_rteLink(event)">&#128279;</button>' +'</div>' +'<div id="tfm-desc" class="tf-input rte-area" contenteditable="true" data-ph="Add details...">' + (t ? (t.description || '') : '') + '</div>' +
     '<button type="button" class="tfa-more" onclick="_tfaToggleMore()" id="tfaMoreBtn">\u2295 More options</button>' +
     '<div id="tfaMoreWrap" style="display:none;">' +
       '<label class="tf-checkrow"><input id="tfm-milestone" type="checkbox"' + (t && t.isMilestone ? ' checked' : '') + '> <span>\u2691 Mark as milestone</span></label>' +
@@ -14379,7 +14460,7 @@ async function _renderTaskPage() {
 
       // Description
       '<div class="tp-section-label">Description</div>' +
-      '<div class="rte-toolbar">' +'<button type="button" class="rte-btn" onmousedown="_rteCmd(event,\'bold\')"><b>B</b></button>' +'<button type="button" class="rte-btn" onmousedown="_rteCmd(event,\'italic\')"><i>I</i></button>' +'<button type="button" class="rte-btn" onmousedown="_rteCmd(event,\'underline\')"><u>U</u></button>' +'<span class="rte-sep"></span>' +'<button type="button" class="rte-btn" onmousedown="_rteCmd(event,\'insertUnorderedList\')">&#8226; List</button>' +'<button type="button" class="rte-btn" onmousedown="_rteCmd(event,\'insertOrderedList\')">1. List</button>' +'<button type="button" class="rte-btn" onmousedown="_rteLink(event)">&#128279;</button>' +'</div>' +'<div class="tp-desc rte-area" contenteditable="true" data-ph="Add more detail\u2026" oninput="_tpField(\'description\', _rteSanitize(this.innerHTML))">' + (t.description||'') + '</div>' +
+      '<div class="rte-toolbar">' +'<button type="button" class="rte-btn" onmousedown="_rteCmd(event,\'bold\')"><b>B</b></button>' +'<button type="button" class="rte-btn" onmousedown="_rteCmd(event,\'italic\')"><i>I</i></button>' +'<button type="button" class="rte-btn" onmousedown="_rteCmd(event,\'underline\')"><u>U</u></button>' +'<button type="button" class="rte-btn" onmousedown="_rteBig(event)" title="Bigger text">A<span style="font-size:1.3em;">A</span></button>' +'<span class="rte-sep"></span>' +'<button type="button" class="rte-btn" onmousedown="_rteCmd(event,\'insertUnorderedList\')">&#8226; List</button>' +'<button type="button" class="rte-btn" onmousedown="_rteCmd(event,\'insertOrderedList\')">1. List</button>' +'<button type="button" class="rte-btn" onmousedown="_rteLink(event)">&#128279;</button>' +'</div>' +'<div class="tp-desc rte-area" contenteditable="true" data-ph="Add more detail\u2026" oninput="_tpField(\'description\', _rteSanitize(this.innerHTML))">' + (t.description||'') + '</div>' +
 
       // Subtasks
       '<div class="tp-section-label">Subtasks' + (subTotal?(' <span class="tp-count">' + subDone + '/' + subTotal + '</span>'):'') + '</div>' +
