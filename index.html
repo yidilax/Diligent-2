@@ -5376,7 +5376,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v326</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v328</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -5843,7 +5843,7 @@ div[style*="position:fixed"][style*="inset:0"] {
     </ul>
     <div class="office-sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v326</div>
+      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v328</div>
     </div>
   </div>
 
@@ -6811,7 +6811,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v326';
+<script>var APP_VERSION = 'v328';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -14465,6 +14465,7 @@ async function _tpAddAssignee(id) {
   if (!id) return;
   var t = window._taskPageDraft; if (!t) return;
   var ids = _taskAssigneeIds(t);
+  var _wasAlready = (ids.indexOf(id) !== -1);
   if (ids.indexOf(id) === -1) ids.push(id);
   t.assigneeIds = ids;
   t.assigneeId = ids[0] || null;  // keep legacy primary in sync
@@ -14473,6 +14474,15 @@ async function _tpAddAssignee(id) {
   t.assigneeName = pe ? (pe.name||pe.email) : '';
   if (!_taskPageIsNew) await _tpSave();
   _renderTaskPage();
+  // Notify (and push) the newly added assignee.
+  try {
+    if (!_wasAlready && typeof _notifyTaskStakeholders === 'function') {
+      // Build a task object targeting just the new person so only they get pinged.
+      var _one = {}; for (var k in t) _one[k] = t[k];
+      _one.assigneeIds = [id]; _one.assignee2Id = ''; _one.followers = []; _one.ownerId = null;
+      _notifyTaskStakeholders(_one, { type: 'assigned', taskId: t.id });
+    }
+  } catch(e) {}
 }
 
 async function _tpRemoveAssignee(id) {
@@ -14491,8 +14501,15 @@ async function _tpFieldAssignee(id) {
   var t = window._taskPageDraft; if (!t) return;
   var emps = await _loadEmployeesForAssign();
   var emp = emps.find(function(e){return e.id===id;});
+  var _prevId = t.assigneeId;
   t.assigneeId = id; t.assigneeName = emp ? (emp.name||emp.email) : '';
   if (!_taskPageIsNew) { await _tpSave(); }
+  // Notify (and push) the newly assigned person, if it actually changed.
+  try {
+    if (id && id !== _prevId && typeof _notifyTaskStakeholders === 'function') {
+      _notifyTaskStakeholders(t, { type: 'assigned', taskId: t.id });
+    }
+  } catch(e) {}
 }
 async function _tpFieldProject(id) {
   var t = window._taskPageDraft; if (!t) return;
@@ -29275,6 +29292,30 @@ async function enablePushNotifications(ownerId, silent) {
     rec.updatedAt = Date.now();
     await DB.set(_pushSubKey(oid), rec);
     try { localStorage.setItem('dd_pushOn', '1'); } catch(e) {}
+    // Foreground handler: show a notification even when the app is open.
+    // (Data-only messages don't auto-display, so we do it manually here.)
+    try {
+      if (!window._ddOnMessageSet) {
+        window._ddOnMessageSet = true;
+        messaging.onMessage(function(payload) {
+          try {
+            var d = (payload && payload.data) || {};
+            var title = d.title || 'Diligent Developers';
+            var body = d.body || '';
+            if (Notification && Notification.permission === 'granted') {
+              navigator.serviceWorker.getRegistration('./firebase-messaging-sw.js').then(function(reg){
+                var r = reg || (navigator.serviceWorker.ready);
+                if (reg) {
+                  reg.showNotification(title, { body: body, icon: '/icon-192.png', badge: '/icon-192.png', data: { url: d.url || '/' } });
+                }
+              });
+            }
+            // Also refresh the in-app bell if present.
+            try { if (typeof _loadMyNotifications === 'function') _loadMyNotifications(); } catch(e) {}
+          } catch(e) {}
+        });
+      }
+    } catch(e) {}
     if (!silent) { try { ddToast('Push notifications on \u2713'); } catch(e) {} }
     try { _renderProfileGcal(); } catch(e) {}
     try { _renderPushSetting(); } catch(e) {}
