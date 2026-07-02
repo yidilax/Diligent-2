@@ -4248,6 +4248,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 /* ========================= ASANA-STYLE NAV (v304) ========================= */
 :root{ --rail-w:66px; --flyout-w:230px; }
 /* Slim always-on icon rail (desktop) */
+.rail-version{ color:rgba(255,255,255,0.4); font-size:9px; text-align:center; padding:6px 2px 8px; font-weight:700; letter-spacing:0.5px; }
 #ddRail{ position:fixed; top:0; left:0; bottom:0; width:var(--rail-w); background:var(--navy); z-index:340;
   display:flex; flex-direction:column; align-items:center; padding:10px 0; gap:3px; border-right:1px solid rgba(255,255,255,0.08); }
 #ddRail .rail-logo{ width:42px;height:42px;border-radius:11px;background:var(--gold);color:var(--navy);
@@ -5368,7 +5369,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v333</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v334</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -5686,6 +5687,8 @@ div[style*="position:fixed"][style*="inset:0"] {
     <div id="ddRailBtns"></div>
     <div class="rail-spacer"></div>
     <div class="rail-btn" onclick="openProfileMenu()" title="Account"><span class="ic">⚙️</span><span class="lbl">Account</span></div>
+    <div class="rail-btn" onclick="doLogout()" title="Log out"><span class="ic">🚪</span><span class="lbl">Log out</span></div>
+    <div class="rail-version" id="ddRailVersion" title="App version"></div>
   </div>
   <div id="ddScrim" onclick="ddFlyClose()"></div>
   <div id="ddFlyout">
@@ -6672,7 +6675,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v333';
+<script>var APP_VERSION = 'v334';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -11819,6 +11822,7 @@ function _renderProfileMenu() {
     '<button class="pm-btn" onclick="addAnotherAccount()">+ Add another account</button>' +
     '<button class="pm-btn pm-btn-out" onclick="closeProfileMenu();doLogout();">Sign out</button>' +
   '</div>';
+  html += '<div style="text-align:center;color:var(--muted);font-size:11px;margin-top:10px;">Version ' + (typeof APP_VERSION!=='undefined'?APP_VERSION:'') + '</div>';
   host.innerHTML = html;
   try { _renderPushSetting(); } catch(e) {}
   try { _renderAiSetting(); } catch(e) {}
@@ -30258,9 +30262,21 @@ function _ddCatBadge(cat){
 }
 
 // ---- Render the rail ----
+// ---- Role-based nav filtering: only show tabs the current user may open ----
+function _ddTabVisible(tabId){
+  try { if (typeof _tabState === 'function') return _tabState(tabId) !== 'hidden'; } catch(e) {}
+  return true;
+}
+function _ddVisTabs(cat){
+  return (cat && cat.tabs ? cat.tabs : []).filter(function(t){ return _ddTabVisible(t.t); });
+}
+function _ddVisCats(){
+  return DD_NAV.filter(function(c){ return _ddVisTabs(c).length > 0; });
+}
+
 function ddRenderRail(){
   var host=document.getElementById('ddRailBtns'); if(!host) return;
-  host.innerHTML = DD_NAV.map(function(cat){
+  host.innerHTML = _ddVisCats().map(function(cat){
     var badge=_ddCatBadge(cat);
     return '<div class="rail-btn'+(cat.id===_ddActiveCat?' active':'')+'" onclick="ddOpenCat(\''+cat.id+'\')" title="'+cat.label+'">'+
       '<span class="ic">'+cat.icon+'</span><span class="lbl">'+cat.label+'</span>'+
@@ -30276,7 +30292,7 @@ function ddRenderFlyout(catId){
   document.getElementById('ddFlyTitle').textContent = cat.label;
   var favs=_ddGetFavs();
   var cur = window._currentTab;
-  document.getElementById('ddFlyBody').innerHTML = cat.tabs.map(function(t){
+  document.getElementById('ddFlyBody').innerHTML = _ddVisTabs(cat).map(function(t){
     var badge=_ddBadgeFor(t.t);
     var isFav=favs.indexOf(t.t)>-1;
     return '<div class="fly-item'+(t.t===cur?' active':'')+'" onclick="ddNav(\''+t.t+'\')">'+
@@ -30332,20 +30348,50 @@ function ddNav(tabId){
 // ---- Mobile bottom bar ----
 function ddRenderBottomBar(){
   var host=document.getElementById('ddBottomBar'); if(!host) return;
-  var favs=_ddGetFavs();
   var cur=window._currentTab;
-  var btns = favs.map(function(tid){
-    var meta=_ddFindTab(tid); if(!meta) return '';
-    var t=meta.tab; var badge=_ddBadgeFor(tid);
-    return '<button class="bbar-btn'+(tid===cur?' active':'')+'" onclick="ddNav(\''+tid+'\')">'+
-      '<span class="ic">'+t.i+'</span>'+t.l+
+  // Option 1 (mobile): the bottom bar holds the CATEGORIES. Tapping one opens a
+  // sheet of that category's tabs. (Employees only see categories they can access.)
+  var cats=_ddVisCats();
+  // If there are more than 5 categories, keep the bar tidy: show first 4 + "More".
+  var showCats = cats.length > 5 ? cats.slice(0,4) : cats;
+  var btns = showCats.map(function(cat){
+    var activeCat = _ddCatContainsTab(cat, cur);
+    var badge=_ddCatBadge(cat);
+    return '<button class="bbar-btn'+(activeCat?' active':'')+'" onclick="ddOpenCatMobile(\''+cat.id+'\')">'+
+      '<span class="ic">'+cat.icon+'</span>'+cat.label+
       (badge?'<span class="bb-badge">'+badge+'</span>':'')+
     '</button>';
   }).join('');
-  // More button always last
-  btns += '<button class="bbar-btn'+((favs.indexOf(cur)===-1)?' active':'')+'" onclick="ddOpenMore()">'+
-      '<span class="ic">•••</span>More</button>';
+  if (cats.length > 5) {
+    btns += '<button class="bbar-btn" onclick="ddOpenMore()"><span class="ic">•••</span>More</button>';
+  }
   host.innerHTML = btns;
+}
+// Does a category contain the currently-open tab? (for highlighting the bar)
+function _ddCatContainsTab(cat, tabId){
+  return !!(cat && cat.tabs && cat.tabs.some(function(t){ return t.t===tabId; }));
+}
+// Mobile: open a sheet listing just this category's (visible) tabs.
+function ddOpenCatMobile(catId){
+  var cat=null; DD_NAV.forEach(function(c){ if(c.id===catId) cat=c; });
+  if(!cat) return;
+  var host=document.getElementById('ddMoreBody');
+  var titleEl=document.querySelector('#ddMoreSheet .more-title');
+  var subEl=document.querySelector('#ddMoreSheet .more-sub');
+  if(titleEl) titleEl.textContent = cat.icon + '  ' + cat.label;
+  if(subEl) subEl.textContent = 'Tap a section to open it.';
+  var cur=window._currentTab;
+  if(host){
+    host.innerHTML = '<div class="more-grid">' + _ddVisTabs(cat).map(function(t){
+      var badge=_ddBadgeFor(t.t);
+      return '<div class="more-item'+(t.t===cur?' active':'')+'" onclick="ddNav(\''+t.t+'\')">'+
+        (badge?'<span class="badge">'+badge+'</span>':'')+
+        '<span class="ic">'+t.i+'</span>'+t.l+
+      '</div>';
+    }).join('') + '</div>';
+  }
+  document.getElementById('ddMoreSheet').classList.add('open');
+  document.getElementById('ddMoreScrim').classList.add('show');
 }
 
 // ---- Mobile "More" sheet (all tabs, grouped, with star to favorite) ----
@@ -30353,9 +30399,9 @@ function ddRenderMore(){
   var host=document.getElementById('ddMoreBody'); if(!host) return;
   var favs=_ddGetFavs();
   var cur=window._currentTab;
-  host.innerHTML = DD_NAV.map(function(cat){
+  host.innerHTML = _ddVisCats().map(function(cat){
     return '<div class="more-group-label">'+cat.icon+' '+cat.label+'</div>'+
-      '<div class="more-grid">'+ cat.tabs.map(function(t){
+      '<div class="more-grid">'+ _ddVisTabs(cat).map(function(t){
         var badge=_ddBadgeFor(t.t);
         var isFav=favs.indexOf(t.t)>-1;
         return '<div class="more-item'+(t.t===cur?' active':'')+'" onclick="ddNav(\''+t.t+'\')">'+
@@ -30380,6 +30426,7 @@ function ddInitNavShell(){
   ddRenderFlyout(_ddActiveCat);
   ddRenderBottomBar();
   ddRenderMore();
+  try { var _rv=document.getElementById('ddRailVersion'); if(_rv) _rv.textContent = (typeof APP_VERSION!=='undefined'?APP_VERSION:''); } catch(e){}
 }
 // Re-sync highlights whenever a tab changes (hook after switchTab via a light wrapper)
 (function(){
