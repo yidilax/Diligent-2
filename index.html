@@ -4149,7 +4149,7 @@ a.sd-contact:active { background:rgba(255,255,255,0.12); }
 /* A3 buttons: slightly lighter navy, clean. */
 .btn-primary, .btn-pri { background:var(--navy); }
 /* Headers feel a bit lighter on the brighter A3 background. */
-.office-content { background:var(--offwhite); }
+.office-content { background: transparent; }
 
 #tasks-count { display:none !important; }
 
@@ -4356,6 +4356,7 @@ div[style*="position:fixed"][style*="inset:0"] {
   /* Broker portal: keep everything within screen width so the units table scrolls (not the page) */
   #brokerPortalPage { overflow-x: hidden; }
   #brokerPortalPage > div { max-width: 720px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+@media(min-width: 900px){ #brokerPortalPage > div { max-width: 1100px; } }
   #brokerUnitsList { width: 100%; max-width: 100%; overflow: hidden; }
   #brokerUnitsList > div { max-width: 100%; }
   /* the horizontal scroll box that holds each table */
@@ -4592,25 +4593,16 @@ div[style*="position:fixed"][style*="inset:0"] {
   #team .section-sub { color:#8899bb; }
   
 /* Broker + office units tables: on desktop use full width (no horizontal scroll) */
-.units-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+/* Units tables: the card is always 100% of its container; the TABLE scrolls
+   inside the card only, so nothing ever clips past the card edge. */
+.units-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; box-sizing: border-box; }
 .units-scroll > table { min-width: var(--units-minw, 560px); }
 @media(min-width: 900px){
-  /* Units tables break out of the narrow content column to use the big desktop width,
-     and show every column fully (no truncation). Horizontal scroll only if truly needed. */
-  .units-scroll {
-    overflow-x: auto;
-    width: calc(100vw - 130px);
-    max-width: 1600px;
-    position: relative;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-  .units-scroll > table { min-width: 0 !important; width: 100%; }
+  /* On desktop the table fills the card and only scrolls if the columns are
+     genuinely wider than the card. No viewport breakout (that was clipping). */
+  .units-scroll { width: 100%; }
+  .units-scroll > table { min-width: 100%; width: 100%; }
   .units-scroll > table th, .units-scroll > table td { white-space: nowrap; }
-}
-/* On very wide screens the broker portal content is also narrow; let its units breathe */
-@media(min-width: 900px){
-  #brokerPortalPage .units-scroll { width: calc(100vw - 130px); }
 }
 
 .hp-detail-stage{ height:300px; }
@@ -5376,7 +5368,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v328</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v333</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -5389,7 +5381,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div id="custReturningPanel" style="display:none;">
         <div class="form-group">
           <label class="form-label">Your 4-digit code</label>
-          <input class="form-input" type="tel" inputmode="numeric" maxlength="4" id="custReturnCode" placeholder="••••" style="text-align:center;font-size:28px;letter-spacing:12px;font-weight:800;" oninput="this.value=this.value.replace(/\\D/g,'').slice(0,4)">
+          <input class="form-input" type="tel" inputmode="numeric" maxlength="4" id="custReturnCode" placeholder="0000" style="text-align:center;font-size:28px;letter-spacing:10px;padding-left:10px;font-weight:800;" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4)">
           <div style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center;">Enter the code you created when you first signed up.</div>
         </div>
         <button class="btn-primary" onclick="customerCodeLogin()" style="margin-top:8px;background:var(--navy);color:#fff;">Enter My Portal</button>
@@ -5716,143 +5708,12 @@ div[style*="position:fixed"][style*="inset:0"] {
   </div>
 
 
-  <!-- Sidebar overlay (closes on tap outside) -->
-  <div class="office-sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
-
-  <!-- Sidebar drawer -->
-  <div class="office-sidebar" id="officeSidebar">
-    <div class="office-sidebar-header">
-      <span class="office-sidebar-title">Menu</span>
-      <button class="office-sidebar-close" onclick="closeSidebar()">✕</button>
-    </div>
-    <div class="office-sidebar-user" onclick="openProfileMenu()" style="display:flex;align-items:center;gap:12px;cursor:pointer;" title="Account & settings">
-      <div id="sidebarAvatar" style="width:44px;height:44px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-weight:800;font-size:18px;color:#fff;background-size:cover;background-position:center;"></div>
-      <div style="min-width:0;">
-        <div class="office-sidebar-user-name" id="sidebarUserName"></div>
-        <div class="office-sidebar-user-role" id="sidebarUserRole"></div>
-      </div>
-    </div>
-    <ul class="office-nav-list">
-      <li class="office-nav-item" id="pinnedSection" style="display:none;">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.4);font-weight:700;padding:8px 24px 4px;">Pinned</div>
-        <div id="pinnedList"></div>
-        <div style="height:1px;background:rgba(255,255,255,0.1);margin:8px 16px;"></div>
-      </li>
-      <li class="office-nav-item">
-        <button class="office-nav-btn active" onclick="switchTab('dashboard');closeSidebar();" id="navbtn-dashboard">
-          <span class="nav-icon">📊</span> Dashboard
-        </button>
-      </li>
-      <li class="office-nav-item">
-        <button class="office-nav-btn" onclick="openInbox();closeSidebar();" id="navbtn-notifications">
-          <span class="nav-icon">🔔</span> Notifications <span class="nav-inbox-badge" id="sidebarNotifBadge" style="display:none;"></span>
-        </button>
-      </li>
-      <li class="office-nav-item">
-        <button class="office-nav-btn" onclick="openGlobalSearch();closeSidebar();" id="navbtn-globalSearch">
-          <span class="nav-icon">🔍</span> Search Everything
-        </button>
-      </li>
-      <li class="office-nav-item">
-        <button class="office-nav-btn" onclick="switchTab('reporting');closeSidebar();" id="navbtn-reporting">
-          <span class="nav-icon">📈</span> Reports
-        </button>
-      </li>
-      <li class="office-nav-item">
-        <button class="office-nav-btn" onclick="switchTab('weeklyDigest');closeSidebar();" id="navbtn-weeklyDigest">
-          <span class="nav-icon">🗓️</span> Weekly Digest
-        </button>
-      </li>
-      <li class="office-nav-item">
-        <button class="office-nav-btn" onclick="switchTab('teamChat');closeSidebar();" id="navbtn-teamChat">
-          <span class="nav-icon">💬</span> Team Chat
-        </button>
-      </li>
-
-      <!-- WORK group -->
-      <li class="office-nav-item">
-        <button class="office-nav-group-btn" onclick="_toggleNavGroup('grp-work')" id="grpbtn-work">
-          <span class="nav-icon">🏗️</span> Work <span class="nav-group-caret" id="grp-work-caret">▾</span>
-        </button>
-      </li>
-      <li class="office-nav-group" id="grp-work" style="display:none;">
-        <button class="office-nav-btn nav-sub" onclick="switchTab('projects');closeSidebar();" id="navbtn-projects"><span class="nav-icon">🏗️</span> Projects</button>
-        <button class="office-nav-btn nav-sub" onclick="switchTab('punchlist');closeSidebar();" id="navbtn-punchlist"><span class="nav-icon">✅</span> Punch Lists</button>
-        <button class="office-nav-btn nav-sub" onclick="switchTab('specs');closeSidebar();" id="navbtn-specs"><span class="nav-icon">🏠</span> House Specs</button>
-        <button class="office-nav-btn nav-sub" onclick="switchTab('tasks');closeSidebar();" id="navbtn-tasks"><span class="nav-icon">📝</span> Tasks</button>
-        <button class="office-nav-btn nav-sub" onclick="switchTab('taskTemplates');closeSidebar();" id="navbtn-taskTemplates"><span class="nav-icon">📋</span> Task Templates</button>
-        <button class="office-nav-btn nav-sub" onclick="switchTab('scheduling');closeSidebar();" id="navbtn-scheduling"><span class="nav-icon">📅</span> Scheduling</button>
-        <button class="office-nav-btn nav-sub" onclick="switchTab('photoTimeline');closeSidebar();" id="navbtn-photoTimeline"><span class="nav-icon">📸</span> Photo Timeline</button>
-      </li>
-      <!-- LOGBOOK group -->
-      <li class="office-nav-item" id="grphdr-logbook">
-        <button class="office-nav-group-btn" onclick="_toggleNavGroup('grp-logbook')" id="grpbtn-logbook">
-          <span class="nav-icon">📘</span> Logbook <span class="nav-group-caret" id="grp-logbook-caret">▾</span>
-        </button>
-      </li>
-      <li class="office-nav-group" id="grp-logbook" style="display:none;">
-        <button class="office-nav-btn nav-sub" onclick="switchTab('dailyLog');closeSidebar();" id="navbtn-dailyLog"><span class="nav-icon">📓</span> Daily Site Log</button>
-        <button class="office-nav-btn nav-sub" onclick="switchTab('inspections');closeSidebar();" id="navbtn-inspections"><span class="nav-icon">🔍</span> Inspections</button>
-        <button class="office-nav-btn nav-sub" onclick="switchTab('deliveries');closeSidebar();" id="navbtn-deliveries"><span class="nav-icon">📦</span> Deliveries</button>
-        <button class="office-nav-btn nav-sub" onclick="switchTab('changeOrders');closeSidebar();" id="navbtn-changeOrders"><span class="nav-icon">📝</span> Change Orders</button>
-      </li>
-
-      <!-- CUSTOMERS group -->
-      <li class="office-nav-item">
-        <button class="office-nav-group-btn" onclick="_toggleNavGroup('grp-cust')" id="grpbtn-cust">
-          <span class="nav-icon">👥</span> Customers <span class="nav-group-caret" id="grp-cust-caret">▾</span>
-        </button>
-      </li>
-      <li class="office-nav-group" id="grp-cust" style="display:none;">
-        <button class="office-nav-btn nav-sub" onclick="switchTab('messages');closeSidebar();" id="navbtn-messages"><span class="nav-icon">💬</span> Messages <span id="messagesBadge" style="display:none;background:#e07a6a;color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;margin-left:4px;"></span></button>
-        <button class="office-nav-btn nav-sub" onclick="switchTab('customers');closeSidebar();" id="navbtn-customers"><span class="nav-icon">👥</span> Customers</button>
-        <button class="office-nav-btn nav-sub" onclick="switchTab('upgrades');closeSidebar();" id="navbtn-upgrades"><span class="nav-icon">📋</span> Upgrades</button>
-        <button class="office-nav-btn nav-sub" onclick="switchTab('custUpdates');closeSidebar();" id="navbtn-custUpdates"><span class="nav-icon">📣</span> Customer Updates</button>
-        <button class="office-nav-btn nav-sub" onclick="switchTab('custReports');closeSidebar();" id="navbtn-custReports"><span class="nav-icon">📝</span> Customer Reports <span id="custReportsBadge" style="display:none;background:#e07a6a;color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;margin-left:4px;"></span></button>
-        <button class="office-nav-btn nav-sub" onclick="switchTab('custPortals');closeSidebar();" id="navbtn-custPortals"><span class="nav-icon">🏠</span> Customer Portals</button>
-        <button class="office-nav-btn nav-sub" onclick="switchTab('walkthroughs');closeSidebar();" id="navbtn-walkthroughs"><span class="nav-icon">🚶</span> Walkthroughs <span id="walkthroughsBadge" style="display:none;background:#e07a6a;color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;margin-left:4px;"></span></button>
-        <button class="office-nav-btn nav-sub admin-only" style="display:none;" onclick="switchTab('upgradeEditor');closeSidebar();" id="navbtn-upgradeEditor"><span class="nav-icon">✏️</span> Upgrade Editor</button>
-      </li>
-
-      <li class="office-nav-group-header">
-        <button class="office-nav-group-btn" onclick="_toggleNavGroup('grp-website')" id="grpbtn-website">
-          <span class="nav-icon">🌐</span> Website <span class="nav-group-caret" id="grp-website-caret">▾</span>
-        </button>
-      </li>
-      <li class="office-nav-group" id="grp-website" style="display:none;">
-        <button class="office-nav-btn nav-sub" onclick="switchTab('homeContent');closeSidebar();" id="navbtn-homeContent"><span class="nav-icon">📝</span> Home Page Content</button>
-        <button class="office-nav-btn nav-sub" onclick="switchTab('units');closeSidebar();" id="navbtn-units"><span class="nav-icon">🏢</span> Units</button>
-        <button class="office-nav-btn nav-sub" onclick="switchTab('brokers');closeSidebar();" id="navbtn-brokers"><span class="nav-icon">🤝</span> Brokers</button>
-        <button class="office-nav-btn nav-sub" onclick="switchTab('plans');closeSidebar();" id="navbtn-plans"><span class="nav-icon">📐</span> Design Plans</button>
-        <button class="office-nav-btn nav-sub" onclick="switchTab('homeProjects');closeSidebar();" id="navbtn-homeProjects"><span class="nav-icon">🏗️</span> Home Page Projects</button>
-        <button class="office-nav-btn nav-sub" onclick="switchTab('contactMessages');closeSidebar();" id="navbtn-contactMessages"><span class="nav-icon">📨</span> Contact Messages <span id="contactMessagesBadge" style="display:none;background:#e07a6a;color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;margin-left:4px;"></span></button>
-      </li>
-
-      <!-- SUBCONTRACTORS group -->
-      <li class="office-nav-item">
-        <button class="office-nav-group-btn" onclick="_toggleNavGroup('grp-sub')" id="grpbtn-sub">
-          <span class="nav-icon">🔧</span> Subcontractors <span class="nav-group-caret" id="grp-sub-caret">▾</span>
-        </button>
-      </li>
-      <li class="office-nav-group" id="grp-sub" style="display:none;">
-        <button class="office-nav-btn nav-sub" onclick="switchTab('subs');closeSidebar();" id="navbtn-subs"><span class="nav-icon">🔧</span> Subcontractors</button>
-        <button class="office-nav-btn nav-sub" onclick="switchTab('subCalendar');closeSidebar();" id="navbtn-subCalendar"><span class="nav-icon">📅</span> Sub Calendar</button>
-        <button class="office-nav-btn nav-sub" onclick="switchTab('vendors');closeSidebar();" id="navbtn-vendors"><span class="nav-icon">📇</span> Vendors</button>
-        <button class="office-nav-btn nav-sub admin-only" style="display:none;" onclick="switchTab('employees');closeSidebar();" id="navbtn-employees"><span class="nav-icon">👤</span> Employees</button>
-      </li>
-    </ul>
-    <div class="office-sidebar-footer">
-      <button class="btn-logout" onclick="doLogout()">Logout</button>
-      <button id="resetDataBtn" onclick="_openResetTool()" style="display:none;width:100%;margin-top:10px;background:none;border:1px solid rgba(192,57,43,0.5);color:#e57368;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">⚠️ Fresh start (wipe test data)</button><div id="appVersionLabel" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:0.5px;">v328</div>
-    </div>
-  </div>
+  <!-- (old sidebar drawer removed; using icon rail + flyout nav) -->
 
   <!-- Top bar -->
   <div class="office-topbar">
     <button id="topbarBack" class="office-back" onclick="goBackTab()" aria-label="Back" style="display:none;">&#8249;</button>
-    <button class="office-hamburger" onclick="openSidebar()" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
+    
     <div class="office-logo">Diligent Developers</div>
     <button id="topbarSearchBtn" onclick="openGlobalSearch()" aria-label="Search" style="margin-left:auto;background:rgba(255,255,255,0.12);border:none;color:#fff;width:36px;height:36px;border-radius:9px;cursor:pointer;font-size:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;">🔍</button>
     <span id="topbarGreeting" class="topbar-greeting" style="padding-left:6px;font-family:'Plus Jakarta Sans','Inter',sans-serif;font-size:13px;font-weight:600;color:rgba(255,255,255,0.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;"></span>
@@ -6811,7 +6672,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v328';
+<script>var APP_VERSION = 'v333';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -23168,7 +23029,7 @@ async function deleteSubmission(key) {
 }
 
 function exportUpgradesCsv() {
-  var sections = window._upgradeSections || DEFAULT_UPGRADE_SECTIONS;
+  var sections = _sheetNow();
   var allItems = [];
   sections.forEach(function(sec) {
     (sec.items || []).forEach(function(item) {
@@ -23666,6 +23527,47 @@ const DEFAULT_UPGRADE_SECTIONS = [
 ];
 
 // Load or init upgrade sections data
+// SINGLE SOURCE OF TRUTH for the current upgrade sheet.
+// Every view/export/table should call this so edits appear everywhere.
+// Order: the in-memory edited sheet -> the saved global sheet -> the built-in default.
+function _sheetNow() {
+  try {
+    if (window._upgradeSections && window._upgradeSections.length) return window._upgradeSections;
+  } catch(e) {}
+  try {
+    if (typeof UPGRADE_SECTIONS !== 'undefined' && UPGRADE_SECTIONS && UPGRADE_SECTIONS.length) return UPGRADE_SECTIONS;
+  } catch(e) {}
+  return (typeof DEFAULT_UPGRADE_SECTIONS !== 'undefined') ? DEFAULT_UPGRADE_SECTIONS : [];
+}
+
+// Resolve which sheet to DISPLAY for a given customer submission, per the rule:
+//   1. If the customer's PROJECT has its own sheet -> use that (so editing a project
+//      sheet updates that project's customers).
+//   2. Otherwise use the snapshot saved with the submission (_sheet) -> so editing the
+//      GENERAL sheet does NOT alter already-submitted customers.
+//   3. Otherwise fall back to the current/built-in sheet.
+async function _sheetForSubmission(sub) {
+  try {
+    var addr = (sub && (sub.address || sub._address)) || '';
+    if (addr) {
+      var projKeys = await DB.list('project:');
+      var projects = (await Promise.all((projKeys||[]).map(function(k){ return DB.get(k); }))).filter(Boolean);
+      var owning = null;
+      projects.forEach(function(p){
+        (p.houses||[]).forEach(function(h){
+          if ((h.address||'').toLowerCase().trim() === addr.toLowerCase().trim()) owning = p;
+        });
+      });
+      if (owning) {
+        var override = await DB.get('upgrade_sections_proj:' + owning.id);
+        if (override && override.length) return override;   // project sheet wins
+      }
+    }
+  } catch(e) {}
+  if (sub && sub._sheet && sub._sheet.length) return sub._sheet;  // customer's snapshot
+  return _sheetNow();                                             // global / built-in
+}
+
 async function ue_load() {
   try {
     var saved = await DB.get('upgrade_sections');
@@ -26103,10 +26005,12 @@ function switchUpgradeView(view) {
     renderCustomerTab();
     (async function(){
       try {
-        var before = getStoredSubmissions().length;
+        // Always re-render after pulling fresh data. (The old code only re-rendered
+        // when the record COUNT changed, so updated-but-same-count records — or a
+        // refresh that filled in missing selections — would show stale/empty. The
+        // other two views always re-render, which is why they worked and this didn't.)
         await _refreshSubmissions();
-        var after = getStoredSubmissions().length;
-        if (after !== before || before === 0) renderCustomerTab();
+        renderCustomerTab();
       } catch(e) {}
     })();
   } else if (view === 'grid') {
@@ -26130,7 +26034,7 @@ function renderUpgradeGrid() {
   }
 
   // Upgrade fields become ROWS
-  var sections = (typeof UPGRADE_SECTIONS !== 'undefined' && UPGRADE_SECTIONS) ? UPGRADE_SECTIONS : (window._upgradeSections || []);
+  var sections = _sheetNow();
 
   // Group submissions by house (address); customers within a house become COLUMNS
   var groups = {}; var order = [];
@@ -26377,7 +26281,7 @@ function _officeViewPdf() {
   try { printMySelections(); } finally { window._lastSubmission = prev; }
 }
 
-function showCustomerDetail(idx) {
+async function showCustomerDetail(idx) {
   var subs = window._filteredSubs || _cachedSubmissions || [];
   var s = subs[idx];
   if (!s) return;
@@ -26427,7 +26331,7 @@ function showCustomerDetail(idx) {
   // Upgrade selections \u2014 display against the sheet the customer ACTUALLY used
   // (stored as _sheet on their submission). Fall back to the default for old submissions.
   var hasAny = false;
-  var _displaySheet = (s._sheet && s._sheet.length) ? s._sheet : ((window._officeUpgradeSheet && window._officeUpgradeSheet.length) ? window._officeUpgradeSheet : UPGRADE_SECTIONS);
+  var _displaySheet = await _sheetForSubmission(s);
   _displaySheet.forEach(function(sec) {
     var secItems = '';
     var _fields = (sec.fields && sec.fields.length) ? sec.fields : (sec.items || []).map(function(it){
@@ -26579,7 +26483,7 @@ function renderUpgradeTab() {
     if (!paintGroups[color]) paintGroups[color] = [];
     paintGroups[color].push(s);
   });
-  UPGRADE_SECTIONS.forEach(function(sec) {
+  _sheetNow().forEach(function(sec) {
     sec.fields.forEach(function(f) {
       var yes = [], no = [];
       subs.forEach(function(s) {
@@ -26643,14 +26547,8 @@ function renderUpgradeTab() {
 // ════════════════════════════════════════════
 // SIDEBAR NAV
 // ════════════════════════════════════════════
-function openSidebar() {
-  document.getElementById('officeSidebar').classList.add('open');
-  document.getElementById('sidebarOverlay').classList.add('open');
-}
-function closeSidebar() {
-  document.getElementById('officeSidebar').classList.remove('open');
-  document.getElementById('sidebarOverlay').classList.remove('open');
-}
+function openSidebar() { /* old drawer removed; nav is now the icon rail */ }
+function closeSidebar() { /* old drawer removed; no-op */ }
 
 
 // ════════════════════════════════════════════
@@ -27853,7 +27751,7 @@ function showUpgradesCompareTable(subs) {
   var rowIdx = 0;
 
   // Section rows
-  UPGRADE_SECTIONS.forEach(function(sec) {
+  _sheetNow().forEach(function(sec) {
     // Section header row
     var secRow = document.createElement('tr');
     var secTd = document.createElement('td');
