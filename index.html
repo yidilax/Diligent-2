@@ -5369,7 +5369,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v335</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v337</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -6675,7 +6675,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v335';
+<script>var APP_VERSION = 'v337';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -7017,11 +7017,21 @@ async function _rerenderCurrentView() {
     else if (tab === 'scheduling') { schedRender(); }
     else if (tab === 'specs') { renderSpecs(); }
     else if (tab === 'inspections') { renderInspections(true); }
+    else if (tab === 'units') { if (typeof renderUnits === 'function') await renderUnits(); }
   } catch(e) {}
 
   // Sub portal / customer portal live refresh.
   try {
     if (typeof renderSubPortal === 'function' && document.getElementById('subPortalContent') && _currentSub) { renderSubPortal(); }
+  } catch(e) {}
+
+  // Broker portal live refresh — when units/addresses change in the office, the broker's
+  // Available Units view updates instantly (no manual refresh needed).
+  try {
+    var bp = document.getElementById('brokerPortalPage');
+    if (bp && getComputedStyle(bp).display !== 'none' && typeof renderBrokerUnits === 'function') {
+      renderBrokerUnits();
+    }
   } catch(e) {}
 }
 
@@ -7168,6 +7178,26 @@ let currentUser = null;
 // ════════════════════════════════════════════
 // INIT
 // ════════════════════════════════════════════
+// True if ANY user session is saved (office Firebase user, or a portal code/PIN).
+// Used so a refresh doesn't dump a logged-in user onto the landing page before their
+// session has a chance to restore.
+function _hasSavedSession() {
+  try {
+    var auth = _getAuth();
+    if (auth && auth.currentUser) return true;
+  } catch(e) {}
+  try {
+    var lp = localStorage.getItem('dd_lastPage') || '';
+    if (localStorage.getItem('dd_brokerCode') && lp === 'brokerPortalPage') return true;
+    if (localStorage.getItem('dd_subSession') && lp === 'subPortalPage') return true;
+    var cs = localStorage.getItem('dd_custSession');
+    if (cs && cs !== '{}') return true;
+    // office user marker
+    if (localStorage.getItem('dd_officeActive') === '1') return true;
+  } catch(e) {}
+  return false;
+}
+
 async function init() {
   if (typeof applyTheme === 'function') { try { applyTheme(); } catch(e){} }
   // Biometric app lock: if enabled, require fingerprint/Face ID on every app open.
@@ -7191,6 +7221,23 @@ async function init() {
         document.getElementById('subPortalTrade').textContent = _sub.trade || '';
         showPage('subPortalPage');
         await renderSubPortal();
+        return;
+      }
+    }
+  } catch(e) {}
+  // \u2500\u2500 Restore a logged-in broker on refresh (stay logged in) \u2500\u2500
+  try {
+    var _bCode = localStorage.getItem('dd_brokerCode');
+    if (_bCode && localStorage.getItem('dd_lastPage') === 'brokerPortalPage') {
+      await _ensureAnonAuth();
+      var _bRec = await DB.get('pubbroker:' + _bCode);
+      if (_bRec && _bRec.active !== false) {
+        var _bl = document.getElementById('bootLoader'); if (_bl) _bl.style.display = 'none';
+        window._brokerName = _bRec.name || 'Broker';
+        var _bw = document.getElementById('brokerWelcome'); if (_bw) _bw.textContent = 'Welcome, ' + window._brokerName;
+        showPage('brokerPortalPage');
+        await renderBrokerUnits();
+        try { if (typeof _startLiveSync === 'function') _startLiveSync(); } catch(e) {}
         return;
       }
     }
@@ -7290,7 +7337,7 @@ async function init() {
         var _shown = false;
         document.querySelectorAll('.page').forEach(function(p){ if (getComputedStyle(p).display !== 'none') _shown = true; });
         var _onPortal = ['subPortalPage','customerDashboardPage','customerGalleryPage','customerPortalPage','customerPunchPage','customerUpdatesPage','customerAuthPage','subAuthPage'].some(function(id){ var e=document.getElementById(id); return e && getComputedStyle(e).display !== 'none'; });
-        if (!_shown && !_onPortal && typeof showPage === 'function') { showPage('landingPage'); }
+        if (!_shown && !_onPortal && !_hasSavedSession() && typeof showPage === 'function') { showPage('landingPage'); }
       } catch(e) {}
       return;
     }
@@ -7310,6 +7357,19 @@ async function init() {
           var cu = null;
           try { cu = auth.currentUser; } catch(e) {}
           if (cu) { return; }                   // session restored — onAuthStateChanged will route it
+          // If a session is saved but hasn't restored yet, wait longer instead of
+          // bouncing to the landing page (this was logging users out on refresh).
+          if (_hasSavedSession()) {
+            setTimeout(function(){
+              if (_handled) return;
+              var cu2=null; try { cu2=auth.currentUser; } catch(e){}
+              if (cu2) return;
+              _settleBoot(); _hideLoader();
+              // still nothing after the extended wait — only now fall back
+              if (!_hasSavedSession()) showPage('landingPage');
+            }, 3500);
+            return;
+          }
           _settleBoot();
           showPage('landingPage');
           _hideLoader();
@@ -7895,7 +7955,8 @@ function _allUnitCols() {
       label: (ov.label!=null && ov.label!=='') ? ov.label : c.label,
       builtin:true,
       isPrice: c.isPrice, isStatus: c.isStatus,
-      brokerVisible: (ov.brokerVisible===false) ? false : true
+      brokerVisible: (ov.brokerVisible===false) ? false : true,
+      choices: (ov.choices && ov.choices.length) ? ov.choices : null
     };
   });
   return builtins.concat(_unitsCols.map(function(c){
@@ -7958,11 +8019,32 @@ async function renderUnits() {
   }).join('');
 }
 
+// Pick black or white text for readability on a given hex background.
+function _contrastText(hex){
+  try {
+    var h = (hex||'').replace('#','');
+    if (h.length===3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+    if (h.length<6) return '#fff';
+    var r=parseInt(h.slice(0,2),16), g=parseInt(h.slice(2,4),16), b=parseInt(h.slice(4,6),16);
+    // relative luminance
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.62 ? '#16294A' : '#ffffff';
+  } catch(e){ return '#fff'; }
+}
+
 function _renderAddrBlock(addr, addrRec, units, cols, editing) {
-  var th = 'style="text-align:left;padding:8px 9px;font-size:10px;letter-spacing:0.04em;text-transform:uppercase;color:#fff;font-weight:700;white-space:nowrap;background:var(--navy);"';
-  var headerCells = cols.map(function(c){
+  var _hdrColor = (addrRec && addrRec.color) ? addrRec.color : '';
+  var _hdrBg = _hdrColor || '#16294A';
+  // pick readable text color for the header based on the chosen color
+  var _hdrText = _contrastText(_hdrBg);
+  var thBase = 'text-align:left;padding:8px 9px;font-size:10px;letter-spacing:0.04em;text-transform:uppercase;color:'+_hdrText+';font-weight:700;white-space:nowrap;background:'+_hdrBg+';';
+  var th = 'style="'+thBase+'"';
+  // First (unit #) header cell is sticky-left so it stays while the rest scrolls.
+  var thStickyFirst = 'style="'+thBase+'position:-webkit-sticky;position:sticky;left:0;z-index:4;"';
+  var headerCells = cols.map(function(c, ci){
     var eye = (!c.brokerVisible) ? ' \ud83d\udd12' : '';
-    return '<th '+th+' title="'+(c.brokerVisible?'Visible to brokers':'Hidden from brokers')+'">'+_esc(c.label)+eye+'</th>';
+    var cellStyle = (ci===0) ? thStickyFirst : th;
+    return '<th '+cellStyle+' title="'+(c.brokerVisible?'Visible to brokers':'Hidden from brokers')+'">'+_esc(c.label)+eye+'</th>';
   }).join('');
 
   var body;
@@ -7971,21 +8053,22 @@ function _renderAddrBlock(addr, addrRec, units, cols, editing) {
   } else {
     body = units.map(function(u, idx){
       var rowBg=(idx%2===1)?'#FAFAF7':'#fff';
-      var cells = cols.map(function(c){
+      var cells = cols.map(function(c, ci){
         var val = _unitCellValue(u, c);
+        var _stick = (ci===0) ? 'position:-webkit-sticky;position:sticky;left:0;z-index:2;' : '';
         if (editing) {
           // editable cell
           if (c.isStatus) {
             var opts = Object.keys(_UNIT_STATUS).map(function(k){ return '<option value="'+k+'"'+(k===(u.status||'available')?' selected':'')+'>'+_UNIT_STATUS[k].label+'</option>'; }).join('');
-            return '<td style="padding:5px 6px;border-bottom:1px solid var(--border);background:'+rowBg+';"><select data-uid="'+u.id+'" data-col="status" style="border:1px solid var(--border);border-radius:6px;padding:5px;font-size:12px;font-weight:700;">'+opts+'</select></td>';
+            return '<td style="padding:5px 6px;border-bottom:1px solid var(--border);background:'+rowBg+';'+_stick+'"><select data-uid="'+u.id+'" data-col="status" style="border:1px solid var(--border);border-radius:6px;padding:5px;font-size:12px;font-weight:700;">'+opts+'</select></td>';
           }
           var dataAttr = c.custom ? ('data-custom="'+c.colId+'"') : ('data-col="'+c.key+'"');
           // dropdown custom column -> render a <select> with its choices
-          if (c.custom && c.choices && c.choices.length) {
+          if (c.choices && c.choices.length && !c.isStatus && !c.isPrice) {
             var dopts = '<option value=""></option>' + c.choices.map(function(ch){ return '<option value="'+_esc(ch)+'"'+(String(val)===String(ch)?' selected':'')+'>'+_esc(ch)+'</option>'; }).join('');
-            return '<td style="padding:5px 6px;border-bottom:1px solid var(--border);background:'+rowBg+';"><select data-uid="'+u.id+'" '+dataAttr+' style="width:100%;min-width:80px;border:1px solid var(--border);border-radius:6px;padding:6px;font-size:12px;box-sizing:border-box;">'+dopts+'</select></td>';
+            return '<td style="padding:5px 6px;border-bottom:1px solid var(--border);background:'+rowBg+';'+_stick+'"><select data-uid="'+u.id+'" '+dataAttr+' style="width:100%;min-width:80px;border:1px solid var(--border);border-radius:6px;padding:6px;font-size:12px;box-sizing:border-box;">'+dopts+'</select></td>';
           }
-          return '<td style="padding:4px 5px;border-bottom:1px solid var(--border);background:'+rowBg+';"><input data-uid="'+u.id+'" '+dataAttr+' value="'+_esc(val)+'" style="width:100%;min-width:70px;border:1px solid var(--border);border-radius:6px;padding:6px;font-size:12px;box-sizing:border-box;"></td>';
+          return '<td style="padding:4px 5px;border-bottom:1px solid var(--border);background:'+rowBg+';'+_stick+'"><input data-uid="'+u.id+'" '+dataAttr+' value="'+_esc(val)+'" style="width:100%;min-width:70px;border:1px solid var(--border);border-radius:6px;padding:6px;font-size:12px;box-sizing:border-box;"></td>';
         } else {
           // read-only cell
           var disp;
@@ -7993,7 +8076,7 @@ function _renderAddrBlock(addr, addrRec, units, cols, editing) {
           else if (c.isPrice) { disp = val!=='' ? _esc(_fmtPrice(val)) : '\u2014'; }
           else { disp = (val===''||val==null) ? '\u2014' : _esc(val); }
           var weight = (c.key==='unitNumber')?'font-weight:800;':'';
-          return '<td style="padding:8px 9px;font-size:13px;color:var(--navy);white-space:nowrap;border-bottom:1px solid var(--border);background:'+rowBg+';'+weight+'">'+disp+'</td>';
+          return '<td style="padding:8px 9px;font-size:13px;color:var(--navy);white-space:nowrap;border-bottom:1px solid var(--border);background:'+rowBg+';'+weight+_stick+'">'+disp+'</td>';
         }
       }).join('');
       // last cell: delete (edit mode) — read mode has no per-row action
@@ -8075,16 +8158,16 @@ async function unitsSaveEdits(addr) {
 
 // ===== Add / rename / delete addresses =====
 async function addressNew() {
-  var name = prompt('Property address (e.g. 31 Mangin Road):');
-  if (!name || !name.trim()) return;
-  name = name.trim();
-  var all = await _addressListAll();
-  if (all.some(function(a){ return a.name.toLowerCase()===name.toLowerCase(); })) { alert('That address already exists.'); return; }
-  var id = 'addr_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
-  var order = all.length ? (Math.max.apply(null, all.map(function(a){return a.order||0;}))+1) : 0;
-  await DB.set('pubaddress:'+id, { id:id, name:name, order:order, _createdAt:Date.now() });
-  try { ddToast('Address added'); } catch(e) {}
-  await renderUnits();
+  ddPrompt({ title:'Add Property Address', placeholder:'e.g. 31 Mangin Road', icon:'🏠', saveLabel:'Add Address' }, async function(name){
+    if (!name) return;
+    var all = await _addressListAll();
+    if (all.some(function(a){ return a.name.toLowerCase()===name.toLowerCase(); })) { ddToast('That address already exists.'); return; }
+    var id = 'addr_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+    var order = all.length ? (Math.max.apply(null, all.map(function(a){return a.order||0;}))+1) : 0;
+    await DB.set('pubaddress:'+id, { id:id, name:name, order:order, _createdAt:Date.now() });
+    try { ddToast('Address added'); } catch(e) {}
+    await renderUnits();
+  });
 }
 async function addressSetColor(id, color) {
   var rec = await DB.get('pubaddress:'+id);
@@ -8100,18 +8183,17 @@ async function addressSetColor(id, color) {
 async function addressRename(id) {
   var rec = await DB.get('pubaddress:'+id);
   if (!rec) return;
-  var newName = prompt('Rename address:', rec.name);
-  if (!newName || !newName.trim() || newName.trim()===rec.name) return;
-  newName = newName.trim();
-  var oldName = rec.name;
-  rec.name = newName; rec._updatedAt = Date.now();
-  await DB.set('pubaddress:'+id, rec);
-  // update all units that referenced the old address
-  var units = await _unitsListAll();
-  for (var i=0;i<units.length;i++){ if (units[i].building===oldName){ var u=units[i]; u.building=newName; await DB.set('pubunit:'+u.id, u); } }
-  if (_unitsEditAddr===oldName) _unitsEditAddr = newName;
-  try { ddToast('Renamed'); } catch(e) {}
-  await renderUnits();
+  ddPrompt({ title:'Rename Address', value:rec.name, icon:'✏️', saveLabel:'Rename' }, async function(newName){
+    if (!newName || newName===rec.name) return;
+    var oldName = rec.name;
+    rec.name = newName; rec._updatedAt = Date.now();
+    await DB.set('pubaddress:'+id, rec);
+    var units = await _unitsListAll();
+    for (var i=0;i<units.length;i++){ if (units[i].building===oldName){ var u=units[i]; u.building=newName; await DB.set('pubunit:'+u.id, u); } }
+    if (_unitsEditAddr===oldName) _unitsEditAddr = newName;
+    try { ddToast('Renamed'); } catch(e) {}
+    await renderUnits();
+  });
 }
 async function addressDelete(id) {
   var rec = await DB.get('pubaddress:'+id);
@@ -8143,8 +8225,15 @@ async function _unitColsRenderList(cols) {
     var ov = bo[c.key] || {};
     var label = (ov.label!=null && ov.label!=='') ? ov.label : c.label;
     var vis = (ov.brokerVisible===false) ? false : true;
-    return '<div style="display:flex;align-items:center;gap:8px;padding:9px 11px;background:var(--cream);border-radius:8px;margin-bottom:6px;">' +
-        '<input value="'+_esc(label)+'" onchange="_unitBuiltinSetLabel(\''+c.key+'\',this.value)" style="flex:1;min-width:0;border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;font-weight:700;color:var(--navy);">' +
+    // status & price are special and can't become plain dropdowns
+    var canDropdown = !c.isStatus && !c.isPrice;
+    var hasChoices = (ov.choices && ov.choices.length);
+    var dropCtrl = canDropdown
+      ? '<button onclick="_unitBuiltinEditChoices(\''+c.key+'\')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:11px;color:'+(hasChoices?'var(--gold)':'var(--muted)')+';font-weight:700;white-space:nowrap;cursor:pointer;">'+(hasChoices?'▾ dropdown':'+ dropdown')+'</button>'
+      : '';
+    return '<div style="display:flex;align-items:center;gap:8px;padding:9px 11px;background:var(--cream);border-radius:8px;margin-bottom:6px;flex-wrap:wrap;">' +
+        '<input value="'+_esc(label)+'" onchange="_unitBuiltinSetLabel(\''+c.key+'\',this.value)" style="flex:1;min-width:90px;border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;font-weight:700;color:var(--navy);background:#fff;">' +
+        dropCtrl +
         '<label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);font-weight:700;white-space:nowrap;cursor:pointer;"><input type="checkbox" '+(vis?'checked':'')+' onchange="_unitBuiltinSetVis(\''+c.key+'\',this.checked)"> Brokers see</label>' +
       '</div>';
   }).join('');
@@ -8179,10 +8268,21 @@ async function _unitColEditChoices(id) {
   var col = cols.filter(function(c){return c.id===id;})[0];
   if (!col) return;
   var cur = (col.choices||[]).join(', ');
-  var val = prompt('Dropdown options (comma-separated):', cur);
-  if (val===null) return;
-  col.choices = val.split(',').map(function(s){return s.trim();}).filter(Boolean);
-  await _unitColsSave(cols); _unitColsRenderList(cols); await renderUnits();
+  ddPrompt({ title:'Dropdown Options', value:cur, icon:'▾', placeholder:'e.g. Yes, No, Pending', saveLabel:'Save' }, async function(val){
+    col.choices = (val||'').split(',').map(function(s){return s.trim();}).filter(Boolean);
+    await _unitColsSave(cols); _unitColsRenderList(cols); await renderUnits();
+  });
+}
+// Turn a BUILT-IN column into a dropdown (or edit/clear its options).
+async function _unitBuiltinEditChoices(key) {
+  var bo = await _unitBuiltinsGet();
+  var cur = (bo[key] && bo[key].choices ? bo[key].choices : []).join(', ');
+  ddPrompt({ title:'Dropdown Options', value:cur, icon:'▾', placeholder:'e.g. Yes, No, Pending — leave blank for free text', saveLabel:'Save' }, async function(val){
+    bo[key] = bo[key] || {};
+    var arr = (val||'').split(',').map(function(s){return s.trim();}).filter(Boolean);
+    if (arr.length) bo[key].choices = arr; else delete bo[key].choices;
+    await _unitBuiltinsSave(bo); _unitColsRenderList(await _unitColsGet()); await renderUnits();
+  });
 }
 async function _unitColAdd() {
   var name = (document.getElementById('unitCol-newName').value||'').trim();
@@ -8235,9 +8335,9 @@ function _unitColsBuildModal() {
       '<div id="unitCols-list" style="margin-bottom:16px;"></div>' +
       '<div style="border-top:1px solid var(--border);padding-top:14px;">' +
         '<div style="font-weight:700;font-size:13px;color:var(--navy);margin-bottom:8px;">Add a column</div>' +
-        '<input id="unitCol-newName" type="text" placeholder="Column name (e.g. Balcony, Parking, Notes)" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:9px;font-size:13px;box-sizing:border-box;margin-bottom:8px;">' +
-        '<div style="margin-bottom:8px;"><label style="display:block;font-size:12px;color:var(--muted);font-weight:700;margin-bottom:4px;">Column type</label><select id="unitCol-newType" onchange="_unitColTypeChanged()" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:9px;font-size:13px;box-sizing:border-box;"><option value="text">Text (type anything)</option><option value="dropdown">Dropdown (choose from options)</option></select></div>' +
-        '<div id="unitCol-choicesWrap" style="display:none;margin-bottom:8px;"><label style="display:block;font-size:12px;color:var(--muted);font-weight:700;margin-bottom:4px;">Dropdown options (comma-separated)</label><input id="unitCol-newChoices" type="text" placeholder="e.g. Yes, No, Pending" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:9px;font-size:13px;box-sizing:border-box;"></div>' +
+        '<input id="unitCol-newName" type="text" placeholder="Column name (e.g. Balcony, Parking, Notes)" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:9px;font-size:13px;box-sizing:border-box;margin-bottom:8px;color:#16294A;background:#fff;">' +
+        '<div style="margin-bottom:8px;"><label style="display:block;font-size:12px;color:var(--muted);font-weight:700;margin-bottom:4px;">Column type</label><select id="unitCol-newType" onchange="_unitColTypeChanged()" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:9px;font-size:13px;box-sizing:border-box;color:#16294A;background:#fff;"><option value="text">Text (type anything)</option><option value="dropdown">Dropdown (choose from options)</option></select></div>' +
+        '<div id="unitCol-choicesWrap" style="display:none;margin-bottom:8px;"><label style="display:block;font-size:12px;color:var(--muted);font-weight:700;margin-bottom:4px;">Dropdown options (comma-separated)</label><input id="unitCol-newChoices" type="text" placeholder="e.g. Yes, No, Pending" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:9px;font-size:13px;box-sizing:border-box;color:#16294A;background:#fff;"></div>' +
         '<label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--navy);margin-bottom:12px;cursor:pointer;"><input type="checkbox" id="unitCol-newVis"> Brokers can see this column</label>' +
         '<button class="btn-primary" onclick="_unitColAdd()" style="width:100%;">+ Add Column</button>' +
       '</div>' +
@@ -8582,6 +8682,7 @@ async function brokerLogin() {
       try { localStorage.setItem('dd_brokerCode', code); } catch(e) {}
       showPage('brokerPortalPage');
       await renderBrokerUnits();
+      try { if (typeof _startLiveSync === 'function') _startLiveSync(); } catch(e) {}
     } else {
       err.textContent = 'That code wasn\'t recognized. Contact the office.'; err.style.display = 'block';
     }
@@ -25223,6 +25324,68 @@ function ue_photoChanged(input, row) {
 // ════════════════════════════════════════════
 // CUSTOM CONFIRM (replaces blocked confirm())
 // ════════════════════════════════════════════
+// Professional input dialog (replaces browser prompt()). Calls onSave(value) with the
+// trimmed text, or does nothing if cancelled. Matches the ddConfirm popup styling.
+function ddPrompt(opts, onSave) {
+  opts = opts || {};
+  var title = opts.title || 'Enter value';
+  var initial = opts.value || '';
+  var placeholder = opts.placeholder || '';
+  var icon = opts.icon || '✏️';
+  var saveLabel = opts.saveLabel || 'Save';
+  var existing = document.getElementById('dd_prompt_popup');
+  if (existing) existing.remove();
+
+  var overlay = document.createElement('div');
+  overlay.id = 'dd_prompt_popup';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:99999;display:flex;align-items:center;overflow-y:auto;justify-content:center;padding:20px;';
+
+  var box = document.createElement('div');
+  box.style.cssText = 'background:white;border-radius:14px;padding:26px 24px;width:100%;max-width:380px;box-shadow:0 8px 40px rgba(0,0,0,0.25);';
+
+  var ic = document.createElement('div');
+  ic.style.cssText = 'font-size:30px;margin-bottom:10px;text-align:center;';
+  ic.textContent = icon;
+  box.appendChild(ic);
+
+  var ti = document.createElement('div');
+  ti.style.cssText = 'font-family:Archivo,sans-serif;font-weight:800;font-size:17px;color:#16294A;text-align:center;margin-bottom:16px;';
+  ti.textContent = title;
+  box.appendChild(ti);
+
+  var input = document.createElement('input');
+  input.type = 'text';
+  input.value = initial;
+  input.placeholder = placeholder;
+  input.style.cssText = 'width:100%;box-sizing:border-box;padding:12px 14px;border:1.5px solid #D1D5DB;border-radius:9px;font-family:Inter,sans-serif;font-size:15px;color:#16294A;margin-bottom:20px;outline:none;';
+  input.addEventListener('focus', function(){ input.style.borderColor='#BFA055'; });
+  input.addEventListener('blur', function(){ input.style.borderColor='#D1D5DB'; });
+  box.appendChild(input);
+
+  var btnRow = document.createElement('div');
+  btnRow.style.cssText = 'display:flex;gap:10px;';
+
+  var cancelBtn = document.createElement('button');
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.style.cssText = 'flex:1;padding:12px;border:1.5px solid #D1D5DB;border-radius:9px;background:white;cursor:pointer;font-family:Inter,sans-serif;font-size:14px;font-weight:600;color:#374151;';
+  cancelBtn.onclick = function(){ overlay.remove(); };
+  btnRow.appendChild(cancelBtn);
+
+  var saveBtn = document.createElement('button');
+  saveBtn.textContent = saveLabel;
+  saveBtn.style.cssText = 'flex:1;padding:12px;border:none;border-radius:9px;background:#16294A;color:white;cursor:pointer;font-family:Inter,sans-serif;font-size:14px;font-weight:700;';
+  function doSave(){ var v=(input.value||'').trim(); overlay.remove(); if(onSave) onSave(v); }
+  saveBtn.onclick = doSave;
+  btnRow.appendChild(saveBtn);
+
+  box.appendChild(btnRow);
+  overlay.appendChild(box);
+  overlay.addEventListener('click', function(e){ if (e.target===overlay) overlay.remove(); });
+  input.addEventListener('keydown', function(e){ if(e.key==='Enter') doSave(); if(e.key==='Escape') overlay.remove(); });
+  document.body.appendChild(overlay);
+  setTimeout(function(){ input.focus(); input.select(); }, 60);
+}
+
 function ddConfirm(message, onYes) {
   var existing = document.getElementById('dd_confirm_popup');
   if (existing) existing.remove();
@@ -28817,6 +28980,7 @@ function _withTimeout(promise, ms, fallback) {
 }
 
 async function handleAuthedUser(fbUser) {
+  try { if (fbUser && !fbUser.isAnonymous) localStorage.setItem('dd_officeActive','1'); } catch(e) {}
   if (!fbUser) return;
   // Anonymous users are portal visitors (subs/customers), not office staff. Never route them
   // through office login or fabricate an employee account for them. They have no email; their
