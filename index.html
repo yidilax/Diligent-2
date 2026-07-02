@@ -5383,7 +5383,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v340</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v341</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -6689,7 +6689,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v340';
+<script>var APP_VERSION = 'v341';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -10418,7 +10418,7 @@ async function _loadCustomerUpdatesInto(address, unit, targetId) {
         var photos = (u.photos||[]).map(function(ph){ return '<img src="'+ph+'" style="width:100%;max-width:340px;border-radius:10px;object-fit:cover;cursor:pointer;margin-top:4px;" onclick="_plLightbox(\''+encodeURIComponent(ph)+'\')">'; }).join('');
         return '<div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(13,31,60,0.05);">' +
           (when ? '<div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:7px;text-transform:uppercase;letter-spacing:0.5px;">' + when + '</div>' : '') +
-          (body ? '<div style="font-size:15px;color:#16233d;line-height:1.6;">' + _esc(body) + '</div>' : '') +
+          (body ? '<div class="pu-text" style="font-size:15px;color:#16233d;line-height:1.6;">' + _rteSanitize(body) + '</div>' : '') +
           (photos ? '<div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">' + photos + '</div>' : '') +
         '</div>';
       }).join('');
@@ -10433,7 +10433,7 @@ async function _loadCustomerUpdatesInto(address, unit, targetId) {
         var photos = (u.photos||[]).map(function(ph){ return '<img src="'+ph+'" style="width:60px;height:60px;border-radius:7px;object-fit:cover;cursor:pointer;" onclick="_plLightbox(\''+encodeURIComponent(ph)+'\')">'; }).join('');
         return '<div style="border-bottom:1px solid #f0ece2;padding:9px 0;">' +
           (when ? '<div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:3px;">' + when + '</div>' : '') +
-          (body ? '<div style="font-size:13px;color:#16233d;line-height:1.5;">' + _esc(body) + '</div>' : '') +
+          (body ? '<div class="pu-text" style="font-size:13px;color:#16233d;line-height:1.5;">' + _rteSanitize(body) + '</div>' : '') +
           (photos ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:7px;">' + photos + '</div>' : '') +
         '</div>';
       }).join('') +
