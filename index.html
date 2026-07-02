@@ -5383,7 +5383,7 @@ div[style*="position:fixed"][style*="inset:0"] {
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:3px;font-weight:600;">Where Quality Meets Home</div>
       <div class="auth-title" style="margin-top:18px;">Welcome to Your Home Portal</div>
       <div class="auth-subtitle">Enter your address and unit to get started</div>
-      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v341</div>
+      <div id="custAuthVersion" style="font-size:9px;color:rgba(13,31,60,0.3);margin-top:6px;">v342</div>
     </div>
     <div class="auth-body">
       <div class="auth-error" id="custAuthError"></div>
@@ -6689,7 +6689,7 @@ div[style*="position:fixed"][style*="inset:0"] {
 </div>
 
 
-<script>var APP_VERSION = 'v341';
+<script>var APP_VERSION = 'v342';
 
 // ════════════════════════════════════════════
 // STORAGE LAYER — direct read/write, no caching races
@@ -7212,6 +7212,14 @@ function _hasSavedSession() {
   return false;
 }
 
+// Wrap a promise so a hung network call (e.g. offline Firebase) can't freeze boot.
+function _withTimeout(promise, ms, fallback) {
+  return Promise.race([
+    Promise.resolve(promise).catch(function(){ return fallback; }),
+    new Promise(function(res){ setTimeout(function(){ res(fallback); }, ms); })
+  ]);
+}
+
 async function init() {
   if (typeof applyTheme === 'function') { try { applyTheme(); } catch(e){} }
   // Biometric app lock: if enabled, require fingerprint/Face ID on every app open.
@@ -7226,7 +7234,7 @@ async function init() {
   try {
     var _subCode = localStorage.getItem('dd_subSession');
     if (_subCode && localStorage.getItem('dd_lastPage') === 'subPortalPage') {
-      var _sub = await _findSubByCode(_subCode);
+      var _sub = await _withTimeout(_findSubByCode(_subCode), 2500, null);
       if (_sub) {
         var l0 = document.getElementById('bootLoader'); if (l0) l0.style.display = 'none';
         await _ensureAnonAuth();   // re-attach auth token so the returning sub can still save
@@ -23575,11 +23583,42 @@ async function deleteEmployee(email) {
 // BOOT
 // ════════════════════════════════════════════
 init();
-// Safety: always hide loader after 3s
-setTimeout(function() {
-  var l = document.getElementById('bootLoader');
-  if (l) l.style.display = 'none';
-}, 3000);
+
+  // ── STRONG boot guarantee ──────────────────────────────────────────────
+  // No matter what init() does (even if an await hangs on a slow/offline
+  // Firebase, or something throws), the user must NEVER be left staring at the
+  // blue loader. These watchdogs force the loader off and route to a usable
+  // page if boot hasn't shown one yet.
+  function _bootWatchdog(reason) {
+    try {
+      var l = document.getElementById('bootLoader');
+      if (l) l.style.display = 'none';
+    } catch(e) {}
+    try {
+      // Is any real page already visible? If so, we're fine.
+      var anyShown = false;
+      var pages = document.querySelectorAll('.page');
+      for (var i=0;i<pages.length;i++){
+        var cs = getComputedStyle(pages[i]);
+        if (cs.display !== 'none') { anyShown = true; break; }
+      }
+      if (!anyShown) {
+        // Nothing routed. Prefer a saved session's page; else the landing page.
+        try {
+          var auth = _getAuth && _getAuth();
+          if (auth && auth.currentUser && !auth.currentUser.isAnonymous) {
+            if (typeof openOfficeDashboard === 'function') { openOfficeDashboard(); return; }
+          }
+        } catch(e) {}
+        if (typeof showPage === 'function') showPage('landingPage');
+      }
+    } catch(e) {
+      try { if (typeof showPage === 'function') showPage('landingPage'); } catch(_){}
+    }
+  }
+  // First watchdog at 3.5s (covers a slow first paint), second hard stop at 7s.
+  setTimeout(function(){ _bootWatchdog('3.5s'); }, 3500);
+  setTimeout(function(){ _bootWatchdog('7s'); }, 7000);
 
 // ── UPGRADE SHEET JS (from original form) ──
 // Init upgrade sections on load — build the customer sheet right away
